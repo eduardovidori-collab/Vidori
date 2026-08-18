@@ -1,0 +1,2248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#E30613">
+<meta name="description" content="Pomodoro de estudo com ciclos, estante de conquistas e voz tricolor.">
+<title>Vidori — Foco Tricolor</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png" type="image/png">
+<style>
+/* ==========================================================================
+   VIDORI — identidade tricolor paulista
+   Vermelho como cor principal, preto no texto, fundo claro para leitura longa.
+   ========================================================================== */
+:root{
+  --vermelho:#E30613;
+  --vermelho-esc:#C8102E;
+  --preto:#111111;
+  --branco:#FFFFFF;
+  --fundo:#F4F5F7;
+  --borda:#E3E5E9;
+  --texto:#111111;
+  --fraco:#5B6068;
+  --raio:14px;
+  --sombra:0 1px 2px rgba(17,17,17,.05), 0 10px 28px rgba(17,17,17,.06);
+  --largura:1180px;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--fundo);
+  color:var(--texto);
+  font-family:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  font-size:15px;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.01em}
+p{margin:0}
+button{font:inherit;color:inherit}
+
+/* --------------------------------------------------------- faixas tricolor */
+.faixas{
+  height:6px;
+  background:linear-gradient(90deg,
+    var(--vermelho) 0 33.33%,
+    var(--branco)   33.33% 66.66%,
+    var(--preto)    66.66% 100%);
+}
+.faixas-fina{height:4px}
+
+/* ---------------------------------------------------------------- cabeçalho */
+.cabecalho{
+  background:var(--branco);
+  border-bottom:1px solid var(--borda);
+  position:sticky; top:0; z-index:30;
+}
+.cabecalho-interno{
+  max-width:var(--largura); margin:0 auto; padding:14px 20px 0;
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+}
+.marca{display:flex; align-items:center; gap:12px; min-width:0}
+.escudo{
+  width:38px; height:44px; flex:0 0 auto;
+  background:linear-gradient(118deg,
+    var(--vermelho) 0 34%,
+    #FFFFFF 34% 66%,
+    var(--preto) 66% 100%);
+  clip-path:polygon(3% 0%,97% 0%,97% 56%,88% 76%,68% 92%,50% 100%,32% 92%,12% 76%,3% 56%);
+  filter:drop-shadow(0 2px 4px rgba(17,17,17,.18));
+}
+.marca h1{font-size:20px; line-height:1.1}
+.marca .lema{font-size:11px; color:var(--fraco); text-transform:uppercase; letter-spacing:.14em}
+
+.cabecalho-texto{margin-left:auto; text-align:right; min-width:0}
+.saudacao{font-size:16px; font-weight:600}
+.subtexto{font-size:13px; color:var(--fraco)}
+
+.chip-ciclo{
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--preto); color:var(--branco);
+  padding:5px 12px; border-radius:999px; font-size:12px; font-weight:600;
+  max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.chip-ciclo.sem{background:#E9EBEF; color:var(--fraco)}
+.chip-ciclo .ponto{width:7px;height:7px;border-radius:50%;background:var(--vermelho);flex:0 0 auto}
+
+/* --------------------------------------------------------------------- abas */
+.abas{
+  max-width:var(--largura); margin:0 auto; padding:10px 20px 0;
+  display:flex; gap:4px; overflow-x:auto;
+}
+.aba-btn{
+  background:none; border:0; border-bottom:3px solid transparent;
+  padding:9px 14px; cursor:pointer; font-weight:600; font-size:14px;
+  color:var(--fraco); white-space:nowrap; border-radius:8px 8px 0 0;
+}
+.aba-btn:hover{background:#F1F2F5; color:var(--texto)}
+.aba-btn:focus-visible{outline:2px solid var(--vermelho); outline-offset:-2px}
+.aba-btn.ativa{color:var(--preto); border-bottom-color:var(--vermelho)}
+
+/* ------------------------------------------------------------------ layout */
+main{max-width:var(--largura); margin:0 auto; padding:22px 20px 60px}
+.painel{display:none}
+.painel.ativo{display:block}
+
+.grade-foco{
+  display:grid; gap:18px;
+  grid-template-columns:minmax(380px,1.05fr) minmax(340px,1fr);
+  align-items:start;
+}
+.grade-2{display:grid; gap:18px; grid-template-columns:repeat(2,1fr); align-items:start}
+.grade-3{display:grid; gap:18px; grid-template-columns:repeat(3,1fr)}
+.coluna{display:grid; gap:18px; align-content:start}
+
+.cartao{
+  background:var(--branco);
+  border:1px solid var(--borda);
+  border-radius:var(--raio);
+  box-shadow:var(--sombra);
+  overflow:hidden;
+}
+.cartao-corpo{padding:18px}
+.cartao h2{font-size:13px; text-transform:uppercase; letter-spacing:.12em; color:var(--fraco); margin-bottom:14px}
+.cartao h3{font-size:15px; margin-bottom:6px}
+
+/* ------------------------------------------------------------------ timer */
+.linha-duracoes{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px}
+.dur{
+  flex:1 1 0; min-width:64px;
+  background:var(--branco); border:1.5px solid var(--borda); color:var(--fraco);
+  border-radius:10px; padding:9px 6px; cursor:pointer; font-weight:700; font-size:14px;
+  transition:.15s;
+}
+.dur small{display:block; font-size:10px; font-weight:600; opacity:.6; letter-spacing:.06em}
+.dur:hover{border-color:var(--preto); color:var(--preto)}
+.dur:focus-visible{outline:2px solid var(--vermelho); outline-offset:2px}
+.dur.sel{background:var(--vermelho); border-color:var(--vermelho); color:#fff}
+.dur.sel small{opacity:.85}
+.dur:disabled{opacity:.45; cursor:not-allowed}
+
+.campo{display:grid; gap:6px; margin-bottom:16px}
+.campo label{font-size:12px; font-weight:600; color:var(--fraco); text-transform:uppercase; letter-spacing:.08em}
+input[type=text],input[type=date],input[type=number]{
+  width:100%; padding:10px 12px; border:1.5px solid var(--borda); border-radius:10px;
+  background:var(--branco); color:var(--texto); font:inherit;
+}
+input:focus{outline:none; border-color:var(--vermelho); box-shadow:0 0 0 3px rgba(227,6,19,.14)}
+
+.recentes{display:flex; gap:6px; flex-wrap:wrap; margin-top:2px}
+.tag{
+  background:#F1F2F5; border:1px solid var(--borda); border-radius:999px;
+  padding:4px 11px; font-size:12px; cursor:pointer; color:var(--fraco); font-weight:600;
+  max-width:190px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.tag:hover{background:var(--preto); color:#fff; border-color:var(--preto)}
+.tag:focus-visible{outline:2px solid var(--vermelho); outline-offset:2px}
+
+.relogio{position:relative; width:min(100%,300px); margin:6px auto 4px; aspect-ratio:1}
+.relogio svg{width:100%; height:100%; display:block}
+.anel-base{fill:none; stroke:#EDEEF1; stroke-width:13}
+.anel-prog{
+  fill:none; stroke:var(--vermelho); stroke-width:13; stroke-linecap:round;
+  transition:stroke-dashoffset .3s linear;
+}
+.modo-pausa .anel-prog{stroke:var(--preto)}
+.centro{
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; padding:0 34px;
+}
+.tempo{
+  font-size:clamp(48px,9vw,66px); font-weight:800; letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums; line-height:1;
+}
+.rotulo-modo{
+  font-size:11px; font-weight:700; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--vermelho); margin-top:8px;
+}
+.modo-pausa .rotulo-modo{color:var(--preto)}
+.assunto-vivo{
+  margin-top:8px; font-size:13px; color:var(--fraco); font-weight:600;
+  max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+.controles{display:flex; gap:10px; margin-top:14px}
+.btn{
+  border:1.5px solid var(--borda); background:var(--branco); color:var(--texto);
+  border-radius:11px; padding:12px 16px; font-weight:700; cursor:pointer; transition:.15s;
+}
+.btn:hover{border-color:var(--preto)}
+.btn:focus-visible{outline:2px solid var(--vermelho); outline-offset:2px}
+.btn:disabled{opacity:.45; cursor:not-allowed}
+.btn-principal{
+  flex:1 1 auto; background:var(--vermelho); border-color:var(--vermelho); color:#fff;
+  font-size:16px; letter-spacing:.01em;
+}
+.btn-principal:hover{background:var(--vermelho-esc); border-color:var(--vermelho-esc)}
+.btn-preto{background:var(--preto); border-color:var(--preto); color:#fff}
+.btn-preto:hover{background:#000}
+.btn-pequeno{padding:7px 12px; font-size:13px; border-radius:9px}
+
+.legenda-teclas{
+  margin-top:14px; font-size:11.5px; color:var(--fraco);
+  display:flex; gap:6px 12px; flex-wrap:wrap; justify-content:center;
+}
+kbd{
+  background:#F1F2F5; border:1px solid var(--borda); border-bottom-width:2px;
+  border-radius:5px; padding:1px 6px; font-family:inherit; font-size:11px; font-weight:700;
+}
+
+/* ---------------------------------------------------------------- números */
+.numeros{display:flex; gap:22px; margin-bottom:14px; flex-wrap:wrap}
+.numero .valor{font-size:30px; font-weight:800; letter-spacing:-.02em; line-height:1.05}
+.numero .rotulo{font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--fraco); font-weight:600}
+.numero.destaque .valor{color:var(--vermelho)}
+
+.lista{display:grid; gap:1px; background:var(--borda); border:1px solid var(--borda); border-radius:10px; overflow:hidden}
+.item{
+  background:var(--branco); padding:9px 12px; display:flex; align-items:center; gap:10px; font-size:13.5px;
+}
+.item .hora{color:var(--fraco); font-variant-numeric:tabular-nums; font-size:12.5px; flex:0 0 auto}
+.item .assunto{flex:1 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600}
+.item .min{font-weight:700; color:var(--vermelho); flex:0 0 auto}
+.item .ciclo-nome{font-size:11px; color:var(--fraco); flex:0 0 auto; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.item .apagar{
+  border:0; background:none; cursor:pointer; color:var(--fraco); font-size:16px; line-height:1;
+  padding:2px 6px; border-radius:6px; flex:0 0 auto;
+}
+.item .apagar:hover{background:#FDE7E9; color:var(--vermelho)}
+.vazio{color:var(--fraco); font-size:13.5px; padding:6px 0}
+
+/* --------------------------------------------------------- gráfico semana */
+.semana{display:flex; align-items:flex-end; gap:8px; height:130px; margin-top:4px}
+.dia{flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%}
+.barra-caixa{flex:1 1 auto; width:100%; display:flex; align-items:flex-end}
+.barra{
+  width:100%; background:linear-gradient(180deg,var(--vermelho),var(--vermelho-esc));
+  border-radius:6px 6px 3px 3px; min-height:3px; transition:height .3s;
+}
+.barra.zero{background:#E7E9ED}
+.barra.hoje{outline:2px solid var(--preto); outline-offset:1px}
+.dia .rot{font-size:11px; color:var(--fraco); font-weight:700; text-transform:uppercase}
+.dia .val{font-size:11px; color:var(--fraco); font-variant-numeric:tabular-nums}
+
+/* ---------------------------------------------------------- mapa de calor */
+.calor-area{overflow-x:auto; padding-bottom:6px}
+.calor-envolt{position:relative; padding-top:18px; min-width:max-content}
+.calor{display:grid; grid-auto-flow:column; grid-template-rows:repeat(7,13px); gap:3px}
+.cel{width:13px; height:13px; border-radius:3px; background:#EAECEF}
+.cel.n1{background:#FAD1D4}
+.cel.n2{background:#F0919A}
+.cel.n3{background:#E30613}
+.cel.n4{background:#8E0410}
+.cel.fora{background:transparent}
+.mes-rot{position:absolute; top:0; font-size:10.5px; color:var(--fraco); font-weight:600}
+.legenda-calor{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--fraco); margin-top:10px}
+.legenda-calor .cel{width:11px;height:11px}
+
+/* --------------------------------------------------------------- vitalício */
+.vitalicio{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.vitalicio .horas{font-size:52px; font-weight:800; letter-spacing:-.03em; color:var(--vermelho); line-height:1}
+.vitalicio .un{font-size:16px; font-weight:700; color:var(--fraco)}
+.marcos{display:flex; gap:8px; flex-wrap:wrap; margin-top:16px}
+.marco{
+  border:1.5px solid var(--borda); border-radius:10px; padding:8px 14px; text-align:center;
+  flex:1 1 0; min-width:78px; background:#FAFBFC;
+}
+.marco .n{font-size:16px; font-weight:800; color:var(--fraco)}
+.marco .l{font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--fraco)}
+.marco.batido{background:var(--vermelho); border-color:var(--vermelho)}
+.marco.batido .n,.marco.batido .l{color:#fff}
+.proximo-marco{margin-top:12px; font-size:13px; color:var(--fraco)}
+
+/* ---------------------------------------------------------------- recordes */
+.recorde{border-left:4px solid var(--vermelho); padding-left:12px}
+.recorde .titulo{font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--fraco); font-weight:700}
+.recorde .valor{font-size:26px; font-weight:800; letter-spacing:-.02em; line-height:1.15}
+.recorde .quando{font-size:12.5px; color:var(--fraco)}
+
+/* ----------------------------------------------------------------- estante */
+.prateleira{display:grid; gap:18px; grid-template-columns:repeat(auto-fill,minmax(285px,1fr))}
+.trofeu{
+  background:var(--branco); border:1px solid var(--borda); border-radius:var(--raio);
+  box-shadow:var(--sombra); overflow:hidden; position:relative;
+  transition:transform .15s, box-shadow .15s;
+}
+/* faixa tricolor vertical como borda do troféu */
+.trofeu::before{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:7px;
+  background:linear-gradient(180deg,
+    var(--vermelho) 0 33.33%, #FFFFFF 33.33% 66.66%, var(--preto) 66.66% 100%);
+}
+.trofeu:hover{transform:translateY(-2px); box-shadow:0 2px 4px rgba(17,17,17,.06),0 16px 34px rgba(17,17,17,.10)}
+.trofeu-topo{padding:16px 18px 12px}
+.trofeu-topo h3{font-size:17px; line-height:1.25}
+.trofeu-periodo{font-size:12px; color:var(--fraco); margin-top:3px}
+.trofeu-nums{display:flex; gap:16px; padding:0 18px 16px; flex-wrap:wrap}
+.trofeu-nums div .v{font-size:20px; font-weight:800; letter-spacing:-.02em}
+.trofeu-nums div .r{font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--fraco); font-weight:600}
+.trofeu-nums div:first-child .v{color:var(--vermelho)}
+.selo{
+  position:absolute; top:14px; right:14px; font-size:10px; font-weight:800;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--fraco);
+  border:1.5px solid var(--borda); border-radius:999px; padding:3px 9px;
+}
+
+/* ---------------------------------------------------------------- gráficos */
+canvas{display:block; width:100%; height:auto}
+.comparativo-texto{font-size:14px; margin-bottom:10px}
+.comparativo-texto b{font-size:16px}
+.a-frente{color:var(--vermelho)}
+.legenda-linhas{display:flex; gap:16px; font-size:12px; color:var(--fraco); margin-top:8px; flex-wrap:wrap}
+.legenda-linhas span{display:flex; align-items:center; gap:6px}
+.tracinho{width:18px; height:3px; border-radius:2px; background:var(--vermelho)}
+.tracinho.preto{background:var(--preto); opacity:.45}
+
+/* ------------------------------------------------------------------ modais */
+.modal{
+  position:fixed; inset:0; background:rgba(17,17,17,.55); z-index:60;
+  display:none; align-items:center; justify-content:center; padding:20px;
+  backdrop-filter:blur(2px);
+}
+.modal.aberto{display:flex}
+.modal-caixa{
+  background:var(--branco); border-radius:18px; max-width:440px; width:100%;
+  overflow:hidden; box-shadow:0 24px 70px rgba(0,0,0,.35); animation:sobe .22s ease-out;
+}
+@keyframes sobe{from{transform:translateY(14px); opacity:0}to{transform:none; opacity:1}}
+.modal-corpo{padding:22px}
+.modal-corpo .frase{font-size:21px; font-weight:800; letter-spacing:-.02em; margin-bottom:14px}
+.modal-corpo .resumo{display:flex; gap:20px; margin-bottom:18px; flex-wrap:wrap}
+.modal-corpo .resumo .v{font-size:24px; font-weight:800; color:var(--vermelho)}
+.modal-corpo .resumo .r{font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--fraco); font-weight:600}
+.modal-botoes{display:flex; gap:10px; flex-wrap:wrap}
+.modal-botoes .btn{flex:1 1 140px}
+
+/* ------------------------------------------------------------------ avisos */
+#avisos{position:fixed; right:18px; bottom:18px; z-index:80; display:grid; gap:10px; max-width:340px}
+.aviso{
+  background:var(--preto); color:#fff; padding:12px 15px; border-radius:12px;
+  font-size:13.5px; font-weight:600; box-shadow:0 10px 30px rgba(0,0,0,.28);
+  animation:sobe .2s ease-out; border-left:4px solid var(--vermelho);
+}
+.aviso.recorde{
+  background:var(--vermelho); border-left-color:var(--preto);
+  box-shadow:0 0 0 1px rgba(227,6,19,.5), 0 0 26px rgba(227,6,19,.45), 0 10px 30px rgba(0,0,0,.25);
+  animation:sobe .2s ease-out, brilho 1.6s ease-in-out 2;
+}
+@keyframes brilho{
+  50%{box-shadow:0 0 0 1px rgba(227,6,19,.6), 0 0 40px rgba(227,6,19,.75), 0 10px 30px rgba(0,0,0,.25)}
+}
+
+/* ------------------------------------------------------------ configuração */
+.linha-config{
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  padding:11px 0; border-bottom:1px solid var(--borda); flex-wrap:wrap;
+}
+.linha-config:last-child{border-bottom:0}
+.linha-config .desc{font-size:12.5px; color:var(--fraco)}
+input[type=range]{accent-color:var(--vermelho); width:170px}
+input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
+.aviso-fixo{
+  background:#FFF4F5; border:1px solid #F6C9CD; color:#8E0410;
+  padding:10px 14px; border-radius:10px; font-size:13px; margin-bottom:16px;
+}
+.dica{font-size:12.5px; color:var(--fraco); margin-top:8px}
+
+@media (max-width:900px){
+  .grade-foco,.grade-2,.grade-3{grid-template-columns:1fr}
+  .cabecalho-texto{margin-left:0; text-align:left; width:100%}
+}
+</style>
+</head>
+<body>
+
+<header class="cabecalho">
+  <div class="faixas"></div>
+  <div class="cabecalho-interno">
+    <div class="marca">
+      <div class="escudo" aria-hidden="true"></div>
+      <div>
+        <h1>Vidori</h1>
+        <div class="lema">Fé &amp; Soberania</div>
+      </div>
+    </div>
+    <div class="cabecalho-texto">
+      <div class="saudacao" id="saudacao">Fé no dia de hoje, Eduardo.</div>
+      <div class="subtexto" id="subtexto">Carregando a escalação…</div>
+      <div style="margin-top:6px"><span class="chip-ciclo sem" id="chipCiclo">Sem ciclo cadastrado</span></div>
+    </div>
+  </div>
+  <nav class="abas" id="abas" role="tablist">
+    <button class="aba-btn ativa" data-painel="foco" role="tab">Foco</button>
+    <button class="aba-btn" data-painel="progresso" role="tab">Progresso</button>
+    <button class="aba-btn" data-painel="estante" role="tab">Estante</button>
+    <button class="aba-btn" data-painel="historico" role="tab">Histórico</button>
+    <button class="aba-btn" data-painel="ciclo" role="tab">Ciclo &amp; Ajustes</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ======================================================== PAINEL: FOCO -->
+<section class="painel ativo" id="painel-foco">
+  <div class="grade-foco">
+
+    <!-- coluna esquerda: o timer -->
+    <div class="cartao">
+      <div class="faixas faixas-fina"></div>
+      <div class="cartao-corpo modo-foco" id="caixaTimer">
+        <div class="linha-duracoes" id="duracoes">
+          <button class="dur" data-min="15">15<small>tecla 1</small></button>
+          <button class="dur" data-min="25">25<small>tecla 2</small></button>
+          <button class="dur sel" data-min="30">30<small>tecla 3</small></button>
+          <button class="dur" data-min="50">50<small>tecla 4</small></button>
+        </div>
+
+        <div class="campo">
+          <label for="assunto">Assunto do bloco</label>
+          <input type="text" id="assunto" list="assuntosConhecidos" placeholder="Ex.: Farmacologia — antibióticos" autocomplete="off" maxlength="80">
+          <datalist id="assuntosConhecidos"></datalist>
+          <div class="recentes" id="recentes"></div>
+        </div>
+
+        <div class="relogio">
+          <svg viewBox="0 0 240 240" aria-hidden="true">
+            <circle class="anel-base" cx="120" cy="120" r="106"></circle>
+            <circle class="anel-prog" id="anel" cx="120" cy="120" r="106"
+                    transform="rotate(-90 120 120)"
+                    stroke-dasharray="666.02" stroke-dashoffset="0"></circle>
+          </svg>
+          <div class="centro">
+            <div class="tempo" id="tempo" role="timer" aria-live="off">30:00</div>
+            <div class="rotulo-modo" id="rotuloModo">Foco</div>
+            <div class="assunto-vivo" id="assuntoVivo"></div>
+          </div>
+        </div>
+
+        <div class="controles">
+          <button class="btn btn-principal" id="btnPrincipal">Iniciar</button>
+          <button class="btn" id="btnZerar" title="Zerar o bloco (R)">Zerar</button>
+          <button class="btn" id="btnPular" title="Pular o bloco (S)">Pular</button>
+        </div>
+
+        <div class="legenda-teclas">
+          <span><kbd>espaço</kbd> iniciar/pausar</span>
+          <span><kbd>R</kbd> zerar</span>
+          <span><kbd>S</kbd> pular</span>
+          <span><kbd>1</kbd>–<kbd>4</kbd> duração</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- coluna direita: estatísticas de acompanhamento -->
+    <div class="coluna">
+      <div class="cartao"><div class="cartao-corpo">
+        <h2>Hoje</h2>
+        <div class="numeros">
+          <div class="numero destaque"><div class="valor" id="hojeMin">0 min</div><div class="rotulo">Estudados</div></div>
+          <div class="numero"><div class="valor" id="hojeBlocos">0</div><div class="rotulo">Blocos</div></div>
+          <div class="numero"><div class="valor" id="hojeSeq">0</div><div class="rotulo">Dias seguidos</div></div>
+        </div>
+        <div id="listaHoje"></div>
+      </div></div>
+
+      <div class="cartao"><div class="cartao-corpo">
+        <h2>Últimos 7 dias</h2>
+        <div class="semana" id="semana"></div>
+      </div></div>
+
+      <div class="cartao"><div class="cartao-corpo">
+        <h2>Ciclo atual</h2>
+        <div id="cicloAtualBox"></div>
+      </div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- =================================================== PAINEL: PROGRESSO -->
+<section class="painel" id="painel-progresso">
+  <div class="coluna">
+
+    <div class="cartao"><div class="cartao-corpo">
+      <h2>Contador vitalício</h2>
+      <div class="vitalicio">
+        <span class="horas" id="vitalicioHoras">0</span>
+        <span class="un">horas estudadas desde o primeiro dia</span>
+      </div>
+      <div class="marcos" id="marcos"></div>
+      <div class="proximo-marco" id="proximoMarco"></div>
+    </div></div>
+
+    <div class="cartao"><div class="cartao-corpo">
+      <h2>Mapa de calor — último ano</h2>
+      <div class="calor-area">
+        <div class="calor-envolt" id="calorEnvolt">
+          <div class="calor" id="calor"></div>
+        </div>
+      </div>
+      <div class="legenda-calor">
+        <span>menos</span>
+        <span class="cel"></span><span class="cel n1"></span><span class="cel n2"></span>
+        <span class="cel n3"></span><span class="cel n4"></span>
+        <span>mais</span>
+        <span style="margin-left:auto" id="calorResumo"></span>
+      </div>
+    </div></div>
+
+    <div class="cartao"><div class="cartao-corpo">
+      <h2>Recordes pessoais</h2>
+      <div class="grade-3" id="recordes"></div>
+    </div></div>
+
+    <div class="cartao"><div class="cartao-corpo">
+      <h2>Ciclo atual x ciclo anterior</h2>
+      <div id="comparativoBox"></div>
+    </div></div>
+
+  </div>
+</section>
+
+<!-- ===================================================== PAINEL: ESTANTE -->
+<section class="painel" id="painel-estante">
+  <div class="cartao" style="margin-bottom:18px"><div class="cartao-corpo">
+    <h3 id="estanteTitulo">Estante de ciclos</h3>
+    <p class="subtexto" id="estanteResumo">Cada ciclo encerrado vira uma taça aqui. Nada some.</p>
+  </div></div>
+  <div class="prateleira" id="prateleira"></div>
+</section>
+
+<!-- =================================================== PAINEL: HISTÓRICO -->
+<section class="painel" id="painel-historico">
+  <div class="cartao"><div class="cartao-corpo">
+    <h2>Backup do histórico</h2>
+    <div class="controles" style="margin-top:0">
+      <button class="btn btn-pequeno" id="btnExportar">Exportar JSON</button>
+      <button class="btn btn-pequeno" id="btnImportar">Importar JSON</button>
+      <input type="file" id="arquivoImport" accept="application/json,.json" hidden>
+    </div>
+    <p class="dica">O arquivo vai para a pasta Downloads do Windows. Guarda de vez em quando, soberano.</p>
+  </div></div>
+
+  <div class="cartao" style="margin-top:18px"><div class="cartao-corpo">
+    <h2>Todos os blocos (<span id="totalBlocos">0</span>)</h2>
+    <div id="listaCompleta"></div>
+  </div></div>
+</section>
+
+<!-- ======================================================= PAINEL: CICLO -->
+<section class="painel" id="painel-ciclo">
+  <div class="grade-2">
+
+    <div class="cartao">
+      <div class="faixas faixas-fina"></div>
+      <div class="cartao-corpo">
+        <h2>Ciclo em andamento</h2>
+        <div id="formCicloBox">
+          <div class="campo">
+            <label for="cicloNome">Nome do ciclo</label>
+            <input type="text" id="cicloNome" placeholder="Ex.: Ciclo 4 — Cardio e Respiratório" maxlength="60">
+          </div>
+          <div class="grade-2" style="gap:12px">
+            <div class="campo">
+              <label for="cicloInicio">Início</label>
+              <input type="date" id="cicloInicio">
+            </div>
+            <div class="campo">
+              <label for="cicloFim">Fim previsto</label>
+              <input type="date" id="cicloFim">
+            </div>
+          </div>
+          <div class="controles" style="margin-top:4px">
+            <button class="btn btn-principal" id="btnSalvarCiclo">Salvar ciclo</button>
+            <button class="btn btn-preto" id="btnEncerrarCiclo">Levantar a taça</button>
+          </div>
+          <p class="dica">Encerrar congela as estatísticas e manda o ciclo para a Estante. A faculdade não volta atrás — o app também não.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cartao"><div class="cartao-corpo">
+      <h2>Ajustes</h2>
+
+      <div class="linha-config">
+        <div><b>Volume do alarme</b><div class="desc">Som gerado pelo próprio app, sem arquivo externo.</div></div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="range" id="volume" min="0" max="100" step="5">
+          <button class="btn btn-pequeno" id="btnTestarSom">Testar</button>
+        </div>
+      </div>
+
+      <div class="linha-config">
+        <div><b>Silenciar</b><div class="desc">Só notificação, sem som.</div></div>
+        <input type="checkbox" id="mudo">
+      </div>
+
+      <div class="linha-config">
+        <div><b>Notificações do Windows</b><div class="desc" id="descNotif">Avisa mesmo com o app minimizado.</div></div>
+        <button class="btn btn-pequeno" id="btnNotif">Permitir</button>
+      </div>
+
+      <div class="linha-config">
+        <div><b>Instalar o app</b><div class="desc" id="descInstalar">Cria atalho na área de trabalho e no menu Iniciar.</div></div>
+        <button class="btn btn-pequeno btn-preto" id="btnInstalar" disabled>Instalar</button>
+      </div>
+
+      <div class="linha-config">
+        <div><b>Apagar tudo</b><div class="desc">Zera blocos, ciclos e recordes. Não tem volta.</div></div>
+        <button class="btn btn-pequeno" id="btnApagarTudo">Apagar</button>
+      </div>
+    </div></div>
+
+  </div>
+</section>
+
+</main>
+
+<!-- =============================================== MODAL: BLOCO CONCLUÍDO -->
+<div class="modal" id="modalFim" role="dialog" aria-modal="true" aria-labelledby="fraseFim">
+  <div class="modal-caixa">
+    <div class="faixas"></div>
+    <div class="modal-corpo">
+      <div class="frase" id="fraseFim">Bloco fechado, soberano.</div>
+      <div class="resumo" id="resumoFim"></div>
+      <div class="modal-botoes" id="botoesFim"></div>
+    </div>
+  </div>
+</div>
+
+<div id="avisos" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ==========================================================================
+   VIDORI — Pomodoro de estudo do Eduardo
+   Sem framework, sem CDN, sem build. Tudo em português e comentado.
+   ========================================================================== */
+
+const NOME = "Eduardo";
+
+/* --------------------------------------------------------------------------
+   1. UTILIDADES
+   -------------------------------------------------------------------------- */
+const $  = (sel) => document.querySelector(sel);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+const doisDig = (n) => String(n).padStart(2, "0");
+
+/** Chave "AAAA-MM-DD" no fuso local (nunca UTC, para o dia não virar errado). */
+function chaveDia(data) {
+  const d = (data instanceof Date) ? data : new Date(data);
+  return d.getFullYear() + "-" + doisDig(d.getMonth() + 1) + "-" + doisDig(d.getDate());
+}
+/** Converte "AAAA-MM-DD" de volta para Date local à meia-noite. */
+function diaDeChave(chave) {
+  const [a, m, d] = chave.split("-").map(Number);
+  return new Date(a, m - 1, d);
+}
+function somaDias(data, n) {
+  const d = new Date(data.getFullYear(), data.getMonth(), data.getDate());
+  d.setDate(d.getDate() + n);
+  return d;
+}
+/** Diferença em dias inteiros entre duas chaves de dia. */
+function difDias(chaveA, chaveB) {
+  const ms = diaDeChave(chaveB) - diaDeChave(chaveA);
+  return Math.round(ms / 86400000);
+}
+function formatarHora(ts) {
+  const d = new Date(ts);
+  return doisDig(d.getHours()) + ":" + doisDig(d.getMinutes());
+}
+function formatarDataCurta(chave) {
+  const d = diaDeChave(chave);
+  return doisDig(d.getDate()) + "/" + doisDig(d.getMonth() + 1);
+}
+function formatarDataLonga(chave) {
+  const d = diaDeChave(chave);
+  const meses = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+  return d.getDate() + " " + meses[d.getMonth()] + " " + d.getFullYear();
+}
+/** Minutos -> "2h30" ou "45 min". */
+function humanoMin(min) {
+  min = Math.round(min);
+  if (min < 60) return min + " min";
+  const h = Math.floor(min / 60), m = min % 60;
+  return m === 0 ? h + "h" : h + "h" + doisDig(m);
+}
+function horasDe(min) { return Math.floor(min / 60); }
+function sortear(lista) { return lista[Math.floor(Math.random() * lista.length)]; }
+function escapar(txt) {
+  return String(txt).replace(/[&<>"']/g, (c) => (
+    { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]
+  ));
+}
+
+/* --------------------------------------------------------------------------
+   2. ARMAZENAMENTO — localStorage com rede de segurança
+   Se o localStorage estiver cheio, bloqueado ou indisponível, o app continua
+   funcionando em memória e avisa uma única vez.
+   -------------------------------------------------------------------------- */
+const Armazem = (function () {
+  let ativo = true;
+  let jaAvisou = false;
+  const memoria = Object.create(null);
+
+  try {
+    const teste = "__vidori__";
+    localStorage.setItem(teste, "1");
+    localStorage.removeItem(teste);
+  } catch (e) {
+    ativo = false;
+  }
+
+  function avisar(msg) {
+    if (jaAvisou) return;
+    jaAvisou = true;
+    setTimeout(() => mostrarAviso(msg), 800);
+  }
+
+  return {
+    get disponivel() { return ativo; },
+    ler(chave, padrao) {
+      try {
+        const bruto = ativo ? localStorage.getItem(chave) : memoria[chave];
+        if (bruto == null) return padrao;
+        const val = JSON.parse(bruto);
+        return (val === null || val === undefined) ? padrao : val;
+      } catch (e) {
+        return padrao;
+      }
+    },
+    gravar(chave, valor) {
+      let bruto;
+      try { bruto = JSON.stringify(valor); }
+      catch (e) { return false; }
+      memoria[chave] = bruto;
+      if (!ativo) {
+        avisar("Sem armazenamento no navegador: o histórico vale só nesta sessão.");
+        return false;
+      }
+      try {
+        localStorage.setItem(chave, bruto);
+        return true;
+      } catch (e) {
+        avisar("Armazenamento cheio. Exporta o JSON e apaga registros antigos, Eduardo.");
+        return false;
+      }
+    },
+    apagar(chave) {
+      delete memoria[chave];
+      try { if (ativo) localStorage.removeItem(chave); } catch (e) {}
+    }
+  };
+})();
+
+const CHAVES = {
+  blocos:   "vidori.blocos",
+  ciclos:   "vidori.ciclos",
+  config:   "vidori.config",
+  recordes: "vidori.recordes",
+  marcos:   "vidori.marcos",
+  timer:    "vidori.timer"
+};
+
+/* --------------------------------------------------------------------------
+   3. DADOS EM MEMÓRIA
+   -------------------------------------------------------------------------- */
+let blocos   = Armazem.ler(CHAVES.blocos, []);        // histórico completo
+let ciclos   = Armazem.ler(CHAVES.ciclos, []);        // ciclos, ativo e encerrados
+let marcosOk = Armazem.ler(CHAVES.marcos, null);      // marcos vitalícios já comemorados
+let recordes = Armazem.ler(CHAVES.recordes, { dia:0, semana:0, sequencia:0 });
+let config   = Object.assign(
+  { duracaoFoco: 30, volume: 0.6, mudo: false, notificar: true },
+  Armazem.ler(CHAVES.config, {})
+);
+
+const DURACOES = [15, 25, 30, 50];
+const PAUSA_MIN = 5;
+const MARCOS = [100, 250, 500, 1000, 2000, 5000];
+
+function salvarBlocos()   { Armazem.gravar(CHAVES.blocos, blocos); }
+function salvarCiclos()   { Armazem.gravar(CHAVES.ciclos, ciclos); }
+function salvarConfig()   { Armazem.gravar(CHAVES.config, config); }
+function salvarRecordes() { Armazem.gravar(CHAVES.recordes, recordes); }
+function salvarMarcos()   { Armazem.gravar(CHAVES.marcos, marcosOk); }
+
+/* --------------------------------------------------------------------------
+   4. VOZ DO APP — são-paulino falando com são-paulino
+   Textos originais. Nada de letra de canto, hino ou música de torcida.
+   {min} {assunto} {marco} {nome} são trocados na hora.
+   -------------------------------------------------------------------------- */
+const FALA = {
+  manha: [
+    "Bom dia, {nome}. Hoje tem jogo e a bola é tua.",
+    "Fé no dia de hoje, {nome}. Começa cedo, termina soberano.",
+    "Escalação montada, {nome}. Falta tu entrar em campo.",
+    "Manhã de Morumbi cheio, {nome}. Bora abrir o placar.",
+    "Primeiro bloco é o gol de saída, {nome}.",
+    "Dia novo, campanha nova. Fé e trabalho, {nome}.",
+    "Tricolor acorda pensando em taça, {nome}.",
+    "Sem tempo ruim, {nome}. Aquece e entra.",
+    "A manhã é tua, soberano. Aproveita enquanto tá calmo.",
+    "Levanta a cabeça e a matéria, {nome}. Fé."
+  ],
+  tarde: [
+    "Boa tarde, {nome}. Tarde é hora boa pra ser soberano.",
+    "Tarde de Morumbi, {nome}. Fé no que vem.",
+    "Sol alto e matéria aberta, Tricolor.",
+    "Segundo tempo do dia, {nome}. Vai.",
+    "Tarde rende, soberano. Aproveita.",
+    "Boa tarde, Tricolor. Fé no que ainda falta.",
+    "Meio de jogo, {nome}. Segura o ritmo.",
+    "Tarde de treino forte, soberano.",
+    "Ainda dá muito jogo hoje, {nome}.",
+    "Boa tarde, {nome}. Bola pra frente."
+  ],
+  noite: [
+    "Boa noite, {nome}. Jogo sob os refletores.",
+    "Noite de Morumbi iluminado, Tricolor.",
+    "Noite é de decisão, {nome}. Fé.",
+    "Refletor aceso, soberano. Bora.",
+    "Boa noite, {nome}. Um bloco fecha bem o dia.",
+    "Noite silenciosa joga a teu favor, {nome}.",
+    "Fim de jogo chegando, soberano. Capricha.",
+    "Boa noite, Tricolor. Fé até o apito final.",
+    "A noite rende, {nome}. Só não vira o dia.",
+    "Últimos minutos do dia, soberano. Vai."
+  ],
+  madrugada: [
+    "Madrugada, {nome}? Isso é raça.",
+    "Só o soberano tá acordado a essa hora.",
+    "Prorrogação, Tricolor. Fé.",
+    "Madrugada é pra quem tem fé mesmo, {nome}.",
+    "Tá tarde, soberano. Um bloco e cama.",
+    "Morumbi vazio e tu em campo, {nome}.",
+    "Acréscimos, {nome}. Segura firme.",
+    "Madrugada de mata-mata, soberano.",
+    "Descansar também é tática, {nome}. Mas se for, vai com fé.",
+    "Último a sair do gramado, Tricolor."
+  ],
+  aindaNao: [
+    "Ainda não entrou em campo hoje.",
+    "Placar de hoje zerado. Um bloco resolve.",
+    "Time aquecendo. Falta o apito.",
+    "Nenhum minuto hoje ainda — e dá tempo de sobra.",
+    "Escalação pronta, só faltou entrar.",
+    "Hoje ainda tá 0 a 0.",
+    "Bola parada esperando teu chute.",
+    "Nada estudado hoje. Fé, começa pequeno.",
+    "O primeiro bloco do dia te espera.",
+    "Tabela de hoje ainda em branco."
+  ],
+  jaEstudou: [
+    "{min} hoje. Tá jogando bem.",
+    "Já são {min} hoje. Soberano.",
+    "{min} na conta de hoje. Fé pra mais.",
+    "Hoje: {min}. Campanha em dia.",
+    "{min} jogados hoje, Tricolor.",
+    "Tá com {min} hoje. Segura o ritmo.",
+    "{min} hoje — placar aberto e a favor.",
+    "Hoje rendeu {min} até agora.",
+    "{min} de raça hoje.",
+    "{min} hoje. Assim se ganha campeonato."
+  ],
+  iniciar: [
+    "Bola rolando, {nome}. Fé nesse bloco.",
+    "Entrou em campo, soberano. Agora é concentração.",
+    "{min} de raça, {nome}. Vai.",
+    "Silêncio no Morumbi: o soberano vai estudar.",
+    "Marcação pressão em {assunto}, {nome}.",
+    "Primeiro tempo começando. Fé, Tricolor.",
+    "Cabeça no jogo, {nome}. O resto espera.",
+    "Sem firula: {assunto} e só.",
+    "Tá em campo, {nome}. Joga bonito.",
+    "Apitou o juiz. Fé e foco, soberano."
+  ],
+  concluir: [
+    "Bloco fechado, soberano.",
+    "Mais um na conta, {nome}. Fé.",
+    "Gol do Tricolor. Anota aí.",
+    "Isso é raça, soberano. Bloco cumprido.",
+    "Jogou bem, {nome}. Respira que tem segundo tempo.",
+    "Ponto somado na tabela, {nome}.",
+    "Assim se constrói campanha, soberano.",
+    "Fechou o bloco de {assunto}. Fé.",
+    "Trabalho feito, {nome}. Nada de improviso.",
+    "Mais {min} de soberania.",
+    "Vitória simples, dessas que valem três pontos.",
+    "Sai de campo aplaudido, soberano."
+  ],
+  fimPausa: [
+    "Intervalo acabou, {nome}. Volta pro campo.",
+    "Segundo tempo, soberano. Fé.",
+    "Descansou, agora joga, {nome}.",
+    "Time voltando do vestiário. Bora, Tricolor.",
+    "Água tomada. Cabeça no jogo de novo.",
+    "Cinco minutos foram. Fé nos próximos, {nome}.",
+    "Reentra, soberano. Ainda tem jogo.",
+    "Pausa cumprida, {nome}. Volta inteiro.",
+    "De volta ao Morumbi, soberano.",
+    "Bola no meio de campo, {nome}. Vai."
+  ],
+  recorde: [
+    "Recorde quebrado, {nome}. Isso é coisa de soberano.",
+    "Marca nova no Morumbi, {nome}.",
+    "Tu passou do teu melhor, soberano. Fé.",
+    "Escreveu história hoje, {nome}.",
+    "Recorde é teu, Tricolor. Merecido.",
+    "Nunca tinha ido tão longe, {nome}. Soberano.",
+    "Placar novo na tua tabela, {nome}.",
+    "Aí é raça pura, soberano. Recorde batido.",
+    "Bateu o próprio recorde, {nome}. Sem sorte nisso.",
+    "Marca superada. Fé que ainda dá pra mais."
+  ],
+  encerrarCiclo: [
+    "Taça levantada, {nome}. Ciclo encerrado.",
+    "Campanha fechada, soberano. Foi bonita.",
+    "Fim de mata-mata, {nome}. Guarda essa na estante.",
+    "Ciclo vencido. Tricolor de novo, {nome}.",
+    "Levanta a taça, soberano. Tu correu por ela.",
+    "Mais um título na estante, {nome}.",
+    "Decisão vencida. Fé no próximo torneio.",
+    "Volta olímpica, soberano.",
+    "Ciclo na prateleira, {nome}. Ninguém tira.",
+    "Campeão desse ciclo, Tricolor. Fé sempre."
+  ],
+  marco: [
+    "{marco} horas na conta, {nome}. Soberano.",
+    "Marca de {marco}h batida. Isso é história, Tricolor.",
+    "Chegou nas {marco} horas, {nome}. Fé.",
+    "{marco}h de raça acumulada, soberano.",
+    "Placar geral: {marco} horas, {nome}.",
+    "Passou das {marco}h. Só quem tem fé chega aí.",
+    "{marco} horas de Morumbi lotado, {nome}.",
+    "Marco de {marco}h, soberano. Segue firme.",
+    "Tá nas {marco} horas, {nome}. Campanha longa.",
+    "{marco}h estudadas. Tricolor não para."
+  ],
+  retomada: [
+    "Voltou, {nome}. É isso que importa.",
+    "Time volta pro campo, soberano. Fé.",
+    "Bom te ver de novo, Tricolor. Bora do zero.",
+    "Jogo de volta começa agora, {nome}.",
+    "Sem cobrança, {nome}. Só bola pra frente.",
+    "Retomada é virada, soberano.",
+    "Voltou pro Morumbi, {nome}. Fé.",
+    "Todo campeão tem intervalo. Bora, Tricolor.",
+    "Recomeça leve, {nome}. Um bloco já vale.",
+    "De volta ao elenco, soberano."
+  ]
+};
+
+/** Sorteia uma fala e troca os marcadores. */
+function falar(grupo, vars) {
+  const base = sortear(FALA[grupo]);
+  const dados = Object.assign({ nome: NOME }, vars || {});
+  return base.replace(/\{(\w+)\}/g, (m, k) => (k in dados ? dados[k] : m));
+}
+
+/* --------------------------------------------------------------------------
+   5. ÁUDIO — alarme gerado na hora com Web Audio API (sem arquivo externo)
+   -------------------------------------------------------------------------- */
+let ctxAudio = null;
+function acordarAudio() {
+  try {
+    if (!ctxAudio) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctxAudio = new AC();
+    }
+    if (ctxAudio.state === "suspended") ctxAudio.resume();
+    return ctxAudio;
+  } catch (e) { return null; }
+}
+
+/**
+ * Toca o alarme. "foco" = três toques subindo, repetidos (mais chamativo);
+ * "pausa" = dois toques descendo, mais discreto.
+ */
+function tocarAlarme(tipo) {
+  if (config.mudo || config.volume <= 0) return;
+  const ctx = acordarAudio();
+  if (!ctx) return;
+
+  const notas = (tipo === "foco") ? [523.25, 659.25, 783.99] : [783.99, 587.33];
+  const repeticoes = (tipo === "foco") ? 3 : 2;
+  const pico = Math.max(0.02, Math.min(1, config.volume)) * 0.32;
+  const t0 = ctx.currentTime + 0.03;
+
+  for (let r = 0; r < repeticoes; r++) {
+    notas.forEach((freq, i) => {
+      const inicio = t0 + r * (notas.length * 0.16 + 0.34) + i * 0.16;
+      const osc = ctx.createOscillator();
+      const ganho = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.value = freq;
+      ganho.gain.setValueAtTime(0.0001, inicio);
+      ganho.gain.exponentialRampToValueAtTime(pico, inicio + 0.02);
+      ganho.gain.exponentialRampToValueAtTime(0.0001, inicio + 0.62);
+      osc.connect(ganho);
+      ganho.connect(ctx.destination);
+      osc.start(inicio);
+      osc.stop(inicio + 0.66);
+    });
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. NOTIFICAÇÕES DO WINDOWS
+   -------------------------------------------------------------------------- */
+async function notificar(titulo, corpo) {
+  if (!config.notificar) return;
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const opcoes = {
+    body: corpo,
+    icon: "./icons/icon-192.png",
+    badge: "./icons/icon-192.png",
+    tag: "vidori",
+    renotify: true
+  };
+  try {
+    if (navigator.serviceWorker) {
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (reg && reg.showNotification) { reg.showNotification(titulo, opcoes); return; }
+    }
+  } catch (e) { /* cai no fallback abaixo */ }
+  try { new Notification(titulo, opcoes); } catch (e) {}
+}
+
+async function pedirPermissaoNotificacao() {
+  if (!("Notification" in window)) {
+    mostrarAviso("Este navegador não tem notificações.");
+    return;
+  }
+  try { await Notification.requestPermission(); } catch (e) {}
+  renderNotifBotao();
+}
+
+function renderNotifBotao() {
+  const btn = $("#btnNotif"), desc = $("#descNotif");
+  if (!("Notification" in window)) {
+    btn.textContent = "Indisponível"; btn.disabled = true;
+    desc.textContent = "Navegador sem suporte a notificações.";
+    return;
+  }
+  const p = Notification.permission;
+  if (p === "granted") {
+    btn.textContent = "Testar"; btn.disabled = false;
+    desc.textContent = "Liberadas. O app avisa mesmo minimizado.";
+  } else if (p === "denied") {
+    btn.textContent = "Bloqueadas"; btn.disabled = true;
+    desc.textContent = "Bloqueadas no navegador — libera no cadeado da barra de endereço.";
+  } else {
+    btn.textContent = "Permitir"; btn.disabled = false;
+    desc.textContent = "Avisa mesmo com o app minimizado.";
+  }
+}
+
+/* --------------------------------------------------------------------------
+   7. AVISOS FLUTUANTES
+   -------------------------------------------------------------------------- */
+function mostrarAviso(texto, tipo) {
+  const caixa = $("#avisos");
+  const el = document.createElement("div");
+  el.className = "aviso" + (tipo ? " " + tipo : "");
+  el.textContent = texto;
+  caixa.appendChild(el);
+  setTimeout(() => {
+    el.style.transition = "opacity .3s, transform .3s";
+    el.style.opacity = "0";
+    el.style.transform = "translateY(8px)";
+    setTimeout(() => el.remove(), 320);
+  }, tipo === "recorde" ? 7000 : 4600);
+}
+
+/* --------------------------------------------------------------------------
+   8. CICLOS
+   -------------------------------------------------------------------------- */
+function cicloAtivo() { return ciclos.find((c) => !c.encerradoEm) || null; }
+function ciclosEncerrados() {
+  return ciclos.filter((c) => c.encerradoEm).sort((a, b) => a.inicio < b.inicio ? 1 : -1);
+}
+function cicloPorId(id) { return ciclos.find((c) => c.id === id) || null; }
+
+/** Último ciclo encerrado antes do ciclo informado (para a comparação). */
+function cicloAnteriorDe(ciclo) {
+  const anteriores = ciclos
+    .filter((c) => c.encerradoEm && c.inicio < ciclo.inicio)
+    .sort((a, b) => a.inicio < b.inicio ? 1 : -1);
+  return anteriores[0] || null;
+}
+
+function salvarCicloDoFormulario() {
+  const nome  = $("#cicloNome").value.trim();
+  const ini   = $("#cicloInicio").value;
+  const fim   = $("#cicloFim").value;
+  if (!nome)      { mostrarAviso("Dá um nome pro ciclo, Eduardo."); return; }
+  if (!ini || !fim) { mostrarAviso("Preenche início e fim previsto."); return; }
+  if (fim < ini)  { mostrarAviso("O fim não pode vir antes do início."); return; }
+
+  const atual = cicloAtivo();
+  if (atual) {
+    atual.nome = nome; atual.inicio = ini; atual.fimPrevisto = fim;
+    mostrarAviso("Ciclo atualizado, soberano.");
+  } else {
+    ciclos.push({
+      id: "c" + Date.now(),
+      nome, inicio: ini, fimPrevisto: fim,
+      encerradoEm: null, congelado: null
+    });
+    mostrarAviso("Ciclo aberto. Fase de grupos começando, " + NOME + ".");
+  }
+  salvarCiclos();
+  renderTudo();
+}
+
+function encerrarCiclo() {
+  const c = cicloAtivo();
+  if (!c) { mostrarAviso("Não tem ciclo em andamento."); return; }
+  if (!confirm('Encerrar "' + c.nome + '"?\n\nAs estatísticas ficam congeladas e o ciclo vai para a Estante. Não dá pra reabrir.')) return;
+
+  const meus = blocos.filter((b) => b.cicloId === c.id);
+  const min  = meus.reduce((s, b) => s + b.minutos, 0);
+  const dias = new Set(meus.map((b) => b.dia));
+
+  c.encerradoEm = chaveDia(new Date());
+  c.congelado = {
+    minutos: min,
+    blocos: meus.length,
+    diasAtivos: dias.size,
+    maiorSequencia: maiorSequenciaEm(Array.from(dias)),
+    dataFim: c.encerradoEm
+  };
+  salvarCiclos();
+
+  const msg = falar("encerrarCiclo");
+  mostrarAviso(msg, "recorde");
+  notificar("Vidori — ciclo encerrado", msg);
+  renderTudo();
+  irParaPainel("estante");
+}
+
+/* --------------------------------------------------------------------------
+   9. ESTATÍSTICAS
+   -------------------------------------------------------------------------- */
+/** Mapa { "AAAA-MM-DD": minutos } de todo o histórico. */
+function minutosPorDia(lista) {
+  const mapa = Object.create(null);
+  (lista || blocos).forEach((b) => {
+    mapa[b.dia] = (mapa[b.dia] || 0) + b.minutos;
+  });
+  return mapa;
+}
+function minutosNoDia(chave) {
+  return blocos.reduce((s, b) => s + (b.dia === chave ? b.minutos : 0), 0);
+}
+function totalMinutos() { return blocos.reduce((s, b) => s + b.minutos, 0); }
+
+/** Maior sequência de dias consecutivos com ao menos um bloco. */
+function maiorSequenciaEm(chaves) {
+  if (!chaves.length) return 0;
+  const ord = Array.from(new Set(chaves)).sort();
+  let melhor = 1, atual = 1;
+  for (let i = 1; i < ord.length; i++) {
+    atual = (difDias(ord[i - 1], ord[i]) === 1) ? atual + 1 : 1;
+    if (atual > melhor) melhor = atual;
+  }
+  return melhor;
+}
+
+/** Sequência ativa hoje (conta ontem também, para não punir quem ainda vai estudar). */
+function sequenciaAtual() {
+  const dias = new Set(blocos.map((b) => b.dia));
+  if (!dias.size) return 0;
+  const hoje = chaveDia(new Date());
+  let inicio = dias.has(hoje) ? new Date() : somaDias(new Date(), -1);
+  if (!dias.has(chaveDia(inicio))) return 0;
+  let n = 0;
+  while (dias.has(chaveDia(inicio))) { n++; inicio = somaDias(inicio, -1); }
+  return n;
+}
+
+/** Melhor semana civil (segunda a domingo) em minutos. */
+function melhorSemana() {
+  const mapa = minutosPorDia();
+  const semanas = Object.create(null);
+  Object.keys(mapa).forEach((chave) => {
+    const d = diaDeChave(chave);
+    const desloc = (d.getDay() + 6) % 7;           // 0 = segunda
+    const seg = chaveDia(somaDias(d, -desloc));
+    semanas[seg] = (semanas[seg] || 0) + mapa[chave];
+  });
+  let melhor = { inicio: null, minutos: 0 };
+  Object.keys(semanas).forEach((k) => {
+    if (semanas[k] > melhor.minutos) melhor = { inicio: k, minutos: semanas[k] };
+  });
+  return melhor;
+}
+
+function melhorDia() {
+  const mapa = minutosPorDia();
+  let melhor = { dia: null, minutos: 0 };
+  Object.keys(mapa).forEach((k) => {
+    if (mapa[k] > melhor.minutos) melhor = { dia: k, minutos: mapa[k] };
+  });
+  return melhor;
+}
+
+/**
+ * Recalcula recordes. Se algum foi superado, devolve a lista dos que caíram.
+ * Com "silencioso" apenas sincroniza (usado na carga e na importação).
+ */
+function conferirRecordes(silencioso) {
+  const d = melhorDia();
+  const s = melhorSemana();
+  const seq = maiorSequenciaEm(blocos.map((b) => b.dia));
+  const quebrados = [];
+
+  if (!silencioso) {
+    if (d.minutos > (recordes.dia || 0) && (recordes.dia || 0) > 0)
+      quebrados.push("Melhor dia: " + humanoMin(d.minutos));
+    if (s.minutos > (recordes.semana || 0) && (recordes.semana || 0) > 0)
+      quebrados.push("Melhor semana: " + humanoMin(s.minutos));
+    if (seq > (recordes.sequencia || 0) && (recordes.sequencia || 0) > 0)
+      quebrados.push("Maior sequência: " + seq + " dias");
+  }
+
+  recordes = { dia: d.minutos, semana: s.minutos, sequencia: seq };
+  salvarRecordes();
+  return quebrados;
+}
+
+/** Marcos vitalícios: comemora o que acabou de cair; sincroniza o resto. */
+function conferirMarcos(silencioso) {
+  const horas = totalMinutos() / 60;
+  if (!Array.isArray(marcosOk)) {           // primeira execução ou importação
+    marcosOk = MARCOS.filter((m) => horas >= m);
+    salvarMarcos();
+    return [];
+  }
+  const novos = MARCOS.filter((m) => horas >= m && marcosOk.indexOf(m) === -1);
+  if (novos.length) {
+    marcosOk = marcosOk.concat(novos);
+    salvarMarcos();
+  }
+  return silencioso ? [] : novos;
+}
+
+/** Soma acumulada por dia do ciclo (índice 0 = primeiro dia). */
+function acumuladoDoCiclo(ciclo, limiteDias) {
+  const meus = blocos.filter((b) => b.cicloId === ciclo.id);
+  const porIndice = Object.create(null);
+  meus.forEach((b) => {
+    const i = difDias(ciclo.inicio, b.dia);
+    if (i >= 0) porIndice[i] = (porIndice[i] || 0) + b.minutos;
+  });
+  const fimRef = ciclo.encerradoEm || ciclo.fimPrevisto;
+  const totalDias = Math.max(1, difDias(ciclo.inicio, fimRef) + 1);
+  const n = limiteDias || totalDias;
+  const saida = [];
+  let soma = 0;
+  for (let i = 0; i < n; i++) { soma += (porIndice[i] || 0); saida.push(soma); }
+  return saida;
+}
+
+/* --------------------------------------------------------------------------
+   10. HISTÓRICO DE BLOCOS
+   -------------------------------------------------------------------------- */
+function registrarBloco(inicioTs, fimTs, assunto, minutos) {
+  const c = cicloAtivo();
+  blocos.push({
+    id: "b" + fimTs + Math.random().toString(36).slice(2, 6),
+    inicio: inicioTs,
+    fim: fimTs,
+    dia: chaveDia(fimTs),
+    assunto: assunto || "Sem assunto",
+    minutos: Math.round(minutos),
+    cicloId: c ? c.id : null
+  });
+  salvarBlocos();
+}
+
+function apagarBloco(id) {
+  const i = blocos.findIndex((b) => b.id === id);
+  if (i === -1) return;
+  blocos.splice(i, 1);
+  salvarBlocos();
+  conferirRecordes(true);
+  conferirMarcos(true);
+  renderTudo();
+}
+
+/** Assuntos do ciclo atual (para o autocompletar), mais usados primeiro. */
+function assuntosDoCiclo() {
+  const c = cicloAtivo();
+  const fonte = c ? blocos.filter((b) => b.cicloId === c.id) : blocos;
+  const cont = Object.create(null);
+  fonte.forEach((b) => { cont[b.assunto] = (cont[b.assunto] || 0) + 1; });
+  return Object.keys(cont).sort((a, b) => cont[b] - cont[a]);
+}
+
+/** Últimos 5 assuntos distintos usados (atalhos rápidos). */
+function assuntosRecentes() {
+  const vistos = [];
+  for (let i = blocos.length - 1; i >= 0 && vistos.length < 5; i--) {
+    if (vistos.indexOf(blocos[i].assunto) === -1) vistos.push(blocos[i].assunto);
+  }
+  return vistos;
+}
+
+/* --------------------------------------------------------------------------
+   11. TIMER — sempre por timestamp real (Date.now), nunca por contagem de ticks
+   -------------------------------------------------------------------------- */
+const T = {
+  modo: "foco",        // "foco" | "pausa"
+  rodando: false,
+  alvoMs: config.duracaoFoco * 60000,
+  restanteMs: config.duracaoFoco * 60000,
+  fimAlvo: null,       // timestamp de quando o bloco termina
+  inicioBloco: null,   // timestamp do primeiro "iniciar" deste bloco
+  assunto: ""
+};
+let intervaloTimer = null;
+
+function restanteAgora() {
+  const ms = T.rodando ? (T.fimAlvo - Date.now()) : T.restanteMs;
+  return Math.max(0, ms);
+}
+
+function definirDuracaoFoco(min) {
+  if (T.rodando || T.modo === "pausa") return;
+  config.duracaoFoco = min;
+  salvarConfig();
+  T.alvoMs = min * 60000;
+  T.restanteMs = T.alvoMs;
+  T.inicioBloco = null;
+  persistirTimer();
+  renderTimer();
+  renderDuracoes();
+}
+
+function iniciarTimer() {
+  acordarAudio();                                  // libera o som no primeiro clique
+  if (T.modo === "foco") {
+    const digitado = $("#assunto").value.trim();
+    T.assunto = digitado || T.assunto || "Sem assunto";
+    $("#assunto").value = T.assunto === "Sem assunto" ? "" : T.assunto;
+  }
+  if (!T.inicioBloco) T.inicioBloco = Date.now();
+  T.fimAlvo = Date.now() + T.restanteMs;
+  T.rodando = true;
+  persistirTimer();
+  ligarLoop();
+  renderTimer();
+  renderDuracoes();
+
+  if (T.modo === "foco") {
+    mostrarAviso(falar("iniciar", {
+      min: humanoMin(T.alvoMs / 60000),
+      assunto: T.assunto
+    }));
+  }
+}
+
+function pausarTimer() {
+  if (!T.rodando) return;
+  T.restanteMs = restanteAgora();
+  T.rodando = false;
+  persistirTimer();
+  renderTimer();
+}
+
+function zerarTimer() {
+  T.rodando = false;
+  T.restanteMs = T.alvoMs;
+  T.fimAlvo = null;
+  T.inicioBloco = null;
+  persistirTimer();
+  renderTimer();
+  renderDuracoes();
+}
+
+/** Pular: no foco, registra o parcial (se valer a pena) e vai pra pausa. */
+function pularBloco() {
+  if (T.modo === "foco") {
+    const decorridoMs = T.alvoMs - restanteAgora();
+    if (T.inicioBloco && decorridoMs >= 60000) {
+      registrarBloco(T.inicioBloco, Date.now(), T.assunto, decorridoMs / 60000);
+      mostrarAviso("Parcial de " + humanoMin(decorridoMs / 60000) + " registrado, soberano.");
+      depoisDeRegistrar();
+    }
+    entrarEmPausa(false);
+  } else {
+    voltarParaFoco(false);
+  }
+}
+
+function entrarEmPausa(autoIniciar) {
+  T.modo = "pausa";
+  T.alvoMs = PAUSA_MIN * 60000;
+  T.restanteMs = T.alvoMs;
+  T.rodando = false;
+  T.fimAlvo = null;
+  T.inicioBloco = null;
+  persistirTimer();
+  renderTimer();
+  renderDuracoes();
+  if (autoIniciar) iniciarTimer();
+}
+
+function voltarParaFoco(avisar) {
+  T.modo = "foco";
+  T.alvoMs = config.duracaoFoco * 60000;
+  T.restanteMs = T.alvoMs;
+  T.rodando = false;
+  T.fimAlvo = null;
+  T.inicioBloco = null;
+  persistirTimer();
+  renderTimer();
+  renderDuracoes();
+  if (avisar) {
+    const msg = falar("fimPausa");
+    mostrarAviso(msg);
+    notificar("Vidori — pausa encerrada", msg);
+  }
+}
+
+function ligarLoop() {
+  if (intervaloTimer) return;
+  intervaloTimer = setInterval(tique, 250);
+}
+function desligarLoop() {
+  if (!intervaloTimer) return;
+  clearInterval(intervaloTimer);
+  intervaloTimer = null;
+}
+
+/** Só desenha e verifica o fim: o tempo em si vem sempre de Date.now(). */
+function tique() {
+  if (!T.rodando) { desligarLoop(); return; }
+  if (restanteAgora() <= 0) {
+    concluirTempo();
+    return;
+  }
+  renderTimer();
+}
+
+/** Chamado quando o tempo chega a zero (em foco ou em pausa). */
+function concluirTempo() {
+  const eraFoco = T.modo === "foco";
+  T.rodando = false;
+  T.restanteMs = 0;
+  desligarLoop();
+
+  if (eraFoco) {
+    const minutos = T.alvoMs / 60000;
+    const assunto = T.assunto || "Sem assunto";
+    registrarBloco(T.inicioBloco || (Date.now() - T.alvoMs), Date.now(), assunto, minutos);
+
+    tocarAlarme("foco");
+    const msg = falar("concluir", { min: humanoMin(minutos), assunto: assunto });
+    notificar("Vidori — bloco concluído", msg);
+    abrirModalFim(msg, minutos, assunto);
+    depoisDeRegistrar();
+    entrarEmPausa(false);
+  } else {
+    tocarAlarme("pausa");
+    voltarParaFoco(true);
+  }
+  renderTudo();
+}
+
+/** Recalcula recordes e marcos depois de gravar um bloco, e comemora o que caiu. */
+function depoisDeRegistrar() {
+  const quebrados = conferirRecordes(false);
+  quebrados.forEach((q) => {
+    const msg = falar("recorde");
+    mostrarAviso(msg + " — " + q, "recorde");
+    notificar("Vidori — recorde batido", msg + " (" + q + ")");
+  });
+  const novosMarcos = conferirMarcos(false);
+  novosMarcos.forEach((m) => {
+    const msg = falar("marco", { marco: m });
+    mostrarAviso(msg, "recorde");
+    notificar("Vidori — marco atingido", msg);
+  });
+}
+
+/* ------ persistência do timer, para um F5 não matar o bloco em andamento ---- */
+function persistirTimer() {
+  Armazem.gravar(CHAVES.timer, {
+    modo: T.modo, rodando: T.rodando, alvoMs: T.alvoMs,
+    restanteMs: T.rodando ? (T.fimAlvo - Date.now()) : T.restanteMs,
+    fimAlvo: T.fimAlvo, inicioBloco: T.inicioBloco, assunto: T.assunto
+  });
+}
+
+function restaurarTimer() {
+  const s = Armazem.ler(CHAVES.timer, null);
+  if (!s) return;
+  T.modo = s.modo === "pausa" ? "pausa" : "foco";
+  T.alvoMs = s.alvoMs || (config.duracaoFoco * 60000);
+  T.assunto = s.assunto || "";
+  T.inicioBloco = s.inicioBloco || null;
+
+  if (s.rodando && s.fimAlvo) {
+    const falta = s.fimAlvo - Date.now();
+    if (falta > 0) {                       // ainda dentro do bloco: continua de onde parou
+      T.fimAlvo = s.fimAlvo;
+      T.restanteMs = falta;
+      T.rodando = true;
+      ligarLoop();
+      return;
+    }
+    // O bloco terminou com o app fechado. Até 2h de atraso ainda conta.
+    if (T.modo === "foco" && falta > -2 * 3600000 && T.inicioBloco) {
+      registrarBloco(T.inicioBloco, s.fimAlvo, T.assunto || "Sem assunto", T.alvoMs / 60000);
+      depoisDeRegistrar();
+      mostrarAviso("Bloco que rodou com o app fechado foi contado, soberano.");
+    }
+    entrarEmPausa(false);
+    return;
+  }
+  T.restanteMs = (typeof s.restanteMs === "number") ? Math.max(0, s.restanteMs) : T.alvoMs;
+  T.rodando = false;
+}
+
+/* --------------------------------------------------------------------------
+   12. RENDERIZAÇÃO
+   -------------------------------------------------------------------------- */
+const CIRCUNFERENCIA = 2 * Math.PI * 106;   // raio 106 no SVG
+
+function renderTimer() {
+  const restante = restanteAgora();
+  const seg = Math.ceil(restante / 1000);
+  const txt = doisDig(Math.floor(seg / 60)) + ":" + doisDig(seg % 60);
+
+  $("#tempo").textContent = txt;
+  $("#rotuloModo").textContent = T.modo === "foco" ? "Foco" : "Pausa";
+  $("#caixaTimer").className = "cartao-corpo " + (T.modo === "foco" ? "modo-foco" : "modo-pausa");
+  $("#assuntoVivo").textContent = T.modo === "foco" ? (T.assunto || "") : "Respira, " + NOME + ".";
+
+  const fracao = T.alvoMs > 0 ? (restante / T.alvoMs) : 0;
+  $("#anel").setAttribute("stroke-dasharray", CIRCUNFERENCIA.toFixed(2));
+  $("#anel").setAttribute("stroke-dashoffset", (CIRCUNFERENCIA * (1 - fracao)).toFixed(2));
+
+  $("#btnPrincipal").textContent = T.rodando ? "Pausar" : (restante < T.alvoMs ? "Retomar" : "Iniciar");
+
+  // título da aba/janela: dá pra acompanhar sem trazer o app pra frente
+  document.title = T.rodando
+    ? txt + " · " + (T.modo === "foco" ? "Foco" : "Pausa") + " · Vidori"
+    : "Vidori — Foco Tricolor";
+}
+
+function renderDuracoes() {
+  const travado = T.rodando || T.modo === "pausa";
+  $$("#duracoes .dur").forEach((b) => {
+    const m = Number(b.dataset.min);
+    b.classList.toggle("sel", m === config.duracaoFoco);
+    b.disabled = travado;
+  });
+  $("#assunto").disabled = (T.modo === "pausa");
+}
+
+function renderCabecalho() {
+  const h = new Date().getHours();
+  const periodo = h < 5 ? "madrugada" : h < 12 ? "manha" : h < 18 ? "tarde" : "noite";
+  $("#saudacao").textContent = falar(periodo);
+
+  const min = minutosNoDia(chaveDia(new Date()));
+  $("#subtexto").textContent = min > 0
+    ? falar("jaEstudou", { min: humanoMin(min) })
+    : falar("aindaNao");
+
+  const c = cicloAtivo();
+  const chip = $("#chipCiclo");
+  if (c) {
+    const dia = difDias(c.inicio, chaveDia(new Date())) + 1;
+    const total = difDias(c.inicio, c.fimPrevisto) + 1;
+    const faltam = difDias(chaveDia(new Date()), c.inicio);
+    chip.className = "chip-ciclo";
+    chip.innerHTML = '<span class="ponto"></span>' + escapar(c.nome) +
+      (faltam > 0
+        ? " · começa em " + faltam + (faltam === 1 ? " dia" : " dias")
+        : " · dia " + Math.max(1, dia) + " de " + total);
+  } else {
+    chip.className = "chip-ciclo sem";
+    chip.textContent = "Sem ciclo cadastrado";
+  }
+}
+
+function renderHoje() {
+  const hoje = chaveDia(new Date());
+  const meus = blocos.filter((b) => b.dia === hoje).sort((a, b) => a.fim - b.fim);
+  const min = meus.reduce((s, b) => s + b.minutos, 0);
+
+  $("#hojeMin").textContent = humanoMin(min);
+  $("#hojeBlocos").textContent = meus.length;
+  $("#hojeSeq").textContent = sequenciaAtual();
+
+  const alvo = $("#listaHoje");
+  if (!meus.length) {
+    alvo.innerHTML = '<p class="vazio">Nenhum bloco hoje ainda. O apito é teu.</p>';
+    return;
+  }
+  alvo.innerHTML = '<div class="lista">' + meus.map((b) =>
+    '<div class="item">' +
+      '<span class="hora">' + formatarHora(b.fim) + "</span>" +
+      '<span class="assunto">' + escapar(b.assunto) + "</span>" +
+      '<span class="min">' + b.minutos + " min</span>" +
+    "</div>"
+  ).join("") + "</div>";
+}
+
+function renderSemana() {
+  const hoje = new Date();
+  const nomes = ["dom","seg","ter","qua","qui","sex","sáb"];
+  const dias = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = somaDias(hoje, -i);
+    dias.push({ chave: chaveDia(d), rot: nomes[d.getDay()], min: minutosNoDia(chaveDia(d)) });
+  }
+  const maximo = Math.max(60, ...dias.map((d) => d.min));
+  $("#semana").innerHTML = dias.map((d, i) => {
+    const alt = Math.max(3, Math.round((d.min / maximo) * 100));
+    const cls = "barra" + (d.min === 0 ? " zero" : "") + (i === 6 ? " hoje" : "");
+    return '<div class="dia" title="' + formatarDataCurta(d.chave) + " — " + humanoMin(d.min) + '">' +
+             '<div class="val">' + (d.min ? d.min : "") + "</div>" +
+             '<div class="barra-caixa"><div class="' + cls + '" style="height:' + alt + '%"></div></div>' +
+             '<div class="rot">' + d.rot + "</div>" +
+           "</div>";
+  }).join("");
+}
+
+function renderCicloAtual() {
+  const alvo = $("#cicloAtualBox");
+  const c = cicloAtivo();
+  if (!c) {
+    alvo.innerHTML = '<p class="vazio">Nenhum ciclo aberto. Cadastra o ciclo da faculdade em ' +
+                     '<b>Ciclo &amp; Ajustes</b> pra campanha começar a contar.</p>';
+    return;
+  }
+  const hoje = chaveDia(new Date());
+  const dia   = Math.max(1, difDias(c.inicio, hoje) + 1);
+  const total = Math.max(1, difDias(c.inicio, c.fimPrevisto) + 1);
+  const meus  = blocos.filter((b) => b.cicloId === c.id);
+  const min   = meus.reduce((s, b) => s + b.minutos, 0);
+  const dias  = new Set(meus.map((b) => b.dia)).size;
+
+  // fase da campanha: começo = fase de grupos, reta final = decisão
+  const comecou = difDias(hoje, c.inicio) <= 0;
+  const prog = dia / total;
+  const fase = !comecou ? "Pré-temporada"
+             : prog < 0.35 ? "Fase de grupos"
+             : prog < 0.75 ? "Mata-mata" : "Decisão";
+
+  alvo.innerHTML =
+    "<h3>" + escapar(c.nome) + "</h3>" +
+    '<p class="subtexto">' + formatarDataLonga(c.inicio) + " → " + formatarDataLonga(c.fimPrevisto) +
+      " · <b>" + fase + "</b></p>" +
+    '<div class="numeros" style="margin-top:14px">' +
+      '<div class="numero destaque"><div class="valor">' + humanoMin(min) + '</div><div class="rotulo">No ciclo</div></div>' +
+      '<div class="numero"><div class="valor">' + (comecou ? dia + "/" + total : "—") + '</div><div class="rotulo">Dia</div></div>' +
+      '<div class="numero"><div class="valor">' + dias + '</div><div class="rotulo">Dias ativos</div></div>' +
+      '<div class="numero"><div class="valor">' + meus.length + '</div><div class="rotulo">Blocos</div></div>' +
+    "</div>" +
+    '<p class="subtexto" id="linhaComparativa"></p>';
+
+  const linha = textoComparativo(c);
+  if (linha) $("#linhaComparativa").innerHTML = linha;
+}
+
+/** Frase "Nh à frente/atrás do ciclo anterior nesta altura". */
+function textoComparativo(c) {
+  const ant = cicloAnteriorDe(c);
+  if (!ant) return "Primeiro ciclo da estante — sem comparação ainda. Fé, soberano.";
+  const dia = Math.max(1, difDias(c.inicio, chaveDia(new Date())) + 1);
+  const meu = acumuladoDoCiclo(c, dia);
+  const dele = acumuladoDoCiclo(ant, dia);
+  const meuMin  = meu[dia - 1] || 0;
+  const deleMin = dele[dia - 1] || (dele.length ? dele[dele.length - 1] : 0);
+  const dif = (meuMin - deleMin) / 60;
+
+  if (Math.abs(dif) < 0.1) return "Empatado com <b>" + escapar(ant.nome) + "</b> nesta altura.";
+  const rotulo = dif > 0
+    ? '<b class="a-frente">' + dif.toFixed(1).replace(".", ",") + "h à frente</b>"
+    : "<b>" + Math.abs(dif).toFixed(1).replace(".", ",") + "h atrás</b>";
+  return rotulo + " de <b>" + escapar(ant.nome) + "</b> nesta altura da campanha.";
+}
+
+function renderVitalicio() {
+  const totalMin = totalMinutos();
+  const horas = totalMin / 60;
+  $("#vitalicioHoras").textContent = horas >= 100
+    ? Math.floor(horas)
+    : horas.toFixed(1).replace(".", ",");
+
+  const principais = [100, 250, 500, 1000];
+  $("#marcos").innerHTML = principais.map((m) =>
+    '<div class="marco' + (horas >= m ? " batido" : "") + '">' +
+      '<div class="n">' + m + "h</div>" +
+      '<div class="l">' + (horas >= m ? "batido" : "a caminho") + "</div>" +
+    "</div>"
+  ).join("");
+
+  const proximo = MARCOS.find((m) => horas < m);
+  $("#proximoMarco").innerHTML = proximo
+    ? "Faltam <b>" + (proximo - horas).toFixed(1).replace(".", ",") + "h</b> para o marco de " + proximo + "h."
+    : "Todos os marcos batidos. Isso é campanha de soberano, " + NOME + ".";
+}
+
+function renderCalor() {
+  const mapa = minutosPorDia();
+  const hoje = new Date();
+  // fecha a última coluna no sábado, como no GitHub
+  const fim = somaDias(hoje, 6 - hoje.getDay());
+  const inicio = somaDias(fim, -(53 * 7 - 1));
+
+  const grade = $("#calor");
+  const partes = [];
+  const rotulosMes = [];
+  const meses = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+  let mesAnterior = -1;
+  let ativos = 0, somaAno = 0;
+
+  for (let col = 0; col < 53; col++) {
+    for (let lin = 0; lin < 7; lin++) {
+      const d = somaDias(inicio, col * 7 + lin);
+      if (d > hoje) { partes.push('<div class="cel fora"></div>'); continue; }
+      const chave = chaveDia(d);
+      const min = mapa[chave] || 0;
+      if (min > 0) { ativos++; somaAno += min; }
+      const nivel = min === 0 ? 0 : min < 25 ? 1 : min < 60 ? 2 : min < 120 ? 3 : 4;
+      partes.push('<div class="cel' + (nivel ? " n" + nivel : "") + '" title="' +
+                  formatarDataLonga(chave) + " — " + humanoMin(min) + '"></div>');
+    }
+    const primeiroDaColuna = somaDias(inicio, col * 7);
+    if (primeiroDaColuna.getMonth() !== mesAnterior && primeiroDaColuna <= hoje) {
+      mesAnterior = primeiroDaColuna.getMonth();
+      rotulosMes.push('<div class="mes-rot" style="left:' + (col * 16) + 'px">' +
+                      meses[mesAnterior] + "</div>");
+    }
+  }
+  grade.innerHTML = partes.join("");
+  // remove rótulos antigos antes de recolocar
+  $$("#calorEnvolt .mes-rot").forEach((e) => e.remove());
+  $("#calorEnvolt").insertAdjacentHTML("afterbegin", rotulosMes.join(""));
+  $("#calorResumo").textContent = ativos + " dias ativos · " + humanoMin(somaAno) + " no período";
+}
+
+function renderRecordes() {
+  const d = melhorDia();
+  const s = melhorSemana();
+  const seq = maiorSequenciaEm(blocos.map((b) => b.dia));
+  const fimSemana = s.inicio ? chaveDia(somaDias(diaDeChave(s.inicio), 6)) : null;
+
+  $("#recordes").innerHTML =
+    '<div class="recorde"><div class="titulo">Melhor dia</div>' +
+      '<div class="valor">' + (d.minutos ? humanoMin(d.minutos) : "—") + "</div>" +
+      '<div class="quando">' + (d.dia ? formatarDataLonga(d.dia) : "ainda sem registro") + "</div></div>" +
+    '<div class="recorde"><div class="titulo">Melhor semana</div>' +
+      '<div class="valor">' + (s.minutos ? humanoMin(s.minutos) : "—") + "</div>" +
+      '<div class="quando">' + (s.inicio ? formatarDataCurta(s.inicio) + " a " + formatarDataCurta(fimSemana) : "ainda sem registro") + "</div></div>" +
+    '<div class="recorde"><div class="titulo">Maior sequência</div>' +
+      '<div class="valor">' + (seq ? seq + (seq === 1 ? " dia" : " dias") : "—") + "</div>" +
+      '<div class="quando">dias seguidos com ao menos um bloco</div></div>';
+}
+
+/** Gráfico de linhas: horas acumuladas do ciclo atual x ciclo anterior. */
+function renderComparativo() {
+  const alvo = $("#comparativoBox");
+  const c = cicloAtivo();
+  if (!c) {
+    alvo.innerHTML = '<p class="vazio">Abre um ciclo pra comparar campanhas.</p>';
+    return;
+  }
+  const ant = cicloAnteriorDe(c);
+  const dia = Math.max(1, difDias(c.inicio, chaveDia(new Date())) + 1);
+  const total = Math.max(1, difDias(c.inicio, c.fimPrevisto) + 1);
+
+  alvo.innerHTML =
+    '<p class="comparativo-texto"><b>Dia ' + dia + " de " + total + "</b> — " +
+      (blocos.filter((b) => b.cicloId === c.id).reduce((s, b) => s + b.minutos, 0) / 60)
+        .toFixed(1).replace(".", ",") + "h estudadas. " + textoComparativo(c) + "</p>" +
+    '<canvas id="telaComparativo" height="240"></canvas>' +
+    (ant ? '<div class="legenda-linhas">' +
+             '<span><i class="tracinho"></i>' + escapar(c.nome) + "</span>" +
+             '<span><i class="tracinho preto"></i>' + escapar(ant.nome) + "</span>" +
+           "</div>" : "");
+
+  desenharComparativo(c, ant, total, dia);
+}
+
+function desenharComparativo(c, ant, totalDias, diaAtual) {
+  const tela = $("#telaComparativo");
+  if (!tela) return;
+  const larguraCss = tela.clientWidth || 600;
+  const alturaCss = 240;
+  const dpr = window.devicePixelRatio || 1;
+  tela.width = Math.round(larguraCss * dpr);
+  tela.height = Math.round(alturaCss * dpr);
+  tela.style.height = alturaCss + "px";
+  const ctx = tela.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, larguraCss, alturaCss);
+
+  const pad = { e: 42, d: 12, t: 14, b: 26 };
+  const larg = larguraCss - pad.e - pad.d;
+  const alt = alturaCss - pad.t - pad.b;
+
+  const serieAtual = acumuladoDoCiclo(c, Math.max(diaAtual, 1)).map((m) => m / 60);
+  const serieAnt = ant ? acumuladoDoCiclo(ant, totalDias).map((m) => m / 60) : [];
+  const maxY = Math.max(1, ...serieAtual, ...serieAnt) * 1.12;
+
+  const x = (i) => pad.e + (totalDias <= 1 ? 0 : (i / (totalDias - 1)) * larg);
+  const y = (v) => pad.t + alt - (v / maxY) * alt;
+
+  // grade horizontal + escala em horas
+  ctx.strokeStyle = "#EDEEF1"; ctx.lineWidth = 1;
+  ctx.fillStyle = "#8A9099"; ctx.font = "11px 'Segoe UI',system-ui,sans-serif";
+  ctx.textAlign = "right"; ctx.textBaseline = "middle";
+  for (let i = 0; i <= 4; i++) {
+    const v = (maxY / 4) * i;
+    const py = Math.round(y(v)) + 0.5;
+    ctx.beginPath(); ctx.moveTo(pad.e, py); ctx.lineTo(pad.e + larg, py); ctx.stroke();
+    ctx.fillText(Math.round(v) + "h", pad.e - 8, py);
+  }
+  // marcas de dia no eixo X
+  ctx.textAlign = "center"; ctx.textBaseline = "top";
+  const passo = Math.max(1, Math.ceil(totalDias / 8));
+  for (let i = 0; i < totalDias; i += passo) {
+    ctx.fillText(String(i + 1), x(i), pad.t + alt + 7);
+  }
+
+  function linha(serie, cor, tracejada, largura) {
+    if (serie.length < 1) return;
+    ctx.save();
+    ctx.strokeStyle = cor; ctx.lineWidth = largura;
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+    if (tracejada) ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    serie.forEach((v, i) => { i ? ctx.lineTo(x(i), y(v)) : ctx.moveTo(x(i), y(v)); });
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  if (serieAnt.length) linha(serieAnt, "rgba(17,17,17,.42)", true, 2);
+  linha(serieAtual, "#E30613", false, 3);
+
+  // bolinha no ponto de hoje
+  if (serieAtual.length) {
+    const i = serieAtual.length - 1;
+    ctx.fillStyle = "#E30613";
+    ctx.beginPath(); ctx.arc(x(i), y(serieAtual[i]), 4.5, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
+  }
+}
+
+function renderEstante() {
+  const lista = ciclosEncerrados();
+  const alvo = $("#prateleira");
+  const totalHoras = lista.reduce((s, c) => s + (c.congelado ? c.congelado.minutos : 0), 0) / 60;
+
+  $("#estanteResumo").textContent = lista.length
+    ? lista.length + (lista.length === 1 ? " ciclo" : " ciclos") + " na estante · " +
+      totalHoras.toFixed(0) + "h de campanha guardadas. Ninguém tira."
+    : "Cada ciclo encerrado vira uma taça aqui. Nada some.";
+
+  if (!lista.length) {
+    alvo.innerHTML = '<div class="cartao"><div class="cartao-corpo">' +
+      '<p class="vazio">Estante vazia por enquanto. Encerra o primeiro ciclo e a primeira taça aparece aqui, ' + NOME + ".</p>" +
+      "</div></div>";
+    return;
+  }
+
+  alvo.innerHTML = lista.map((c, i) => {
+    const g = c.congelado || { minutos: 0, diasAtivos: 0, maiorSequencia: 0, blocos: 0 };
+    return '<article class="trofeu">' +
+      '<span class="selo">' + (lista.length - i) + "º ciclo</span>" +
+      '<div class="trofeu-topo">' +
+        "<h3>" + escapar(c.nome) + "</h3>" +
+        '<div class="trofeu-periodo">' + formatarDataLonga(c.inicio) + " → " + formatarDataLonga(c.encerradoEm) + "</div>" +
+      "</div>" +
+      '<div class="trofeu-nums">' +
+        '<div><div class="v">' + (g.minutos / 60).toFixed(0) + 'h</div><div class="r">Total</div></div>' +
+        '<div><div class="v">' + g.diasAtivos + '</div><div class="r">Dias ativos</div></div>' +
+        '<div><div class="v">' + g.maiorSequencia + '</div><div class="r">Sequência</div></div>' +
+        '<div><div class="v">' + (g.blocos || 0) + '</div><div class="r">Blocos</div></div>' +
+      "</div></article>";
+  }).join("");
+}
+
+function renderHistorico() {
+  const ord = blocos.slice().sort((a, b) => b.fim - a.fim);
+  $("#totalBlocos").textContent = ord.length;
+  const alvo = $("#listaCompleta");
+  if (!ord.length) {
+    alvo.innerHTML = '<p class="vazio">Nada registrado ainda. Fé — o primeiro bloco começa a história.</p>';
+    return;
+  }
+  const limite = 400;                    // mantém a tela leve mesmo com muito histórico
+  const mostrar = ord.slice(0, limite);
+  alvo.innerHTML = '<div class="lista">' + mostrar.map((b) => {
+    const c = b.cicloId ? cicloPorId(b.cicloId) : null;
+    return '<div class="item">' +
+      '<span class="hora">' + formatarDataCurta(b.dia) + " " + formatarHora(b.fim) + "</span>" +
+      '<span class="assunto">' + escapar(b.assunto) + "</span>" +
+      '<span class="ciclo-nome">' + (c ? escapar(c.nome) : "sem ciclo") + "</span>" +
+      '<span class="min">' + b.minutos + " min</span>" +
+      '<button class="apagar" data-id="' + b.id + '" title="Apagar este registro" aria-label="Apagar">&times;</button>' +
+    "</div>";
+  }).join("") + "</div>" +
+  (ord.length > limite ? '<p class="dica">Mostrando os ' + limite + " mais recentes de " + ord.length + ".</p>" : "");
+}
+
+function renderAssuntos() {
+  $("#assuntosConhecidos").innerHTML = assuntosDoCiclo()
+    .map((a) => '<option value="' + escapar(a) + '"></option>').join("");
+  const rec = assuntosRecentes();
+  $("#recentes").innerHTML = rec.length
+    ? rec.map((a) => '<button class="tag" type="button" data-assunto="' + escapar(a) + '">' + escapar(a) + "</button>").join("")
+    : "";
+}
+
+function renderFormCiclo() {
+  const c = cicloAtivo();
+  if (c) {
+    $("#cicloNome").value = c.nome;
+    $("#cicloInicio").value = c.inicio;
+    $("#cicloFim").value = c.fimPrevisto;
+    $("#btnSalvarCiclo").textContent = "Atualizar ciclo";
+    $("#btnEncerrarCiclo").disabled = false;
+  } else {
+    if (!$("#cicloInicio").value) {
+      const hoje = new Date();
+      $("#cicloInicio").value = chaveDia(hoje);
+      $("#cicloFim").value = chaveDia(somaDias(hoje, 35));   // ~1 mês e 5 dias
+    }
+    $("#btnSalvarCiclo").textContent = "Abrir ciclo";
+    $("#btnEncerrarCiclo").disabled = true;
+  }
+}
+
+function renderAjustes() {
+  $("#volume").value = Math.round(config.volume * 100);
+  $("#mudo").checked = !!config.mudo;
+  renderNotifBotao();
+}
+
+function renderTudo() {
+  renderCabecalho();
+  renderTimer();
+  renderDuracoes();
+  renderHoje();
+  renderSemana();
+  renderCicloAtual();
+  renderVitalicio();
+  renderCalor();
+  renderRecordes();
+  renderComparativo();
+  renderEstante();
+  renderHistorico();
+  renderAssuntos();
+  renderFormCiclo();
+}
+
+/* --------------------------------------------------------------------------
+   13. MODAL DE BLOCO CONCLUÍDO
+   -------------------------------------------------------------------------- */
+function abrirModalFim(frase, minutos, assunto) {
+  const hojeMin = minutosNoDia(chaveDia(new Date()));
+  $("#fraseFim").textContent = frase;
+  $("#resumoFim").innerHTML =
+    '<div><div class="v">' + Math.round(minutos) + '</div><div class="r">min no bloco</div></div>' +
+    '<div><div class="v">' + humanoMin(hojeMin) + '</div><div class="r">hoje</div></div>' +
+    '<div><div class="v">' + sequenciaAtual() + '</div><div class="r">dias seguidos</div></div>';
+
+  $("#botoesFim").innerHTML =
+    '<button class="btn btn-principal" id="fimPausa">Pausa de 5 min</button>' +
+    '<button class="btn btn-preto" id="fimNovo">Novo bloco</button>' +
+    '<button class="btn" id="fimFechar">Fechar</button>';
+
+  $("#fimPausa").onclick  = () => { fecharModalFim(); entrarEmPausa(true); };
+  $("#fimNovo").onclick   = () => { fecharModalFim(); voltarParaFoco(false); iniciarTimer(); };
+  $("#fimFechar").onclick = () => fecharModalFim();
+
+  $("#modalFim").classList.add("aberto");
+  setTimeout(() => $("#fimPausa") && $("#fimPausa").focus(), 60);
+}
+function fecharModalFim() { $("#modalFim").classList.remove("aberto"); }
+
+/* --------------------------------------------------------------------------
+   14. EXPORTAR / IMPORTAR
+   -------------------------------------------------------------------------- */
+function exportarJSON() {
+  const pacote = {
+    app: "vidori",
+    versao: 1,
+    exportadoEm: new Date().toISOString(),
+    blocos, ciclos, config, recordes, marcos: marcosOk
+  };
+  const blob = new Blob([JSON.stringify(pacote, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "vidori-historico-" + chaveDia(new Date()) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  mostrarAviso("Backup salvo em Downloads, soberano.");
+}
+
+function importarJSON(arquivo) {
+  const leitor = new FileReader();
+  leitor.onload = () => {
+    let dados;
+    try { dados = JSON.parse(leitor.result); }
+    catch (e) { mostrarAviso("Arquivo inválido — não é um JSON."); return; }
+
+    if (!dados || !Array.isArray(dados.blocos)) {
+      mostrarAviso("Esse arquivo não parece um backup do Vidori.");
+      return;
+    }
+    if (!confirm("Importar substitui TODO o histórico atual (" + blocos.length +
+                 " blocos) por " + dados.blocos.length + " blocos do arquivo. Continuar?")) return;
+
+    blocos = dados.blocos.filter((b) => b && b.dia && typeof b.minutos === "number");
+    ciclos = Array.isArray(dados.ciclos) ? dados.ciclos : [];
+    if (dados.config) config = Object.assign(config, dados.config);
+    marcosOk = null;                 // recalcula sem comemorar tudo de novo
+    salvarBlocos(); salvarCiclos(); salvarConfig();
+    conferirRecordes(true);
+    conferirMarcos(true);
+    renderTudo();
+    mostrarAviso("Histórico importado: " + blocos.length + " blocos. Fé.");
+  };
+  leitor.onerror = () => mostrarAviso("Não consegui ler o arquivo.");
+  leitor.readAsText(arquivo);
+}
+
+function apagarTudo() {
+  if (!confirm("Apagar TODOS os blocos, ciclos e recordes?\n\nNão tem volta. Exporta o JSON antes se quiser guardar.")) return;
+  if (!confirm("Confirma mesmo, " + NOME + "? A estante inteira some.")) return;
+  blocos = []; ciclos = []; marcosOk = []; recordes = { dia:0, semana:0, sequencia:0 };
+  salvarBlocos(); salvarCiclos(); salvarMarcos(); salvarRecordes();
+  Armazem.apagar(CHAVES.timer);
+  zerarTimer();
+  renderTudo();
+  mostrarAviso("Tudo zerado. Começo de campanha nova.");
+}
+
+/* --------------------------------------------------------------------------
+   15. NAVEGAÇÃO ENTRE PAINÉIS
+   -------------------------------------------------------------------------- */
+function irParaPainel(nome) {
+  $$(".painel").forEach((p) => p.classList.toggle("ativo", p.id === "painel-" + nome));
+  $$(".aba-btn").forEach((b) => b.classList.toggle("ativa", b.dataset.painel === nome));
+  if (nome === "progresso") { renderCalor(); renderComparativo(); }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* --------------------------------------------------------------------------
+   16. EVENTOS
+   -------------------------------------------------------------------------- */
+$("#abas").addEventListener("click", (e) => {
+  const btn = e.target.closest(".aba-btn");
+  if (btn) irParaPainel(btn.dataset.painel);
+});
+
+$("#duracoes").addEventListener("click", (e) => {
+  const btn = e.target.closest(".dur");
+  if (btn && !btn.disabled) definirDuracaoFoco(Number(btn.dataset.min));
+});
+
+$("#recentes").addEventListener("click", (e) => {
+  const tag = e.target.closest(".tag");
+  if (!tag) return;
+  $("#assunto").value = tag.dataset.assunto;
+  T.assunto = tag.dataset.assunto;
+  $("#assunto").focus();
+  renderTimer();
+});
+
+/* editar o assunto durante o bloco vale para o registro */
+$("#assunto").addEventListener("input", (e) => {
+  if (T.modo !== "foco") return;
+  T.assunto = e.target.value.trim();
+  $("#assuntoVivo").textContent = T.assunto;
+});
+
+$("#btnPrincipal").addEventListener("click", () => (T.rodando ? pausarTimer() : iniciarTimer()));
+$("#btnZerar").addEventListener("click", zerarTimer);
+$("#btnPular").addEventListener("click", pularBloco);
+
+$("#btnSalvarCiclo").addEventListener("click", salvarCicloDoFormulario);
+$("#btnEncerrarCiclo").addEventListener("click", encerrarCiclo);
+
+$("#btnExportar").addEventListener("click", exportarJSON);
+$("#btnImportar").addEventListener("click", () => $("#arquivoImport").click());
+$("#arquivoImport").addEventListener("change", (e) => {
+  if (e.target.files && e.target.files[0]) importarJSON(e.target.files[0]);
+  e.target.value = "";
+});
+$("#btnApagarTudo").addEventListener("click", apagarTudo);
+
+$("#listaCompleta").addEventListener("click", (e) => {
+  const btn = e.target.closest(".apagar");
+  if (btn && confirm("Apagar este registro?")) apagarBloco(btn.dataset.id);
+});
+
+$("#volume").addEventListener("input", (e) => {
+  config.volume = Number(e.target.value) / 100;
+  salvarConfig();
+});
+$("#volume").addEventListener("change", () => tocarAlarme("pausa"));
+$("#mudo").addEventListener("change", (e) => { config.mudo = e.target.checked; salvarConfig(); });
+$("#btnTestarSom").addEventListener("click", () => { acordarAudio(); tocarAlarme("foco"); });
+$("#btnNotif").addEventListener("click", () => {
+  if (Notification.permission === "granted") {
+    notificar("Vidori", "Notificação de teste. Fé, " + NOME + ".");
+  } else {
+    pedirPermissaoNotificacao();
+  }
+});
+
+$("#modalFim").addEventListener("click", (e) => {
+  if (e.target.id === "modalFim") fecharModalFim();
+});
+
+/* atalhos de teclado: espaço, R, S e 1–4 */
+document.addEventListener("keydown", (e) => {
+  const alvo = e.target;
+  const digitando = alvo && (alvo.tagName === "INPUT" || alvo.tagName === "TEXTAREA" || alvo.isContentEditable);
+
+  if (e.key === "Escape") { fecharModalFim(); return; }
+  if (digitando) {
+    // Enter no campo de assunto já começa o bloco
+    if (e.key === "Enter" && alvo.id === "assunto" && !T.rodando) { e.preventDefault(); iniciarTimer(); }
+    return;
+  }
+  if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+  if (e.code === "Space") {
+    e.preventDefault();
+    T.rodando ? pausarTimer() : iniciarTimer();
+  } else if (e.key === "r" || e.key === "R") {
+    e.preventDefault(); zerarTimer();
+  } else if (e.key === "s" || e.key === "S") {
+    e.preventDefault(); pularBloco();
+  } else if (["1","2","3","4"].indexOf(e.key) !== -1) {
+    e.preventDefault(); definirDuracaoFoco(DURACOES[Number(e.key) - 1]);
+  }
+});
+
+/* ao voltar para a janela, recalcula na hora (o tempo é sempre por timestamp) */
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
+    if (T.rodando && restanteAgora() <= 0) concluirTempo();
+    else renderTimer();
+  }
+});
+window.addEventListener("focus", () => { if (T.rodando) renderTimer(); });
+window.addEventListener("beforeunload", persistirTimer);
+
+let redesenhoPendente = null;
+window.addEventListener("resize", () => {
+  clearTimeout(redesenhoPendente);
+  redesenhoPendente = setTimeout(renderComparativo, 180);
+});
+
+/* --------------------------------------------------------------------------
+   17. PWA — service worker e instalação
+   -------------------------------------------------------------------------- */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {
+      /* file:// ou navegador sem suporte — o app segue funcionando */
+    });
+  });
+}
+
+let promptInstalar = null;
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  promptInstalar = e;
+  $("#btnInstalar").disabled = false;
+  $("#descInstalar").textContent = "Pronto pra instalar: cria atalho na área de trabalho e no menu Iniciar.";
+});
+$("#btnInstalar").addEventListener("click", async () => {
+  if (!promptInstalar) return;
+  promptInstalar.prompt();
+  await promptInstalar.userChoice;
+  promptInstalar = null;
+  $("#btnInstalar").disabled = true;
+});
+window.addEventListener("appinstalled", () => {
+  $("#descInstalar").textContent = "App instalado. Fé, " + NOME + ".";
+  $("#btnInstalar").disabled = true;
+  mostrarAviso("Instalado. Agora é só abrir pelo menu Iniciar, soberano.");
+});
+
+/* --------------------------------------------------------------------------
+   18. INÍCIO
+   -------------------------------------------------------------------------- */
+function mensagemDeRetomada() {
+  if (!blocos.length) return;
+  const ultimo = blocos.reduce((a, b) => (a.dia > b.dia ? a : b));
+  const dias = difDias(ultimo.dia, chaveDia(new Date()));
+  if (dias >= 3) {
+    setTimeout(() => mostrarAviso(falar("retomada")), 900);
+  }
+}
+
+function iniciarApp() {
+  // sincroniza recordes e marcos sem comemorar histórico antigo
+  conferirRecordes(true);
+  conferirMarcos(true);
+
+  T.alvoMs = config.duracaoFoco * 60000;
+  T.restanteMs = T.alvoMs;
+  restaurarTimer();
+
+  renderAjustes();
+  renderTudo();
+  if (T.assunto) $("#assunto").value = T.assunto === "Sem assunto" ? "" : T.assunto;
+  if (T.rodando) ligarLoop();
+
+  mensagemDeRetomada();
+
+  if (!Armazem.disponivel) {
+    const aviso = document.createElement("div");
+    aviso.className = "aviso-fixo";
+    aviso.textContent = "Atenção: o navegador está sem armazenamento local. O histórico não vai ser salvo entre sessões.";
+    $("main").prepend(aviso);
+  }
+
+  // atualiza a saudação de hora em hora, para o período do dia acompanhar
+  setInterval(renderCabecalho, 60 * 60 * 1000);
+}
+
+iniciarApp();
+</script>
+</body>
+</html>
