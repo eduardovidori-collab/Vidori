@@ -486,7 +486,9 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <section class="painel ativo" id="painel-foco">
   <div class="grade-foco">
 
-    <!-- coluna esquerda: o timer -->
+    <!-- coluna esquerda: o timer e o ajuste das pausas -->
+    <div class="coluna">
+
     <div class="cartao">
       <div class="faixas faixas-fina"></div>
       <div class="cartao-corpo modo-foco" id="caixaTimer">
@@ -529,6 +531,18 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
           <span><kbd>+</kbd><kbd>−</kbd> 1 min</span>
         </div>
       </div>
+    </div>
+
+    <div class="cartao">
+      <div class="cartao-corpo">
+        <h2>Pausas</h2>
+        <p class="subtexto" id="descSerie">A pausa é livre: entra se tu quiser.</p>
+        <div class="grade-passos" id="gradePausas"></div>
+        <p class="dica">Clica na seta ou digita o número direto. Nada de tempo redondo
+          obrigatório — se te serve pausa de 7 min e intervalo de 22, é isso que vale.</p>
+      </div>
+    </div>
+
     </div>
 
     <!-- coluna direita: estatísticas de acompanhamento -->
@@ -697,17 +711,6 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       </div>
     </div></div>
 
-  </div>
-
-  <div class="cartao" style="margin-top:18px">
-    <div class="faixas faixas-fina"></div>
-    <div class="cartao-corpo">
-      <h2>Pausas</h2>
-      <p class="subtexto" id="descSerie">A pausa é livre: entra se tu quiser.</p>
-      <div class="grade-passos" id="gradePausas"></div>
-      <p class="dica">Clica na seta ou digita o número direto. Nada de tempo redondo obrigatório —
-        se te serve pausa de 7 min e intervalo de 22, é isso que vale.</p>
-    </div>
   </div>
 </section>
 
@@ -2601,6 +2604,9 @@ function renderTudo() {
   renderHistorico();
   renderAssuntos();
   renderFormCiclo();
+  // o bloco de pausas mora na aba Foco: precisa acompanhar qualquer mudança
+  // de configuração, inclusive a que vem de uma importação de JSON
+  renderAjustes();
 }
 
 /* --------------------------------------------------------------------------
