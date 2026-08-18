@@ -127,7 +127,22 @@ main{max-width:var(--largura); margin:0 auto; padding:22px 20px 60px}
 .cartao h3{font-size:15px; margin-bottom:6px}
 
 /* ------------------------------------------------------------------ timer */
-.linha-duracoes{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px}
+.rotulo-duracoes{
+  font-size:12px; font-weight:600; color:var(--fraco);
+  text-transform:uppercase; letter-spacing:.08em; margin-bottom:7px;
+}
+.linha-duracoes{display:flex; gap:8px; flex-wrap:wrap}
+.serie-info{
+  font-size:12px; color:var(--fraco); margin-top:8px; margin-bottom:16px;
+  display:flex; align-items:center; gap:7px;
+}
+.serie-info.vazia{margin-top:0; margin-bottom:16px}
+.pontos-serie{display:inline-flex; gap:4px}
+.pontos-serie i{
+  width:7px; height:7px; border-radius:50%; background:#DFE1E6; display:block;
+}
+.pontos-serie i.feito{background:var(--vermelho)}
+.pontos-serie i.longa{background:var(--preto); width:9px; height:9px; margin-top:-1px}
 .dur{
   flex:1 1 0; min-width:64px;
   background:var(--branco); border:1.5px solid var(--borda); color:var(--fraco);
@@ -383,7 +398,13 @@ canvas{display:block; width:100%; height:auto}
 }
 .linha-config:last-child{border-bottom:0}
 .linha-config .desc{font-size:12.5px; color:var(--fraco)}
-input[type=range]{accent-color:var(--vermelho); width:170px}
+input[type=range]{accent-color:var(--vermelho); width:150px}
+select{
+  padding:8px 11px; border:1.5px solid var(--borda); border-radius:10px;
+  background:var(--branco); color:var(--texto); font:inherit; font-weight:600; cursor:pointer;
+}
+select:hover{border-color:var(--preto)}
+select:focus{outline:none; border-color:var(--vermelho); box-shadow:0 0 0 3px rgba(227,6,19,.14)}
 input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 .aviso-fixo{
   background:#FFF4F5; border:1px solid #F6C9CD; color:#8E0410;
@@ -434,12 +455,9 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     <div class="cartao">
       <div class="faixas faixas-fina"></div>
       <div class="cartao-corpo modo-foco" id="caixaTimer">
-        <div class="linha-duracoes" id="duracoes">
-          <button class="dur" data-min="15">15<small>tecla 1</small></button>
-          <button class="dur" data-min="25">25<small>tecla 2</small></button>
-          <button class="dur sel" data-min="30">30<small>tecla 3</small></button>
-          <button class="dur" data-min="50">50<small>tecla 4</small></button>
-        </div>
+        <div class="rotulo-duracoes" id="rotuloDuracoes">Duração do bloco</div>
+        <div class="linha-duracoes" id="duracoes"></div>
+        <div class="serie-info" id="serieInfo"></div>
 
         <div class="campo">
           <label for="assunto">Assunto do bloco</label>
@@ -609,10 +627,37 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <h2>Ajustes</h2>
 
       <div class="linha-config">
-        <div><b>Volume do alarme</b><div class="desc">Som gerado pelo próprio app, sem arquivo externo.</div></div>
-        <div style="display:flex;align-items:center;gap:10px">
+        <div><b>Pausa curta</b><div class="desc">A que vem depois de cada bloco.</div></div>
+        <select id="selPausaCurta">
+          <option value="3">3 min</option><option value="5">5 min</option>
+          <option value="8">8 min</option><option value="10">10 min</option>
+        </select>
+      </div>
+
+      <div class="linha-config">
+        <div><b>Pausa longa</b><div class="desc">A folga maior no fim da série.</div></div>
+        <select id="selPausaLonga">
+          <option value="10">10 min</option><option value="15">15 min</option>
+          <option value="20">20 min</option><option value="25">25 min</option>
+          <option value="30">30 min</option>
+        </select>
+      </div>
+
+      <div class="linha-config">
+        <div><b>Pausa longa a cada</b><div class="desc" id="descSerie">Blocos fechados até a folga maior.</div></div>
+        <select id="selBlocosAteLonga">
+          <option value="0">Nunca</option><option value="2">2 blocos</option>
+          <option value="3">3 blocos</option><option value="4">4 blocos</option>
+          <option value="5">5 blocos</option><option value="6">6 blocos</option>
+        </select>
+      </div>
+
+      <div class="linha-config">
+        <div><b>Volume</b><div class="desc">Sons gerados pelo próprio app, sem arquivo externo.</div></div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <input type="range" id="volume" min="0" max="100" step="5">
-          <button class="btn btn-pequeno" id="btnTestarSom">Testar</button>
+          <button class="btn btn-pequeno" id="btnTestarSom">Alarme</button>
+          <button class="btn btn-pequeno" id="btnTestarApito">Apito</button>
         </div>
       </div>
 
@@ -884,12 +929,18 @@ let ciclos   = Armazem.ler(CHAVES.ciclos, []);        // ciclos, ativo e encerra
 let marcosOk = Armazem.ler(CHAVES.marcos, null);      // marcos vitalícios já comemorados
 let recordes = Armazem.ler(CHAVES.recordes, { dia:0, semana:0, sequencia:0 });
 let config   = Object.assign(
-  { duracaoFoco: 30, volume: 0.6, mudo: false, notificar: true },
+  {
+    duracaoFoco: 30,
+    pausaCurta: 5,        // a pausa que vem depois de cada bloco
+    pausaLonga: 15,       // a pausa maior, no fim da série
+    blocosAteLonga: 3,    // quantos blocos até a pausa longa (0 = nunca)
+    volume: 0.6, mudo: false, notificar: true
+  },
   Armazem.ler(CHAVES.config, {})
 );
 
-const DURACOES = [15, 25, 30, 50];
-const PAUSA_MIN = 5;
+const DURACOES_FOCO  = [15, 25, 30, 50];
+const DURACOES_PAUSA = [5, 10, 15, 30];
 const MARCOS = [100, 250, 500, 1000, 2000, 5000];
 
 function salvarBlocos()   { Armazem.gravar(CHAVES.blocos, blocos); }
@@ -1117,6 +1168,82 @@ function tocarAlarme(tipo) {
       osc.stop(inicio + 0.66);
     });
   }
+}
+
+/**
+ * Uma rajada de apito. O timbre vem de três coisas somadas:
+ *  - dois tons agudos quase iguais, cujo batimento dá o brilho metálico;
+ *  - um LFO rápido modulando a frequência, que é o trinado da bolinha;
+ *  - ruído branco em passa-faixa, que é o sopro.
+ * Aceita um destino próprio para conseguir renderizar fora do alto-falante.
+ */
+function rajadaDeApito(ctx, inicio, duracao, volume, destino) {
+  const fim = inicio + duracao;
+  const pico = Math.max(0.02, Math.min(1, volume)) * 0.28;
+
+  const saida = ctx.createGain();
+  saida.gain.setValueAtTime(0.0001, inicio);
+  saida.gain.exponentialRampToValueAtTime(pico, inicio + 0.018);
+  saida.gain.setValueAtTime(pico, Math.max(inicio + 0.02, fim - 0.045));
+  saida.gain.exponentialRampToValueAtTime(0.0001, fim);
+  saida.connect(destino || ctx.destination);
+
+  // trinado da bolinha do apito
+  const lfo = ctx.createOscillator();
+  const lfoGanho = ctx.createGain();
+  lfo.type = "sine";
+  lfo.frequency.value = 26;
+  lfoGanho.gain.value = 170;
+  lfo.connect(lfoGanho);
+  lfo.start(inicio);
+  lfo.stop(fim + 0.02);
+
+  [[2750, 1], [3580, 0.45]].forEach(([freq, forca], i) => {
+    const osc = ctx.createOscillator();
+    osc.type = i === 0 ? "sine" : "triangle";
+    osc.frequency.value = freq;
+    lfoGanho.connect(osc.frequency);
+    const g = ctx.createGain();
+    g.gain.value = forca;
+    osc.connect(g);
+    g.connect(saida);
+    osc.start(inicio);
+    osc.stop(fim + 0.02);
+  });
+
+  // sopro
+  const amostras = Math.max(1, Math.ceil(ctx.sampleRate * (duracao + 0.05)));
+  const buffer = ctx.createBuffer(1, amostras, ctx.sampleRate);
+  const dados = buffer.getChannelData(0);
+  for (let i = 0; i < amostras; i++) dados[i] = Math.random() * 2 - 1;
+  const ruido = ctx.createBufferSource();
+  ruido.buffer = buffer;
+  const passaFaixa = ctx.createBiquadFilter();
+  passaFaixa.type = "bandpass";
+  passaFaixa.frequency.value = 3100;
+  passaFaixa.Q.value = 6;
+  const gRuido = ctx.createGain();
+  gRuido.gain.value = 0.5;
+  ruido.connect(passaFaixa);
+  passaFaixa.connect(gRuido);
+  gRuido.connect(saida);
+  ruido.start(inicio);
+  ruido.stop(fim + 0.02);
+}
+
+/** Fim de pausa: dois apitos curtos e um longo, como fim de intervalo. */
+const APITO = [
+  { atraso: 0.00, duracao: 0.17 },
+  { atraso: 0.26, duracao: 0.17 },
+  { atraso: 0.52, duracao: 0.55 }
+];
+
+function tocarApito() {
+  if (config.mudo || config.volume <= 0) return;
+  const ctx = acordarAudio();
+  if (!ctx) return;
+  const t0 = ctx.currentTime + 0.03;
+  APITO.forEach((r) => rajadaDeApito(ctx, t0 + r.atraso, r.duracao, config.volume));
 }
 
 /* --------------------------------------------------------------------------
@@ -1651,8 +1778,16 @@ const T = {
   restanteMs: config.duracaoFoco * 60000,
   fimAlvo: null,       // timestamp de quando o bloco termina
   inicioBloco: null,   // timestamp do primeiro "iniciar" deste bloco
-  assunto: ""
+  assunto: "",
+  blocosNaSerie: 0,    // blocos fechados desde a última pausa longa
+  pausaLonga: false    // a pausa atual é a longa?
 };
+
+/** Que pausa vem agora, com base nos blocos já fechados na série. */
+function pausaQueVem() {
+  const longa = config.blocosAteLonga > 0 && T.blocosNaSerie >= config.blocosAteLonga;
+  return { minutos: longa ? config.pausaLonga : config.pausaCurta, longa: longa };
+}
 let intervaloTimer = null;
 
 function restanteAgora() {
@@ -1660,16 +1795,32 @@ function restanteAgora() {
   return Math.max(0, ms);
 }
 
-function definirDuracaoFoco(min) {
-  if (T.rodando || T.modo === "pausa") return;
-  config.duracaoFoco = min;
+/**
+ * Troca a duração do que está na tela. No foco só vale com o bloco parado —
+ * encurtar um bloco em andamento faria o histórico registrar menos do que foi
+ * estudado. Na pausa vale a qualquer momento: pausa não vira registro.
+ */
+function definirDuracao(min) {
+  if (T.modo === "foco") {
+    if (T.rodando) return;
+    config.duracaoFoco = min;
+    T.alvoMs = min * 60000;
+    T.restanteMs = T.alvoMs;
+    T.inicioBloco = null;
+  } else {
+    const decorrido = T.alvoMs - restanteAgora();
+    T.alvoMs = min * 60000;
+    // se já passou do novo tempo, sobra o mínimo para ele ver o que aconteceu
+    T.restanteMs = Math.max(1000, T.alvoMs - decorrido);
+    if (T.rodando) T.fimAlvo = Date.now() + T.restanteMs;
+    // a escolha vira o padrão desse tipo de pausa
+    if (T.pausaLonga) config.pausaLonga = min; else config.pausaCurta = min;
+  }
   salvarConfig();
-  T.alvoMs = min * 60000;
-  T.restanteMs = T.alvoMs;
-  T.inicioBloco = null;
   persistirTimer();
   renderTimer();
   renderDuracoes();
+  renderAjustes();
 }
 
 function iniciarTimer() {
@@ -1729,8 +1880,14 @@ function pularBloco() {
 }
 
 function entrarEmPausa(autoIniciar) {
+  const proxima = pausaQueVem();
+  // a série zera ao entrar na pausa longa, não ao terminá-la: assim pular a
+  // pausa longa não deixa o contador travado no máximo
+  if (proxima.longa) T.blocosNaSerie = 0;
+
   T.modo = "pausa";
-  T.alvoMs = PAUSA_MIN * 60000;
+  T.pausaLonga = proxima.longa;
+  T.alvoMs = proxima.minutos * 60000;
   T.restanteMs = T.alvoMs;
   T.rodando = false;
   T.fimAlvo = null;
@@ -1743,6 +1900,7 @@ function entrarEmPausa(autoIniciar) {
 
 function voltarParaFoco(avisar) {
   T.modo = "foco";
+  T.pausaLonga = false;
   T.alvoMs = config.duracaoFoco * 60000;
   T.restanteMs = T.alvoMs;
   T.rodando = false;
@@ -1789,6 +1947,7 @@ function concluirTempo() {
     const minutos = T.alvoMs / 60000;
     const assunto = T.assunto || "Sem assunto";
     registrarBloco(T.inicioBloco || (Date.now() - T.alvoMs), Date.now(), assunto, minutos);
+    T.blocosNaSerie = (T.blocosNaSerie || 0) + 1;
 
     tocarAlarme("foco");
     const msg = falar("concluir", { min: humanoMin(minutos), assunto: assunto });
@@ -1797,7 +1956,8 @@ function concluirTempo() {
     depoisDeRegistrar();
     entrarEmPausa(false);
   } else {
-    tocarAlarme("pausa");
+    // fim da pausa: apito de árbitro mandando voltar pro jogo
+    tocarApito();
     voltarParaFoco(true);
   }
   renderTudo();
@@ -1824,7 +1984,8 @@ function persistirTimer() {
   Armazem.gravar(CHAVES.timer, {
     modo: T.modo, rodando: T.rodando, alvoMs: T.alvoMs,
     restanteMs: T.rodando ? (T.fimAlvo - Date.now()) : T.restanteMs,
-    fimAlvo: T.fimAlvo, inicioBloco: T.inicioBloco, assunto: T.assunto
+    fimAlvo: T.fimAlvo, inicioBloco: T.inicioBloco, assunto: T.assunto,
+    blocosNaSerie: T.blocosNaSerie, pausaLonga: T.pausaLonga
   });
 }
 
@@ -1835,6 +1996,8 @@ function restaurarTimer() {
   T.alvoMs = s.alvoMs || (config.duracaoFoco * 60000);
   T.assunto = s.assunto || "";
   T.inicioBloco = s.inicioBloco || null;
+  T.blocosNaSerie = s.blocosNaSerie || 0;
+  T.pausaLonga = !!s.pausaLonga;
 
   if (s.rodando && s.fimAlvo) {
     const falta = s.fimAlvo - Date.now();
@@ -1848,6 +2011,7 @@ function restaurarTimer() {
     // O bloco terminou com o app fechado. Até 2h de atraso ainda conta.
     if (T.modo === "foco" && falta > -2 * 3600000 && T.inicioBloco) {
       registrarBloco(T.inicioBloco, s.fimAlvo, T.assunto || "Sem assunto", T.alvoMs / 60000);
+      T.blocosNaSerie = (T.blocosNaSerie || 0) + 1;
       depoisDeRegistrar();
       mostrarAviso("Bloco que rodou com o app fechado foi contado, soberano.");
     }
@@ -1869,7 +2033,8 @@ function renderTimer() {
   const txt = doisDig(Math.floor(seg / 60)) + ":" + doisDig(seg % 60);
 
   $("#tempo").textContent = txt;
-  $("#rotuloModo").textContent = T.modo === "foco" ? "Foco" : "Pausa";
+  $("#rotuloModo").textContent = T.modo === "foco"
+    ? "Foco" : (T.pausaLonga ? "Pausa longa" : "Pausa");
   $("#caixaTimer").className = "cartao-corpo " + (T.modo === "foco" ? "modo-foco" : "modo-pausa");
   $("#assuntoVivo").textContent = T.modo === "foco" ? (T.assunto || "") : "Respira, " + NOME + ".";
 
@@ -1886,13 +2051,53 @@ function renderTimer() {
 }
 
 function renderDuracoes() {
-  const travado = T.rodando || T.modo === "pausa";
-  $$("#duracoes .dur").forEach((b) => {
-    const m = Number(b.dataset.min);
-    b.classList.toggle("sel", m === config.duracaoFoco);
-    b.disabled = travado;
-  });
-  $("#assunto").disabled = (T.modo === "pausa");
+  const naPausa = T.modo === "pausa";
+  const lista = naPausa ? DURACOES_PAUSA : DURACOES_FOCO;
+  const atual = naPausa ? Math.round(T.alvoMs / 60000) : config.duracaoFoco;
+  // no foco a duração trava com o bloco rodando; na pausa fica sempre livre
+  const travado = !naPausa && T.rodando;
+
+  $("#rotuloDuracoes").textContent = naPausa
+    ? (T.pausaLonga ? "Duração da pausa longa" : "Duração da pausa")
+    : "Duração do bloco";
+
+  $("#duracoes").innerHTML = lista.map((m, i) =>
+    '<button class="dur' + (m === atual ? " sel" : "") + '" data-min="' + m + '"' +
+    (travado ? " disabled" : "") + ">" + m +
+    "<small>tecla " + (i + 1) + "</small></button>"
+  ).join("");
+
+  renderSerie();
+  $("#assunto").disabled = naPausa;
+}
+
+/** Linha discreta mostrando quantos blocos faltam para a pausa longa. */
+function renderSerie() {
+  const caixa = $("#serieInfo");
+  const total = config.blocosAteLonga;
+  if (!total || total < 1) {
+    caixa.className = "serie-info vazia";
+    caixa.innerHTML = "";
+    return;
+  }
+  caixa.className = "serie-info";
+  const feitos = Math.min(T.blocosNaSerie, total);
+  const pontos = '<span class="pontos-serie">' +
+    Array.from({ length: total }, (_, i) =>
+      "<i" + (i < feitos ? ' class="feito"' : "") + "></i>").join("") +
+    '<i class="longa" title="pausa longa"></i></span>';
+
+  let texto;
+  if (T.modo === "pausa" && T.pausaLonga) {
+    texto = "Pausa longa — série fechada, soberano.";
+  } else if (feitos >= total) {
+    texto = "Próxima pausa é a longa, de " + config.pausaLonga + " min.";
+  } else {
+    const faltam = total - feitos;
+    texto = faltam + (faltam === 1 ? " bloco" : " blocos") +
+            " até a pausa longa de " + config.pausaLonga + " min.";
+  }
+  caixa.innerHTML = pontos + "<span>" + texto + "</span>";
 }
 
 function renderCabecalho() {
@@ -2279,6 +2484,12 @@ function renderFormCiclo() {
 function renderAjustes() {
   $("#volume").value = Math.round(config.volume * 100);
   $("#mudo").checked = !!config.mudo;
+  $("#selPausaCurta").value = String(config.pausaCurta);
+  $("#selPausaLonga").value = String(config.pausaLonga);
+  $("#selBlocosAteLonga").value = String(config.blocosAteLonga);
+  $("#descSerie").textContent = config.blocosAteLonga > 0
+    ? "Depois de " + config.blocosAteLonga + " blocos, a pausa vira " + config.pausaLonga + " min."
+    : "Desligado: todas as pausas são de " + config.pausaCurta + " min.";
   renderNotifBotao();
 }
 
@@ -2312,8 +2523,10 @@ function abrirModalFim(frase, minutos, assunto) {
     '<div><div class="v">' + humanoMin(hojeMin) + '</div><div class="r">hoje</div></div>' +
     '<div><div class="v">' + sequenciaAtual() + '</div><div class="r">dias seguidos</div></div>';
 
+  const proxima = pausaQueVem();
   $("#botoesFim").innerHTML =
-    '<button class="btn btn-principal" id="fimPausa">Pausa de 5 min</button>' +
+    '<button class="btn btn-principal" id="fimPausa">' +
+      (proxima.longa ? "Pausa longa de " : "Pausa de ") + proxima.minutos + " min</button>" +
     '<button class="btn btn-preto" id="fimNovo">Novo bloco</button>' +
     '<button class="btn" id="fimFechar">Fechar</button>';
 
@@ -2407,8 +2620,28 @@ $("#abas").addEventListener("click", (e) => {
 
 $("#duracoes").addEventListener("click", (e) => {
   const btn = e.target.closest(".dur");
-  if (btn && !btn.disabled) definirDuracaoFoco(Number(btn.dataset.min));
+  if (btn && !btn.disabled) definirDuracao(Number(btn.dataset.min));
 });
+
+/** Muda um ajuste de pausa e reflete na hora no timer, se fizer sentido. */
+function ajustarPausa(chave, valor) {
+  config[chave] = valor;
+  salvarConfig();
+  // pausa parada na tela acompanha o novo valor na hora
+  if (T.modo === "pausa" && !T.rodando) {
+    const alvo = T.pausaLonga ? config.pausaLonga : config.pausaCurta;
+    T.alvoMs = alvo * 60000;
+    T.restanteMs = T.alvoMs;
+    persistirTimer();
+    renderTimer();
+  }
+  renderDuracoes();
+  renderAjustes();
+}
+$("#selPausaCurta").addEventListener("change", (e) => ajustarPausa("pausaCurta", Number(e.target.value)));
+$("#selPausaLonga").addEventListener("change", (e) => ajustarPausa("pausaLonga", Number(e.target.value)));
+$("#selBlocosAteLonga").addEventListener("change", (e) => ajustarPausa("blocosAteLonga", Number(e.target.value)));
+$("#btnTestarApito").addEventListener("click", () => { acordarAudio(); tocarApito(); });
 
 $("#recentes").addEventListener("click", (e) => {
   const tag = e.target.closest(".tag");
@@ -2503,7 +2736,9 @@ document.addEventListener("keydown", (e) => {
   } else if (e.key === "s" || e.key === "S") {
     e.preventDefault(); pularBloco();
   } else if (["1","2","3","4"].indexOf(e.key) !== -1) {
-    e.preventDefault(); definirDuracaoFoco(DURACOES[Number(e.key) - 1]);
+    e.preventDefault();
+    const lista = T.modo === "pausa" ? DURACOES_PAUSA : DURACOES_FOCO;
+    definirDuracao(lista[Number(e.key) - 1]);
   }
 });
 
