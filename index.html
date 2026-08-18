@@ -393,6 +393,29 @@ canvas{display:block; width:100%; height:auto}
 .zona-solta.sobre{border-color:var(--vermelho); background:#FFF4F5; color:var(--vermelho)}
 .zona-solta b{display:block; font-size:14px; color:inherit}
 
+/* marca de "ja vi isso": circulo que vira vermelho cheio com o certo branco */
+.marca-visto{
+  width:26px; height:26px; flex:0 0 auto; padding:0; cursor:pointer;
+  border:2px solid #D6D9DE; border-radius:50%; background:var(--branco);
+  display:flex; align-items:center; justify-content:center; transition:.13s;
+}
+.marca-visto::after{
+  content:""; width:9px; height:5px; margin-top:-2px;
+  border-left:2.5px solid #C9CDD4; border-bottom:2.5px solid #C9CDD4;
+  transform:rotate(-45deg); transition:.13s;
+}
+.marca-visto:hover{border-color:var(--vermelho); background:#FFF4F5}
+.marca-visto:hover::after{border-color:var(--vermelho)}
+.marca-visto:focus-visible{outline:2px solid var(--vermelho); outline-offset:2px}
+.marca-visto.visto{background:var(--vermelho); border-color:var(--vermelho)}
+.marca-visto.visto::after{border-color:#fff}
+.marca-visto.visto:hover{background:var(--vermelho-esc); border-color:var(--vermelho-esc)}
+
+.arquivo.foi-visto .ext{opacity:.45}
+.arquivo.foi-visto .titulo{color:var(--fraco)}
+.conta-vistos{font-size:12px; font-weight:600; color:var(--fraco); margin-left:8px; white-space:nowrap}
+.pasta .cont.tem-visto{color:var(--vermelho); font-weight:700}
+
 .arquivo{display:flex; align-items:center; gap:11px; padding:9px 11px; background:var(--branco)}
 .arquivo .ext{
   width:36px; height:36px; border-radius:9px; flex:0 0 auto;
@@ -3104,9 +3127,10 @@ async function renderAcervo() {
   const metas = await Acervo.listarTodosMetadados();
   const porPasta = Object.create(null);
   metas.forEach((m) => {
-    if (!porPasta[m.pastaId]) porPasta[m.pastaId] = { n: 0, bytes: 0 };
+    if (!porPasta[m.pastaId]) porPasta[m.pastaId] = { n: 0, bytes: 0, vistos: 0 };
     porPasta[m.pastaId].n++;
     porPasta[m.pastaId].bytes += m.tamanho || 0;
+    if (m.visto) porPasta[m.pastaId].vistos++;
   });
 
   // a pasta aberta pode ter sido apagada
@@ -3115,12 +3139,14 @@ async function renderAcervo() {
 
   caixaPastas.innerHTML = pastas.length
     ? pastas.map((p) => {
-        const c = porPasta[p.id] || { n: 0, bytes: 0 };
+        const c = porPasta[p.id] || { n: 0, bytes: 0, vistos: 0 };
         return '<button type="button" class="pasta' + (p.id === pastaAberta ? " ativa" : "") +
           '" data-pasta="' + p.id + '">' +
           '<span class="marca-pasta"></span>' +
           '<span class="nome">' + escapar(p.nome) + "</span>" +
-          '<span class="cont">' + c.n + "</span>" +
+          '<span class="cont' + (c.vistos ? " tem-visto" : "") + '" title="' +
+            c.vistos + " de " + c.n + ' vistos">' +
+            (c.n ? c.vistos + "/" + c.n : "0") + "</span>" +
           '<span class="acoes">' +
             '<button type="button" class="mini" data-acao="renomear-pasta" data-id="' + p.id +
               '" title="Renomear">&#9998;</button>' +
@@ -3131,7 +3157,14 @@ async function renderAcervo() {
     : '<p class="vazio">Nenhuma pasta ainda. Cria a primeira e joga as aulas lá dentro, ' + NOME + ".</p>";
 
   const pasta = pastas.find((p) => p.id === pastaAberta) || null;
-  $("#tituloPasta").textContent = pasta ? pasta.nome : "Nenhuma pasta aberta";
+  if (pasta) {
+    const c = porPasta[pasta.id] || { n: 0, vistos: 0 };
+    $("#tituloPasta").innerHTML = escapar(pasta.nome) +
+      (c.n ? '<span class="conta-vistos">' + c.vistos + " de " + c.n +
+             (c.n === 1 ? " visto" : " vistos") + "</span>" : "");
+  } else {
+    $("#tituloPasta").textContent = "Nenhuma pasta aberta";
+  }
   $("#btnAddArquivo").disabled = !pasta;
   $("#zonaSolta").style.display = pasta ? "" : "none";
 
@@ -3142,13 +3175,17 @@ async function renderAcervo() {
     caixaArquivos.innerHTML = arquivos.length
       ? '<div class="lista">' + arquivos.map((a) => {
           const ext = extensaoDe(a.nome);
-          return '<div class="item arquivo">' +
+          return '<div class="item arquivo' + (a.visto ? " foi-visto" : "") + '">' +
+            '<button type="button" class="marca-visto' + (a.visto ? " visto" : "") + '" ' +
+              'data-acao="visto" data-id="' + a.id + '" aria-pressed="' + (a.visto ? "true" : "false") + '" ' +
+              'title="' + (a.visto ? "Visto — clica pra desmarcar" : "Marcar como visto") + '"></button>' +
             '<span class="ext ' + classeExtensao(ext) + '">' + (ext ? escapar(ext.slice(0, 4).toUpperCase()) : "?") + "</span>" +
             '<span class="corpo">' +
               '<span class="titulo" data-acao="abrir" data-id="' + a.id + '" role="button" tabindex="0" ' +
                 'title="Abrir">' + escapar(a.nome) + "</span>" +
               '<span class="meta">' + tamanhoHumano(a.tamanho) + " · " +
-                formatarDataCurta(chaveDia(a.adicionadoEm)) + "</span>" +
+                formatarDataCurta(chaveDia(a.adicionadoEm)) +
+                (a.visto && a.vistoEm ? " · visto em " + formatarDataCurta(chaveDia(a.vistoEm)) : "") + "</span>" +
             "</span>" +
             '<span class="acoes">' +
               '<button type="button" class="mini" data-acao="baixar" data-id="' + a.id + '" title="Baixar">&#8615;</button>' +
@@ -3160,11 +3197,13 @@ async function renderAcervo() {
   }
 
   const totalBytes = metas.reduce((s, m) => s + (m.tamanho || 0), 0);
+  const totalVistos = metas.filter((m) => m.visto).length;
   const info = await estadoArmazenamento();
   $("#resumoAcervo").textContent =
     pastas.length + (pastas.length === 1 ? " pasta" : " pastas") + " · " +
     metas.length + (metas.length === 1 ? " arquivo" : " arquivos") + " · " +
     tamanhoHumano(totalBytes) + " guardados" +
+    (metas.length ? " · " + totalVistos + (totalVistos === 1 ? " já visto" : " já vistos") : "") +
     (info.persistente ? " · protegidos contra descarte" : "");
 }
 
@@ -3393,6 +3432,15 @@ $("#listaArquivos").addEventListener("click", async (e) => {
 
   if (acao === "abrir") {
     abrirNoVisor(id);
+  } else if (acao === "visto") {
+    // marca sem esperar o banco: o clique responde na hora e o disco acompanha
+    const virou = !alvo.classList.contains("visto");
+    alvo.classList.toggle("visto", virou);
+    alvo.setAttribute("aria-pressed", virou ? "true" : "false");
+    const linha = alvo.closest(".arquivo");
+    if (linha) linha.classList.toggle("foi-visto", virou);
+    await Acervo.atualizarArquivo(id, { visto: virou, vistoEm: virou ? Date.now() : null });
+    renderAcervo();
   } else if (acao === "baixar") {
     baixarArquivo(id);
   } else if (acao === "editar") {
