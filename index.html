@@ -342,6 +342,99 @@ canvas{display:block; width:100%; height:auto}
 .tracinho{width:18px; height:3px; border-radius:2px; background:var(--vermelho)}
 .tracinho.preto{background:var(--preto); opacity:.45}
 
+/* ---------------------------------------------------------------- arquivos */
+.grade-arquivos{
+  display:grid; gap:18px; align-items:start;
+  grid-template-columns:minmax(230px,300px) minmax(0,1fr);
+}
+.cabeca-lista{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px; margin-bottom:14px; flex-wrap:wrap;
+}
+.cabeca-lista h2{margin-bottom:0}
+.cabeca-lista .titulo-pasta{
+  font-size:16px; font-weight:700; letter-spacing:-.01em; min-width:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+.pasta{
+  display:flex; align-items:center; gap:9px; padding:9px 11px; margin-bottom:6px;
+  border:1.5px solid transparent; border-radius:10px; background:#FAFBFC;
+  cursor:pointer; transition:.13s; text-align:left; width:100%; font:inherit;
+}
+.pasta:hover{background:#F1F2F5; border-color:var(--borda)}
+.pasta:focus-visible{outline:2px solid var(--vermelho); outline-offset:2px}
+.pasta.ativa{background:#FFF1F2; border-color:var(--vermelho)}
+.pasta .marca-pasta{
+  width:9px; height:9px; border-radius:2px; background:#C9CDD4; flex:0 0 auto;
+}
+.pasta.ativa .marca-pasta{background:var(--vermelho)}
+.pasta .nome{
+  flex:1 1 auto; min-width:0; font-weight:600; font-size:13.5px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.pasta .cont{font-size:11px; color:var(--fraco); flex:0 0 auto; font-variant-numeric:tabular-nums}
+.pasta .acoes{display:flex; gap:1px; flex:0 0 auto; opacity:0; transition:.13s}
+.pasta:hover .acoes,.pasta.ativa .acoes,.pasta:focus-within .acoes{opacity:1}
+.mini{
+  border:0; background:none; cursor:pointer; color:var(--fraco);
+  padding:3px 5px; border-radius:6px; font-size:12px; line-height:1;
+}
+.mini:hover{background:#E7E9ED; color:var(--preto)}
+.mini.perigo:hover{background:#FDE7E9; color:var(--vermelho)}
+.mini:focus-visible{outline:2px solid var(--vermelho); outline-offset:1px}
+
+.zona-solta{
+  border:2px dashed var(--borda); border-radius:12px; padding:20px 16px;
+  text-align:center; color:var(--fraco); font-size:13.5px; margin-bottom:14px;
+  transition:.13s; cursor:pointer;
+}
+.zona-solta:hover{border-color:var(--preto); color:var(--preto)}
+.zona-solta.sobre{border-color:var(--vermelho); background:#FFF4F5; color:var(--vermelho)}
+.zona-solta b{display:block; font-size:14px; color:inherit}
+
+.arquivo{display:flex; align-items:center; gap:11px; padding:9px 11px; background:var(--branco)}
+.arquivo .ext{
+  width:36px; height:36px; border-radius:9px; flex:0 0 auto;
+  background:var(--preto); color:#fff; display:flex; align-items:center;
+  justify-content:center; font-size:9px; font-weight:800; letter-spacing:.02em;
+}
+.arquivo .ext.pdf{background:var(--vermelho)}
+.arquivo .ext.img{background:#0B7285}
+.arquivo .ext.doc{background:#1C4E80}
+.arquivo .ext.zip{background:#7048E8}
+.arquivo .corpo{flex:1 1 auto; min-width:0}
+.arquivo .titulo{
+  font-weight:600; font-size:13.5px; overflow:hidden; text-overflow:ellipsis;
+  white-space:nowrap; cursor:pointer; border-radius:4px;
+}
+.arquivo .titulo:hover{color:var(--vermelho); text-decoration:underline}
+.arquivo .meta{font-size:11.5px; color:var(--fraco)}
+.arquivo .acoes{display:flex; gap:1px; flex:0 0 auto}
+
+/* visor de leitura */
+.modal-caixa.largo{max-width:1000px; width:100%; height:min(90vh,940px)}
+.visor-topo{
+  display:flex; align-items:center; gap:12px; padding:14px 18px;
+  border-bottom:1px solid var(--borda); flex:0 0 auto;
+}
+.visor-topo .visor-nome{
+  flex:1 1 auto; min-width:0; font-weight:700; font-size:15px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.visor-topo .visor-acoes{display:flex; gap:7px; flex:0 0 auto; flex-wrap:wrap}
+.visor{flex:1 1 auto; min-height:0; background:#EDEEF1; overflow:auto; position:relative}
+.visor iframe{width:100%; height:100%; border:0; display:block; background:#fff}
+.visor .centrado{
+  height:100%; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:12px; padding:30px; text-align:center; color:var(--fraco);
+}
+.visor img{display:block; margin:auto; max-width:100%; height:auto}
+
+@media (max-width:820px){
+  .grade-arquivos{grid-template-columns:1fr}
+}
+
 /* ------------------------------------------------------------------ modais */
 .modal{
   position:fixed; inset:0; background:rgba(17,17,17,.55); z-index:60;
@@ -399,6 +492,12 @@ canvas{display:block; width:100%; height:auto}
 .linha-config:last-child{border-bottom:0}
 .linha-config .desc{font-size:12.5px; color:var(--fraco)}
 input[type=range]{accent-color:var(--vermelho); width:150px}
+select{
+  width:100%; padding:10px 12px; border:1.5px solid var(--borda); border-radius:10px;
+  background:var(--branco); color:var(--texto); font:inherit; font-weight:600; cursor:pointer;
+}
+select:hover{border-color:var(--preto)}
+select:focus{outline:none; border-color:var(--vermelho); box-shadow:0 0 0 3px rgba(227,6,19,.14)}
 
 /* ----------------------------------------- seletor numérico livre (− N +) */
 .grade-passos{
@@ -473,6 +572,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
   </div>
   <nav class="abas" id="abas" role="tablist">
     <button class="aba-btn ativa" data-painel="foco" role="tab">Foco</button>
+    <button class="aba-btn" data-painel="arquivos" role="tab">Arquivos</button>
     <button class="aba-btn" data-painel="progresso" role="tab">Progresso</button>
     <button class="aba-btn" data-painel="estante" role="tab">Estante</button>
     <button class="aba-btn" data-painel="historico" role="tab">Histórico</button>
@@ -567,6 +667,42 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
         <div id="cicloAtualBox"></div>
       </div></div>
     </div>
+
+  </div>
+</section>
+
+<!-- ==================================================== PAINEL: ARQUIVOS -->
+<section class="painel" id="painel-arquivos">
+  <div class="cartao" style="margin-bottom:18px">
+    <div class="faixas faixas-fina"></div>
+    <div class="cartao-corpo">
+      <h3>Arquivos</h3>
+      <p class="subtexto" id="resumoAcervo">Carregando o acervo…</p>
+    </div>
+  </div>
+
+  <div class="grade-arquivos">
+
+    <div class="cartao"><div class="cartao-corpo">
+      <div class="cabeca-lista">
+        <h2>Pastas</h2>
+        <button class="btn btn-pequeno btn-preto" id="btnNovaPasta">Nova pasta</button>
+      </div>
+      <div id="listaPastas"></div>
+    </div></div>
+
+    <div class="cartao"><div class="cartao-corpo">
+      <div class="cabeca-lista">
+        <div class="titulo-pasta" id="tituloPasta">Nenhuma pasta aberta</div>
+        <button class="btn btn-pequeno" id="btnAddArquivo" disabled>Adicionar arquivos</button>
+      </div>
+      <input type="file" id="entradaArquivos" multiple hidden>
+      <div class="zona-solta" id="zonaSolta" role="button" tabindex="0">
+        <b>Arrasta os arquivos aqui</b>
+        ou clica para escolher no aparelho
+      </div>
+      <div id="listaArquivos"></div>
+    </div></div>
 
   </div>
 </section>
@@ -725,6 +861,44 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <div class="resumo" id="resumoFim"></div>
       <div class="modal-botoes" id="botoesFim"></div>
     </div>
+  </div>
+</div>
+
+<!-- ============================== MODAL: NOME DE PASTA / ARQUIVO -->
+<div class="modal" id="modalCampo" role="dialog" aria-modal="true" aria-labelledby="tituloCampo">
+  <div class="modal-caixa">
+    <div class="faixas"></div>
+    <div class="modal-corpo">
+      <div class="frase" id="tituloCampo">Nova pasta</div>
+      <div class="campo">
+        <label for="entradaCampo" id="rotuloCampo">Nome</label>
+        <input type="text" id="entradaCampo" maxlength="80" autocomplete="off">
+      </div>
+      <div class="campo" id="campoDestino" hidden>
+        <label for="selDestino">Pasta</label>
+        <select id="selDestino"></select>
+      </div>
+      <div class="modal-botoes">
+        <button class="btn btn-principal" id="campoConfirmar">Salvar</button>
+        <button class="btn" id="campoCancelar">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================================================== MODAL: VISOR -->
+<div class="modal" id="modalVisor" role="dialog" aria-modal="true" aria-labelledby="visorNome">
+  <div class="modal-caixa largo">
+    <div class="faixas"></div>
+    <div class="visor-topo">
+      <div class="visor-nome" id="visorNome">arquivo</div>
+      <div class="visor-acoes">
+        <button class="btn btn-pequeno" id="visorNovaAba">Nova aba</button>
+        <button class="btn btn-pequeno" id="visorBaixar">Baixar</button>
+        <button class="btn btn-pequeno btn-preto" id="visorFechar">Fechar</button>
+      </div>
+    </div>
+    <div class="visor" id="visorConteudo"></div>
   </div>
 </div>
 
@@ -2698,12 +2872,415 @@ function apagarTudo() {
 }
 
 /* --------------------------------------------------------------------------
+   14b. ACERVO DE ARQUIVOS — IndexedDB
+   Arquivo de aula não cabe em localStorage: são ~5 MB no total, só texto, e
+   guardar PDF ali colocaria a Estante em risco. IndexedDB guarda o arquivo
+   bruto e trabalha na casa dos gigabytes.
+
+   Duas lojas de propósito: "arquivos" guarda só os dados leves (nome, tipo,
+   tamanho) e "conteudos" guarda o blob. Assim abrir uma pasta com 20 PDFs lê
+   uns poucos KB em vez de arrastar centenas de MB para a memória.
+   -------------------------------------------------------------------------- */
+const Acervo = (function () {
+  const NOME_BD = "vidori-acervo";
+  const VERSAO_BD = 1;
+  let conexao = null;
+  let quebrado = false;
+
+  function abrir() {
+    if (quebrado) return Promise.reject(new Error("IndexedDB indisponível"));
+    if (conexao) return Promise.resolve(conexao);
+    return new Promise((ok, erro) => {
+      let req;
+      try {
+        if (!window.indexedDB) throw new Error("sem IndexedDB");
+        req = indexedDB.open(NOME_BD, VERSAO_BD);
+      } catch (e) { quebrado = true; erro(e); return; }
+
+      req.onupgradeneeded = () => {
+        const bd = req.result;
+        if (!bd.objectStoreNames.contains("pastas")) {
+          bd.createObjectStore("pastas", { keyPath: "id" });
+        }
+        if (!bd.objectStoreNames.contains("arquivos")) {
+          const loja = bd.createObjectStore("arquivos", { keyPath: "id" });
+          loja.createIndex("porPasta", "pastaId", { unique: false });
+        }
+        if (!bd.objectStoreNames.contains("conteudos")) {
+          bd.createObjectStore("conteudos", { keyPath: "id" });
+        }
+      };
+      req.onsuccess = () => { conexao = req.result; ok(conexao); };
+      req.onerror = () => { quebrado = true; erro(req.error); };
+      req.onblocked = () => erro(new Error("Banco travado por outra aba aberta"));
+    });
+  }
+
+  /** Envolve um IDBRequest numa promessa. */
+  function pedir(req) {
+    return new Promise((ok, erro) => {
+      req.onsuccess = () => ok(req.result);
+      req.onerror = () => erro(req.error);
+    });
+  }
+  /** Espera a transação fechar de verdade antes de seguir. */
+  function fechar(tx, valor) {
+    return new Promise((ok, erro) => {
+      tx.oncomplete = () => ok(valor);
+      tx.onerror = () => erro(tx.error);
+      tx.onabort = () => erro(tx.error || new Error("Gravação cancelada"));
+    });
+  }
+  function novoId(prefixo) {
+    return prefixo + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  return {
+    get quebrado() { return quebrado; },
+
+    async listarPastas() {
+      const bd = await abrir();
+      const lista = await pedir(bd.transaction("pastas", "readonly").objectStore("pastas").getAll());
+      return lista.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }));
+    },
+
+    async criarPasta(nome) {
+      const bd = await abrir();
+      const pasta = { id: novoId("p"), nome: nome, criadaEm: Date.now() };
+      const tx = bd.transaction("pastas", "readwrite");
+      tx.objectStore("pastas").put(pasta);
+      return fechar(tx, pasta);
+    },
+
+    async renomearPasta(id, nome) {
+      const bd = await abrir();
+      const loja = bd.transaction("pastas", "readonly").objectStore("pastas");
+      const pasta = await pedir(loja.get(id));
+      if (!pasta) return null;
+      pasta.nome = nome;
+      const tx = bd.transaction("pastas", "readwrite");
+      tx.objectStore("pastas").put(pasta);
+      return fechar(tx, pasta);
+    },
+
+    /** Apaga a pasta e tudo que está dentro dela, numa transação só. */
+    async excluirPasta(id) {
+      const ids = await this.chavesDaPasta(id);
+      const bd = await abrir();
+      const tx = bd.transaction(["pastas", "arquivos", "conteudos"], "readwrite");
+      tx.objectStore("pastas").delete(id);
+      ids.forEach((chave) => {
+        tx.objectStore("arquivos").delete(chave);
+        tx.objectStore("conteudos").delete(chave);
+      });
+      return fechar(tx, ids.length);
+    },
+
+    async chavesDaPasta(pastaId) {
+      const bd = await abrir();
+      const loja = bd.transaction("arquivos", "readonly").objectStore("arquivos");
+      return pedir(loja.index("porPasta").getAllKeys(IDBKeyRange.only(pastaId)));
+    },
+
+    /** Só os metadados: o blob fica no banco até alguém pedir para abrir. */
+    async listarArquivos(pastaId) {
+      const bd = await abrir();
+      const loja = bd.transaction("arquivos", "readonly").objectStore("arquivos");
+      const lista = await pedir(loja.index("porPasta").getAll(IDBKeyRange.only(pastaId)));
+      return lista.sort((a, b) => b.adicionadoEm - a.adicionadoEm);
+    },
+
+    async listarTodosMetadados() {
+      const bd = await abrir();
+      return pedir(bd.transaction("arquivos", "readonly").objectStore("arquivos").getAll());
+    },
+
+    async adicionarArquivo(pastaId, arquivo) {
+      const bd = await abrir();
+      const id = novoId("a");
+      const meta = {
+        id: id,
+        pastaId: pastaId,
+        nome: arquivo.name || "sem nome",
+        tipo: arquivo.type || "",
+        tamanho: arquivo.size || 0,
+        adicionadoEm: Date.now()
+      };
+      const tx = bd.transaction(["arquivos", "conteudos"], "readwrite");
+      tx.objectStore("arquivos").put(meta);
+      tx.objectStore("conteudos").put({ id: id, blob: arquivo });
+      return fechar(tx, meta);
+    },
+
+    async atualizarArquivo(id, campos) {
+      const bd = await abrir();
+      const loja = bd.transaction("arquivos", "readonly").objectStore("arquivos");
+      const meta = await pedir(loja.get(id));
+      if (!meta) return null;
+      Object.assign(meta, campos);
+      const tx = bd.transaction("arquivos", "readwrite");
+      tx.objectStore("arquivos").put(meta);
+      return fechar(tx, meta);
+    },
+
+    async excluirArquivo(id) {
+      const bd = await abrir();
+      const tx = bd.transaction(["arquivos", "conteudos"], "readwrite");
+      tx.objectStore("arquivos").delete(id);
+      tx.objectStore("conteudos").delete(id);
+      return fechar(tx, true);
+    },
+
+    async pegarMeta(id) {
+      const bd = await abrir();
+      return pedir(bd.transaction("arquivos", "readonly").objectStore("arquivos").get(id));
+    },
+
+    /** Só aqui o blob sai do banco. */
+    async pegarBlob(id) {
+      const bd = await abrir();
+      const reg = await pedir(bd.transaction("conteudos", "readonly").objectStore("conteudos").get(id));
+      return reg ? reg.blob : null;
+    }
+  };
+})();
+
+/* --------------------------------------------------------------------------
+   14c. ACERVO — tela
+   -------------------------------------------------------------------------- */
+let pastaAberta = null;    // id da pasta selecionada
+let urlAberta = null;      // object URL do arquivo no visor, revogado ao trocar
+
+function tamanhoHumano(bytes) {
+  if (!bytes) return "0 KB";
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1048576) return Math.round(bytes / 1024) + " KB";
+  if (bytes < 1073741824) return (bytes / 1048576).toFixed(1).replace(".", ",") + " MB";
+  return (bytes / 1073741824).toFixed(2).replace(".", ",") + " GB";
+}
+
+function extensaoDe(nome) {
+  const ponto = nome.lastIndexOf(".");
+  if (ponto < 1 || ponto === nome.length - 1) return "";
+  return nome.slice(ponto + 1).toLowerCase();
+}
+
+/** Classe de cor do selo pela extensão, só para bater o olho e achar. */
+function classeExtensao(ext) {
+  if (ext === "pdf") return "pdf";
+  if (["png","jpg","jpeg","gif","webp","bmp","svg","heic"].indexOf(ext) !== -1) return "img";
+  if (["doc","docx","odt","txt","rtf","ppt","pptx","xls","xlsx"].indexOf(ext) !== -1) return "doc";
+  if (["zip","rar","7z","tar","gz"].indexOf(ext) !== -1) return "zip";
+  return "";
+}
+
+function ehImagem(meta) {
+  return (meta.tipo || "").indexOf("image/") === 0 ||
+         classeExtensao(extensaoDe(meta.nome)) === "img";
+}
+function ehPdf(meta) {
+  return (meta.tipo || "") === "application/pdf" || extensaoDe(meta.nome) === "pdf";
+}
+
+async function renderAcervo() {
+  const caixaPastas = $("#listaPastas");
+  const caixaArquivos = $("#listaArquivos");
+
+  let pastas;
+  try {
+    pastas = await Acervo.listarPastas();
+  } catch (e) {
+    caixaPastas.innerHTML = '<p class="vazio">Este navegador não liberou o armazenamento de arquivos. ' +
+      "O resto do app segue funcionando normal.</p>";
+    caixaArquivos.innerHTML = "";
+    $("#resumoAcervo").textContent = "Acervo indisponível neste navegador.";
+    $("#btnNovaPasta").disabled = true;
+    $("#btnAddArquivo").disabled = true;
+    $("#zonaSolta").style.display = "none";
+    return;
+  }
+
+  // contagem e peso por pasta, lidos só dos metadados
+  const metas = await Acervo.listarTodosMetadados();
+  const porPasta = Object.create(null);
+  metas.forEach((m) => {
+    if (!porPasta[m.pastaId]) porPasta[m.pastaId] = { n: 0, bytes: 0 };
+    porPasta[m.pastaId].n++;
+    porPasta[m.pastaId].bytes += m.tamanho || 0;
+  });
+
+  // a pasta aberta pode ter sido apagada
+  if (pastaAberta && !pastas.some((p) => p.id === pastaAberta)) pastaAberta = null;
+  if (!pastaAberta && pastas.length) pastaAberta = pastas[0].id;
+
+  caixaPastas.innerHTML = pastas.length
+    ? pastas.map((p) => {
+        const c = porPasta[p.id] || { n: 0, bytes: 0 };
+        return '<button type="button" class="pasta' + (p.id === pastaAberta ? " ativa" : "") +
+          '" data-pasta="' + p.id + '">' +
+          '<span class="marca-pasta"></span>' +
+          '<span class="nome">' + escapar(p.nome) + "</span>" +
+          '<span class="cont">' + c.n + "</span>" +
+          '<span class="acoes">' +
+            '<button type="button" class="mini" data-acao="renomear-pasta" data-id="' + p.id +
+              '" title="Renomear">&#9998;</button>' +
+            '<button type="button" class="mini perigo" data-acao="excluir-pasta" data-id="' + p.id +
+              '" title="Excluir">&times;</button>' +
+          "</span></button>";
+      }).join("")
+    : '<p class="vazio">Nenhuma pasta ainda. Cria a primeira e joga as aulas lá dentro, ' + NOME + ".</p>";
+
+  const pasta = pastas.find((p) => p.id === pastaAberta) || null;
+  $("#tituloPasta").textContent = pasta ? pasta.nome : "Nenhuma pasta aberta";
+  $("#btnAddArquivo").disabled = !pasta;
+  $("#zonaSolta").style.display = pasta ? "" : "none";
+
+  if (!pasta) {
+    caixaArquivos.innerHTML = '<p class="vazio">Escolhe uma pasta na esquerda pra ver o que tem dentro.</p>';
+  } else {
+    const arquivos = await Acervo.listarArquivos(pasta.id);
+    caixaArquivos.innerHTML = arquivos.length
+      ? '<div class="lista">' + arquivos.map((a) => {
+          const ext = extensaoDe(a.nome);
+          return '<div class="item arquivo">' +
+            '<span class="ext ' + classeExtensao(ext) + '">' + (ext ? escapar(ext.slice(0, 4).toUpperCase()) : "?") + "</span>" +
+            '<span class="corpo">' +
+              '<span class="titulo" data-acao="abrir" data-id="' + a.id + '" role="button" tabindex="0" ' +
+                'title="Abrir">' + escapar(a.nome) + "</span>" +
+              '<span class="meta">' + tamanhoHumano(a.tamanho) + " · " +
+                formatarDataCurta(chaveDia(a.adicionadoEm)) + "</span>" +
+            "</span>" +
+            '<span class="acoes">' +
+              '<button type="button" class="mini" data-acao="baixar" data-id="' + a.id + '" title="Baixar">&#8615;</button>' +
+              '<button type="button" class="mini" data-acao="editar" data-id="' + a.id + '" title="Renomear ou mover">&#9998;</button>' +
+              '<button type="button" class="mini perigo" data-acao="excluir" data-id="' + a.id + '" title="Excluir">&times;</button>' +
+            "</span></div>";
+        }).join("") + "</div>"
+      : '<p class="vazio">Pasta vazia. Arrasta os arquivos aqui em cima.</p>';
+  }
+
+  const totalBytes = metas.reduce((s, m) => s + (m.tamanho || 0), 0);
+  const info = await estadoArmazenamento();
+  $("#resumoAcervo").textContent =
+    pastas.length + (pastas.length === 1 ? " pasta" : " pastas") + " · " +
+    metas.length + (metas.length === 1 ? " arquivo" : " arquivos") + " · " +
+    tamanhoHumano(totalBytes) + " guardados" +
+    (info.persistente ? " · protegidos contra descarte" : "");
+}
+
+/** Guarda os arquivos escolhidos, um a um, sem travar a tela. */
+async function guardarArquivos(lista) {
+  if (!pastaAberta || !lista || !lista.length) return;
+  let guardados = 0, falhas = 0, cheio = false;
+  for (const arquivo of Array.from(lista)) {
+    try {
+      await Acervo.adicionarArquivo(pastaAberta, arquivo);
+      guardados++;
+    } catch (e) {
+      falhas++;
+      const nome = e && (e.name || "");
+      if (nome === "QuotaExceededError" || /quota/i.test(String(e && e.message))) cheio = true;
+    }
+  }
+  await renderAcervo();
+  if (guardados) {
+    mostrarAviso(guardados + (guardados === 1 ? " arquivo guardado" : " arquivos guardados") + ", soberano.");
+  }
+  if (cheio) {
+    mostrarAviso("Sem espaço no aparelho pra tudo isso. Apaga arquivo antigo e tenta de novo.");
+  } else if (falhas) {
+    mostrarAviso(falhas + (falhas === 1 ? " arquivo não entrou." : " arquivos não entraram."));
+  }
+}
+
+/* ------------------------------------------------- modal genérico de nome */
+let acaoDoCampo = null;
+
+function abrirModalCampo(titulo, rotulo, valor, opcoes, aoConfirmar) {
+  $("#tituloCampo").textContent = titulo;
+  $("#rotuloCampo").textContent = rotulo;
+  $("#entradaCampo").value = valor || "";
+  const temDestino = Array.isArray(opcoes) && opcoes.length > 0;
+  $("#campoDestino").hidden = !temDestino;
+  if (temDestino) {
+    $("#selDestino").innerHTML = opcoes.map((o) =>
+      '<option value="' + escapar(o.id) + '"' + (o.selecionado ? " selected" : "") + ">" +
+      escapar(o.nome) + "</option>").join("");
+  }
+  acaoDoCampo = aoConfirmar;
+  $("#modalCampo").classList.add("aberto");
+  setTimeout(() => { $("#entradaCampo").focus(); $("#entradaCampo").select(); }, 60);
+}
+function fecharModalCampo() {
+  $("#modalCampo").classList.remove("aberto");
+  acaoDoCampo = null;
+}
+function confirmarModalCampo() {
+  if (!acaoDoCampo) return;
+  const nome = $("#entradaCampo").value.trim();
+  if (!nome) { mostrarAviso("Precisa de um nome."); return; }
+  const destino = $("#campoDestino").hidden ? null : $("#selDestino").value;
+  const acao = acaoDoCampo;
+  fecharModalCampo();
+  Promise.resolve(acao(nome, destino)).then(renderAcervo);
+}
+
+/* --------------------------------------------------------------- o visor */
+function limparVisor() {
+  if (urlAberta) { URL.revokeObjectURL(urlAberta); urlAberta = null; }
+  $("#visorConteudo").innerHTML = "";
+}
+
+async function abrirNoVisor(id) {
+  const meta = await Acervo.pegarMeta(id);
+  if (!meta) return;
+  const blob = await Acervo.pegarBlob(id);
+  if (!blob) { mostrarAviso("Não achei o conteúdo desse arquivo."); return; }
+
+  limparVisor();
+  urlAberta = URL.createObjectURL(blob);
+  $("#visorNome").textContent = meta.nome;
+
+  if (ehPdf(meta)) {
+    $("#visorConteudo").innerHTML = '<iframe src="' + urlAberta + '" title="' + escapar(meta.nome) + '"></iframe>';
+  } else if (ehImagem(meta)) {
+    $("#visorConteudo").innerHTML = '<img src="' + urlAberta + '" alt="' + escapar(meta.nome) + '">';
+  } else {
+    $("#visorConteudo").innerHTML = '<div class="centrado">' +
+      "<b>Esse tipo de arquivo não abre aqui dentro.</b>" +
+      "<span>" + escapar(extensaoDe(meta.nome).toUpperCase() || "Arquivo") + " · " +
+      tamanhoHumano(meta.tamanho) + "</span>" +
+      "<span>Usa <b>Baixar</b> pra abrir no programa certo.</span></div>";
+  }
+  $("#modalVisor").classList.add("aberto");
+}
+function fecharVisor() {
+  $("#modalVisor").classList.remove("aberto");
+  limparVisor();
+}
+
+async function baixarArquivo(id) {
+  const meta = await Acervo.pegarMeta(id);
+  const blob = await Acervo.pegarBlob(id);
+  if (!meta || !blob) { mostrarAviso("Não achei esse arquivo."); return; }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = meta.nome;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+/* --------------------------------------------------------------------------
    15. NAVEGAÇÃO ENTRE PAINÉIS
    -------------------------------------------------------------------------- */
 function irParaPainel(nome) {
   $$(".painel").forEach((p) => p.classList.toggle("ativo", p.id === "painel-" + nome));
   $$(".aba-btn").forEach((b) => b.classList.toggle("ativa", b.dataset.painel === nome));
   if (nome === "progresso") { renderCalor(); renderComparativo(); }
+  if (nome === "arquivos") renderAcervo();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -2769,6 +3346,136 @@ function ajustarPausa(chave, valor) {
   renderAjustes();
 }
 $("#btnTestarApito").addEventListener("click", () => { acordarAudio(); tocarApito(); });
+
+/* -------------------------------------------------------- aba de arquivos */
+$("#btnNovaPasta").addEventListener("click", () => {
+  abrirModalCampo("Nova pasta", "Nome da pasta", "", null, async (nome) => {
+    const pasta = await Acervo.criarPasta(nome);
+    pastaAberta = pasta.id;
+    mostrarAviso('Pasta "' + pasta.nome + '" criada.');
+  });
+});
+
+$("#listaPastas").addEventListener("click", async (e) => {
+  const acao = e.target.closest("[data-acao]");
+  if (acao) {
+    e.stopPropagation();
+    const id = acao.dataset.id;
+    if (acao.dataset.acao === "renomear-pasta") {
+      const pastas = await Acervo.listarPastas();
+      const atual = pastas.find((p) => p.id === id);
+      abrirModalCampo("Renomear pasta", "Nome da pasta", atual ? atual.nome : "", null,
+        (nome) => Acervo.renomearPasta(id, nome));
+    } else if (acao.dataset.acao === "excluir-pasta") {
+      const dentro = await Acervo.chavesDaPasta(id);
+      const aviso = dentro.length
+        ? "Excluir esta pasta apaga junto " + dentro.length +
+          (dentro.length === 1 ? " arquivo" : " arquivos") + " que está lá dentro.\n\nNão tem volta. Confirma?"
+        : "Excluir esta pasta?";
+      if (confirm(aviso)) {
+        await Acervo.excluirPasta(id);
+        if (pastaAberta === id) pastaAberta = null;
+        renderAcervo();
+        mostrarAviso("Pasta excluída.");
+      }
+    }
+    return;
+  }
+  const pasta = e.target.closest(".pasta");
+  if (pasta) { pastaAberta = pasta.dataset.pasta; renderAcervo(); }
+});
+
+$("#listaArquivos").addEventListener("click", async (e) => {
+  const alvo = e.target.closest("[data-acao]");
+  if (!alvo) return;
+  const id = alvo.dataset.id;
+  const acao = alvo.dataset.acao;
+
+  if (acao === "abrir") {
+    abrirNoVisor(id);
+  } else if (acao === "baixar") {
+    baixarArquivo(id);
+  } else if (acao === "editar") {
+    const meta = await Acervo.pegarMeta(id);
+    const pastas = await Acervo.listarPastas();
+    if (!meta) return;
+    abrirModalCampo("Renomear ou mover", "Nome do arquivo", meta.nome,
+      pastas.map((p) => ({ id: p.id, nome: p.nome, selecionado: p.id === meta.pastaId })),
+      async (nome, destino) => {
+        await Acervo.atualizarArquivo(id, { nome: nome, pastaId: destino || meta.pastaId });
+        mostrarAviso("Arquivo atualizado.");
+      });
+  } else if (acao === "excluir") {
+    const meta = await Acervo.pegarMeta(id);
+    if (meta && confirm('Excluir "' + meta.nome + '"?\n\nNão tem volta — o arquivo sai do app.')) {
+      await Acervo.excluirArquivo(id);
+      renderAcervo();
+      mostrarAviso("Arquivo excluído.");
+    }
+  }
+});
+
+/* abrir o arquivo pelo teclado, já que o nome é um alvo de clique */
+$("#listaArquivos").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const titulo = e.target.closest('.titulo[data-acao="abrir"]');
+  if (!titulo) return;
+  e.preventDefault(); e.stopPropagation();
+  abrirNoVisor(titulo.dataset.id);
+});
+
+$("#btnAddArquivo").addEventListener("click", () => $("#entradaArquivos").click());
+$("#zonaSolta").addEventListener("click", () => $("#entradaArquivos").click());
+$("#zonaSolta").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); $("#entradaArquivos").click(); }
+});
+$("#entradaArquivos").addEventListener("change", (e) => {
+  guardarArquivos(e.target.files);
+  e.target.value = "";
+});
+
+/* arrastar e soltar */
+["dragenter", "dragover"].forEach((evt) =>
+  $("#zonaSolta").addEventListener(evt, (e) => {
+    e.preventDefault(); e.stopPropagation();
+    if (pastaAberta) $("#zonaSolta").classList.add("sobre");
+  }));
+["dragleave", "drop"].forEach((evt) =>
+  $("#zonaSolta").addEventListener(evt, (e) => {
+    e.preventDefault(); e.stopPropagation();
+    $("#zonaSolta").classList.remove("sobre");
+  }));
+$("#zonaSolta").addEventListener("drop", (e) => {
+  if (e.dataTransfer && e.dataTransfer.files) guardarArquivos(e.dataTransfer.files);
+});
+/* soltar fora da zona não pode fazer o navegador trocar de página */
+["dragover", "drop"].forEach((evt) =>
+  window.addEventListener(evt, (e) => { e.preventDefault(); }));
+
+$("#campoConfirmar").addEventListener("click", confirmarModalCampo);
+$("#campoCancelar").addEventListener("click", fecharModalCampo);
+$("#modalCampo").addEventListener("click", (e) => {
+  if (e.target.id === "modalCampo") fecharModalCampo();
+});
+$("#entradaCampo").addEventListener("keydown", (e) => {
+  e.stopPropagation();
+  if (e.key === "Enter") { e.preventDefault(); confirmarModalCampo(); }
+});
+
+$("#visorFechar").addEventListener("click", fecharVisor);
+$("#modalVisor").addEventListener("click", (e) => {
+  if (e.target.id === "modalVisor") fecharVisor();
+});
+$("#visorBaixar").addEventListener("click", () => {
+  const nome = $("#visorNome").textContent;
+  if (!urlAberta) return;
+  const a = document.createElement("a");
+  a.href = urlAberta; a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove();
+});
+$("#visorNovaAba").addEventListener("click", () => {
+  if (urlAberta) window.open(urlAberta, "_blank");
+});
 
 $("#recentes").addEventListener("click", (e) => {
   const tag = e.target.closest(".tag");
@@ -2847,7 +3554,11 @@ document.addEventListener("keydown", (e) => {
   const alvo = e.target;
   const digitando = alvo && (alvo.tagName === "INPUT" || alvo.tagName === "TEXTAREA" || alvo.isContentEditable);
 
-  if (e.key === "Escape") { fecharModalFim(); fecharModalNotif(); fecharModalOrfaos(); return; }
+  if (e.key === "Escape") {
+    fecharModalFim(); fecharModalNotif(); fecharModalOrfaos();
+    fecharModalCampo(); fecharVisor();
+    return;
+  }
   if (digitando) {
     // Enter no campo de assunto já começa o bloco
     if (e.key === "Enter" && alvo.id === "assunto" && !T.rodando) { e.preventDefault(); iniciarTimer(); }
