@@ -231,6 +231,17 @@ kbd{
 .item .apagar:hover{background:#FDE7E9; color:var(--vermelho)}
 .vazio{color:var(--fraco); font-size:13.5px; padding:6px 0}
 
+/* assunto corrigível: clique (ou Enter) abre a edição no lugar */
+.assunto.editavel{cursor:text; border-radius:5px; padding:1px 5px; margin:-1px -5px}
+.assunto.editavel:hover{background:#F1F2F5; box-shadow:inset 0 -1.5px 0 var(--vermelho)}
+.assunto.editavel:focus-visible{outline:2px solid var(--vermelho); outline-offset:1px}
+.assunto-edit{
+  flex:1 1 auto; min-width:0;
+  padding:3px 8px !important; font-size:13.5px !important; font-weight:600;
+  border-radius:7px !important; border-color:var(--vermelho) !important;
+  box-shadow:0 0 0 3px rgba(227,6,19,.14);
+}
+
 /* --------------------------------------------------------- gráfico semana */
 .semana{display:flex; align-items:flex-end; gap:8px; height:130px; margin-top:4px}
 .dia{flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%}
@@ -621,6 +632,11 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       </div>
 
       <div class="linha-config">
+        <div><b>Armazenamento persistente</b><div class="desc" id="descArmazenamento">Verificando…</div></div>
+        <button class="btn btn-pequeno" id="btnPersistir">Ativar</button>
+      </div>
+
+      <div class="linha-config">
         <div><b>Apagar tudo</b><div class="desc">Zera blocos, ciclos e recordes. Não tem volta.</div></div>
         <button class="btn btn-pequeno" id="btnApagarTudo">Apagar</button>
       </div>
@@ -639,6 +655,21 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <div class="frase" id="fraseFim">Bloco fechado, soberano.</div>
       <div class="resumo" id="resumoFim"></div>
       <div class="modal-botoes" id="botoesFim"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ MODAL: BLOCOS SEM CAMPANHA -->
+<div class="modal" id="modalOrfaos" role="dialog" aria-modal="true" aria-labelledby="tituloOrfaos">
+  <div class="modal-caixa">
+    <div class="faixas"></div>
+    <div class="modal-corpo">
+      <div class="frase" id="tituloOrfaos">Achei blocos sem campanha</div>
+      <div id="textoOrfaos"></div>
+      <div class="modal-botoes" style="margin-top:18px">
+        <button class="btn btn-principal" id="orfaosPuxar">Puxar pro ciclo</button>
+        <button class="btn" id="orfaosDeixar">Deixar como estão</button>
+      </div>
     </div>
   </div>
 </div>
@@ -782,6 +813,59 @@ const Armazem = (function () {
     }
   };
 })();
+
+/* --------------------------------------------------------------------------
+   2b. ARMAZENAMENTO PERSISTENTE
+   Sem isso o sistema pode descartar o localStorage sozinho quando o aparelho
+   fica sem espaço — sem aviso e sem o usuário ter limpado nada. A estante
+   inteira iria junto. Marcar como persistente tira os dados dessa fila.
+   -------------------------------------------------------------------------- */
+async function estadoArmazenamento() {
+  const info = { suportado: false, persistente: false, usadoMB: null };
+  if (!navigator.storage || !navigator.storage.persist) return info;
+  info.suportado = true;
+  try { info.persistente = await navigator.storage.persisted(); } catch (e) {}
+  try {
+    if (navigator.storage.estimate) {
+      const e = await navigator.storage.estimate();
+      if (e && typeof e.usage === "number") info.usadoMB = e.usage / 1048576;
+    }
+  } catch (e) {}
+  return info;
+}
+
+/** Pede a persistência. Com "manual", dá retorno na tela do que aconteceu. */
+async function pedirArmazenamentoPersistente(manual) {
+  let info = await estadoArmazenamento();
+  if (info.suportado && !info.persistente) {
+    try { await navigator.storage.persist(); } catch (e) {}
+    info = await estadoArmazenamento();
+  }
+  renderArmazenamento(info);
+  if (manual) {
+    mostrarAviso(info.persistente
+      ? "Histórico blindado, soberano. O sistema não descarta mais."
+      : "O navegador ainda não liberou. Instala o app e usa mais uns dias que ele libera.");
+  }
+}
+
+function renderArmazenamento(info) {
+  const btn = $("#btnPersistir"), desc = $("#descArmazenamento");
+  if (!btn || !desc) return;
+  const uso = (info.usadoMB != null)
+    ? " · " + info.usadoMB.toFixed(1).replace(".", ",") + " MB usados"
+    : "";
+  if (!info.suportado) {
+    btn.disabled = true; btn.textContent = "Indisponível";
+    desc.textContent = "Navegador sem suporte — exporta o JSON de vez em quando.";
+  } else if (info.persistente) {
+    btn.disabled = true; btn.textContent = "Ativo";
+    desc.textContent = "Protegido: o sistema não descarta o histórico" + uso + ".";
+  } else {
+    btn.disabled = false; btn.textContent = "Ativar";
+    desc.textContent = "Ainda descartável se o aparelho ficar sem espaço" + uso + ".";
+  }
+}
 
 const CHAVES = {
   blocos:   "vidori.blocos",
@@ -1217,7 +1301,63 @@ function salvarCicloDoFormulario() {
   }
   salvarCiclos();
   renderTudo();
+  oferecerAdocaoDeOrfaos(cicloAtivo());
 }
+
+/**
+ * Blocos sem ciclo que caem dentro do período do ciclo informado.
+ * É o caso do primeiro dia: estudou antes de cadastrar a campanha.
+ */
+function orfaosDoPeriodo(ciclo) {
+  if (!ciclo) return [];
+  return blocos.filter((b) => !b.cicloId &&
+                              b.dia >= ciclo.inicio &&
+                              b.dia <= ciclo.fimPrevisto);
+}
+
+function oferecerAdocaoDeOrfaos(ciclo) {
+  const orfaos = orfaosDoPeriodo(ciclo);
+  if (!orfaos.length) return;
+
+  const min = orfaos.reduce((s, b) => s + b.minutos, 0);
+  const dias = Array.from(new Set(orfaos.map((b) => b.dia))).sort();
+  const porAssunto = Object.create(null);
+  orfaos.forEach((b) => { porAssunto[b.assunto] = (porAssunto[b.assunto] || 0) + b.minutos; });
+  const assuntos = Object.keys(porAssunto).sort((a, b) => porAssunto[b] - porAssunto[a]);
+
+  const periodo = dias.length === 1
+    ? "em " + formatarDataCurta(dias[0])
+    : "entre " + formatarDataCurta(dias[0]) + " e " + formatarDataCurta(dias[dias.length - 1]);
+
+  $("#textoOrfaos").innerHTML =
+    "<p>Achei <b>" + orfaos.length + (orfaos.length === 1 ? " bloco" : " blocos") +
+      " sem campanha</b> dentro do período de <b>" + escapar(ciclo.nome) + "</b> — " +
+      humanoMin(min) + " " + periodo + ".</p>" +
+    '<div class="lista" style="margin-top:12px">' +
+      assuntos.slice(0, 6).map((a) =>
+        '<div class="item"><span class="assunto">' + escapar(a) + "</span>" +
+        '<span class="min">' + humanoMin(porAssunto[a]) + "</span></div>").join("") +
+      (assuntos.length > 6
+        ? '<div class="item"><span class="assunto">+ ' + (assuntos.length - 6) + " outros assuntos</span></div>"
+        : "") +
+    "</div>" +
+    '<p class="dica">Puxar faz esses minutos contarem na campanha, na Estante e ' +
+    "na comparação com o ciclo anterior.</p>";
+
+  $("#orfaosPuxar").onclick = () => {
+    orfaos.forEach((b) => { b.cicloId = ciclo.id; });
+    salvarBlocos();
+    fecharModalOrfaos();
+    renderTudo();
+    mostrarAviso(orfaos.length + (orfaos.length === 1 ? " bloco puxado" : " blocos puxados") +
+                 " pra campanha, soberano.");
+  };
+  $("#orfaosDeixar").onclick = fecharModalOrfaos;
+
+  $("#modalOrfaos").classList.add("aberto");
+  setTimeout(() => $("#orfaosPuxar") && $("#orfaosPuxar").focus(), 60);
+}
+function fecharModalOrfaos() { $("#modalOrfaos").classList.remove("aberto"); }
 
 function encerrarCiclo() {
   const c = cicloAtivo();
@@ -1383,6 +1523,94 @@ function registrarBloco(inicioTs, fimTs, assunto, minutos) {
     cicloId: c ? c.id : null
   });
   salvarBlocos();
+}
+
+/**
+ * Edição do assunto no lugar, sem perder os minutos já registrados.
+ * Enter grava, Escape desiste, sair do campo grava.
+ */
+let edicaoAberta = null;   // grava o que estiver sendo editado antes de redesenhar
+
+/** Fecha uma edição pendente sem redesenhar. Devolve true se algo mudou. */
+function comitarEdicaoAberta() {
+  if (!edicaoAberta) return false;
+  const aplicar = edicaoAberta;
+  edicaoAberta = null;
+  return aplicar();
+}
+
+function editarAssunto(id, elemento) {
+  // já tinha um assunto aberto: grava, redesenha e reencontra o alvo
+  if (edicaoAberta) {
+    comitarEdicaoAberta();
+    renderTudo();
+    elemento = document.querySelector('.assunto.editavel[data-id="' + id + '"]');
+  }
+  const bloco = blocos.find((b) => b.id === id);
+  if (!bloco || !elemento || !elemento.parentNode) return;
+
+  const campo = document.createElement("input");
+  campo.type = "text";
+  campo.className = "assunto-edit";
+  campo.value = bloco.assunto;
+  campo.maxLength = 80;
+  campo.setAttribute("list", "assuntosConhecidos");
+  campo.setAttribute("aria-label", "Corrigir o assunto do bloco");
+  elemento.replaceWith(campo);
+  campo.focus();
+  campo.select();
+
+  let encerrado = false;
+  // aplicar() só grava — quem chama decide quando redesenhar, para o
+  // redesenho nunca engolir uma correção que ainda estava na tela
+  const aplicar = () => {
+    if (encerrado) return false;
+    encerrado = true;
+    edicaoAberta = null;
+    const novo = campo.value.trim();
+    if (!novo || novo === bloco.assunto) return false;
+    bloco.assunto = novo;
+    salvarBlocos();
+    return true;
+  };
+  const gravar = () => {
+    if (encerrado) return;
+    if (aplicar()) mostrarAviso("Assunto corrigido, soberano.");
+    renderTudo();
+  };
+  const desistir = () => {
+    if (encerrado) return;
+    encerrado = true;
+    edicaoAberta = null;
+    renderTudo();
+  };
+  edicaoAberta = aplicar;
+
+  campo.addEventListener("keydown", (e) => {
+    // segura os atalhos globais: aqui espaço é espaço, R é R
+    e.stopPropagation();
+    if (e.key === "Enter") { e.preventDefault(); gravar(); }
+    else if (e.key === "Escape") { e.preventDefault(); desistir(); }
+  });
+  campo.addEventListener("blur", gravar);
+}
+
+/** Liga clique e teclado para editar o assunto dentro de uma lista. */
+function ligarEdicaoDeAssunto(seletor) {
+  const caixa = $(seletor);
+  if (!caixa) return;
+  caixa.addEventListener("click", (e) => {
+    const alvo = e.target.closest(".assunto.editavel");
+    if (alvo) editarAssunto(alvo.dataset.id, alvo);
+  });
+  caixa.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const alvo = e.target.closest(".assunto.editavel");
+    if (!alvo) return;
+    e.preventDefault();
+    e.stopPropagation();
+    editarAssunto(alvo.dataset.id, alvo);
+  });
 }
 
 function apagarBloco(id) {
@@ -1711,7 +1939,8 @@ function renderHoje() {
   alvo.innerHTML = '<div class="lista">' + meus.map((b) =>
     '<div class="item">' +
       '<span class="hora">' + formatarHora(b.fim) + "</span>" +
-      '<span class="assunto">' + escapar(b.assunto) + "</span>" +
+      '<span class="assunto editavel" data-id="' + b.id + '" tabindex="0" role="button" ' +
+        'title="Clique para corrigir o assunto">' + escapar(b.assunto) + "</span>" +
       '<span class="min">' + b.minutos + " min</span>" +
     "</div>"
   ).join("") + "</div>";
@@ -2009,7 +2238,8 @@ function renderHistorico() {
     const c = b.cicloId ? cicloPorId(b.cicloId) : null;
     return '<div class="item">' +
       '<span class="hora">' + formatarDataCurta(b.dia) + " " + formatarHora(b.fim) + "</span>" +
-      '<span class="assunto">' + escapar(b.assunto) + "</span>" +
+      '<span class="assunto editavel" data-id="' + b.id + '" tabindex="0" role="button" ' +
+        'title="Clique para corrigir o assunto">' + escapar(b.assunto) + "</span>" +
       '<span class="ciclo-nome">' + (c ? escapar(c.nome) : "sem ciclo") + "</span>" +
       '<span class="min">' + b.minutos + " min</span>" +
       '<button class="apagar" data-id="' + b.id + '" title="Apagar este registro" aria-label="Apagar">&times;</button>' +
@@ -2053,6 +2283,8 @@ function renderAjustes() {
 }
 
 function renderTudo() {
+  // se houver assunto sendo corrigido, grava antes de refazer as listas
+  comitarEdicaoAberta();
   renderCabecalho();
   renderTimer();
   renderDuracoes();
@@ -2213,6 +2445,15 @@ $("#listaCompleta").addEventListener("click", (e) => {
   const btn = e.target.closest(".apagar");
   if (btn && confirm("Apagar este registro?")) apagarBloco(btn.dataset.id);
 });
+ligarEdicaoDeAssunto("#listaCompleta");
+ligarEdicaoDeAssunto("#listaHoje");
+
+$("#btnPersistir").addEventListener("click", () => pedirArmazenamentoPersistente(true));
+
+$("#modalOrfaos").addEventListener("click", (e) => {
+  if (e.target.id === "modalOrfaos") fecharModalOrfaos();
+});
+$("#orfaosDeixar").addEventListener("click", fecharModalOrfaos);
 
 $("#volume").addEventListener("input", (e) => {
   config.volume = Number(e.target.value) / 100;
@@ -2246,7 +2487,7 @@ document.addEventListener("keydown", (e) => {
   const alvo = e.target;
   const digitando = alvo && (alvo.tagName === "INPUT" || alvo.tagName === "TEXTAREA" || alvo.isContentEditable);
 
-  if (e.key === "Escape") { fecharModalFim(); fecharModalNotif(); return; }
+  if (e.key === "Escape") { fecharModalFim(); fecharModalNotif(); fecharModalOrfaos(); return; }
   if (digitando) {
     // Enter no campo de assunto já começa o bloco
     if (e.key === "Enter" && alvo.id === "assunto" && !T.rodando) { e.preventDefault(); iniciarTimer(); }
@@ -2336,6 +2577,9 @@ function iniciarApp() {
 
   renderAjustes();
   renderTudo();
+
+  // blinda o histórico contra descarte automático do sistema
+  pedirArmazenamentoPersistente(false);
   if (T.assunto) $("#assunto").value = T.assunto === "Sem assunto" ? "" : T.assunto;
   if (T.rodando) ligarLoop();
 
