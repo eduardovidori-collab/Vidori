@@ -335,6 +335,19 @@ canvas{display:block; width:100%; height:auto}
 .modal-corpo .resumo .r{font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--fraco); font-weight:600}
 .modal-botoes{display:flex; gap:10px; flex-wrap:wrap}
 .modal-botoes .btn{flex:1 1 140px}
+.modal-caixa{max-height:calc(100vh - 40px); display:flex; flex-direction:column}
+.modal-corpo{overflow-y:auto}
+#textoNotif p{font-size:14px; margin-bottom:4px}
+.rotulo-passos{
+  font-size:11px; text-transform:uppercase; letter-spacing:.1em; font-weight:700;
+  color:var(--vermelho); margin-top:16px !important;
+}
+.passos{margin:6px 0 0; padding-left:20px; font-size:13.5px; line-height:1.6}
+.passos li{margin-bottom:3px}
+#textoNotif code{
+  background:#F1F2F5; border:1px solid var(--borda); border-radius:5px;
+  padding:1px 5px; font-size:12px; word-break:break-all;
+}
 
 /* ------------------------------------------------------------------ avisos */
 #avisos{position:fixed; right:18px; bottom:18px; z-index:80; display:grid; gap:10px; max-width:340px}
@@ -626,6 +639,20 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <div class="frase" id="fraseFim">Bloco fechado, soberano.</div>
       <div class="resumo" id="resumoFim"></div>
       <div class="modal-botoes" id="botoesFim"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== MODAL: AJUDA DE NOTIFICAÇÕES -->
+<div class="modal" id="modalNotif" role="dialog" aria-modal="true" aria-labelledby="tituloNotif">
+  <div class="modal-caixa">
+    <div class="faixas"></div>
+    <div class="modal-corpo">
+      <div class="frase" id="tituloNotif">Liberar as notificações</div>
+      <div id="textoNotif"></div>
+      <div class="modal-botoes" style="margin-top:18px">
+        <button class="btn btn-principal" id="notifFechar">Entendi</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1035,8 +1062,36 @@ async function pedirPermissaoNotificacao() {
     mostrarAviso("Este navegador não tem notificações.");
     return;
   }
-  try { await Notification.requestPermission(); } catch (e) {}
+  // Já bloqueado: o navegador nem chega a mostrar a caixa de permissão.
+  if (Notification.permission === "denied") {
+    abrirAjudaNotificacao(false);
+    return;
+  }
+
+  let resposta = "default";
+  try {
+    resposta = await Notification.requestPermission();
+  } catch (e) {
+    // Navegadores antigos usam callback em vez de promessa.
+    try {
+      Notification.requestPermission(() => renderNotifBotao());
+      return;
+    } catch (e2) {
+      mostrarAviso("Não consegui pedir a permissão aqui.");
+      return;
+    }
+  }
+
   renderNotifBotao();
+  if (resposta === "granted") {
+    mostrarAviso("Notificações liberadas, soberano.");
+    notificar("Vidori", "Pronto, " + NOME + ". Agora eu te aviso mesmo minimizado.");
+  } else if (resposta === "denied") {
+    abrirAjudaNotificacao(false);
+  } else {
+    // "default": o navegador suprimiu o pedido sem perguntar nada ao usuário.
+    abrirAjudaNotificacao(true);
+  }
 }
 
 function renderNotifBotao() {
@@ -1047,17 +1102,64 @@ function renderNotifBotao() {
     return;
   }
   const p = Notification.permission;
+  // O botão nunca fica desabilitado: quando está bloqueado, ele abre o passo a
+  // passo. Na janela do app instalado não existe barra de endereço, então o
+  // usuário não tem como descobrir isso sozinho.
+  btn.disabled = false;
   if (p === "granted") {
-    btn.textContent = "Testar"; btn.disabled = false;
+    btn.textContent = "Testar";
     desc.textContent = "Liberadas. O app avisa mesmo minimizado.";
   } else if (p === "denied") {
-    btn.textContent = "Bloqueadas"; btn.disabled = true;
-    desc.textContent = "Bloqueadas no navegador — libera no cadeado da barra de endereço.";
+    btn.textContent = "Como liberar";
+    desc.textContent = "Bloqueadas para este site. Clica aqui pra ver o passo a passo.";
   } else {
-    btn.textContent = "Permitir"; btn.disabled = false;
+    btn.textContent = "Permitir";
     desc.textContent = "Avisa mesmo com o app minimizado.";
   }
 }
+
+/** Passo a passo de desbloqueio, com o caminho certo para app instalado. */
+function abrirAjudaNotificacao(engolido) {
+  const endereco = location.origin + location.pathname;
+  const instalado = window.matchMedia("(display-mode: standalone)").matches ||
+                    window.matchMedia("(display-mode: window-controls-overlay)").matches;
+
+  $("#tituloNotif").textContent = engolido
+    ? "O navegador engoliu o pedido"
+    : "Notificações bloqueadas para este site";
+
+  $("#textoNotif").innerHTML =
+    "<p>" + (engolido
+      ? "O Chrome às vezes esconde o pedido de permissão em vez de mostrar a caixa. Dá pra liberar na mão:"
+      : "Alguém já respondeu <b>Bloquear</b> para este site. Só o navegador pode desfazer:") + "</p>" +
+    (instalado
+      ? '<p class="rotulo-passos">Pela janela do app (onde tu está agora)</p>' +
+        '<ol class="passos">' +
+          "<li>Clica no menu <b>⋯</b> no canto superior direito desta janela.</li>" +
+          "<li>Vai em <b>Configurações do site</b> (no Edge: <b>Permissões para este site</b>).</li>" +
+          "<li>Em <b>Notificações</b>, troca para <b>Permitir</b>.</li>" +
+          "<li>Fecha e abre o Vidori de novo.</li>" +
+        "</ol>"
+      : "") +
+    '<p class="rotulo-passos">Pelo navegador (caminho mais garantido)</p>' +
+    '<ol class="passos">' +
+      "<li>Abre <code>" + escapar(endereco) + "</code> numa aba normal do Chrome ou Edge.</li>" +
+      "<li>Clica no ícone à esquerda do endereço (cadeado ou controle deslizante).</li>" +
+      "<li>Em <b>Notificações</b>, escolhe <b>Permitir</b>.</li>" +
+      "<li>Volta pro app instalado — a permissão vale para os dois.</li>" +
+    "</ol>" +
+    '<p class="rotulo-passos">Se mesmo assim não aparecer nada</p>' +
+    '<ol class="passos">' +
+      "<li>Windows: <b>Configurações → Sistema → Notificações</b>, confere se o Chrome/Edge está ligado.</li>" +
+      "<li>Desliga o <b>Assistente de foco</b> / <b>Não perturbe</b>.</li>" +
+    "</ol>" +
+    '<p class="dica">Sem notificação o timer não para de funcionar: o alarme toca e o ' +
+    "título da janela continua mostrando o tempo, " + NOME + ".</p>";
+
+  $("#modalNotif").classList.add("aberto");
+  setTimeout(() => $("#notifFechar") && $("#notifFechar").focus(), 60);
+}
+function fecharModalNotif() { $("#modalNotif").classList.remove("aberto"); }
 
 /* --------------------------------------------------------------------------
    7. AVISOS FLUTUANTES
@@ -2120,8 +2222,12 @@ $("#volume").addEventListener("change", () => tocarAlarme("pausa"));
 $("#mudo").addEventListener("change", (e) => { config.mudo = e.target.checked; salvarConfig(); });
 $("#btnTestarSom").addEventListener("click", () => { acordarAudio(); tocarAlarme("foco"); });
 $("#btnNotif").addEventListener("click", () => {
+  if (!("Notification" in window)) return;
   if (Notification.permission === "granted") {
     notificar("Vidori", "Notificação de teste. Fé, " + NOME + ".");
+    // Se o Windows estiver com as notificações desligadas, nada aparece na tela;
+    // o aviso interno confirma que o app fez a parte dele.
+    mostrarAviso("Mandei uma notificação de teste. Se não apareceu, o bloqueio é do Windows.");
   } else {
     pedirPermissaoNotificacao();
   }
@@ -2130,13 +2236,17 @@ $("#btnNotif").addEventListener("click", () => {
 $("#modalFim").addEventListener("click", (e) => {
   if (e.target.id === "modalFim") fecharModalFim();
 });
+$("#modalNotif").addEventListener("click", (e) => {
+  if (e.target.id === "modalNotif") fecharModalNotif();
+});
+$("#notifFechar").addEventListener("click", fecharModalNotif);
 
 /* atalhos de teclado: espaço, R, S e 1–4 */
 document.addEventListener("keydown", (e) => {
   const alvo = e.target;
   const digitando = alvo && (alvo.tagName === "INPUT" || alvo.tagName === "TEXTAREA" || alvo.isContentEditable);
 
-  if (e.key === "Escape") { fecharModalFim(); return; }
+  if (e.key === "Escape") { fecharModalFim(); fecharModalNotif(); return; }
   if (digitando) {
     // Enter no campo de assunto já começa o bloco
     if (e.key === "Enter" && alvo.id === "assunto" && !T.rodando) { e.preventDefault(); iniciarTimer(); }
