@@ -1878,61 +1878,116 @@ function badalada(ctx, t, base, volume, destino, forcaDaBatida) {
   batidaCaixa(ctx, t, volume * 0.16 * forcaDaBatida, saida, 3400, 0.035);
 }
 
-/** Fim de pausa: sino chamando os times de volta. */
+/** Fim de pausa: sino chamando os times de volta. Três badaladas. */
 function montarSino(ctx, inicio, volume, destino) {
   const forca = Math.max(0.02, Math.min(1, volume));
   badalada(ctx, inicio, 524, forca, destino, 1);
-  badalada(ctx, inicio + 0.86, 524, forca, destino, 0.75);
+  badalada(ctx, inicio + 0.78, 524, forca, destino, 0.80);
+  badalada(ctx, inicio + 1.56, 524, forca, destino, 0.64);
 }
 
-/** Assobio de subida do rojão. */
-function subidaDeFogo(ctx, t, dur, volume, destino) {
-  const osc = ctx.createOscillator();
-  const g = ctx.createGain();
-  osc.type = "sine";
-  osc.frequency.setValueAtTime(380, t);
-  osc.frequency.exponentialRampToValueAtTime(1750, t + dur);
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(volume * 0.09, t + 0.05);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  osc.connect(g); g.connect(destino || ctx.destination);
-  osc.start(t); osc.stop(t + dur + 0.02);
+/* ------------------------------------------------------------ fogos */
+
+/** Ruído branco cru, base das camadas de estouro. */
+function bufferDeRuido(ctx, segundos) {
+  const n = Math.ceil(ctx.sampleRate * segundos);
+  const buf = ctx.createBuffer(1, n, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+  return buf;
 }
 
 /**
- * Um estouro: corpo grave caindo de altura, estalo seco e a crepitação
- * espalhada depois. A crepitação é o que faz virar fogo de artifício em vez
- * de um bumbo.
+ * Crepitação num buffer só: dezenas de estalos de 2 a 8 ms em tempos
+ * aleatórios, cada um com decaimento próprio. Antes eu somava um nó por
+ * estalo, poucos e longos demais, e o resultado era chiado em vez de crepitar.
  */
-function estouroDeFogo(ctx, t, volume, destino, grave, estalinhos) {
-  const saida = destino || ctx.destination;
-  const osc = ctx.createOscillator();
-  const g = ctx.createGain();
-  osc.type = "sine";
-  osc.frequency.setValueAtTime(grave * 2.6, t);
-  osc.frequency.exponentialRampToValueAtTime(grave, t + 0.13);
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(volume * 0.46, t + 0.006);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
-  osc.connect(g); g.connect(saida);
-  osc.start(t); osc.stop(t + 0.46);
-
-  batidaCaixa(ctx, t, volume * 0.30, saida, 900, 0.14);
-  for (let i = 0; i < estalinhos; i++) {
-    batidaCaixa(ctx, t + 0.06 + Math.random() * 0.85,
-                volume * (0.03 + Math.random() * 0.06), saida,
-                2800 + Math.random() * 2400, 0.02 + Math.random() * 0.03);
+function bufferDeCrepitacao(ctx, segundos, densidade) {
+  const n = Math.ceil(ctx.sampleRate * segundos);
+  const buf = ctx.createBuffer(1, n, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  const quantos = Math.round(segundos * densidade);
+  for (let k = 0; k < quantos; k++) {
+    const ini = Math.floor(Math.random() * n);
+    const dur = Math.floor(ctx.sampleRate * (0.002 + Math.random() * 0.006));
+    const amp = 0.25 + Math.random() * 0.75;
+    for (let i = 0; i < dur && ini + i < n; i++) {
+      d[ini + i] += (Math.random() * 2 - 1) * amp * Math.pow(1 - i / dur, 3);
+    }
   }
+  return buf;
+}
+
+/** O rojão subindo: ruído num passa-faixa que sobe, não um seno. */
+function subidaDeFogo(ctx, t, dur, volume, destino) {
+  const src = ctx.createBufferSource();
+  src.buffer = bufferDeRuido(ctx, dur + 0.06);
+  const bp = ctx.createBiquadFilter();
+  bp.type = "bandpass"; bp.Q.value = 9;
+  bp.frequency.setValueAtTime(520, t);
+  bp.frequency.exponentialRampToValueAtTime(2300, t + dur);
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(volume * 0.15, t + dur * 0.55);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(bp); bp.connect(g); g.connect(destino || ctx.destination);
+  src.start(t); src.stop(t + dur + 0.06);
+}
+
+/**
+ * Um estouro. Explosão é RUÍDO, não tom.
+ *
+ * A primeira versão usava um seno caindo de 160 para 62 Hz — que é a receita
+ * exata de um bumbo, e por isso não soava como fogo de artifício. Agora são
+ * quatro camadas de ruído filtrado:
+ *   estalo, ataque em 3 ms e agudo;
+ *   corpo, com o passa-baixa fechando de 5 kHz para 220 Hz;
+ *   ronco grave, decaindo mais devagar que o resto;
+ *   crepitação densa espalhada pela cauda.
+ */
+function estouroDeFogo(ctx, t, volume, destino, tamanho) {
+  const saida = destino || ctx.destination;
+  const dur = 0.55 * tamanho;
+
+  const camada = (buffer, filtro, pico, ataque, queda, atraso) => {
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    const g = ctx.createGain();
+    const t0 = t + (atraso || 0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(pico, t0 + ataque);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + queda);
+    src.connect(filtro); filtro.connect(g); g.connect(saida);
+    src.start(t0); src.stop(t0 + queda + 0.05);
+  };
+
+  const agudo = ctx.createBiquadFilter();
+  agudo.type = "highpass"; agudo.frequency.value = 1800;
+  camada(bufferDeRuido(ctx, 0.12), agudo, volume * 0.40, 0.003, 0.07);
+
+  const corpo = ctx.createBiquadFilter();
+  corpo.type = "lowpass";
+  corpo.frequency.setValueAtTime(5200, t);
+  corpo.frequency.exponentialRampToValueAtTime(220, t + dur * 0.75);
+  camada(bufferDeRuido(ctx, dur + 0.1), corpo, volume * 0.46, 0.004, dur);
+
+  const ronco = ctx.createBiquadFilter();
+  ronco.type = "lowpass"; ronco.frequency.value = 140;
+  camada(bufferDeRuido(ctx, dur + 0.35), ronco, volume * 0.5, 0.02, dur + 0.25);
+
+  const brilho = ctx.createBiquadFilter();
+  brilho.type = "highpass"; brilho.frequency.value = 2600;
+  camada(bufferDeCrepitacao(ctx, 1.0, 75), brilho, volume * 0.26, 0.06, 0.95, 0.03);
 }
 
 /** Fim de bloco: fogos por cima do estádio. */
 function montarFogos(ctx, inicio, volume, destino) {
   const forca = Math.max(0.02, Math.min(1, volume));
-  subidaDeFogo(ctx, inicio, 0.40, forca, destino);
-  estouroDeFogo(ctx, inicio + 0.42, forca, destino, 62, 16);
-  subidaDeFogo(ctx, inicio + 0.55, 0.34, forca * 0.8, destino);
-  estouroDeFogo(ctx, inicio + 0.91, forca * 0.9, destino, 78, 14);
-  estouroDeFogo(ctx, inicio + 1.34, forca * 0.85, destino, 52, 18);
+  subidaDeFogo(ctx, inicio, 0.42, forca, destino);
+  estouroDeFogo(ctx, inicio + 0.44, forca, destino, 1);
+  subidaDeFogo(ctx, inicio + 0.34, 0.38, forca * 0.75, destino);
+  estouroDeFogo(ctx, inicio + 0.76, forca * 0.85, destino, 0.85);
+  estouroDeFogo(ctx, inicio + 1.24, forca * 0.9, destino, 1.1);
 }
 
 /* ---------------------------------------------------- catálogo de sons */
@@ -1947,7 +2002,7 @@ const SONS = {
     padrao:  { nome: "Apito de árbitro", desc: "Dois toques curtos e um longo.", preco: 0,  montar: montarApitoPadrao },
     final:   { nome: "Apito final", desc: "Uma rajada só, longa e mais grave.", preco: 10, montar: montarApitoFinal },
     pressao: { nome: "Apito de pressão", desc: "Cinco toques secos e agudos. Urgente.", preco: 15, montar: montarApitoPressao },
-    sino:    { nome: "Sino da entrada", desc: "Duas badaladas chamando os times de volta pro gramado. Nada de apito.", preco: 20, montar: montarSino }
+    sino:    { nome: "Sino da entrada", desc: "Três badaladas chamando os times de volta pro gramado. Nada de apito.", preco: 20, montar: montarSino }
   }
 };
 
