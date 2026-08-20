@@ -1884,6 +1884,12 @@ const MELHORIAS_ESTADIO = {
     desc: "Laje suspensa sobre os quatro setores, com pilares e a sombra caindo nos assentos.",
     preco: 60,
     tipo: "estadio"
+  },
+  anel: {
+    nome: "Segundo anel",
+    desc: "Mais um anel de arquibancada acima do atual, recuado do campo. A cobertura sobe junto.",
+    preco: 90,
+    tipo: "estadio"
   }
 };
 
@@ -4032,6 +4038,9 @@ const EST = {
   pista: 9,                     // faixa entre a linha e a arquibancada
   arqFundo: 21, arqAlt: 8,      // profundidade e altura das arquibancadas
   assentos: 10,                 // quanto da arquibancada é assento
+  recuoAnel: 9, altAnel: 6,     // o anel de cima recua do campo e sobe menos
+  assentosAnel: 7,
+  recuoCobertura: 7,            // a laje para antes da beirada do convés
   torreX: 57, torreY: 38        // torres encaixadas no vão de canto
 };
 
@@ -4042,6 +4051,7 @@ const CORES_EST = {
   campo: "#2E7D32", campoTerra: "#B0794D",
   linha: "#F4F7F5",
   arqTopo: "#CFD3D8", arqDir: "#AAB0B8", arqEsq: "#8D949E",
+  anelTopo: "#D8DCE0", anelDir: "#B4BAC1", anelEsq: "#979EA7",
   assento: "#C62828", assentoLinha: "#8E1B1B",
   mosaicoClaro: "#FFFFFF", mosaicoEscuro: "#1E2429",
   mosaicoLinha: "rgba(0,0,0,.26)",
@@ -4056,6 +4066,29 @@ const CORES_EST = {
 function temCobertura() { return temItem("estadio", "cobertura"); }
 function temGrama()     { return temItem("estadio", "grama"); }
 function temMosaico()   { return temItem("estadio", "mosaico"); }
+function temAnel()      { return temItem("estadio", "anel"); }
+
+/** Copia o retângulo do setor recuando a borda que dá pro campo. */
+function recuarDoCampo(a, d) {
+  const b = { perto: a.perto, aoLongoDeX: a.aoLongoDeX,
+              x0: a.x0, y0: a.y0, x1: a.x1, y1: a.y1 };
+  if (a.perto === "x1") b.x1 -= d;
+  else if (a.perto === "x0") b.x0 += d;
+  else if (a.perto === "y1") b.y1 -= d;
+  else b.y0 += d;
+  return b;
+}
+
+/**
+ * O convés mais alto do setor: sem o segundo anel é o próprio bloco, com ele
+ * é o anel de cima. A cobertura e a sombra se apoiam nisso, então subir um
+ * andar não exige mexer nelas.
+ */
+function convesDeCima(a) {
+  return temAnel()
+    ? { r: recuarDoCampo(a, EST.recuoAnel), z: EST.arqAlt + EST.altAnel }
+    : { r: a, z: EST.arqAlt };
+}
 
 /**
  * Cobertura: laje suspensa sobre o setor, apoiada em pilares na borda de fora
@@ -4064,11 +4097,14 @@ function temMosaico()   { return temItem("estadio", "mosaico"); }
  */
 function coberturaDe(a) {
   const C = CORES_EST;
-  const zPilar = EST.arqAlt, zLaje = zPilar + 4, zTopo = zLaje + 1.2;
+  // apoia no convés mais alto: com o segundo anel, a laje sobe um andar
+  const conves = convesDeCima(a);
+  const zPilar = conves.z, zLaje = zPilar + 4, zTopo = zLaje + 1.2;
   const fora = 2, ponta = 1;
   // A laje NÃO avança sobre o campo e para antes da beirada: cobrindo o setor
   // inteiro, os assentos sumiam e o estádio virava um anel branco liso.
-  const recuo = 7;
+  const recuo = EST.recuoCobertura;
+  a = conves.r;
 
   let x0 = a.x0, x1 = a.x1, y0 = a.y0, y1 = a.y1;
   if (a.perto === "x1")      { x1 -= recuo; x0 -= fora; y0 -= ponta; y1 += ponta; }
@@ -4094,13 +4130,14 @@ function coberturaDe(a) {
   return s;
 }
 
-/** Uma arquibancada: bloco de concreto com faixa de assentos virada pro campo. */
-function arquibancada(a) {
-  const C = CORES_EST, z = EST.arqAlt;
-  let s = caixa(a.x0, a.y0, a.x1, a.y1, 0, z, C.arqTopo, C.arqDir, C.arqEsq);
-
-  // faixa de assentos, encostada na borda que dá pro campo
-  const d = EST.assentos;
+/**
+ * A faixa de assentos de um convés, encostada na borda que dá pro campo.
+ * Os dois anéis usam a mesma função, então o mosaico vale para os dois sem
+ * nada duplicado.
+ */
+function assentosDe(a, z, d) {
+  const C = CORES_EST;
+  let s = "";
   let sx0 = a.x0, sy0 = a.y0, sx1 = a.x1, sy1 = a.y1;
   if (a.perto === "x1") sx0 = a.x1 - d;
   else if (a.perto === "x0") sx1 = a.x0 + d;
@@ -4137,15 +4174,30 @@ function arquibancada(a) {
       ? traco([[sx0, sy0 + (sy1 - sy0) * t, z], [sx1, sy0 + (sy1 - sy0) * t, z]], corLinha, 0.7, opLinha)
       : traco([[sx0 + (sx1 - sx0) * t, sy0, z], [sx0 + (sx1 - sx0) * t, sy1, z]], corLinha, 0.7, opLinha);
   }
+  return s;
+}
+
+/** Uma arquibancada: um ou dois anéis de concreto com assentos virados pro campo. */
+function arquibancada(a) {
+  const C = CORES_EST, z1 = EST.arqAlt;
+  let s = caixa(a.x0, a.y0, a.x1, a.y1, 0, z1, C.arqTopo, C.arqDir, C.arqEsq);
+  s += assentosDe(a, z1, EST.assentos);
+
+  if (temAnel()) {
+    // o anel de cima ocupa só a parte de fora, senão taparia o campo
+    const cima = recuarDoCampo(a, EST.recuoAnel);
+    const z2 = z1 + EST.altAnel;
+    s += caixa(cima.x0, cima.y0, cima.x1, cima.y1, z1, z2,
+               C.anelTopo, C.anelDir, C.anelEsq);
+    s += assentosDe(cima, z2, EST.assentosAnel);
+  }
 
   if (temCobertura()) {
-    // sombra só nas fileiras que ficam debaixo da laje
-    const r = 7;
-    let hx0 = a.x0, hx1 = a.x1, hy0 = a.y0, hy1 = a.y1;
-    if (a.perto === "x1") hx1 -= r; else if (a.perto === "x0") hx0 += r;
-    else if (a.perto === "y1") hy1 -= r; else hy0 += r;
-    s += poligono([[hx0, hy0, z + 0.05], [hx1, hy0, z + 0.05],
-                   [hx1, hy1, z + 0.05], [hx0, hy1, z + 0.05]], C.sombra);
+    const conves = convesDeCima(a);
+    const h = recuarDoCampo(conves.r, EST.recuoCobertura);
+    const zs = conves.z + 0.05;
+    s += poligono([[h.x0, h.y0, zs], [h.x1, h.y0, zs],
+                   [h.x1, h.y1, zs], [h.x0, h.y1, zs]], C.sombra);
     s += coberturaDe(a);
   }
   return s;
@@ -4243,7 +4295,7 @@ function renderEstadio() {
   const caixaEl = $("#caixaEstadio");
   if (!caixaEl) return;
   const assinatura = (temGrama() ? "g" : "-") + (temCobertura() ? "c" : "-") +
-                     (temMosaico() ? "m" : "-");
+                     (temMosaico() ? "m" : "-") + (temAnel() ? "a" : "-");
   if (estadioAssinatura === assinatura) return;
   caixaEl.innerHTML = desenharEstadio();
   estadioAssinatura = assinatura;
@@ -4276,6 +4328,7 @@ function fraseDoEstadio() {
   const feitas = [];
   if (temGrama()) feitas.push("grama no chão");
   if (temMosaico()) feitas.push("mosaico tricolor nos assentos");
+  if (temAnel()) feitas.push("segundo anel de arquibancada");
   if (temCobertura()) feitas.push("arquibancada coberta");
 
   if (!feitas.length) {
@@ -4285,7 +4338,8 @@ function fraseDoEstadio() {
   const lista = feitas.length === 1
     ? feitas[0]
     : feitas.slice(0, -1).join(", ") + " e " + feitas[feitas.length - 1];
-  const fecho = feitas.length === 3
+  const total = Object.keys(MELHORIAS_ESTADIO).length;
+  const fecho = feitas.length === total
     ? "Casa de decisão, soberano."
     : (temGrama() ? "A obra vai andando." : "A obra vai por partes — o campo ainda é terra.");
   return lista.charAt(0).toUpperCase() + lista.slice(1) + ". " + fecho;
