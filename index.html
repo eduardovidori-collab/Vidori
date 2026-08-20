@@ -2701,9 +2701,11 @@ function concluirTempo() {
     tocarGol();
     const msg = falar("concluir", { min: humanoMin(minutos), assunto: assunto });
     notificar("Vidori — bloco concluído", msg);
-    abrirModalFim(msg, minutos, assunto);
     depoisDeRegistrar();
+    // a pausa é definida ANTES de ser anunciada: o modal só lê o que já está
+    // valendo, em vez de calcular por conta própria e arriscar divergir
     entrarEmPausa(false);
+    abrirModalFim(msg, minutos, assunto);
   } else {
     // fim da pausa: apito de árbitro mandando voltar pro jogo
     tocarApito();
@@ -3343,14 +3345,17 @@ function abrirModalFim(frase, minutos, assunto) {
     '<div><div class="v">' + humanoMin(hojeMin) + '</div><div class="r">hoje</div></div>' +
     '<div><div class="v">' + sequenciaAtual() + '</div><div class="r">dias seguidos</div></div>';
 
-  const proxima = pausaQueVem();
+  // lê a pausa que já foi definida, em vez de recalcular: chamar
+  // entrarEmPausa() de novo daqui zerava a série duas vezes e a pausa longa
+  // virava curta na hora de começar
+  const minPausa = Math.round(T.alvoMs / 60000);
   $("#botoesFim").innerHTML =
     '<button class="btn btn-principal" id="fimPausa">' +
-      (proxima.longa ? "Pausa longa de " : "Pausa de ") + proxima.minutos + " min</button>" +
+      (T.pausaLonga ? "Pausa longa de " : "Pausa de ") + minPausa + " min</button>" +
     '<button class="btn btn-preto" id="fimNovo">Novo bloco</button>' +
     '<button class="btn" id="fimFechar">Fechar</button>';
 
-  $("#fimPausa").onclick  = () => { fecharModalFim(); entrarEmPausa(true); };
+  $("#fimPausa").onclick  = () => { fecharModalFim(); iniciarTimer(); };
   $("#fimNovo").onclick   = () => { fecharModalFim(); voltarParaFoco(false); iniciarTimer(); };
   $("#fimFechar").onclick = () => fecharModalFim();
 
