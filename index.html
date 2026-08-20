@@ -839,7 +839,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
         <div><b>Volume</b><div class="desc">Sons gerados pelo próprio app, sem arquivo externo.</div></div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <input type="range" id="volume" min="0" max="100" step="5">
-          <button class="btn btn-pequeno" id="btnTestarSom">Alarme</button>
+          <button class="btn btn-pequeno" id="btnTestarSom">Gol</button>
           <button class="btn btn-pequeno" id="btnTestarApito">Apito</button>
         </div>
       </div>
@@ -1359,36 +1359,139 @@ function acordarAudio() {
   } catch (e) { return null; }
 }
 
-/**
- * Toca o alarme. "foco" = três toques subindo, repetidos (mais chamativo);
- * "pausa" = dois toques descendo, mais discreto.
- */
-function tocarAlarme(tipo) {
+/** Bipe curto e discreto, só para conferir o volume ao mexer no controle. */
+function bipeCurto() {
   if (config.mudo || config.volume <= 0) return;
   const ctx = acordarAudio();
   if (!ctx) return;
-
-  const notas = (tipo === "foco") ? [523.25, 659.25, 783.99] : [783.99, 587.33];
-  const repeticoes = (tipo === "foco") ? 3 : 2;
-  const pico = Math.max(0.02, Math.min(1, config.volume)) * 0.32;
+  const pico = Math.max(0.02, Math.min(1, config.volume)) * 0.3;
   const t0 = ctx.currentTime + 0.03;
+  [783.99, 587.33].forEach((freq, i) => {
+    const inicio = t0 + i * 0.16;
+    const osc = ctx.createOscillator();
+    const ganho = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.value = freq;
+    ganho.gain.setValueAtTime(0.0001, inicio);
+    ganho.gain.exponentialRampToValueAtTime(pico, inicio + 0.02);
+    ganho.gain.exponentialRampToValueAtTime(0.0001, inicio + 0.6);
+    osc.connect(ganho);
+    ganho.connect(ctx.destination);
+    osc.start(inicio);
+    osc.stop(inicio + 0.64);
+  });
+}
 
-  for (let r = 0; r < repeticoes; r++) {
-    notas.forEach((freq, i) => {
-      const inicio = t0 + r * (notas.length * 0.16 + 0.34) + i * 0.16;
-      const osc = ctx.createOscillator();
-      const ganho = ctx.createGain();
-      osc.type = "triangle";
-      osc.frequency.value = freq;
-      ganho.gain.setValueAtTime(0.0001, inicio);
-      ganho.gain.exponentialRampToValueAtTime(pico, inicio + 0.02);
-      ganho.gain.exponentialRampToValueAtTime(0.0001, inicio + 0.62);
-      osc.connect(ganho);
-      ganho.connect(ctx.destination);
-      osc.start(inicio);
-      osc.stop(inicio + 0.66);
-    });
+/**
+ * GOL: buzina de estádio somada ao ronco da torcida.
+ *
+ * A torcida é ruído ROSA, não branco — ruído branco soa como chuveiro, o rosa
+ * tem mais energia grave e passa como massa de vozes. Ele é dividido em dois
+ * filtros: um corpo em ~900 Hz, que é o grito, e um passa-baixa grave, que é o
+ * ronco do estádio. Um oscilador lento por cima faz o volume ondular, que é o
+ * vaivém da arquibancada.
+ *
+ * Recebe um destino próprio para dar pra renderizar fora do alto-falante e
+ * conferir o resultado.
+ */
+function montarGol(ctx, inicio, volume, destino) {
+  const saida = destino || ctx.destination;
+  const forca = Math.max(0.02, Math.min(1, volume));
+  const dur = 2.6;
+
+  /* ---------------------------------------------------------- a torcida */
+  const amostras = Math.ceil(ctx.sampleRate * dur);
+  const buffer = ctx.createBuffer(1, amostras, ctx.sampleRate);
+  const dados = buffer.getChannelData(0);
+  let b0 = 0, b1 = 0, b2 = 0;
+  for (let i = 0; i < amostras; i++) {
+    const branco = Math.random() * 2 - 1;
+    b0 = 0.99765 * b0 + branco * 0.0990460;
+    b1 = 0.96300 * b1 + branco * 0.2965164;
+    b2 = 0.57000 * b2 + branco * 1.0526913;
+    dados[i] = (b0 + b1 + b2 + branco * 0.1848) * 0.25;
   }
+  const ruido = ctx.createBufferSource();
+  ruido.buffer = buffer;
+
+  const corpo = ctx.createBiquadFilter();
+  corpo.type = "bandpass"; corpo.frequency.value = 900; corpo.Q.value = 0.7;
+  const ronco = ctx.createBiquadFilter();
+  ronco.type = "lowpass"; ronco.frequency.value = 220;
+  // terceira camada: o ruído rosa cai 3 dB por oitava, então sem reforçar o
+  // agudo a torcida soava só como ronco. Esta faixa é o grito por cima.
+  const brilho = ctx.createBiquadFilter();
+  brilho.type = "bandpass"; brilho.frequency.value = 2400; brilho.Q.value = 0.9;
+
+  const gCorpo = ctx.createGain(); gCorpo.gain.value = 1;
+  const gRonco = ctx.createGain(); gRonco.gain.value = 0.7;
+  const gBrilho = ctx.createGain(); gBrilho.gain.value = 1.5;
+
+  const torcida = ctx.createGain();
+  const pico = forca * 0.34;
+  torcida.gain.setValueAtTime(0.0001, inicio);
+  torcida.gain.exponentialRampToValueAtTime(pico, inicio + 0.30);        // explode
+  torcida.gain.linearRampToValueAtTime(pico * 0.70, inicio + 0.95);      // respira
+  torcida.gain.linearRampToValueAtTime(pico * 0.90, inicio + 1.35);      // segunda onda
+  // a queda vai em duas etapas: só exponencial, o som morria em 1,5 s e a
+  // cauda ficava muda em vez de virar aquele resto de grito se afastando
+  torcida.gain.linearRampToValueAtTime(pico * 0.42, inicio + 1.95);
+  torcida.gain.exponentialRampToValueAtTime(0.0001, inicio + dur - 0.05);
+
+  const onda = ctx.createOscillator();
+  const ondaGanho = ctx.createGain();
+  onda.type = "sine";
+  onda.frequency.value = 3.2;
+  ondaGanho.gain.value = forca * 0.05;
+  onda.connect(ondaGanho);
+  ondaGanho.connect(torcida.gain);
+  onda.start(inicio);
+  onda.stop(inicio + dur);
+
+  ruido.connect(corpo);  corpo.connect(gCorpo);   gCorpo.connect(torcida);
+  ruido.connect(ronco);  ronco.connect(gRonco);   gRonco.connect(torcida);
+  ruido.connect(brilho); brilho.connect(gBrilho); gBrilho.connect(torcida);
+  torcida.connect(saida);
+  ruido.start(inicio);
+  ruido.stop(inicio + dur);
+
+  /* ----------------------------------------------------------- a buzina */
+  [[0.00, 0.72], [0.92, 0.52]].forEach((par) => {
+    const t = inicio + par[0], fim = t + par[1];
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(forca * 0.11, t + 0.03);
+    env.gain.setValueAtTime(forca * 0.11, fim - 0.10);
+    env.gain.exponentialRampToValueAtTime(0.0001, fim);
+
+    // tira o excesso de agudo da serra, senão a buzina fica áspera demais
+    const suave = ctx.createBiquadFilter();
+    suave.type = "lowpass";
+    suave.frequency.value = 1900;
+    env.connect(suave);
+    suave.connect(saida);
+
+    [[233.08, 1], [311.13, 0.8], [466.16, 0.35]].forEach((n) => {
+      const osc = ctx.createOscillator();
+      osc.type = "sawtooth";
+      osc.frequency.value = n[0];
+      osc.detune.value = (Math.random() * 8) - 4;   // desafina de leve: soa real
+      const g = ctx.createGain();
+      g.gain.value = n[1];
+      osc.connect(g);
+      g.connect(env);
+      osc.start(t);
+      osc.stop(fim + 0.02);
+    });
+  });
+}
+
+/** Fim de bloco de foco: a bola entrou. */
+function tocarGol() {
+  if (config.mudo || config.volume <= 0) return;
+  const ctx = acordarAudio();
+  if (!ctx) return;
+  montarGol(ctx, ctx.currentTime + 0.03, config.volume);
 }
 
 /**
@@ -2171,7 +2274,7 @@ function concluirTempo() {
     registrarBloco(T.inicioBloco || (Date.now() - T.alvoMs), Date.now(), assunto, minutos);
     T.blocosNaSerie = (T.blocosNaSerie || 0) + 1;
 
-    tocarAlarme("foco");
+    tocarGol();
     const msg = falar("concluir", { min: humanoMin(minutos), assunto: assunto });
     notificar("Vidori — bloco concluído", msg);
     abrirModalFim(msg, minutos, assunto);
@@ -3574,9 +3677,9 @@ $("#volume").addEventListener("input", (e) => {
   config.volume = Number(e.target.value) / 100;
   salvarConfig();
 });
-$("#volume").addEventListener("change", () => tocarAlarme("pausa"));
+$("#volume").addEventListener("change", bipeCurto);
 $("#mudo").addEventListener("change", (e) => { config.mudo = e.target.checked; salvarConfig(); });
-$("#btnTestarSom").addEventListener("click", () => { acordarAudio(); tocarAlarme("foco"); });
+$("#btnTestarSom").addEventListener("click", () => { acordarAudio(); tocarGol(); });
 $("#btnNotif").addEventListener("click", () => {
   if (!("Notification" in window)) return;
   if (Notification.permission === "granted") {
