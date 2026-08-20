@@ -852,6 +852,10 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
             É troco do que já foi estudado — nada além disso.</p>
         </div>
       </div>
+      <div class="controles" style="margin-top:16px">
+        <button class="btn btn-pequeno" id="btnZerarSaldo">Zerar saldo</button>
+        <button class="btn btn-pequeno" id="btnResetarLoja">Resetar a loja</button>
+      </div>
     </div>
   </div>
 
@@ -3788,6 +3792,32 @@ function renderLoja() {
   renderAvisoLoja();
 }
 
+/**
+ * Zera o saldo sem tirar nada do que já foi comprado.
+ * Como o saldo é ganhas menos gastas, zerar é igualar as gastas às ganhas —
+ * o histórico de estudo não é tocado.
+ */
+function zerarSaldo() {
+  if (saldoMoedas() === 0) { mostrarAviso("O saldo já está em zero."); return; }
+  if (!confirm("Zerar o saldo?\n\nVocê fica com 0 moedas e mantém tudo que já comprou. " +
+               "O histórico de estudo não muda.\n\nNão tem volta.")) return;
+  loja.gastas = moedasGanhas();
+  salvarLoja();
+  renderLoja();
+  mostrarAviso("Saldo zerado, soberano.");
+}
+
+/** Volta a loja ao estado de fábrica: nada comprado, sons no padrão. */
+function resetarLoja() {
+  if (!confirm("Resetar a loja?\n\nTudo que você comprou volta a ficar bloqueado, os sons " +
+               "voltam ao padrão e o saldo passa a ser tudo que você já ganhou (" +
+               moedasGanhas() + " moedas).\n\nNão tem volta.")) return;
+  loja = { gastas: 0, comprados: [], golAtivo: "padrao", apitoAtivo: "padrao" };
+  salvarLoja();
+  renderLoja();
+  mostrarAviso("Loja resetada. Saldo de volta em " + saldoMoedas() + ".");
+}
+
 /** Bolinha na aba quando dá pra comprar algo que ele ainda não tem. */
 function renderAvisoLoja() {
   const aba = $$(".aba-btn").find((b) => b.dataset.painel === "loja");
@@ -3921,6 +3951,9 @@ function ajustarPausa(chave, valor) {
 $("#btnTestarApito").addEventListener("click", () => { acordarAudio(); tocarApito(); });
 
 /* ------------------------------------------------------------ aba da loja */
+$("#btnZerarSaldo").addEventListener("click", zerarSaldo);
+$("#btnResetarLoja").addEventListener("click", resetarLoja);
+
 document.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-loja]");
   if (!btn || btn.disabled) return;
