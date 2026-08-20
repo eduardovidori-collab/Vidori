@@ -143,19 +143,6 @@ main{max-width:var(--largura); margin:0 auto; padding:22px 20px 60px}
 }
 .pontos-serie i.feito{background:var(--vermelho)}
 .pontos-serie i.longa{background:var(--preto); width:9px; height:9px; margin-top:-1px}
-.dur{
-  flex:1 1 0; min-width:64px;
-  background:var(--branco); border:1.5px solid var(--borda); color:var(--fraco);
-  border-radius:10px; padding:9px 6px; cursor:pointer; font-weight:700; font-size:14px;
-  transition:.15s;
-}
-.dur small{display:block; font-size:10px; font-weight:600; opacity:.6; letter-spacing:.06em}
-.dur:hover{border-color:var(--preto); color:var(--preto)}
-.dur:focus-visible{outline:2px solid var(--vermelho); outline-offset:2px}
-.dur.sel{background:var(--vermelho); border-color:var(--vermelho); color:#fff}
-.dur.sel small{opacity:.85}
-.dur:disabled{opacity:.45; cursor:not-allowed}
-
 .campo{display:grid; gap:6px; margin-bottom:16px}
 .campo label{font-size:12px; font-weight:600; color:var(--fraco); text-transform:uppercase; letter-spacing:.08em}
 input[type=text],input[type=date],input[type=number]{
@@ -554,6 +541,7 @@ select:focus{outline:none; border-color:var(--vermelho); box-shadow:0 0 0 3px rg
   font-variant-numeric:tabular-nums;
 }
 .passo-valor input:focus{outline:none; box-shadow:none; border-bottom-color:var(--vermelho)}
+.passo-valor input:disabled{color:var(--fraco); opacity:.55; cursor:not-allowed}
 .passo-valor input::-webkit-outer-spin-button,
 .passo-valor input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
 .passo-valor input[type=number]{-moz-appearance:textfield}
@@ -650,8 +638,8 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
           <span><kbd>espaço</kbd> iniciar/pausar</span>
           <span><kbd>R</kbd> zerar</span>
           <span><kbd>S</kbd> pular</span>
-          <span><kbd>1</kbd>–<kbd>4</kbd> duração</span>
-          <span><kbd>+</kbd><kbd>−</kbd> 1 min</span>
+          <span><kbd>+</kbd><kbd>−</kbd> ajusta 1 min</span>
+          <span><kbd>1</kbd>–<kbd>4</kbd> tempos rápidos</span>
         </div>
       </div>
     </div>
@@ -2397,36 +2385,33 @@ function passoHTML(id, valor, min, max, unidade, rotulo, extraClasse) {
 
 /* Limites e destino de cada seletor numérico do app. */
 const PASSOS = {
-  valPausaCurta:  { min: 1, max: 90,  aplicar: (v) => ajustarPausa("pausaCurta", v) },
-  valPausaLonga:  { min: 1, max: 180, aplicar: (v) => ajustarPausa("pausaLonga", v) },
-  valBlocosLonga: { min: 0, max: 12,  aplicar: (v) => ajustarPausa("blocosAteLonga", v) },
-  valPausaAtual:  { min: 1, max: 180, aplicar: (v) => definirDuracao(v) }
+  valPausaCurta:   { min: 1, max: 90,  aplicar: (v) => ajustarPausa("pausaCurta", v) },
+  valPausaLonga:   { min: 1, max: 180, aplicar: (v) => ajustarPausa("pausaLonga", v) },
+  valBlocosLonga:  { min: 0, max: 12,  aplicar: (v) => ajustarPausa("blocosAteLonga", v) },
+  valDuracaoAtual: { min: 1, max: 180, aplicar: (v) => definirDuracao(v) }
 };
 
 function renderDuracoes() {
   const naPausa = T.modo === "pausa";
   const atual = naPausa ? Math.round(T.alvoMs / 60000) : config.duracaoFoco;
+  // no foco a duração trava com o bloco rodando: encurtar no meio faria o
+  // histórico registrar menos tempo do que foi realmente estudado
   const travado = !naPausa && T.rodando;
 
   $("#rotuloDuracoes").textContent = naPausa
     ? (T.pausaLonga ? "Duração da pausa longa" : "Duração da pausa")
     : "Duração do bloco";
 
-  if (naPausa) {
-    // na pausa o tempo é livre: dá pra ajustar minuto a minuto, até correndo
-    if (document.getElementById("valPausaAtual")) {
-      atualizarPasso("valPausaAtual", atual, 1, 180);
-    } else {
-      $("#duracoes").innerHTML = passoHTML("valPausaAtual", atual, 1, 180, "min", "", "passo-linha");
-    }
+  // o mesmo seletor serve aos dois modos, então trocar de modo não refaz o HTML
+  if (document.getElementById("valDuracaoAtual")) {
+    atualizarPasso("valDuracaoAtual", atual, 1, 180);
   } else {
-    // no foco os atalhos de duração seguem sendo os mais rápidos
-    $("#duracoes").innerHTML = DURACOES_FOCO.map((m, i) =>
-      '<button class="dur' + (m === atual ? " sel" : "") + '" data-min="' + m + '"' +
-      (travado ? " disabled" : "") + ">" + m +
-      "<small>tecla " + (i + 1) + "</small></button>"
-    ).join("");
+    $("#duracoes").innerHTML = passoHTML("valDuracaoAtual", atual, 1, 180, "min", "", "passo-linha");
   }
+
+  const campo = document.getElementById("valDuracaoAtual");
+  if (campo) campo.disabled = travado;
+  if (travado) $$("#duracoes .passo-btn").forEach((b) => { b.disabled = true; });
 
   renderSerie();
   $("#assunto").disabled = naPausa;
@@ -3434,11 +3419,6 @@ $("#abas").addEventListener("click", (e) => {
   if (btn) irParaPainel(btn.dataset.painel);
 });
 
-$("#duracoes").addEventListener("click", (e) => {
-  const btn = e.target.closest(".dur");
-  if (btn && !btn.disabled) definirDuracao(Number(btn.dataset.min));
-});
-
 /* ---------- seletores numéricos livres: − / + e digitação direta ---------- */
 function limitar(valor, min, max) {
   if (!isFinite(valor)) return min;
@@ -3452,13 +3432,57 @@ function aplicarPasso(id, valor) {
   regra.aplicar(limitar(valor, regra.min, regra.max));
 }
 
+/** Dá um passo a partir do valor que está na tela. Devolve false no limite. */
+function passoDoBotao(btn) {
+  const id = btn.dataset.alvo;
+  const campo = document.getElementById(id);
+  if (!campo) return false;
+  const antes = Number(campo.value);
+  aplicarPasso(id, antes + Number(btn.dataset.delta));
+  const depois = Number((document.getElementById(id) || {}).value);
+  return depois !== antes;
+}
+
+/* Segurar o botão acelera. Sem isso, sair de 30 para 50 min custaria 20
+   cliques — e é justamente o ajuste que ele mais vai fazer. */
+let esperaRepeticao = null, intervaloRepeticao = null, instantePonteiro = 0;
+
+function pararRepeticao() {
+  clearTimeout(esperaRepeticao); esperaRepeticao = null;
+  clearInterval(intervaloRepeticao); intervaloRepeticao = null;
+}
+
+document.addEventListener("pointerdown", (e) => {
+  const btn = e.target.closest(".passo-btn");
+  if (!btn || btn.disabled) return;
+  instantePonteiro = Date.now();
+  pararRepeticao();
+  passoDoBotao(btn);
+
+  esperaRepeticao = setTimeout(() => {
+    let conta = 0, ritmo = 110;
+    const bater = () => {
+      if (btn.disabled || !passoDoBotao(btn)) { pararRepeticao(); return; }
+      conta++;
+      if (conta === 10) {                       // depois de um tempo, acelera
+        clearInterval(intervaloRepeticao);
+        ritmo = 45;
+        intervaloRepeticao = setInterval(bater, ritmo);
+      }
+    };
+    intervaloRepeticao = setInterval(bater, ritmo);
+  }, 420);
+});
+["pointerup", "pointercancel"].forEach((evt) =>
+  window.addEventListener(evt, pararRepeticao));
+window.addEventListener("blur", pararRepeticao);
+
+/* Teclado (Enter/Espaço no botão) chega como clique sem ponteiro antes. */
 document.addEventListener("click", (e) => {
   const btn = e.target.closest(".passo-btn");
   if (!btn || btn.disabled) return;
-  const id = btn.dataset.alvo;
-  const campo = document.getElementById(id);
-  if (!campo) return;
-  aplicarPasso(id, Number(campo.value) + Number(btn.dataset.delta));
+  if (Date.now() - instantePonteiro < 700) return;   // o ponteiro já resolveu
+  passoDoBotao(btn);
 });
 
 /** Digitar direto no campo: grava ao sair ou no Enter, nunca a cada tecla. */
