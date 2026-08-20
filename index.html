@@ -445,6 +445,19 @@ canvas{display:block; width:100%; height:auto}
   .grade-arquivos{grid-template-columns:1fr}
 }
 
+/* ----------------------------------------------------------------- estádio */
+.caixa-estadio{
+  border:1px solid var(--borda); border-radius:14px; overflow:hidden;
+  background:linear-gradient(175deg,#EDF3F8 0%,#DFE9F1 55%,#D6E2EB 100%);
+}
+.caixa-estadio svg{display:block; width:100%; height:auto}
+.legenda-estadio{
+  display:flex; gap:8px 20px; flex-wrap:wrap; margin-top:14px;
+  font-size:12px; color:var(--fraco);
+}
+.legenda-estadio span{display:flex; align-items:center; gap:6px}
+.legenda-estadio i{width:11px; height:11px; border-radius:3px; display:block}
+
 /* -------------------------------------------------------------------- loja */
 .caixa-saldo{display:flex; align-items:center; gap:22px; flex-wrap:wrap}
 .saldo{
@@ -633,6 +646,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     <button class="aba-btn" data-painel="arquivos" role="tab">Arquivos</button>
     <button class="aba-btn" data-painel="progresso" role="tab">Progresso</button>
     <button class="aba-btn" data-painel="estante" role="tab">Estante</button>
+    <button class="aba-btn" data-painel="estadio" role="tab">Estádio</button>
     <button class="aba-btn" data-painel="historico" role="tab">Histórico</button>
     <button class="aba-btn" data-painel="loja" role="tab">Loja</button>
     <button class="aba-btn" data-painel="ciclo" role="tab">Ciclo &amp; Ajustes</button>
@@ -816,6 +830,27 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     <p class="subtexto" id="estanteResumo">Cada ciclo encerrado vira uma taça aqui. Nada some.</p>
   </div></div>
   <div class="prateleira" id="prateleira"></div>
+</section>
+
+<!-- ===================================================== PAINEL: ESTÁDIO -->
+<section class="painel" id="painel-estadio">
+  <div class="cartao">
+    <div class="faixas faixas-fina"></div>
+    <div class="cartao-corpo">
+      <h3>Estádio</h3>
+      <p class="subtexto" id="legendaEstadio">Terreno limpo, gramado plantado e as quatro
+        arquibancadas de pé. O resto vem com o trabalho.</p>
+      <div class="caixa-estadio" id="caixaEstadio" style="margin-top:14px"></div>
+      <div class="legenda-estadio">
+        <span><i style="background:#2E7D32"></i>Gramado</span>
+        <span><i style="background:#CFD3D8"></i>Arquibancada</span>
+        <span><i style="background:#C62828"></i>Assentos</span>
+        <span><i style="background:#607D8B"></i>Refletores</span>
+      </div>
+      <p class="dica">Obra em andamento. As melhorias entram numa próxima etapa —
+        por enquanto é o estádio de pé, do jeito que toda campanha começa.</p>
+    </div>
+  </div>
 </section>
 
 <!-- =================================================== PAINEL: HISTÓRICO -->
@@ -3892,6 +3927,179 @@ function renderAvisoLoja() {
 }
 
 /* --------------------------------------------------------------------------
+   14e. ESTÁDIO — desenho isométrico em SVG
+   Nada de imagem: tudo sai de coordenadas 3D projetadas em 2D. Assim escala
+   sem borrar, usa a paleta do app e cada peça fica pronta para virar item
+   melhorável mais pra frente.
+   -------------------------------------------------------------------------- */
+const ISO_COS = Math.cos(Math.PI / 6);   // 0,866
+const ISO_SEN = Math.sin(Math.PI / 6);   // 0,5
+
+/** Projeção isométrica de 30°: x vai pra direita, y pra esquerda, z pra cima. */
+function iso(x, y, z) {
+  return { x: (x - y) * ISO_COS, y: (x + y) * ISO_SEN - (z || 0) };
+}
+function pontos(lista) {
+  return lista.map((p) => {
+    const q = iso(p[0], p[1], p[2] || 0);
+    return q.x.toFixed(2) + "," + q.y.toFixed(2);
+  }).join(" ");
+}
+function poligono(lista, cor, extra) {
+  return '<polygon points="' + pontos(lista) + '" fill="' + cor + '"' + (extra || "") + "/>";
+}
+function traco(lista, cor, largura, opacidade) {
+  return '<polyline points="' + pontos(lista) + '" fill="none" stroke="' + cor +
+    '" stroke-width="' + largura + '" stroke-opacity="' + (opacidade === undefined ? 1 : opacidade) +
+    '" stroke-linejoin="round" stroke-linecap="round"/>';
+}
+
+/**
+ * Uma caixa vista de cima. Nesta projeção só three faces aparecem: o topo, a
+ * face de maior x (que cai à direita) e a de maior y (que cai à esquerda).
+ * O sombreado diferente entre elas é o que dá volume.
+ */
+function caixa(x0, y0, x1, y1, z0, z1, cTopo, cDir, cEsq) {
+  return poligono([[x1,y0,z1],[x1,y1,z1],[x1,y1,z0],[x1,y0,z0]], cDir) +
+         poligono([[x0,y1,z1],[x1,y1,z1],[x1,y1,z0],[x0,y1,z0]], cEsq) +
+         poligono([[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]], cTopo);
+}
+
+const EST = {
+  campoX: 52, campoY: 33,      // meio-campo
+  pista: 9,                     // faixa entre a linha e a arquibancada
+  arqFundo: 21, arqAlt: 8,      // profundidade e altura das arquibancadas
+  assentos: 10,                 // quanto da arquibancada é assento
+  torreX: 57, torreY: 38        // torres encaixadas no vão de canto
+};
+
+const CORES_EST = {
+  terra: "#8D6E63", terraDir: "#795548", terraEsq: "#5D4037",
+  gramaFora: "#57A85C", gramaForaDir: "#489150", gramaForaEsq: "#3C7C43",
+  pista: "#8B99A3", pistaDir: "#77858F", pistaEsq: "#65727C",
+  campo: "#2E7D32",
+  linha: "#F4F7F5",
+  arqTopo: "#CFD3D8", arqDir: "#AAB0B8", arqEsq: "#8D949E",
+  assento: "#C62828", assentoLinha: "#8E1B1B",
+  torre: "#78868F", torreDir: "#63717A", torreEsq: "#4E5C66",
+  lampada: "#ECEFF1"
+};
+
+/** Uma arquibancada: bloco de concreto com faixa de assentos virada pro campo. */
+function arquibancada(a) {
+  const C = CORES_EST, z = EST.arqAlt;
+  let s = caixa(a.x0, a.y0, a.x1, a.y1, 0, z, C.arqTopo, C.arqDir, C.arqEsq);
+
+  // faixa de assentos, encostada na borda que dá pro campo
+  const d = EST.assentos;
+  let sx0 = a.x0, sy0 = a.y0, sx1 = a.x1, sy1 = a.y1;
+  if (a.perto === "x1") sx0 = a.x1 - d;
+  else if (a.perto === "x0") sx1 = a.x0 + d;
+  else if (a.perto === "y1") sy0 = a.y1 - d;
+  else sy1 = a.y0 + d;
+  s += poligono([[sx0,sy0,z],[sx1,sy0,z],[sx1,sy1,z],[sx0,sy1,z]], C.assento);
+
+  // fileiras: é o que faz o bloco ler como arquibancada e não como laje
+  const n = 6;
+  for (let i = 1; i < n; i++) {
+    const t = i / n;
+    s += a.aoLongoDeX
+      ? traco([[sx0, sy0 + (sy1 - sy0) * t, z], [sx1, sy0 + (sy1 - sy0) * t, z]], C.assentoLinha, 0.7, 0.55)
+      : traco([[sx0 + (sx1 - sx0) * t, sy0, z], [sx0 + (sx1 - sx0) * t, sy1, z]], C.assentoLinha, 0.7, 0.55);
+  }
+  return s;
+}
+
+/** Torre de refletor: poste e a caixa de lâmpadas em cima. */
+function torreDeLuz(cx, cy) {
+  const C = CORES_EST;
+  return caixa(cx - 2.2, cy - 2.2, cx + 2.2, cy + 2.2, 0, 21, C.torre, C.torreDir, C.torreEsq) +
+         caixa(cx - 5.5, cy - 4.5, cx + 5.5, cy + 4.5, 21, 24.5, C.lampada, "#B6C0C6", "#96A2AA");
+}
+
+/** Baliza: caixa translúcida fazendo as vezes de rede. */
+function baliza(xLinha, paraFora) {
+  const x0 = paraFora < 0 ? xLinha - 5.5 : xLinha;
+  const x1 = paraFora < 0 ? xLinha : xLinha + 5.5;
+  return caixa(x0, -7.5, x1, 7.5, 0, 5,
+               "rgba(255,255,255,.55)", "rgba(255,255,255,.42)", "rgba(255,255,255,.32)");
+}
+
+/** As marcações do campo, todas projetadas em vez de desenhadas em 2D. */
+function marcacoes() {
+  const C = CORES_EST, mx = EST.campoX, my = EST.campoY, L = 0.9;
+  let s = "";
+  // linhas de fundo e laterais
+  s += traco([[-mx,-my,0],[mx,-my,0],[mx,my,0],[-mx,my,0],[-mx,-my,0]], C.linha, L, 0.85);
+  // meio de campo
+  s += traco([[0,-my,0],[0,my,0]], C.linha, L, 0.85);
+  // círculo central, ponto a ponto
+  const circulo = [];
+  for (let i = 0; i <= 44; i++) {
+    const ang = (i / 44) * Math.PI * 2;
+    circulo.push([Math.cos(ang) * 10, Math.sin(ang) * 10, 0]);
+  }
+  s += traco(circulo, C.linha, L, 0.85);
+  s += '<circle cx="' + iso(0,0,0).x.toFixed(2) + '" cy="' + iso(0,0,0).y.toFixed(2) +
+       '" r="1.1" fill="' + C.linha + '" fill-opacity="0.85"/>';
+  // áreas grande e pequena, dos dois lados
+  [-1, 1].forEach((d) => {
+    s += traco([[d*mx,-20,0],[d*(mx-16),-20,0],[d*(mx-16),20,0],[d*mx,20,0]], C.linha, L, 0.85);
+    s += traco([[d*mx,-9,0],[d*(mx-5.5),-9,0],[d*(mx-5.5),9,0],[d*mx,9,0]], C.linha, L, 0.85);
+    const marca = iso(d * (mx - 11), 0, 0);
+    s += '<circle cx="' + marca.x.toFixed(2) + '" cy="' + marca.y.toFixed(2) +
+         '" r="0.9" fill="' + C.linha + '" fill-opacity="0.85"/>';
+  });
+  return s;
+}
+
+function desenharEstadio() {
+  const C = CORES_EST;
+  const mx = EST.campoX, my = EST.campoY;
+  const px = mx + EST.pista, py = my + EST.pista;          // borda da pista
+  const ax = px + EST.arqFundo, ay = py + EST.arqFundo;    // borda externa
+  const bx = 105, by = 86;                                  // terreno
+
+  let s = "";
+
+  // terreno: bloco de terra com grama em cima
+  s += caixa(-bx, -by, bx, by, -7, 0, C.gramaFora, C.terraDir, C.terraEsq);
+  // pista ao redor do campo
+  s += poligono([[-px,-py,0.02],[px,-py,0.02],[px,py,0.02],[-px,py,0.02]], C.pista);
+  // gramado
+  s += poligono([[-mx,-my,0.04],[mx,-my,0.04],[mx,my,0.04],[-mx,my,0.04]], C.campo);
+  s += marcacoes();
+  s += baliza(-mx, -1) + baliza(mx, 1);
+
+  // peças em pé, do fundo para a frente: quem tem x+y menor está mais atrás
+  const tx = EST.torreX, ty = EST.torreY;
+  const pecas = [
+    { d: -tx - ty, svg: () => torreDeLuz(-tx, -ty) },
+    { d: -(ax + px) / 2, svg: () => arquibancada({ x0:-ax, y0:-my, x1:-px, y1:my, perto:"x1", aoLongoDeX:false }) },
+    { d: -(ay + py) / 2, svg: () => arquibancada({ x0:-mx, y0:-ay, x1:mx, y1:-py, perto:"y1", aoLongoDeX:true }) },
+    { d: -tx + ty, svg: () => torreDeLuz(-tx, ty) },
+    { d: tx - ty, svg: () => torreDeLuz(tx, -ty) },
+    { d: (ay + py) / 2, svg: () => arquibancada({ x0:-mx, y0:py, x1:mx, y1:ay, perto:"y0", aoLongoDeX:true }) },
+    { d: (ax + px) / 2, svg: () => arquibancada({ x0:px, y0:-my, x1:ax, y1:my, perto:"x0", aoLongoDeX:false }) },
+    { d: tx + ty, svg: () => torreDeLuz(tx, ty) }
+  ];
+  pecas.sort((a, b) => a.d - b.d).forEach((p) => { s += p.svg(); });
+
+  return '<svg viewBox="-172 -104 344 213" preserveAspectRatio="xMidYMid meet" ' +
+         'role="img" aria-label="Estádio isométrico do Vidori: campo, quatro arquibancadas e ' +
+         'quatro torres de refletores">' + s + "</svg>";
+}
+
+let estadioDesenhado = false;
+function renderEstadio() {
+  if (estadioDesenhado) return;              // cena fixa: desenha uma vez só
+  const caixaEl = $("#caixaEstadio");
+  if (!caixaEl) return;
+  caixaEl.innerHTML = desenharEstadio();
+  estadioDesenhado = true;
+}
+
+/* --------------------------------------------------------------------------
    15. NAVEGAÇÃO ENTRE PAINÉIS
    -------------------------------------------------------------------------- */
 function irParaPainel(nome) {
@@ -3900,6 +4108,7 @@ function irParaPainel(nome) {
   if (nome === "progresso") { renderCalor(); renderComparativo(); }
   if (nome === "arquivos") renderAcervo();
   if (nome === "loja") renderLoja();
+  if (nome === "estadio") renderEstadio();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
