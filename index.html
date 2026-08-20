@@ -1987,6 +1987,18 @@ const SONS = {
 /* Melhorias do estádio: compradas uma vez e aplicadas para sempre — não têm
    "usar", diferente dos sons, onde só um fica ativo por vez. */
 const MELHORIAS_ESTADIO = {
+  bandeiras: {
+    nome: "Bandeirinhas de escanteio",
+    desc: "Mastro e flâmula vermelha nos quatro cantos do gramado.",
+    preco: 10,
+    tipo: "estadio"
+  },
+  redes: {
+    nome: "Redes nos gols",
+    desc: "Malha nas duas balizas: fundo, laterais e teto. Antes eram só as traves.",
+    preco: 15,
+    tipo: "estadio"
+  },
   grama: {
     nome: "Gramado",
     desc: "Troca a terra batida por grama de verdade, e a cal das marcações fica nítida.",
@@ -4188,7 +4200,10 @@ const CORES_EST = {
   pilar: "#9AA3AB", pilarDir: "#848E97",
   sombra: "rgba(18,24,30,.34)",
   torre: "#78868F", torreDir: "#63717A", torreEsq: "#4E5C66",
-  lampada: "#ECEFF1", lampadaAcesa: "#FFF8D2"
+  lampada: "#ECEFF1", lampadaAcesa: "#FFF8D2",
+  trave: "#F7F9FA", traveDir: "#DCE1E4", traveEsq: "#BFC6CB",
+  rede: "#FFFFFF",
+  mastro: "#EDF0F2", mastroDir: "#C8CFD3", bandeira: "#C62828"
 };
 
 /** Obras já entregues. */
@@ -4197,6 +4212,8 @@ function temGrama()     { return temItem("estadio", "grama"); }
 function temMosaico()   { return temItem("estadio", "mosaico"); }
 function temAnel()      { return temItem("estadio", "anel"); }
 function temRefletores() { return temItem("estadio", "refletores"); }
+function temRedes()      { return temItem("estadio", "redes"); }
+function temBandeiras()  { return temItem("estadio", "bandeiras"); }
 
 /** As quatro torres, na ordem em que os gradientes de feixe são nomeados. */
 function posicoesDasTorres() {
@@ -4470,12 +4487,62 @@ function defsDeLuz() {
   return d;
 }
 
-/** Baliza: caixa translúcida fazendo as vezes de rede. */
+/**
+ * Malha de rede sobre um painel qualquer. Recebe os quatro cantos em ordem e
+ * interpola as linhas nas duas direções, então o mesmo código serve pro fundo,
+ * pras laterais e pro teto do gol sem nenhum caso especial.
+ */
+function malhaDeRede(a, b, c, d, nU, nV) {
+  const p = (u, v) => [0, 1, 2].map((k) =>
+    a[k] + (b[k] - a[k]) * u + (d[k] - a[k]) * v +
+    (a[k] - b[k] - d[k] + c[k]) * u * v);
+  let s = "";
+  for (let i = 0; i <= nU; i++) s += traco([p(i / nU, 0), p(i / nU, 1)], CORES_EST.rede, 0.32, 0.5);
+  for (let j = 0; j <= nV; j++) s += traco([p(0, j / nV), p(1, j / nV)], CORES_EST.rede, 0.32, 0.5);
+  return s;
+}
+
+/** Baliza: postes e travessa. A rede vem como obra à parte. */
 function baliza(xLinha, paraFora) {
-  const x0 = paraFora < 0 ? xLinha - 5.5 : xLinha;
-  const x1 = paraFora < 0 ? xLinha : xLinha + 5.5;
-  return caixa(x0, -7.5, x1, 7.5, 0, 5,
-               "rgba(255,255,255,.55)", "rgba(255,255,255,.42)", "rgba(255,255,255,.32)");
+  const C = CORES_EST;
+  const my = 7.5, alt = 5, esp = 0.6, prof = 5.5;
+  const xFundo = xLinha + paraFora * prof;
+  let s = "";
+
+  if (temRedes()) {
+    const A = [xLinha, -my, 0], B = [xFundo, -my, 0];
+    const teto = [xLinha, -my, alt], tetoF = [xFundo, -my, alt];
+    // pano de fundo, laterais e teto
+    s += malhaDeRede([xFundo,-my,0], [xFundo,my,0], [xFundo,my,alt], [xFundo,-my,alt], 8, 4);
+    [-my, my].forEach((y) => {
+      s += malhaDeRede([xLinha,y,0], [xFundo,y,0], [xFundo,y,alt], [xLinha,y,alt], 4, 4);
+    });
+    s += malhaDeRede([xLinha,-my,alt], [xFundo,-my,alt], [xFundo,my,alt], [xLinha,my,alt], 5, 8);
+    // um véu translúcido dá corpo à malha, que sozinha fica seca demais
+    s += poligono([[xFundo,-my,0],[xFundo,my,0],[xFundo,my,alt],[xFundo,-my,alt]],
+                  "rgba(255,255,255,.18)");
+  }
+
+  // estrutura: dois postes e a travessa
+  [-my, my].forEach((y) => {
+    s += caixa(xLinha - esp/2, y - esp/2, xLinha + esp/2, y + esp/2, 0, alt,
+               C.trave, C.traveDir, C.traveEsq);
+  });
+  s += caixa(xLinha - esp/2, -my, xLinha + esp/2, my, alt - esp, alt,
+             C.trave, C.traveDir, C.traveEsq);
+  return s;
+}
+
+/** Bandeirinha de escanteio: mastro fino e a flâmula apontando pra fora. */
+function bandeirinha(sx, sy) {
+  const C = CORES_EST;
+  const cx = sx * EST.campoX, cy = sy * EST.campoY, alt = 4.6;
+  let s = caixa(cx - 0.32, cy - 0.32, cx + 0.32, cy + 0.32, 0, alt,
+                C.mastro, C.mastroDir, C.mastroDir);
+  // flâmula saindo do topo, na diagonal para fora do campo
+  s += poligono([[cx, cy, alt], [cx + sx * 2.8, cy + sy * 1.9, alt - 0.55],
+                 [cx, cy, alt - 1.9]], C.bandeira);
+  return s;
 }
 
 /** As marcações do campo, todas projetadas em vez de desenhadas em 2D. */
@@ -4526,6 +4593,9 @@ function desenharEstadio() {
                 temGrama() ? C.campo : C.campoTerra);
   s += marcacoes();
   s += baliza(-mx, -1) + baliza(mx, 1);
+  if (temBandeiras()) {
+    [[-1,-1], [-1,1], [1,-1], [1,1]].forEach((c) => { s += bandeirinha(c[0], c[1]); });
+  }
 
   // peças em pé, do fundo para a frente: quem tem x+y menor está mais atrás
   const tx = EST.torreX, ty = EST.torreY;
@@ -4558,7 +4628,8 @@ function renderEstadio() {
   if (!caixaEl) return;
   const assinatura = (temGrama() ? "g" : "-") + (temCobertura() ? "c" : "-") +
                      (temMosaico() ? "m" : "-") + (temAnel() ? "a" : "-") +
-                     (temRefletores() ? "r" : "-");
+                     (temRefletores() ? "r" : "-") + (temRedes() ? "n" : "-") +
+                     (temBandeiras() ? "b" : "-");
   if (estadioAssinatura === assinatura) return;
   caixaEl.innerHTML = desenharEstadio();
   estadioAssinatura = assinatura;
@@ -4596,6 +4667,8 @@ function renderEstadio() {
 function fraseDoEstadio() {
   const feitas = [];
   if (temGrama()) feitas.push("grama no chão");
+  if (temRedes()) feitas.push("rede nos gols");
+  if (temBandeiras()) feitas.push("bandeirinha nos escanteios");
   if (temMosaico()) feitas.push("mosaico tricolor nos assentos");
   if (temAnel()) feitas.push("segundo anel de arquibancada");
   if (temCobertura()) feitas.push("arquibancada coberta");
