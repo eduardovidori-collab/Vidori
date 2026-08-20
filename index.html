@@ -1285,6 +1285,14 @@ let loja = Object.assign(
 );
 if (!Array.isArray(loja.comprados)) loja.comprados = [];
 
+// os fogos de artifício viraram a virada da bateria: quem já tinha comprado
+// não pode perder o item nem o que gastou nele
+if (loja.comprados.indexOf("gol:fogos") !== -1) {
+  loja.comprados = loja.comprados.map((c) => (c === "gol:fogos" ? "gol:virada" : c));
+  if (loja.golAtivo === "fogos") loja.golAtivo = "virada";
+  Armazem.gravar(CHAVES.loja, loja);
+}
+
 const MIN_POR_MOEDA = 5;
 
 /**
@@ -1886,142 +1894,79 @@ function montarSino(ctx, inicio, volume, destino) {
   badalada(ctx, inicio + 1.56, 524, forca, destino, 0.64);
 }
 
-/* ------------------------------------------------------------ fogos */
+/* -------------------------------------------------- virada da bateria */
 
-/** Ruído branco cru, base das camadas de estouro. */
-function bufferDeRuido(ctx, segundos) {
-  const n = Math.ceil(ctx.sampleRate * segundos);
-  const buf = ctx.createBuffer(1, n, ctx.sampleRate);
-  const d = buf.getChannelData(0);
-  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-  return buf;
-}
-
-/**
- * Crepitação num buffer só: dezenas de estalos de 2 a 8 ms em tempos
- * aleatórios, cada um com decaimento próprio. Antes eu somava um nó por
- * estalo, poucos e longos demais, e o resultado era chiado em vez de crepitar.
- */
-function bufferDeCrepitacao(ctx, segundos, densidade) {
-  const n = Math.ceil(ctx.sampleRate * segundos);
-  const buf = ctx.createBuffer(1, n, ctx.sampleRate);
-  const d = buf.getChannelData(0);
-  const quantos = Math.round(segundos * densidade);
-  for (let k = 0; k < quantos; k++) {
-    const ini = Math.floor(Math.random() * n);
-    const dur = Math.floor(ctx.sampleRate * (0.002 + Math.random() * 0.006));
-    const amp = 0.25 + Math.random() * 0.75;
-    for (let i = 0; i < dur && ini + i < n; i++) {
-      d[ini + i] += (Math.random() * 2 - 1) * amp * Math.pow(1 - i / dur, 3);
-    }
-  }
-  return buf;
-}
-
-/** O rojão subindo: ruído num passa-faixa que sobe, não um seno. */
-function subidaDeFogo(ctx, t, dur, volume, destino) {
-  const src = ctx.createBufferSource();
-  src.buffer = bufferDeRuido(ctx, dur + 0.06);
-  const bp = ctx.createBiquadFilter();
-  bp.type = "bandpass"; bp.Q.value = 9;
-  bp.frequency.setValueAtTime(520, t);
-  bp.frequency.exponentialRampToValueAtTime(2300, t + dur);
-  const g = ctx.createGain();
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(volume * 0.15, t + dur * 0.55);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  src.connect(bp); bp.connect(g); g.connect(destino || ctx.destination);
-  src.start(t); src.stop(t + dur + 0.06);
-}
-
-/**
- * Um estouro. Explosão é RUÍDO, não tom.
- *
- * A primeira versão usava um seno caindo de 160 para 62 Hz — que é a receita
- * exata de um bumbo, e por isso não soava como fogo de artifício. Agora são
- * quatro camadas de ruído filtrado:
- *   estalo, ataque em 3 ms e agudo;
- *   corpo, com o passa-baixa fechando de 5 kHz para 220 Hz;
- *   ronco grave, decaindo mais devagar que o resto;
- *   crepitação densa espalhada pela cauda.
- */
-function estouroDeFogo(ctx, t, volume, destino, tamanho) {
+/** Tamborim: estalo agudo e curtíssimo, o contratempo da bateria. */
+function batidaTamborim(ctx, t, volume, destino) {
   const saida = destino || ctx.destination;
-  const dur = 1.1 * tamanho;
-
-  const camada = (buffer, filtro, pico, ataque, queda, atraso) => {
-    const src = ctx.createBufferSource();
-    src.buffer = buffer;
-    const g = ctx.createGain();
-    const t0 = t + (atraso || 0);
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(pico, t0 + ataque);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + queda);
-    src.connect(filtro); filtro.connect(g); g.connect(saida);
-    src.start(t0); src.stop(t0 + queda + 0.05);
-  };
-
-  // O "pop" fica no meio do espectro, não no agudo. Um transiente agudo de
-  // 3 ms é o ataque de uma CAIXA DE BATERIA — era ele que puxava o som para o
-  // lado errado. De longe o ar come o agudo e o ataque chega arredondado.
-  const pop = ctx.createBiquadFilter();
-  pop.type = "bandpass"; pop.frequency.value = 620; pop.Q.value = 0.8;
-  camada(bufferDeRuido(ctx, 0.3), pop, volume * 0.30, 0.012, 0.22);
-
-  // corpo: o passa-baixa fecha e o estouro "rola" para o grave
-  const corpo = ctx.createBiquadFilter();
-  corpo.type = "lowpass";
-  corpo.frequency.setValueAtTime(1400, t);
-  corpo.frequency.exponentialRampToValueAtTime(160, t + dur * 0.6);
-  camada(bufferDeRuido(ctx, dur + 0.1), corpo, volume * 0.62, 0.018, dur);
-
-  // ronco: o trovão que sobra, bem mais longo que o estouro. É a camada que
-  // manda — o peso do som tem que ficar no grave, senão vira chiado.
-  const ronco = ctx.createBiquadFilter();
-  ronco.type = "lowpass"; ronco.frequency.value = 85;
-  camada(bufferDeRuido(ctx, dur + 0.7), ronco, volume * 0.95, 0.03, dur + 0.6);
-
-  // crepitação: tempero, não prato principal. Com ela alta demais o centroide
-  // do som inteiro subia para perto do de uma caixa de bateria.
-  const brilho = ctx.createBiquadFilter();
-  brilho.type = "highpass"; brilho.frequency.value = 2600;
-  camada(bufferDeCrepitacao(ctx, 0.9, 130), brilho, volume * 0.10, 0.05, 0.8, 0.04);
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = "triangle";
+  osc.frequency.setValueAtTime(920, t);
+  osc.frequency.exponentialRampToValueAtTime(540, t + 0.05);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(Math.max(0.001, volume), t + 0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+  osc.connect(g); g.connect(saida);
+  osc.start(t); osc.stop(t + 0.1);
+  batidaCaixa(ctx, t, volume * 0.5, saida, 1900, 0.04);
 }
 
 /**
- * Fim de bloco: fogos por cima do estádio.
- *
- * Tudo passa por reverberação escura e longa. Fogo seco soa como estática ou
- * caixa de bateria; o que o ouvido reconhece como fogo de artifício é a cauda
- * batendo no concreto e voltando — a explosão em si dura pouco, o eco é que
- * dá o tamanho.
+ * Virada da bateria: mais rápida e mais cheia que a "Bateria da torcida".
+ * A caixa entra na metade e vai enchendo, e termina num rufo acelerando até
+ * a pancada com todo mundo junto — é a aceleração que dá o "animado".
  */
-function montarFogos(ctx, inicio, volume, destino) {
+function montarViradaBateria(ctx, inicio, volume, destino) {
   const saida = destino || ctx.destination;
   const forca = Math.max(0.02, Math.min(1, volume));
 
+  // eco curto: percussão precisa de ataque limpo, senão o ritmo vira massa
   const eco = ctx.createConvolver();
   eco.normalize = false;
-  eco.buffer = impulsoDeEstadio(ctx, 2.4, 1.5, 1);
-  const escuro = ctx.createBiquadFilter();     // eco de longe chega abafado
-  escuro.type = "lowpass"; escuro.frequency.value = 1500;
-  const gEco = ctx.createGain(); gEco.gain.value = 3.4;
-  eco.connect(escuro); escuro.connect(gEco); gEco.connect(saida);
-
-  // camadas de ruído somam menos que tons, então o barramento compensa para o
-  // som não sair mais fraco que os outros da loja
+  eco.buffer = impulsoDeEstadio(ctx, 0.8, 3.4, 1);
+  /* Na pancada final surdo, caixa e tamborim caem juntos e somam, e tanto o
+     ruído da caixa quanto a resposta do eco são sorteados a cada toque: o pico
+     varia bastante entre execuções do MESMO som. O ganho fica dimensionado
+     pelo pior caso medido, não pelo caso médio.
+     (Tentei um DynamicsCompressor como limitador e ele piorou — os picos
+     subiram em vez de cair, então saiu.) */
+  const gEco = ctx.createGain(); gEco.gain.value = 0.8;
+  eco.connect(gEco); gEco.connect(saida);
   const barra = ctx.createGain();
-  barra.gain.value = 1.7;
-  barra.connect(saida);
-  barra.connect(eco);
+  barra.gain.value = 0.58;
+  barra.connect(saida); barra.connect(eco);
 
-  // tempos irregulares: fogo em intervalo certinho soa como metrônomo
-  subidaDeFogo(ctx, inicio, 0.42, forca, barra);
-  estouroDeFogo(ctx, inicio + 0.44, forca, barra, 1);
-  subidaDeFogo(ctx, inicio + 0.36, 0.36, forca * 0.7, barra);
-  estouroDeFogo(ctx, inicio + 0.78, forca * 0.8, barra, 0.75);
-  estouroDeFogo(ctx, inicio + 1.42, forca * 0.95, barra, 1.15);
+  const passo = 0.085;                       // semicolcheia a ~176 bpm
+  const em = (i) => inicio + 0.03 + i * passo;
+  const surdoGrave = [0, 8, 16];
+  const surdoAgudo = [4, 12, 20];
+  const tamborim = [2, 6, 10, 14, 17, 19, 22];
+
+  for (let i = 0; i < 24; i++) {
+    const t = em(i);
+    if (surdoGrave.indexOf(i) !== -1) batidaSurdo(ctx, t, forca * 0.52, barra, 60);
+    if (surdoAgudo.indexOf(i) !== -1) batidaSurdo(ctx, t, forca * 0.36, barra, 84);
+    if (tamborim.indexOf(i) !== -1) batidaTamborim(ctx, t, forca * 0.22, barra);
+    if (i >= 8) {
+      const cresce = 0.05 + 0.13 * ((i - 8) / 16);
+      batidaCaixa(ctx, t, forca * cresce, barra, 3200, 0.05);
+      if (i >= 16) batidaCaixa(ctx, t + passo / 2, forca * cresce * 0.6, barra, 3600, 0.04);
+    }
+  }
+
+  // rufo: os intervalos encurtam a cada golpe
+  let t = em(24);
+  for (let k = 0; k < 6; k++) {
+    batidaCaixa(ctx, t, forca * (0.12 + k * 0.028), barra, 3000, 0.045);
+    t += passo * (0.55 - k * 0.06);
+  }
+  // pancada final, todo mundo junto
+  batidaSurdo(ctx, t, forca * 0.72, barra, 55);
+  batidaCaixa(ctx, t, forca * 0.30, barra, 2400, 0.12);
+  batidaTamborim(ctx, t, forca * 0.34, barra);
 }
+
 
 /* ---------------------------------------------------- catálogo de sons */
 const SONS = {
@@ -2029,7 +1974,7 @@ const SONS = {
     padrao:  { nome: "Gol do Morumbi", desc: "Buzina de estádio e o ronco da torcida.", preco: 0,  montar: montarGol },
     geral:   { nome: "Grito da geral", desc: "Só torcida, sem buzina. Sobe devagar e segura mais.", preco: 10, montar: montarGolGeral },
     bateria: { nome: "Bateria da torcida", desc: "Só percussão: surdo, caixa e repique. Sem grito, sem buzina.", preco: 15, montar: montarGolBateria },
-    fogos:   { nome: "Fogos de artifício", desc: "Rojão subindo, estouro grave e a crepitação caindo sobre o estádio.", preco: 20, montar: montarFogos }
+    virada:  { nome: "Virada da bateria", desc: "Bateria acelerando até a pancada final, com surdo, caixa e tamborim.", preco: 20, montar: montarViradaBateria }
   },
   apito: {
     padrao:  { nome: "Apito de árbitro", desc: "Dois toques curtos e um longo.", preco: 0,  montar: montarApitoPadrao },
