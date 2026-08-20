@@ -4046,6 +4046,7 @@ const EST = {
   assentos: 10,                 // quanto da arquibancada é assento
   recuoAnel: 9, altAnel: 6,     // o anel de cima recua do campo e sobe menos
   assentosAnel: 7,
+  degraus: 4, quedaDegraus: 3.4,  // fileiras escalonadas descendo pro campo
   recuoCobertura: 7,            // a laje para antes da beirada do convés
   torreX: 57, torreY: 38,       // torres encaixadas no vão de canto
   torreAlt: 21, lampadaAlt: 3.5
@@ -4059,6 +4060,7 @@ const CORES_EST = {
   linha: "#F4F7F5",
   arqTopo: "#CFD3D8", arqDir: "#AAB0B8", arqEsq: "#8D949E",
   anelTopo: "#D8DCE0", anelDir: "#B4BAC1", anelEsq: "#979EA7",
+  degrauDir: "#9AA1A9", degrauEsq: "#7E858D",
   assento: "#C62828", assentoLinha: "#8E1B1B",
   mosaicoClaro: "#FFFFFF", mosaicoEscuro: "#1E2429",
   mosaicoLinha: "rgba(0,0,0,.26)",
@@ -4149,67 +4151,107 @@ function coberturaDe(a) {
  * Os dois anéis usam a mesma função, então o mosaico vale para os dois sem
  * nada duplicado.
  */
-function assentosDe(a, z, d) {
-  const C = CORES_EST;
-  let s = "";
+function fatiasDeAssento(a, zTopo, d) {
+  // a faixa de assentos, encostada na borda que dá pro campo
   let sx0 = a.x0, sy0 = a.y0, sx1 = a.x1, sy1 = a.y1;
   if (a.perto === "x1") sx0 = a.x1 - d;
   else if (a.perto === "x0") sx1 = a.x0 + d;
   else if (a.perto === "y1") sy0 = a.y1 - d;
   else sy1 = a.y0 + d;
-  if (temMosaico()) {
-    // faixas de vermelho, branco e preto ao longo do setor, como mosaico
-    // feito com a cor dos próprios assentos
-    const cores = [C.assento, C.mosaicoClaro, C.mosaicoEscuro];
-    const comprimento = a.aoLongoDeX ? (sx1 - sx0) : (sy1 - sy0);
-    const faixas = Math.max(3, Math.round(comprimento / 9));
-    for (let i = 0; i < faixas; i++) {
-      const t0 = i / faixas, t1 = (i + 1) / faixas;
-      const q = a.aoLongoDeX
-        ? [[sx0 + (sx1-sx0)*t0, sy0, z], [sx0 + (sx1-sx0)*t1, sy0, z],
-           [sx0 + (sx1-sx0)*t1, sy1, z], [sx0 + (sx1-sx0)*t0, sy1, z]]
-        : [[sx0, sy0 + (sy1-sy0)*t0, z], [sx1, sy0 + (sy1-sy0)*t0, z],
-           [sx1, sy0 + (sy1-sy0)*t1, z], [sx0, sy0 + (sy1-sy0)*t1, z]];
-      s += poligono(q, cores[i % 3]);
-    }
-  } else {
-    s += poligono([[sx0,sy0,z],[sx1,sy0,z],[sx1,sy1,z],[sx0,sy1,z]], C.assento);
-  }
 
-  // fileiras: é o que faz o bloco ler como arquibancada e não como laje.
-  // No mosaico a linha vai em preto translúcido, que funciona sobre as três
-  // cores — o vinho do padrão sumiria em cima das faixas escuras.
-  const corLinha = temMosaico() ? C.mosaicoLinha : C.assentoLinha;
-  const opLinha = temMosaico() ? 1 : 0.55;
-  const n = 6;
-  for (let i = 1; i < n; i++) {
-    const t = i / n;
-    s += a.aoLongoDeX
-      ? traco([[sx0, sy0 + (sy1 - sy0) * t, z], [sx1, sy0 + (sy1 - sy0) * t, z]], corLinha, 0.7, opLinha)
-      : traco([[sx0 + (sx1 - sx0) * t, sy0, z], [sx0 + (sx1 - sx0) * t, sy1, z]], corLinha, 0.7, opLinha);
+  const eixoY = a.aoLongoDeX;                 // setor corre em x, fatias em y
+  const campoNoMinimo = (a.perto === "x0" || a.perto === "y0");
+  const de = eixoY ? sy0 : sx0, ate = eixoY ? sy1 : sx1;
+  const n = EST.degraus, passo = (ate - de) / n;
+
+  const fatias = [];
+  for (let i = 0; i < n; i++) {
+    const p0 = de + i * passo, p1 = de + (i + 1) * passo;
+    // t = 0 na fileira colada no campo, 1 na de trás
+    const t = campoNoMinimo ? i / (n - 1) : (n - 1 - i) / (n - 1);
+    fatias.push({
+      x0: eixoY ? sx0 : p0, x1: eixoY ? sx1 : p1,
+      y0: eixoY ? p0 : sy0, y1: eixoY ? p1 : sy1,
+      z: zTopo - EST.quedaDegraus * (1 - t),
+      doCampo: (1 - t) * d,                   // distância da beirada
+      aoLongoDeX: a.aoLongoDeX
+    });
+  }
+  // sempre na ordem crescente do eixo, que é a ordem de profundidade na tela
+  return fatias;
+}
+
+/**
+ * A arquibancada em degraus.
+ *
+ * Um bloco de topo chato lê como laje de concreto, não como arquibancada. O
+ * que o olho reconhece é o perfil escalonado — cada fileira um degrau acima da
+ * de frente — e as faces verticais entre elas, que dão a sombra do relevo.
+ *
+ * Cada degrau é uma caixa inteira, do chão até a sua altura, e não só um topo
+ * solto: fatias vizinhas se sobrepõem e não sobra vão aparecendo o fundo.
+ */
+function assentosDe(a, zTopo, d, zBase) {
+  const C = CORES_EST;
+  const zb = zBase || 0;
+  let s = "";
+  fatiasDeAssento(a, zTopo, d).forEach((f) => {
+    s += poligono([[f.x1,f.y0,f.z],[f.x1,f.y1,f.z],[f.x1,f.y1,zb],[f.x1,f.y0,zb]], C.degrauDir);
+    s += poligono([[f.x0,f.y1,f.z],[f.x1,f.y1,f.z],[f.x1,f.y1,zb],[f.x0,f.y1,zb]], C.degrauEsq);
+    s += topoDoDegrau(f);
+  });
+  return s;
+}
+
+/** O topo de um degrau: cor chapada ou as faixas do mosaico. */
+function topoDoDegrau(f) {
+  const C = CORES_EST;
+  if (!temMosaico()) {
+    return poligono([[f.x0,f.y0,f.z],[f.x1,f.y0,f.z],[f.x1,f.y1,f.z],[f.x0,f.y1,f.z]], C.assento);
+  }
+  const cores = [C.assento, C.mosaicoClaro, C.mosaicoEscuro];
+  const comprimento = f.aoLongoDeX ? (f.x1 - f.x0) : (f.y1 - f.y0);
+  const faixas = Math.max(3, Math.round(comprimento / 9));
+  let s = "";
+  for (let i = 0; i < faixas; i++) {
+    const t0 = i / faixas, t1 = (i + 1) / faixas;
+    s += poligono(f.aoLongoDeX
+      ? [[f.x0+(f.x1-f.x0)*t0, f.y0, f.z], [f.x0+(f.x1-f.x0)*t1, f.y0, f.z],
+         [f.x0+(f.x1-f.x0)*t1, f.y1, f.z], [f.x0+(f.x1-f.x0)*t0, f.y1, f.z]]
+      : [[f.x0, f.y0+(f.y1-f.y0)*t0, f.z], [f.x1, f.y0+(f.y1-f.y0)*t0, f.z],
+         [f.x1, f.y0+(f.y1-f.y0)*t1, f.z], [f.x0, f.y0+(f.y1-f.y0)*t1, f.z]], cores[i % 3]);
   }
   return s;
+}
+
+/** Um convés: o bloco de concreto do fundo mais os degraus na frente dele. */
+function conves(a, zTopo, d, cTopo, cDir, cEsq, zBase) {
+  const zb = zBase || 0;
+  const fundo = recuarDoCampo(a, d);          // a parte sem assento, lá atrás
+  const bloco = caixa(fundo.x0, fundo.y0, fundo.x1, fundo.y1, zb, zTopo, cTopo, cDir, cEsq);
+  const degraus = assentosDe(a, zTopo, d, zb);
+  // pinta na ordem da profundidade: nos setores em que o campo fica no lado de
+  // menor coordenada, os degraus estão atrás do bloco, e não na frente
+  return (a.perto === "x0" || a.perto === "y0") ? degraus + bloco : bloco + degraus;
 }
 
 /** Uma arquibancada: um ou dois anéis de concreto com assentos virados pro campo. */
 function arquibancada(a) {
   const C = CORES_EST, z1 = EST.arqAlt;
-  let s = caixa(a.x0, a.y0, a.x1, a.y1, 0, z1, C.arqTopo, C.arqDir, C.arqEsq);
-  s += assentosDe(a, z1, EST.assentos);
+  let s = conves(a, z1, EST.assentos, C.arqTopo, C.arqDir, C.arqEsq);
 
   if (temAnel()) {
     // o anel de cima ocupa só a parte de fora, senão taparia o campo
     const cima = recuarDoCampo(a, EST.recuoAnel);
-    const z2 = z1 + EST.altAnel;
-    s += caixa(cima.x0, cima.y0, cima.x1, cima.y1, z1, z2,
-               C.anelTopo, C.anelDir, C.anelEsq);
-    s += assentosDe(cima, z2, EST.assentosAnel);
+    s += conves(cima, z1 + EST.altAnel, EST.assentosAnel,
+                C.anelTopo, C.anelDir, C.anelEsq, z1);
   }
 
   if (temCobertura()) {
-    const conves = convesDeCima(a);
-    const h = recuarDoCampo(conves.r, EST.recuoCobertura);
-    const zs = conves.z + 0.05;
+    // a sombra fica no concreto plano do fundo: sobre os degraus ela flutuaria
+    const c = convesDeCima(a);
+    const h = recuarDoCampo(c.r, temAnel() ? EST.assentosAnel : EST.assentos);
+    const zs = c.z + 0.05;
     s += poligono([[h.x0, h.y0, zs], [h.x1, h.y0, zs],
                    [h.x1, h.y1, zs], [h.x0, h.y1, zs]], C.sombra);
     s += coberturaDe(a);
