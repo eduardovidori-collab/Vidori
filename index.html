@@ -1947,7 +1947,7 @@ function subidaDeFogo(ctx, t, dur, volume, destino) {
  */
 function estouroDeFogo(ctx, t, volume, destino, tamanho) {
   const saida = destino || ctx.destination;
-  const dur = 0.55 * tamanho;
+  const dur = 1.1 * tamanho;
 
   const camada = (buffer, filtro, pico, ataque, queda, atraso) => {
     const src = ctx.createBufferSource();
@@ -1961,33 +1961,66 @@ function estouroDeFogo(ctx, t, volume, destino, tamanho) {
     src.start(t0); src.stop(t0 + queda + 0.05);
   };
 
-  const agudo = ctx.createBiquadFilter();
-  agudo.type = "highpass"; agudo.frequency.value = 1800;
-  camada(bufferDeRuido(ctx, 0.12), agudo, volume * 0.40, 0.003, 0.07);
+  // O "pop" fica no meio do espectro, não no agudo. Um transiente agudo de
+  // 3 ms é o ataque de uma CAIXA DE BATERIA — era ele que puxava o som para o
+  // lado errado. De longe o ar come o agudo e o ataque chega arredondado.
+  const pop = ctx.createBiquadFilter();
+  pop.type = "bandpass"; pop.frequency.value = 620; pop.Q.value = 0.8;
+  camada(bufferDeRuido(ctx, 0.3), pop, volume * 0.30, 0.012, 0.22);
 
+  // corpo: o passa-baixa fecha e o estouro "rola" para o grave
   const corpo = ctx.createBiquadFilter();
   corpo.type = "lowpass";
-  corpo.frequency.setValueAtTime(5200, t);
-  corpo.frequency.exponentialRampToValueAtTime(220, t + dur * 0.75);
-  camada(bufferDeRuido(ctx, dur + 0.1), corpo, volume * 0.46, 0.004, dur);
+  corpo.frequency.setValueAtTime(1400, t);
+  corpo.frequency.exponentialRampToValueAtTime(160, t + dur * 0.6);
+  camada(bufferDeRuido(ctx, dur + 0.1), corpo, volume * 0.62, 0.018, dur);
 
+  // ronco: o trovão que sobra, bem mais longo que o estouro. É a camada que
+  // manda — o peso do som tem que ficar no grave, senão vira chiado.
   const ronco = ctx.createBiquadFilter();
-  ronco.type = "lowpass"; ronco.frequency.value = 140;
-  camada(bufferDeRuido(ctx, dur + 0.35), ronco, volume * 0.5, 0.02, dur + 0.25);
+  ronco.type = "lowpass"; ronco.frequency.value = 85;
+  camada(bufferDeRuido(ctx, dur + 0.7), ronco, volume * 0.95, 0.03, dur + 0.6);
 
+  // crepitação: tempero, não prato principal. Com ela alta demais o centroide
+  // do som inteiro subia para perto do de uma caixa de bateria.
   const brilho = ctx.createBiquadFilter();
   brilho.type = "highpass"; brilho.frequency.value = 2600;
-  camada(bufferDeCrepitacao(ctx, 1.0, 75), brilho, volume * 0.26, 0.06, 0.95, 0.03);
+  camada(bufferDeCrepitacao(ctx, 0.9, 130), brilho, volume * 0.10, 0.05, 0.8, 0.04);
 }
 
-/** Fim de bloco: fogos por cima do estádio. */
+/**
+ * Fim de bloco: fogos por cima do estádio.
+ *
+ * Tudo passa por reverberação escura e longa. Fogo seco soa como estática ou
+ * caixa de bateria; o que o ouvido reconhece como fogo de artifício é a cauda
+ * batendo no concreto e voltando — a explosão em si dura pouco, o eco é que
+ * dá o tamanho.
+ */
 function montarFogos(ctx, inicio, volume, destino) {
+  const saida = destino || ctx.destination;
   const forca = Math.max(0.02, Math.min(1, volume));
-  subidaDeFogo(ctx, inicio, 0.42, forca, destino);
-  estouroDeFogo(ctx, inicio + 0.44, forca, destino, 1);
-  subidaDeFogo(ctx, inicio + 0.34, 0.38, forca * 0.75, destino);
-  estouroDeFogo(ctx, inicio + 0.76, forca * 0.85, destino, 0.85);
-  estouroDeFogo(ctx, inicio + 1.24, forca * 0.9, destino, 1.1);
+
+  const eco = ctx.createConvolver();
+  eco.normalize = false;
+  eco.buffer = impulsoDeEstadio(ctx, 2.4, 1.5, 1);
+  const escuro = ctx.createBiquadFilter();     // eco de longe chega abafado
+  escuro.type = "lowpass"; escuro.frequency.value = 1500;
+  const gEco = ctx.createGain(); gEco.gain.value = 3.4;
+  eco.connect(escuro); escuro.connect(gEco); gEco.connect(saida);
+
+  // camadas de ruído somam menos que tons, então o barramento compensa para o
+  // som não sair mais fraco que os outros da loja
+  const barra = ctx.createGain();
+  barra.gain.value = 1.7;
+  barra.connect(saida);
+  barra.connect(eco);
+
+  // tempos irregulares: fogo em intervalo certinho soa como metrônomo
+  subidaDeFogo(ctx, inicio, 0.42, forca, barra);
+  estouroDeFogo(ctx, inicio + 0.44, forca, barra, 1);
+  subidaDeFogo(ctx, inicio + 0.36, 0.36, forca * 0.7, barra);
+  estouroDeFogo(ctx, inicio + 0.78, forca * 0.8, barra, 0.75);
+  estouroDeFogo(ctx, inicio + 1.42, forca * 0.95, barra, 1.15);
 }
 
 /* ---------------------------------------------------- catálogo de sons */
