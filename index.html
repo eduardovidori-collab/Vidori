@@ -445,6 +445,53 @@ canvas{display:block; width:100%; height:auto}
   .grade-arquivos{grid-template-columns:1fr}
 }
 
+/* -------------------------------------------------------------------- loja */
+.caixa-saldo{display:flex; align-items:center; gap:22px; flex-wrap:wrap}
+.saldo{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-width:118px; padding:12px 20px; border-radius:14px; flex:0 0 auto;
+  background:linear-gradient(160deg,var(--vermelho),var(--vermelho-esc)); color:#fff;
+  box-shadow:0 6px 18px rgba(227,6,19,.22);
+}
+.saldo .valor{font-size:40px; font-weight:800; letter-spacing:-.03em; line-height:1; font-variant-numeric:tabular-nums}
+.saldo .rotulo{font-size:11px; text-transform:uppercase; letter-spacing:.12em; font-weight:700; opacity:.9; margin-top:4px}
+.caixa-saldo > div:last-child{flex:1 1 240px; min-width:0}
+
+.grade-itens{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.item-loja{
+  border:1.5px solid var(--borda); border-radius:13px; padding:14px 15px;
+  background:#FAFBFC; display:flex; flex-direction:column; gap:9px; position:relative;
+}
+.item-loja.em-uso{border-color:var(--vermelho); background:#FFF6F7}
+.item-loja.bloqueado{background:var(--branco)}
+.item-topo{display:flex; align-items:flex-start; justify-content:space-between; gap:10px}
+.item-topo h3{font-size:15px; line-height:1.3}
+.preco{
+  flex:0 0 auto; font-size:12px; font-weight:800; color:var(--preto);
+  background:#E9EBEF; border-radius:999px; padding:3px 10px; white-space:nowrap;
+}
+.preco.pode{background:var(--preto); color:#fff}
+.selo-uso{
+  flex:0 0 auto; font-size:10px; font-weight:800; letter-spacing:.1em;
+  text-transform:uppercase; color:#fff; background:var(--vermelho);
+  border-radius:999px; padding:4px 10px; white-space:nowrap;
+}
+.selo-tem{
+  flex:0 0 auto; font-size:10px; font-weight:800; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--fraco); border:1.5px solid var(--borda);
+  border-radius:999px; padding:3px 9px; white-space:nowrap;
+}
+.item-loja .desc{font-size:12.5px; color:var(--fraco); flex:1 1 auto}
+.item-acoes{display:flex; gap:8px; flex-wrap:wrap}
+.item-acoes .btn{flex:1 1 auto}
+
+/* aviso discreto na aba quando dá pra comprar algo novo */
+.aba-btn{position:relative}
+.ponto-novo{
+  position:absolute; top:7px; right:5px; width:7px; height:7px;
+  border-radius:50%; background:var(--vermelho);
+}
+
 /* ------------------------------------------------------------------ modais */
 .modal{
   position:fixed; inset:0; background:rgba(17,17,17,.55); z-index:60;
@@ -587,6 +634,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     <button class="aba-btn" data-painel="progresso" role="tab">Progresso</button>
     <button class="aba-btn" data-painel="estante" role="tab">Estante</button>
     <button class="aba-btn" data-painel="historico" role="tab">Histórico</button>
+    <button class="aba-btn" data-painel="loja" role="tab">Loja</button>
     <button class="aba-btn" data-painel="ciclo" role="tab">Ciclo &amp; Ajustes</button>
   </nav>
 </header>
@@ -785,6 +833,36 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
   <div class="cartao" style="margin-top:18px"><div class="cartao-corpo">
     <h2>Todos os blocos (<span id="totalBlocos">0</span>)</h2>
     <div id="listaCompleta"></div>
+  </div></div>
+</section>
+
+<!-- ======================================================== PAINEL: LOJA -->
+<section class="painel" id="painel-loja">
+  <div class="cartao" style="margin-bottom:18px">
+    <div class="faixas faixas-fina"></div>
+    <div class="cartao-corpo">
+      <div class="caixa-saldo">
+        <div class="saldo">
+          <div class="valor" id="saldoMoedas">0</div>
+          <div class="rotulo">moedas</div>
+        </div>
+        <div>
+          <p class="subtexto" id="explicaMoeda"></p>
+          <p class="dica">Moeda não expira, não zera e não desconta por dia parado.
+            É troco do que já foi estudado — nada além disso.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cartao" style="margin-bottom:18px"><div class="cartao-corpo">
+    <h2>Comemoração de fim de bloco</h2>
+    <div class="grade-itens" id="itensGol"></div>
+  </div></div>
+
+  <div class="cartao"><div class="cartao-corpo">
+    <h2>Apito de fim de pausa</h2>
+    <div class="grade-itens" id="itensApito"></div>
   </div></div>
 </section>
 
@@ -1127,7 +1205,8 @@ const CHAVES = {
   config:   "vidori.config",
   recordes: "vidori.recordes",
   marcos:   "vidori.marcos",
-  timer:    "vidori.timer"
+  timer:    "vidori.timer",
+  loja:     "vidori.loja"
 };
 
 /* --------------------------------------------------------------------------
@@ -1152,7 +1231,25 @@ const DURACOES_FOCO  = [15, 25, 30, 50];
 const DURACOES_PAUSA = [5, 10, 15, 30];
 const MARCOS = [100, 250, 500, 1000, 2000, 5000];
 
+/* Loja: o que já foi gasto, o que foi comprado e o que está em uso. */
+let loja = Object.assign(
+  { gastas: 0, comprados: [], golAtivo: "padrao", apitoAtivo: "padrao" },
+  Armazem.ler(CHAVES.loja, {})
+);
+if (!Array.isArray(loja.comprados)) loja.comprados = [];
+
+const MIN_POR_MOEDA = 5;
+
+/**
+ * As moedas são DERIVADAS do histórico, não um contador guardado à parte.
+ * Assim não existe saldo que descola do que foi realmente estudado, e importar
+ * um backup não precisa de conserto: a conta se refaz sozinha.
+ */
+function moedasGanhas() { return Math.floor(totalMinutos() / MIN_POR_MOEDA); }
+function saldoMoedas()  { return Math.max(0, moedasGanhas() - (loja.gastas || 0)); }
+
 function salvarBlocos()   { Armazem.gravar(CHAVES.blocos, blocos); }
+function salvarLoja()     { Armazem.gravar(CHAVES.loja, loja); }
 function salvarCiclos()   { Armazem.gravar(CHAVES.ciclos, ciclos); }
 function salvarConfig()   { Armazem.gravar(CHAVES.config, config); }
 function salvarRecordes() { Armazem.gravar(CHAVES.recordes, recordes); }
@@ -1382,10 +1479,10 @@ function bipeCurto() {
  * Recebe um destino próprio para dar pra renderizar fora do alto-falante e
  * conferir o resultado.
  */
-function montarGol(ctx, inicio, volume, destino) {
+function camadaTorcida(ctx, inicio, volume, destino, op) {
   const saida = destino || ctx.destination;
   const forca = Math.max(0.02, Math.min(1, volume));
-  const dur = 2.6;
+  const dur = op.dur;
 
   /* ---------------------------------------------------------- a torcida */
   const amostras = Math.ceil(ctx.sampleRate * dur);
@@ -1416,20 +1513,20 @@ function montarGol(ctx, inicio, volume, destino) {
   const gBrilho = ctx.createGain(); gBrilho.gain.value = 1.5;
 
   const torcida = ctx.createGain();
-  const pico = forca * 0.34;
+  const pico = forca * op.pico;
   torcida.gain.setValueAtTime(0.0001, inicio);
-  torcida.gain.exponentialRampToValueAtTime(pico, inicio + 0.30);        // explode
-  torcida.gain.linearRampToValueAtTime(pico * 0.70, inicio + 0.95);      // respira
-  torcida.gain.linearRampToValueAtTime(pico * 0.90, inicio + 1.35);      // segunda onda
-  // a queda vai em duas etapas: só exponencial, o som morria em 1,5 s e a
-  // cauda ficava muda em vez de virar aquele resto de grito se afastando
-  torcida.gain.linearRampToValueAtTime(pico * 0.42, inicio + 1.95);
+  // primeiro ponto é a explosão; o resto é o vaivém e a queda. A queda em duas
+  // etapas existe porque só exponencial o som morria e a cauda ficava muda,
+  // em vez de virar aquele resto de grito se afastando.
+  torcida.gain.exponentialRampToValueAtTime(pico * op.curva[0][1], inicio + op.curva[0][0]);
+  op.curva.slice(1).forEach((p) =>
+    torcida.gain.linearRampToValueAtTime(pico * p[1], inicio + p[0]));
   torcida.gain.exponentialRampToValueAtTime(0.0001, inicio + dur - 0.05);
 
   const onda = ctx.createOscillator();
   const ondaGanho = ctx.createGain();
   onda.type = "sine";
-  onda.frequency.value = 3.2;
+  onda.frequency.value = op.onda || 3.2;
   ondaGanho.gain.value = forca * 0.05;
   onda.connect(ondaGanho);
   ondaGanho.connect(torcida.gain);
@@ -1442,9 +1539,14 @@ function montarGol(ctx, inicio, volume, destino) {
   torcida.connect(saida);
   ruido.start(inicio);
   ruido.stop(inicio + dur);
+}
 
-  /* ----------------------------------------------------------- a buzina */
-  [[0.00, 0.72], [0.92, 0.52]].forEach((par) => {
+/** A buzina de estádio: três serras desafinadas de leve, num acorde. */
+function camadaBuzina(ctx, inicio, volume, destino, rajadas) {
+  const saida = destino || ctx.destination;
+  const forca = Math.max(0.02, Math.min(1, volume));
+
+  rajadas.forEach((par) => {
     const t = inicio + par[0], fim = t + par[1];
     const env = ctx.createGain();
     env.gain.setValueAtTime(0.0001, t);
@@ -1474,13 +1576,111 @@ function montarGol(ctx, inicio, volume, destino) {
   });
 }
 
-/** Fim de bloco de foco: a bola entrou. */
-function tocarGol() {
+/** Surdo: um pulso grave que cai rápido de altura, como pele de tambor. */
+function batidaSurdo(ctx, t, volume, destino, freq) {
+  const forca = Math.max(0.02, Math.min(1, volume));
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(freq * 1.7, t);
+  osc.frequency.exponentialRampToValueAtTime(freq, t + 0.055);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(forca * 0.42, t + 0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
+  osc.connect(g);
+  g.connect(destino || ctx.destination);
+  osc.start(t);
+  osc.stop(t + 0.38);
+}
+
+/** Caixa: estalo curto de ruído agudo, marcando o contratempo. */
+function batidaCaixa(ctx, t, volume, destino) {
+  const forca = Math.max(0.02, Math.min(1, volume));
+  const n = Math.ceil(ctx.sampleRate * 0.09);
+  const buffer = ctx.createBuffer(1, n, ctx.sampleRate);
+  const dados = buffer.getChannelData(0);
+  for (let i = 0; i < n; i++) dados[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  const fonte = ctx.createBufferSource();
+  fonte.buffer = buffer;
+  const passa = ctx.createBiquadFilter();
+  passa.type = "highpass";
+  passa.frequency.value = 2600;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(forca * 0.12, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.085);
+  fonte.connect(passa); passa.connect(g);
+  g.connect(destino || ctx.destination);
+  fonte.start(t);
+  fonte.stop(t + 0.1);
+}
+
+/* ------------------------------------------- as comemorações compráveis */
+
+/** Padrão: buzina de estádio somada ao ronco da torcida. */
+function montarGol(ctx, inicio, volume, destino) {
+  camadaTorcida(ctx, inicio, volume, destino, {
+    dur: 2.6, pico: 0.34,
+    curva: [[0.30, 1], [0.95, 0.70], [1.35, 0.90], [1.95, 0.42]]
+  });
+  camadaBuzina(ctx, inicio, volume, destino, [[0.00, 0.72], [0.92, 0.52]]);
+}
+
+/** Grito da geral: só torcida, sem buzina. Sobe devagar e segura mais. */
+function montarGolGeral(ctx, inicio, volume, destino) {
+  camadaTorcida(ctx, inicio, volume, destino, {
+    dur: 3.1, pico: 0.42, onda: 2.4,
+    curva: [[0.55, 1], [1.30, 0.86], [1.80, 0.95], [2.40, 0.45]]
+  });
+}
+
+/** Gol com bateria: torcida, buzina e a batida do surdo por baixo. */
+function montarGolBateria(ctx, inicio, volume, destino) {
+  camadaTorcida(ctx, inicio, volume, destino, {
+    dur: 2.9, pico: 0.28,
+    curva: [[0.28, 1], [1.00, 0.74], [1.60, 0.88], [2.20, 0.40]]
+  });
+  camadaBuzina(ctx, inicio, volume, destino, [[0.00, 0.55]]);
+  // dois compassos de samba: surdo no tempo, caixa no contratempo
+  const compasso = 0.44;
+  for (let i = 0; i < 6; i++) {
+    const t = inicio + 0.30 + i * compasso;
+    batidaSurdo(ctx, t, volume, destino, i % 2 === 0 ? 62 : 82);
+    batidaCaixa(ctx, t + compasso * 0.5, volume, destino);
+    if (i % 2 === 1) batidaCaixa(ctx, t + compasso * 0.75, volume, destino);
+  }
+}
+
+/* ---------------------------------------------------- catálogo de sons */
+const SONS = {
+  gol: {
+    padrao:  { nome: "Gol do Morumbi", desc: "Buzina de estádio e o ronco da torcida.", preco: 0,  montar: montarGol },
+    geral:   { nome: "Grito da geral", desc: "Só torcida, sem buzina. Sobe devagar e segura mais.", preco: 10, montar: montarGolGeral },
+    bateria: { nome: "Gol com bateria", desc: "Torcida, buzina e o surdo batendo por baixo.", preco: 15, montar: montarGolBateria }
+  },
+  apito: {
+    padrao:  { nome: "Apito de árbitro", desc: "Dois toques curtos e um longo.", preco: 0,  montar: montarApitoPadrao },
+    final:   { nome: "Apito final", desc: "Uma rajada só, longa e mais grave.", preco: 10, montar: montarApitoFinal },
+    pressao: { nome: "Apito de pressão", desc: "Cinco toques secos e agudos. Urgente.", preco: 15, montar: montarApitoPressao }
+  }
+};
+
+function somAtivo(categoria) {
+  const escolhido = categoria === "gol" ? loja.golAtivo : loja.apitoAtivo;
+  return SONS[categoria][escolhido] || SONS[categoria].padrao;
+}
+
+function tocarSom(categoria, id) {
   if (config.mudo || config.volume <= 0) return;
   const ctx = acordarAudio();
   if (!ctx) return;
-  montarGol(ctx, ctx.currentTime + 0.03, config.volume);
+  const som = (id && SONS[categoria][id]) || somAtivo(categoria);
+  som.montar(ctx, ctx.currentTime + 0.03, config.volume);
 }
+
+/** Fim de bloco de foco: a bola entrou. */
+function tocarGol()   { tocarSom("gol"); }
+/** Fim de pausa: volta pro jogo. */
+function tocarApito() { tocarSom("apito"); }
 
 /**
  * Uma rajada de apito. O timbre vem de três coisas somadas:
@@ -1489,9 +1689,10 @@ function tocarGol() {
  *  - ruído branco em passa-faixa, que é o sopro.
  * Aceita um destino próprio para conseguir renderizar fora do alto-falante.
  */
-function rajadaDeApito(ctx, inicio, duracao, volume, destino) {
+function rajadaDeApito(ctx, inicio, duracao, volume, destino, base) {
   const fim = inicio + duracao;
   const pico = Math.max(0.02, Math.min(1, volume)) * 0.28;
+  base = base || 2750;
 
   const saida = ctx.createGain();
   saida.gain.setValueAtTime(0.0001, inicio);
@@ -1510,7 +1711,7 @@ function rajadaDeApito(ctx, inicio, duracao, volume, destino) {
   lfo.start(inicio);
   lfo.stop(fim + 0.02);
 
-  [[2750, 1], [3580, 0.45]].forEach(([freq, forca], i) => {
+  [[base, 1], [base * 1.302, 0.45]].forEach(([freq, forca], i) => {
     const osc = ctx.createOscillator();
     osc.type = i === 0 ? "sine" : "triangle";
     osc.frequency.value = freq;
@@ -1532,7 +1733,7 @@ function rajadaDeApito(ctx, inicio, duracao, volume, destino) {
   ruido.buffer = buffer;
   const passaFaixa = ctx.createBiquadFilter();
   passaFaixa.type = "bandpass";
-  passaFaixa.frequency.value = 3100;
+  passaFaixa.frequency.value = base * 1.13;
   passaFaixa.Q.value = 6;
   const gRuido = ctx.createGain();
   gRuido.gain.value = 0.5;
@@ -1543,19 +1744,26 @@ function rajadaDeApito(ctx, inicio, duracao, volume, destino) {
   ruido.stop(fim + 0.02);
 }
 
-/** Fim de pausa: dois apitos curtos e um longo, como fim de intervalo. */
+/** Fim de pausa, padrão: dois apitos curtos e um longo, como fim de intervalo. */
 const APITO = [
   { atraso: 0.00, duracao: 0.17 },
   { atraso: 0.26, duracao: 0.17 },
   { atraso: 0.52, duracao: 0.55 }
 ];
 
-function tocarApito() {
-  if (config.mudo || config.volume <= 0) return;
-  const ctx = acordarAudio();
-  if (!ctx) return;
-  const t0 = ctx.currentTime + 0.03;
-  APITO.forEach((r) => rajadaDeApito(ctx, t0 + r.atraso, r.duracao, config.volume));
+function montarApitoPadrao(ctx, inicio, volume, destino) {
+  APITO.forEach((r) => rajadaDeApito(ctx, inicio + r.atraso, r.duracao, volume, destino));
+}
+
+/** Apito final: uma rajada só, longa e mais grave — fim de jogo. */
+function montarApitoFinal(ctx, inicio, volume, destino) {
+  rajadaDeApito(ctx, inicio, 1.30, volume, destino, 2280);
+}
+
+/** Apito de pressão: cinco toques secos e agudos, urgentes. */
+function montarApitoPressao(ctx, inicio, volume, destino) {
+  [0, 0.155, 0.31, 0.465, 0.65].forEach((t) =>
+    rajadaDeApito(ctx, inicio + t, 0.10, volume, destino, 3200));
 }
 
 /* --------------------------------------------------------------------------
@@ -2889,6 +3097,7 @@ function renderTudo() {
   renderHistorico();
   renderAssuntos();
   renderFormCiclo();
+  renderLoja();
   // o bloco de pausas mora na aba Foco: precisa acompanhar qualquer mudança
   // de configuração, inclusive a que vem de uma importação de JSON
   renderAjustes();
@@ -2929,7 +3138,7 @@ function exportarJSON() {
     app: "vidori",
     versao: 1,
     exportadoEm: new Date().toISOString(),
-    blocos, ciclos, config, recordes, marcos: marcosOk
+    blocos, ciclos, config, recordes, marcos: marcosOk, loja: loja
   };
   const blob = new Blob([JSON.stringify(pacote, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -2960,8 +3169,12 @@ function importarJSON(arquivo) {
     blocos = dados.blocos.filter((b) => b && b.dia && typeof b.minutos === "number");
     ciclos = Array.isArray(dados.ciclos) ? dados.ciclos : [];
     if (dados.config) config = Object.assign(config, dados.config);
+    if (dados.loja) {
+      loja = Object.assign({ gastas: 0, comprados: [], golAtivo: "padrao", apitoAtivo: "padrao" }, dados.loja);
+      if (!Array.isArray(loja.comprados)) loja.comprados = [];
+    }
     marcosOk = null;                 // recalcula sem comemorar tudo de novo
-    salvarBlocos(); salvarCiclos(); salvarConfig();
+    salvarBlocos(); salvarCiclos(); salvarConfig(); salvarLoja();
     conferirRecordes(true);
     conferirMarcos(true);
     renderTudo();
@@ -2975,7 +3188,8 @@ function apagarTudo() {
   if (!confirm("Apagar TODOS os blocos, ciclos e recordes?\n\nNão tem volta. Exporta o JSON antes se quiser guardar.")) return;
   if (!confirm("Confirma mesmo, " + NOME + "? A estante inteira some.")) return;
   blocos = []; ciclos = []; marcosOk = []; recordes = { dia:0, semana:0, sequencia:0 };
-  salvarBlocos(); salvarCiclos(); salvarMarcos(); salvarRecordes();
+  loja = { gastas: 0, comprados: [], golAtivo: "padrao", apitoAtivo: "padrao" };
+  salvarBlocos(); salvarCiclos(); salvarMarcos(); salvarRecordes(); salvarLoja();
   Armazem.apagar(CHAVES.timer);
   zerarTimer();
   renderTudo();
@@ -3401,6 +3615,100 @@ async function baixarArquivo(id) {
 }
 
 /* --------------------------------------------------------------------------
+   14d. LOJA
+   Cosmético e nada mais: os itens só trocam som, nunca mexem em estatística.
+   -------------------------------------------------------------------------- */
+function temItem(categoria, id) {
+  return SONS[categoria][id].preco === 0 ||
+         loja.comprados.indexOf(categoria + ":" + id) !== -1;
+}
+function itemEmUso(categoria, id) {
+  return (categoria === "gol" ? loja.golAtivo : loja.apitoAtivo) === id;
+}
+
+function comprarItem(categoria, id) {
+  const som = SONS[categoria][id];
+  if (!som || temItem(categoria, id)) return;
+  if (saldoMoedas() < som.preco) {
+    const falta = som.preco - saldoMoedas();
+    mostrarAviso("Faltam " + falta + (falta === 1 ? " moeda" : " moedas") +
+                 " — dá em " + (falta * MIN_POR_MOEDA) + " min de estudo.");
+    return;
+  }
+  loja.gastas = (loja.gastas || 0) + som.preco;
+  loja.comprados.push(categoria + ":" + id);
+  salvarLoja();
+  usarItem(categoria, id);                       // já entra em uso na hora
+  mostrarAviso('"' + som.nome + '" é teu, soberano.', "recorde");
+  tocarSom(categoria, id);
+}
+
+function usarItem(categoria, id) {
+  if (!temItem(categoria, id)) return;
+  if (categoria === "gol") loja.golAtivo = id; else loja.apitoAtivo = id;
+  salvarLoja();
+  renderLoja();
+}
+
+function cartaoDeItem(categoria, id) {
+  const som = SONS[categoria][id];
+  const tem = temItem(categoria, id);
+  const emUso = tem && itemEmUso(categoria, id);
+  const pode = saldoMoedas() >= som.preco;
+
+  let selo;
+  if (emUso) selo = '<span class="selo-uso">Em uso</span>';
+  else if (tem) selo = '<span class="selo-tem">Teu</span>';
+  else selo = '<span class="preco' + (pode ? " pode" : "") + '">' + som.preco + " moedas</span>";
+
+  const acao = tem
+    ? (emUso ? "" : '<button class="btn btn-pequeno btn-preto" data-loja="usar" ' +
+                    'data-cat="' + categoria + '" data-id="' + id + '">Usar</button>')
+    : '<button class="btn btn-pequeno btn-principal" data-loja="comprar" ' +
+      'data-cat="' + categoria + '" data-id="' + id + '"' + (pode ? "" : " disabled") +
+      ">Comprar</button>";
+
+  return '<div class="item-loja' + (emUso ? " em-uso" : tem ? "" : " bloqueado") + '">' +
+    '<div class="item-topo"><h3>' + escapar(som.nome) + "</h3>" + selo + "</div>" +
+    '<p class="desc">' + escapar(som.desc) + "</p>" +
+    '<div class="item-acoes">' +
+      '<button class="btn btn-pequeno" data-loja="ouvir" data-cat="' + categoria +
+        '" data-id="' + id + '">Ouvir</button>' + acao +
+    "</div></div>";
+}
+
+function renderLoja() {
+  const saldo = saldoMoedas();
+  $("#saldoMoedas").textContent = saldo;
+  $("#explicaMoeda").innerHTML =
+    "1 moeda a cada <b>" + MIN_POR_MOEDA + " min</b> de estudo. " +
+    "Já rendeu <b>" + moedasGanhas() + "</b> no total" +
+    (loja.gastas ? ", com <b>" + loja.gastas + "</b> gastas" : "") + ".";
+
+  $("#itensGol").innerHTML = Object.keys(SONS.gol).map((id) => cartaoDeItem("gol", id)).join("");
+  $("#itensApito").innerHTML = Object.keys(SONS.apito).map((id) => cartaoDeItem("apito", id)).join("");
+  renderAvisoLoja();
+}
+
+/** Bolinha na aba quando dá pra comprar algo que ele ainda não tem. */
+function renderAvisoLoja() {
+  const aba = $$(".aba-btn").find((b) => b.dataset.painel === "loja");
+  if (!aba) return;
+  const saldo = saldoMoedas();
+  const podeAlgo = ["gol", "apito"].some((cat) =>
+    Object.keys(SONS[cat]).some((id) => !temItem(cat, id) && saldo >= SONS[cat][id].preco));
+  const ponto = aba.querySelector(".ponto-novo");
+  if (podeAlgo && !ponto) {
+    const p = document.createElement("span");
+    p.className = "ponto-novo";
+    p.title = "Dá pra comprar algo novo";
+    aba.appendChild(p);
+  } else if (!podeAlgo && ponto) {
+    ponto.remove();
+  }
+}
+
+/* --------------------------------------------------------------------------
    15. NAVEGAÇÃO ENTRE PAINÉIS
    -------------------------------------------------------------------------- */
 function irParaPainel(nome) {
@@ -3408,6 +3716,7 @@ function irParaPainel(nome) {
   $$(".aba-btn").forEach((b) => b.classList.toggle("ativa", b.dataset.painel === nome));
   if (nome === "progresso") { renderCalor(); renderComparativo(); }
   if (nome === "arquivos") renderAcervo();
+  if (nome === "loja") renderLoja();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -3512,6 +3821,21 @@ function ajustarPausa(chave, valor) {
   renderAjustes();
 }
 $("#btnTestarApito").addEventListener("click", () => { acordarAudio(); tocarApito(); });
+
+/* ------------------------------------------------------------ aba da loja */
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-loja]");
+  if (!btn || btn.disabled) return;
+  const cat = btn.dataset.cat, id = btn.dataset.id;
+  acordarAudio();
+  if (btn.dataset.loja === "ouvir") tocarSom(cat, id);
+  else if (btn.dataset.loja === "comprar") comprarItem(cat, id);
+  else if (btn.dataset.loja === "usar") {
+    usarItem(cat, id);
+    tocarSom(cat, id);
+    mostrarAviso("Trocado, Tricolor.");
+  }
+});
 
 /* -------------------------------------------------------- aba de arquivos */
 $("#btnNovaPasta").addEventListener("click", () => {
