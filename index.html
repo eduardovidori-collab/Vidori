@@ -456,7 +456,8 @@ canvas{display:block; width:100%; height:auto}
   font-size:12px; color:var(--fraco);
 }
 .legenda-estadio span{display:flex; align-items:center; gap:6px}
-.legenda-estadio i{width:11px; height:11px; border-radius:3px; display:block}
+.legenda-estadio i{width:11px; height:11px; border-radius:3px; display:block; flex:0 0 auto}
+.legenda-estadio b{font-weight:inherit}
 
 /* -------------------------------------------------------------------- loja */
 .caixa-saldo{display:flex; align-items:center; gap:22px; flex-wrap:wrap}
@@ -842,7 +843,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
         arquibancadas de pé. O resto vem com o trabalho.</p>
       <div class="caixa-estadio" id="caixaEstadio" style="margin-top:14px"></div>
       <div class="legenda-estadio">
-        <span><i style="background:#2E7D32"></i>Gramado</span>
+        <span id="legendaCampo"><i style="background:#B0794D"></i><b>Terra batida</b></span>
         <span><i style="background:#CFD3D8"></i>Arquibancada</span>
         <span><i style="background:#C62828"></i>Assentos</span>
         <span><i style="background:#607D8B"></i>Refletores</span>
@@ -1866,6 +1867,12 @@ const SONS = {
 /* Melhorias do estádio: compradas uma vez e aplicadas para sempre — não têm
    "usar", diferente dos sons, onde só um fica ativo por vez. */
 const MELHORIAS_ESTADIO = {
+  grama: {
+    nome: "Gramado",
+    desc: "Troca a terra batida por grama de verdade, e a cal das marcações fica nítida.",
+    preco: 35,
+    tipo: "estadio"
+  },
   cobertura: {
     nome: "Cobertura das arquibancadas",
     desc: "Laje suspensa sobre os quatro setores, com pilares e a sombra caindo nos assentos.",
@@ -4021,7 +4028,7 @@ const CORES_EST = {
   terra: "#8D6E63", terraDir: "#795548", terraEsq: "#5D4037",
   gramaFora: "#57A85C", gramaForaDir: "#489150", gramaForaEsq: "#3C7C43",
   pista: "#8B99A3", pistaDir: "#77858F", pistaEsq: "#65727C",
-  campo: "#2E7D32",
+  campo: "#2E7D32", campoTerra: "#B0794D",
   linha: "#F4F7F5",
   arqTopo: "#CFD3D8", arqDir: "#AAB0B8", arqEsq: "#8D949E",
   assento: "#C62828", assentoLinha: "#8E1B1B",
@@ -4032,8 +4039,9 @@ const CORES_EST = {
   lampada: "#ECEFF1"
 };
 
-/** Já foi comprada a cobertura das arquibancadas? */
+/** Obras já entregues. */
 function temCobertura() { return temItem("estadio", "cobertura"); }
+function temGrama()     { return temItem("estadio", "grama"); }
 
 /**
  * Cobertura: laje suspensa sobre o setor, apoiada em pilares na borda de fora
@@ -4126,27 +4134,29 @@ function baliza(xLinha, paraFora) {
 /** As marcações do campo, todas projetadas em vez de desenhadas em 2D. */
 function marcacoes() {
   const C = CORES_EST, mx = EST.campoX, my = EST.campoY, L = 0.9;
+  // cal em terra batida não fica nítida como em gramado aparado
+  const op = temGrama() ? 0.85 : 0.55;
   let s = "";
   // linhas de fundo e laterais
-  s += traco([[-mx,-my,0],[mx,-my,0],[mx,my,0],[-mx,my,0],[-mx,-my,0]], C.linha, L, 0.85);
+  s += traco([[-mx,-my,0],[mx,-my,0],[mx,my,0],[-mx,my,0],[-mx,-my,0]], C.linha, L, op);
   // meio de campo
-  s += traco([[0,-my,0],[0,my,0]], C.linha, L, 0.85);
+  s += traco([[0,-my,0],[0,my,0]], C.linha, L, op);
   // círculo central, ponto a ponto
   const circulo = [];
   for (let i = 0; i <= 44; i++) {
     const ang = (i / 44) * Math.PI * 2;
     circulo.push([Math.cos(ang) * 10, Math.sin(ang) * 10, 0]);
   }
-  s += traco(circulo, C.linha, L, 0.85);
+  s += traco(circulo, C.linha, L, op);
   s += '<circle cx="' + iso(0,0,0).x.toFixed(2) + '" cy="' + iso(0,0,0).y.toFixed(2) +
-       '" r="1.1" fill="' + C.linha + '" fill-opacity="0.85"/>';
+       '" r="1.1" fill="' + C.linha + '" fill-opacity="' + op + '"/>';
   // áreas grande e pequena, dos dois lados
   [-1, 1].forEach((d) => {
-    s += traco([[d*mx,-20,0],[d*(mx-16),-20,0],[d*(mx-16),20,0],[d*mx,20,0]], C.linha, L, 0.85);
-    s += traco([[d*mx,-9,0],[d*(mx-5.5),-9,0],[d*(mx-5.5),9,0],[d*mx,9,0]], C.linha, L, 0.85);
+    s += traco([[d*mx,-20,0],[d*(mx-16),-20,0],[d*(mx-16),20,0],[d*mx,20,0]], C.linha, L, op);
+    s += traco([[d*mx,-9,0],[d*(mx-5.5),-9,0],[d*(mx-5.5),9,0],[d*mx,9,0]], C.linha, L, op);
     const marca = iso(d * (mx - 11), 0, 0);
     s += '<circle cx="' + marca.x.toFixed(2) + '" cy="' + marca.y.toFixed(2) +
-         '" r="0.9" fill="' + C.linha + '" fill-opacity="0.85"/>';
+         '" r="0.9" fill="' + C.linha + '" fill-opacity="' + op + '"/>';
   });
   return s;
 }
@@ -4164,8 +4174,9 @@ function desenharEstadio() {
   s += caixa(-bx, -by, bx, by, -7, 0, C.gramaFora, C.terraDir, C.terraEsq);
   // pista ao redor do campo
   s += poligono([[-px,-py,0.02],[px,-py,0.02],[px,py,0.02],[-px,py,0.02]], C.pista);
-  // gramado
-  s += poligono([[-mx,-my,0.04],[mx,-my,0.04],[mx,my,0.04],[-mx,my,0.04]], C.campo);
+  // o campo: terra batida até a grama ser plantada
+  s += poligono([[-mx,-my,0.04],[mx,-my,0.04],[mx,my,0.04],[-mx,my,0.04]],
+                temGrama() ? C.campo : C.campoTerra);
   s += marcacoes();
   s += baliza(-mx, -1) + baliza(mx, 1);
 
@@ -4196,15 +4207,26 @@ let estadioAssinatura = null;
 function renderEstadio() {
   const caixaEl = $("#caixaEstadio");
   if (!caixaEl) return;
-  const assinatura = temCobertura() ? "cobertura" : "base";
+  const assinatura = (temGrama() ? "g" : "-") + (temCobertura() ? "c" : "-");
   if (estadioAssinatura === assinatura) return;
   caixaEl.innerHTML = desenharEstadio();
   estadioAssinatura = assinatura;
 
-  $("#legendaEstadio").textContent = temCobertura()
-    ? "Arquibancadas cobertas. O estádio já tem cara de casa de decisão."
-    : "Terreno limpo, gramado plantado e as quatro arquibancadas de pé. " +
-      "O resto vem com o trabalho.";
+  const frases = {
+    "--": "Terreno limpo, campo de terra batida e as quatro arquibancadas de pé. " +
+          "Toda campanha começa assim.",
+    "g-": "Grama plantada e cal fresca nas linhas. Já dá pra jogar bola.",
+    "-c": "Arquibancadas cobertas, campo ainda na terra. A obra vai por partes.",
+    "gc": "Grama no chão e arquibancada coberta. Cara de casa de decisão."
+  };
+  $("#legendaEstadio").textContent = frases[assinatura];
+
+  const campo = $("#legendaCampo");
+  if (campo) {
+    campo.querySelector("i").style.background = temGrama()
+      ? CORES_EST.campo : CORES_EST.campoTerra;
+    campo.querySelector("b").textContent = temGrama() ? "Gramado" : "Terra batida";
+  }
   const leg = $("#legendaCobertura");
   if (leg) leg.hidden = !temCobertura();
 }
