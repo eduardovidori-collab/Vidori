@@ -846,6 +846,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
         <span><i style="background:#CFD3D8"></i>Arquibancada</span>
         <span><i style="background:#C62828"></i>Assentos</span>
         <span><i style="background:#607D8B"></i>Refletores</span>
+        <span id="legendaCobertura" hidden><i style="background:#E6EAED"></i>Cobertura</span>
       </div>
       <p class="dica">Obra em andamento. As melhorias entram numa próxima etapa —
         por enquanto é o estádio de pé, do jeito que toda campanha começa.</p>
@@ -899,9 +900,15 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     <div class="grade-itens" id="itensGol"></div>
   </div></div>
 
-  <div class="cartao"><div class="cartao-corpo">
+  <div class="cartao" style="margin-bottom:18px"><div class="cartao-corpo">
     <h2>Apito de fim de pausa</h2>
     <div class="grade-itens" id="itensApito"></div>
+  </div></div>
+
+  <div class="cartao"><div class="cartao-corpo">
+    <h2>Obras do estádio</h2>
+    <p class="subtexto" style="margin-bottom:4px">Comprou, ficou. Melhoria de obra não se troca nem se desfaz.</p>
+    <div class="grade-itens" id="itensEstadio"></div>
   </div></div>
 </section>
 
@@ -1855,6 +1862,22 @@ const SONS = {
     pressao: { nome: "Apito de pressão", desc: "Cinco toques secos e agudos. Urgente.", preco: 15, montar: montarApitoPressao }
   }
 };
+
+/* Melhorias do estádio: compradas uma vez e aplicadas para sempre — não têm
+   "usar", diferente dos sons, onde só um fica ativo por vez. */
+const MELHORIAS_ESTADIO = {
+  cobertura: {
+    nome: "Cobertura das arquibancadas",
+    desc: "Laje suspensa sobre os quatro setores, com pilares e a sombra caindo nos assentos.",
+    preco: 60,
+    tipo: "estadio"
+  }
+};
+
+const CATALOGO = { gol: SONS.gol, apito: SONS.apito, estadio: MELHORIAS_ESTADIO };
+function itemDoCatalogo(categoria, id) {
+  return CATALOGO[categoria] && CATALOGO[categoria][id];
+}
 
 function somAtivo(categoria) {
   const escolhido = categoria === "gol" ? loja.golAtivo : loja.apitoAtivo;
@@ -3290,6 +3313,7 @@ function renderTudo() {
   renderAssuntos();
   renderFormCiclo();
   renderLoja();
+  renderEstadio();      // sai barato: só refaz quando as obras mudam
   // o bloco de pausas mora na aba Foco: precisa acompanhar qualquer mudança
   // de configuração, inclusive a que vem de uma importação de JSON
   renderAjustes();
@@ -3811,28 +3835,36 @@ async function baixarArquivo(id) {
    Cosmético e nada mais: os itens só trocam som, nunca mexem em estatística.
    -------------------------------------------------------------------------- */
 function temItem(categoria, id) {
-  return SONS[categoria][id].preco === 0 ||
-         loja.comprados.indexOf(categoria + ":" + id) !== -1;
+  const item = itemDoCatalogo(categoria, id);
+  return !!item && (item.preco === 0 ||
+                    loja.comprados.indexOf(categoria + ":" + id) !== -1);
 }
 function itemEmUso(categoria, id) {
   return (categoria === "gol" ? loja.golAtivo : loja.apitoAtivo) === id;
 }
 
 function comprarItem(categoria, id) {
-  const som = SONS[categoria][id];
-  if (!som || temItem(categoria, id)) return;
-  if (saldoMoedas() < som.preco) {
-    const falta = som.preco - saldoMoedas();
+  const item = itemDoCatalogo(categoria, id);
+  if (!item || temItem(categoria, id)) return;
+  if (saldoMoedas() < item.preco) {
+    const falta = item.preco - saldoMoedas();
     mostrarAviso("Faltam " + falta + (falta === 1 ? " moeda" : " moedas") +
                  " — dá em " + (falta * MIN_POR_MOEDA) + " min de estudo.");
     return;
   }
-  loja.gastas = (loja.gastas || 0) + som.preco;
+  loja.gastas = (loja.gastas || 0) + item.preco;
   loja.comprados.push(categoria + ":" + id);
   salvarLoja();
-  usarItem(categoria, id);                       // já entra em uso na hora
-  mostrarAviso('"' + som.nome + '" é teu, soberano.', "recorde");
-  tocarSom(categoria, id);
+
+  if (item.tipo === "estadio") {
+    renderEstadio();                             // a assinatura mudou: redesenha
+    renderLoja();
+    mostrarAviso("Obra entregue: " + item.nome.toLowerCase() + ". Dá uma olhada no estádio.", "recorde");
+  } else {
+    usarItem(categoria, id);                     // som já entra em uso na hora
+    mostrarAviso('"' + item.nome + '" é teu, soberano.', "recorde");
+    tocarSom(categoria, id);
+  }
 }
 
 function usarItem(categoria, id) {
@@ -3843,30 +3875,39 @@ function usarItem(categoria, id) {
 }
 
 function cartaoDeItem(categoria, id) {
-  const som = SONS[categoria][id];
+  const item = itemDoCatalogo(categoria, id);
   const tem = temItem(categoria, id);
-  const emUso = tem && itemEmUso(categoria, id);
-  const pode = saldoMoedas() >= som.preco;
+  const pode = saldoMoedas() >= item.preco;
+  const ehEstadio = item.tipo === "estadio";
+  const emUso = tem && !ehEstadio && itemEmUso(categoria, id);
 
-  let selo;
-  if (emUso) selo = '<span class="selo-uso">Em uso</span>';
-  else if (tem) selo = '<span class="selo-tem">Teu</span>';
-  else selo = '<span class="preco' + (pode ? " pode" : "") + '">' + som.preco + " moedas</span>";
+  const botaoComprar = '<button class="btn btn-pequeno btn-principal" data-loja="comprar" ' +
+    'data-cat="' + categoria + '" data-id="' + id + '"' + (pode ? "" : " disabled") +
+    ">Comprar</button>";
 
-  const acao = tem
-    ? (emUso ? "" : '<button class="btn btn-pequeno btn-preto" data-loja="usar" ' +
-                    'data-cat="' + categoria + '" data-id="' + id + '">Usar</button>')
-    : '<button class="btn btn-pequeno btn-principal" data-loja="comprar" ' +
-      'data-cat="' + categoria + '" data-id="' + id + '"' + (pode ? "" : " disabled") +
-      ">Comprar</button>";
+  let selo, acoes;
+  if (ehEstadio) {
+    // melhoria de obra: comprou, ficou. Não tem prévia nem troca.
+    selo = tem ? '<span class="selo-uso">Instalada</span>'
+               : '<span class="preco' + (pode ? " pode" : "") + '">' + item.preco + " moedas</span>";
+    acoes = tem ? "" : botaoComprar;
+  } else {
+    if (emUso) selo = '<span class="selo-uso">Em uso</span>';
+    else if (tem) selo = '<span class="selo-tem">Teu</span>';
+    else selo = '<span class="preco' + (pode ? " pode" : "") + '">' + item.preco + " moedas</span>";
+    const acao = tem
+      ? (emUso ? "" : '<button class="btn btn-pequeno btn-preto" data-loja="usar" ' +
+                      'data-cat="' + categoria + '" data-id="' + id + '">Usar</button>')
+      : botaoComprar;
+    acoes = '<button class="btn btn-pequeno" data-loja="ouvir" data-cat="' + categoria +
+            '" data-id="' + id + '">Ouvir</button>' + acao;
+  }
 
-  return '<div class="item-loja' + (emUso ? " em-uso" : tem ? "" : " bloqueado") + '">' +
-    '<div class="item-topo"><h3>' + escapar(som.nome) + "</h3>" + selo + "</div>" +
-    '<p class="desc">' + escapar(som.desc) + "</p>" +
-    '<div class="item-acoes">' +
-      '<button class="btn btn-pequeno" data-loja="ouvir" data-cat="' + categoria +
-        '" data-id="' + id + '">Ouvir</button>' + acao +
-    "</div></div>";
+  return '<div class="item-loja' + ((emUso || (ehEstadio && tem)) ? " em-uso" : tem ? "" : " bloqueado") + '">' +
+    '<div class="item-topo"><h3>' + escapar(item.nome) + "</h3>" + selo + "</div>" +
+    '<p class="desc">' + escapar(item.desc) + "</p>" +
+    (acoes ? '<div class="item-acoes">' + acoes + "</div>" : "") +
+    "</div>";
 }
 
 function renderLoja() {
@@ -3879,6 +3920,8 @@ function renderLoja() {
 
   $("#itensGol").innerHTML = Object.keys(SONS.gol).map((id) => cartaoDeItem("gol", id)).join("");
   $("#itensApito").innerHTML = Object.keys(SONS.apito).map((id) => cartaoDeItem("apito", id)).join("");
+  $("#itensEstadio").innerHTML = Object.keys(MELHORIAS_ESTADIO)
+    .map((id) => cartaoDeItem("estadio", id)).join("");
   renderAvisoLoja();
 }
 
@@ -3913,8 +3956,9 @@ function renderAvisoLoja() {
   const aba = $$(".aba-btn").find((b) => b.dataset.painel === "loja");
   if (!aba) return;
   const saldo = saldoMoedas();
-  const podeAlgo = ["gol", "apito"].some((cat) =>
-    Object.keys(SONS[cat]).some((id) => !temItem(cat, id) && saldo >= SONS[cat][id].preco));
+  const podeAlgo = Object.keys(CATALOGO).some((cat) =>
+    Object.keys(CATALOGO[cat]).some((id) =>
+      !temItem(cat, id) && saldo >= CATALOGO[cat][id].preco));
   const ponto = aba.querySelector(".ponto-novo");
   if (podeAlgo && !ponto) {
     const p = document.createElement("span");
@@ -3981,9 +4025,52 @@ const CORES_EST = {
   linha: "#F4F7F5",
   arqTopo: "#CFD3D8", arqDir: "#AAB0B8", arqEsq: "#8D949E",
   assento: "#C62828", assentoLinha: "#8E1B1B",
+  cobTopo: "#E6EAED", cobDir: "#C3C9CF", cobEsq: "#A2AAB2",
+  pilar: "#9AA3AB", pilarDir: "#848E97",
+  sombra: "rgba(18,24,30,.34)",
   torre: "#78868F", torreDir: "#63717A", torreEsq: "#4E5C66",
   lampada: "#ECEFF1"
 };
+
+/** Já foi comprada a cobertura das arquibancadas? */
+function temCobertura() { return temItem("estadio", "cobertura"); }
+
+/**
+ * Cobertura: laje suspensa sobre o setor, apoiada em pilares na borda de fora
+ * e avançando sobre os assentos. A sombra que ela joga é o que faz a laje
+ * parecer suspensa, e não colada em cima do concreto.
+ */
+function coberturaDe(a) {
+  const C = CORES_EST;
+  const zPilar = EST.arqAlt, zLaje = zPilar + 4, zTopo = zLaje + 1.2;
+  const fora = 2, ponta = 1;
+  // A laje NÃO avança sobre o campo e para antes da beirada: cobrindo o setor
+  // inteiro, os assentos sumiam e o estádio virava um anel branco liso.
+  const recuo = 7;
+
+  let x0 = a.x0, x1 = a.x1, y0 = a.y0, y1 = a.y1;
+  if (a.perto === "x1")      { x1 -= recuo; x0 -= fora; y0 -= ponta; y1 += ponta; }
+  else if (a.perto === "x0") { x0 += recuo; x1 += fora; y0 -= ponta; y1 += ponta; }
+  else if (a.perto === "y1") { y1 -= recuo; y0 -= fora; x0 -= ponta; x1 += ponta; }
+  else                       { y0 += recuo; y1 += fora; x0 -= ponta; x1 += ponta; }
+
+  // pilares na borda externa, longe do campo
+  let s = "";
+  const aoLongo = a.aoLongoDeX;
+  const de = aoLongo ? a.x0 : a.y0, ate = aoLongo ? a.x1 : a.y1;
+  const fixo = (a.perto === "x1") ? a.x0 + 1.6
+             : (a.perto === "x0") ? a.x1 - 1.6
+             : (a.perto === "y1") ? a.y0 + 1.6 : a.y1 - 1.6;
+  for (let i = 0; i <= 3; i++) {
+    const t = de + (ate - de) * (0.08 + 0.28 * i);
+    const px = aoLongo ? t : fixo, py = aoLongo ? fixo : t;
+    s += caixa(px - 1.3, py - 1.3, px + 1.3, py + 1.3, zPilar, zLaje,
+               C.pilar, C.pilarDir, C.pilarDir);
+  }
+
+  s += caixa(x0, y0, x1, y1, zLaje, zTopo, C.cobTopo, C.cobDir, C.cobEsq);
+  return s;
+}
 
 /** Uma arquibancada: bloco de concreto com faixa de assentos virada pro campo. */
 function arquibancada(a) {
@@ -4006,6 +4093,17 @@ function arquibancada(a) {
     s += a.aoLongoDeX
       ? traco([[sx0, sy0 + (sy1 - sy0) * t, z], [sx1, sy0 + (sy1 - sy0) * t, z]], C.assentoLinha, 0.7, 0.55)
       : traco([[sx0 + (sx1 - sx0) * t, sy0, z], [sx0 + (sx1 - sx0) * t, sy1, z]], C.assentoLinha, 0.7, 0.55);
+  }
+
+  if (temCobertura()) {
+    // sombra só nas fileiras que ficam debaixo da laje
+    const r = 7;
+    let hx0 = a.x0, hx1 = a.x1, hy0 = a.y0, hy1 = a.y1;
+    if (a.perto === "x1") hx1 -= r; else if (a.perto === "x0") hx0 += r;
+    else if (a.perto === "y1") hy1 -= r; else hy0 += r;
+    s += poligono([[hx0, hy0, z + 0.05], [hx1, hy0, z + 0.05],
+                   [hx1, hy1, z + 0.05], [hx0, hy1, z + 0.05]], C.sombra);
+    s += coberturaDe(a);
   }
   return s;
 }
@@ -4090,13 +4188,25 @@ function desenharEstadio() {
          'quatro torres de refletores">' + s + "</svg>";
 }
 
-let estadioDesenhado = false;
+/**
+ * Redesenha só quando o estado das obras muda. A assinatura evita ter que
+ * lembrar de invalidar o cache em cada lugar que mexe na loja.
+ */
+let estadioAssinatura = null;
 function renderEstadio() {
-  if (estadioDesenhado) return;              // cena fixa: desenha uma vez só
   const caixaEl = $("#caixaEstadio");
   if (!caixaEl) return;
+  const assinatura = temCobertura() ? "cobertura" : "base";
+  if (estadioAssinatura === assinatura) return;
   caixaEl.innerHTML = desenharEstadio();
-  estadioDesenhado = true;
+  estadioAssinatura = assinatura;
+
+  $("#legendaEstadio").textContent = temCobertura()
+    ? "Arquibancadas cobertas. O estádio já tem cara de casa de decisão."
+    : "Terreno limpo, gramado plantado e as quatro arquibancadas de pé. " +
+      "O resto vem com o trabalho.";
+  const leg = $("#legendaCobertura");
+  if (leg) leg.hidden = !temCobertura();
 }
 
 /* --------------------------------------------------------------------------
