@@ -846,7 +846,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
         <span id="legendaCampo"><i style="background:#B0794D"></i><b>Terra batida</b></span>
         <span><i style="background:#CFD3D8"></i>Arquibancada</span>
         <span id="legendaAssentos"><i style="background:#C62828"></i><b>Assentos</b></span>
-        <span><i style="background:#607D8B"></i>Refletores</span>
+        <span id="legendaRefletores"><i style="background:#607D8B"></i><b>Refletores</b></span>
         <span id="legendaCobertura" hidden><i style="background:#E6EAED"></i>Cobertura</span>
       </div>
       <p class="dica">Obra em andamento. As melhorias entram numa próxima etapa —
@@ -1883,6 +1883,12 @@ const MELHORIAS_ESTADIO = {
     nome: "Cobertura das arquibancadas",
     desc: "Laje suspensa sobre os quatro setores, com pilares e a sombra caindo nos assentos.",
     preco: 60,
+    tipo: "estadio"
+  },
+  refletores: {
+    nome: "Refletores acesos",
+    desc: "Acende as quatro torres: lâmpadas brilhando, feixe descendo e poça de luz no gramado.",
+    preco: 70,
     tipo: "estadio"
   },
   anel: {
@@ -4041,7 +4047,8 @@ const EST = {
   recuoAnel: 9, altAnel: 6,     // o anel de cima recua do campo e sobe menos
   assentosAnel: 7,
   recuoCobertura: 7,            // a laje para antes da beirada do convés
-  torreX: 57, torreY: 38        // torres encaixadas no vão de canto
+  torreX: 57, torreY: 38,       // torres encaixadas no vão de canto
+  torreAlt: 21, lampadaAlt: 3.5
 };
 
 const CORES_EST = {
@@ -4059,7 +4066,7 @@ const CORES_EST = {
   pilar: "#9AA3AB", pilarDir: "#848E97",
   sombra: "rgba(18,24,30,.34)",
   torre: "#78868F", torreDir: "#63717A", torreEsq: "#4E5C66",
-  lampada: "#ECEFF1"
+  lampada: "#ECEFF1", lampadaAcesa: "#FFF8D2"
 };
 
 /** Obras já entregues. */
@@ -4067,6 +4074,13 @@ function temCobertura() { return temItem("estadio", "cobertura"); }
 function temGrama()     { return temItem("estadio", "grama"); }
 function temMosaico()   { return temItem("estadio", "mosaico"); }
 function temAnel()      { return temItem("estadio", "anel"); }
+function temRefletores() { return temItem("estadio", "refletores"); }
+
+/** As quatro torres, na ordem em que os gradientes de feixe são nomeados. */
+function posicoesDasTorres() {
+  const tx = EST.torreX, ty = EST.torreY;
+  return [[-tx, -ty], [-tx, ty], [tx, -ty], [tx, ty]];
+}
 
 /** Copia o retângulo do setor recuando a borda que dá pro campo. */
 function recuarDoCampo(a, d) {
@@ -4204,10 +4218,94 @@ function arquibancada(a) {
 }
 
 /** Torre de refletor: poste e a caixa de lâmpadas em cima. */
-function torreDeLuz(cx, cy) {
+function torreDeLuz(cx, cy, indice) {
   const C = CORES_EST;
-  return caixa(cx - 2.2, cy - 2.2, cx + 2.2, cy + 2.2, 0, 21, C.torre, C.torreDir, C.torreEsq) +
-         caixa(cx - 5.5, cy - 4.5, cx + 5.5, cy + 4.5, 21, 24.5, C.lampada, "#B6C0C6", "#96A2AA");
+  const zPoste = EST.torreAlt, zTopo = zPoste + EST.lampadaAlt;
+  let s = "";
+
+  if (temRefletores()) {
+    // o feixe aponta para dentro, mas para antes do meio: quatro poças
+    // separadas leem melhor que uma clarão só no centro do campo
+    const ax = cx * 0.42, ay = cy * 0.42, raio = 30;
+    const poca = [];
+    for (let k = 0; k <= 34; k++) {
+      const ang = (k / 34) * Math.PI * 2;
+      poca.push([ax + Math.cos(ang) * raio, ay + Math.sin(ang) * raio, 0.06]);
+    }
+    s += '<polygon points="' + pontos(poca) + '" fill="url(#pocaDeLuz)"/>';
+
+    const dx = ax - cx, dy = ay - cy;
+    const comp = Math.hypot(dx, dy) || 1;
+    const px = -dy / comp, py = dx / comp;      // perpendicular ao feixe
+    const feixe = [
+      [cx + px * 4, cy + py * 4, zTopo],
+      [cx - px * 4, cy - py * 4, zTopo],
+      [ax - px * raio, ay - py * raio, 0.07],
+      [ax + px * raio, ay + py * raio, 0.07]
+    ];
+    // A torre da frente aponta quase para o observador: nesta projeção o feixe
+    // dela achata numa tira de poucos pixels, que lê como falha de desenho e
+    // não como luz. Nenhum alvo conserta isso sem fundir as quatro poças numa
+    // só, então nesse caso ficam a poça e o halo, sem o feixe.
+    const ys = feixe.map((p) => iso(p[0], p[1], p[2]).y);
+    if (Math.max.apply(null, ys) - Math.min.apply(null, ys) >= 16) {
+      s += '<polygon points="' + pontos(feixe) + '" fill="url(#feixe' + indice + ')"/>';
+    }
+  }
+
+  s += caixa(cx - 2.2, cy - 2.2, cx + 2.2, cy + 2.2, 0, zPoste, C.torre, C.torreDir, C.torreEsq);
+  s += caixa(cx - 5.5, cy - 4.5, cx + 5.5, cy + 4.5, zPoste, zTopo,
+             temRefletores() ? C.lampadaAcesa : C.lampada,
+             temRefletores() ? "#F2E4A4" : "#B6C0C6",
+             temRefletores() ? "#D9C88A" : "#96A2AA");
+
+  if (temRefletores()) {
+    // halo em volta da cabeça: é o que faz o refletor parecer aceso
+    const cabeca = iso(cx, cy, zTopo);
+    s += '<circle cx="' + cabeca.x.toFixed(2) + '" cy="' + cabeca.y.toFixed(2) +
+         '" r="15" fill="url(#brilhoLampada)"/>';
+    // as lâmpadas em si, uma fileira na face virada pro campo
+    for (let k = -1; k <= 1; k++) {
+      const l = iso(cx + k * 3.2, cy - 4.6, zTopo - 1.4);
+      s += '<circle cx="' + l.x.toFixed(2) + '" cy="' + l.y.toFixed(2) +
+           '" r="1.5" fill="#FFFDF0"/>';
+    }
+  }
+  return s;
+}
+
+/** Gradientes da luz. Só entram no SVG quando os refletores estão acesos. */
+function defsDeLuz() {
+  if (!temRefletores()) return "";
+  let d = '<radialGradient id="brilhoLampada">' +
+            '<stop offset="0%" stop-color="#FFFBE8" stop-opacity=".85"/>' +
+            '<stop offset="45%" stop-color="#FFF3C4" stop-opacity=".30"/>' +
+            '<stop offset="100%" stop-color="#FFF3C4" stop-opacity="0"/>' +
+          "</radialGradient>" +
+          '<radialGradient id="pocaDeLuz">' +
+            '<stop offset="0%" stop-color="#FFF6D0" stop-opacity=".40"/>' +
+            '<stop offset="65%" stop-color="#FFF6D0" stop-opacity=".17"/>' +
+            '<stop offset="100%" stop-color="#FFF6D0" stop-opacity="0"/>' +
+          "</radialGradient>";
+  // um gradiente por torre, na direção do próprio feixe
+  posicoesDasTorres().forEach((t, i) => {
+    const topo = iso(t[0], t[1], EST.torreAlt + EST.lampadaAlt);
+    const chao = iso(t[0] * 0.42, t[1] * 0.42, 0);
+    // A torre da frente aponta quase para o observador, e aí lâmpada e poça
+    // quase coincidem na tela. Sem um eixo mínimo o degradê terminaria antes
+    // do polígono e aquele feixe sumiria.
+    let ex = chao.x - topo.x, ey = chao.y - topo.y;
+    let comp = Math.hypot(ex, ey);
+    if (comp < 1) { ex = 0; ey = 1; comp = 1; }
+    if (comp < 46) { const k = 46 / comp; ex *= k; ey *= k; }
+    d += '<linearGradient id="feixe' + i + '" gradientUnits="userSpaceOnUse" x1="' +
+         topo.x.toFixed(1) + '" y1="' + topo.y.toFixed(1) + '" x2="' +
+         (topo.x + ex).toFixed(1) + '" y2="' + (topo.y + ey).toFixed(1) + '">' +
+           '<stop offset="0%" stop-color="#FFF6D0" stop-opacity=".32"/>' +
+           '<stop offset="100%" stop-color="#FFF6D0" stop-opacity=".03"/>' +
+         "</linearGradient>";
+  });
+  return d;
 }
 
 /** Baliza: caixa translúcida fazendo as vezes de rede. */
@@ -4270,20 +4368,22 @@ function desenharEstadio() {
   // peças em pé, do fundo para a frente: quem tem x+y menor está mais atrás
   const tx = EST.torreX, ty = EST.torreY;
   const pecas = [
-    { d: -tx - ty, svg: () => torreDeLuz(-tx, -ty) },
+    { d: -tx - ty, svg: () => torreDeLuz(-tx, -ty, 0) },
     { d: -(ax + px) / 2, svg: () => arquibancada({ x0:-ax, y0:-my, x1:-px, y1:my, perto:"x1", aoLongoDeX:false }) },
     { d: -(ay + py) / 2, svg: () => arquibancada({ x0:-mx, y0:-ay, x1:mx, y1:-py, perto:"y1", aoLongoDeX:true }) },
-    { d: -tx + ty, svg: () => torreDeLuz(-tx, ty) },
-    { d: tx - ty, svg: () => torreDeLuz(tx, -ty) },
+    { d: -tx + ty, svg: () => torreDeLuz(-tx, ty, 1) },
+    { d: tx - ty, svg: () => torreDeLuz(tx, -ty, 2) },
     { d: (ay + py) / 2, svg: () => arquibancada({ x0:-mx, y0:py, x1:mx, y1:ay, perto:"y0", aoLongoDeX:true }) },
     { d: (ax + px) / 2, svg: () => arquibancada({ x0:px, y0:-my, x1:ax, y1:my, perto:"x0", aoLongoDeX:false }) },
-    { d: tx + ty, svg: () => torreDeLuz(tx, ty) }
+    { d: tx + ty, svg: () => torreDeLuz(tx, ty, 3) }
   ];
   pecas.sort((a, b) => a.d - b.d).forEach((p) => { s += p.svg(); });
 
+  const defs = defsDeLuz();
   return '<svg viewBox="-172 -104 344 213" preserveAspectRatio="xMidYMid meet" ' +
          'role="img" aria-label="Estádio isométrico do Vidori: campo, quatro arquibancadas e ' +
-         'quatro torres de refletores">' + s + "</svg>";
+         'quatro torres de refletores' + (temRefletores() ? ", acesos" : "") + '">' +
+         (defs ? "<defs>" + defs + "</defs>" : "") + s + "</svg>";
 }
 
 /**
@@ -4295,7 +4395,8 @@ function renderEstadio() {
   const caixaEl = $("#caixaEstadio");
   if (!caixaEl) return;
   const assinatura = (temGrama() ? "g" : "-") + (temCobertura() ? "c" : "-") +
-                     (temMosaico() ? "m" : "-") + (temAnel() ? "a" : "-");
+                     (temMosaico() ? "m" : "-") + (temAnel() ? "a" : "-") +
+                     (temRefletores() ? "r" : "-");
   if (estadioAssinatura === assinatura) return;
   caixaEl.innerHTML = desenharEstadio();
   estadioAssinatura = assinatura;
@@ -4316,6 +4417,12 @@ function renderEstadio() {
       : CORES_EST.assento;
     assentos.querySelector("b").textContent = temMosaico() ? "Mosaico" : "Assentos";
   }
+  const refl = $("#legendaRefletores");
+  if (refl) {
+    refl.querySelector("i").style.background = temRefletores()
+      ? CORES_EST.lampadaAcesa : CORES_EST.torre;
+    refl.querySelector("b").textContent = temRefletores() ? "Refletores acesos" : "Refletores";
+  }
   const leg = $("#legendaCobertura");
   if (leg) leg.hidden = !temCobertura();
 }
@@ -4330,6 +4437,7 @@ function fraseDoEstadio() {
   if (temMosaico()) feitas.push("mosaico tricolor nos assentos");
   if (temAnel()) feitas.push("segundo anel de arquibancada");
   if (temCobertura()) feitas.push("arquibancada coberta");
+  if (temRefletores()) feitas.push("refletores acesos");
 
   if (!feitas.length) {
     return "Terreno limpo, campo de terra batida e as quatro arquibancadas de pé. " +
