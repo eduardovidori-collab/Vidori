@@ -845,7 +845,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <div class="legenda-estadio">
         <span id="legendaCampo"><i style="background:#B0794D"></i><b>Terra batida</b></span>
         <span><i style="background:#CFD3D8"></i>Arquibancada</span>
-        <span><i style="background:#C62828"></i>Assentos</span>
+        <span id="legendaAssentos"><i style="background:#C62828"></i><b>Assentos</b></span>
         <span><i style="background:#607D8B"></i>Refletores</span>
         <span id="legendaCobertura" hidden><i style="background:#E6EAED"></i>Cobertura</span>
       </div>
@@ -1871,6 +1871,12 @@ const MELHORIAS_ESTADIO = {
     nome: "Gramado",
     desc: "Troca a terra batida por grama de verdade, e a cal das marcações fica nítida.",
     preco: 35,
+    tipo: "estadio"
+  },
+  mosaico: {
+    nome: "Mosaico tricolor",
+    desc: "Os assentos viram faixas de vermelho, branco e preto ao longo dos quatro setores.",
+    preco: 45,
     tipo: "estadio"
   },
   cobertura: {
@@ -4032,6 +4038,8 @@ const CORES_EST = {
   linha: "#F4F7F5",
   arqTopo: "#CFD3D8", arqDir: "#AAB0B8", arqEsq: "#8D949E",
   assento: "#C62828", assentoLinha: "#8E1B1B",
+  mosaicoClaro: "#FFFFFF", mosaicoEscuro: "#1E2429",
+  mosaicoLinha: "rgba(0,0,0,.26)",
   cobTopo: "#E6EAED", cobDir: "#C3C9CF", cobEsq: "#A2AAB2",
   pilar: "#9AA3AB", pilarDir: "#848E97",
   sombra: "rgba(18,24,30,.34)",
@@ -4042,6 +4050,7 @@ const CORES_EST = {
 /** Obras já entregues. */
 function temCobertura() { return temItem("estadio", "cobertura"); }
 function temGrama()     { return temItem("estadio", "grama"); }
+function temMosaico()   { return temItem("estadio", "mosaico"); }
 
 /**
  * Cobertura: laje suspensa sobre o setor, apoiada em pilares na borda de fora
@@ -4092,15 +4101,36 @@ function arquibancada(a) {
   else if (a.perto === "x0") sx1 = a.x0 + d;
   else if (a.perto === "y1") sy0 = a.y1 - d;
   else sy1 = a.y0 + d;
-  s += poligono([[sx0,sy0,z],[sx1,sy0,z],[sx1,sy1,z],[sx0,sy1,z]], C.assento);
+  if (temMosaico()) {
+    // faixas de vermelho, branco e preto ao longo do setor, como mosaico
+    // feito com a cor dos próprios assentos
+    const cores = [C.assento, C.mosaicoClaro, C.mosaicoEscuro];
+    const comprimento = a.aoLongoDeX ? (sx1 - sx0) : (sy1 - sy0);
+    const faixas = Math.max(3, Math.round(comprimento / 9));
+    for (let i = 0; i < faixas; i++) {
+      const t0 = i / faixas, t1 = (i + 1) / faixas;
+      const q = a.aoLongoDeX
+        ? [[sx0 + (sx1-sx0)*t0, sy0, z], [sx0 + (sx1-sx0)*t1, sy0, z],
+           [sx0 + (sx1-sx0)*t1, sy1, z], [sx0 + (sx1-sx0)*t0, sy1, z]]
+        : [[sx0, sy0 + (sy1-sy0)*t0, z], [sx1, sy0 + (sy1-sy0)*t0, z],
+           [sx1, sy0 + (sy1-sy0)*t1, z], [sx0, sy0 + (sy1-sy0)*t1, z]];
+      s += poligono(q, cores[i % 3]);
+    }
+  } else {
+    s += poligono([[sx0,sy0,z],[sx1,sy0,z],[sx1,sy1,z],[sx0,sy1,z]], C.assento);
+  }
 
-  // fileiras: é o que faz o bloco ler como arquibancada e não como laje
+  // fileiras: é o que faz o bloco ler como arquibancada e não como laje.
+  // No mosaico a linha vai em preto translúcido, que funciona sobre as três
+  // cores — o vinho do padrão sumiria em cima das faixas escuras.
+  const corLinha = temMosaico() ? C.mosaicoLinha : C.assentoLinha;
+  const opLinha = temMosaico() ? 1 : 0.55;
   const n = 6;
   for (let i = 1; i < n; i++) {
     const t = i / n;
     s += a.aoLongoDeX
-      ? traco([[sx0, sy0 + (sy1 - sy0) * t, z], [sx1, sy0 + (sy1 - sy0) * t, z]], C.assentoLinha, 0.7, 0.55)
-      : traco([[sx0 + (sx1 - sx0) * t, sy0, z], [sx0 + (sx1 - sx0) * t, sy1, z]], C.assentoLinha, 0.7, 0.55);
+      ? traco([[sx0, sy0 + (sy1 - sy0) * t, z], [sx1, sy0 + (sy1 - sy0) * t, z]], corLinha, 0.7, opLinha)
+      : traco([[sx0 + (sx1 - sx0) * t, sy0, z], [sx0 + (sx1 - sx0) * t, sy1, z]], corLinha, 0.7, opLinha);
   }
 
   if (temCobertura()) {
@@ -4207,19 +4237,13 @@ let estadioAssinatura = null;
 function renderEstadio() {
   const caixaEl = $("#caixaEstadio");
   if (!caixaEl) return;
-  const assinatura = (temGrama() ? "g" : "-") + (temCobertura() ? "c" : "-");
+  const assinatura = (temGrama() ? "g" : "-") + (temCobertura() ? "c" : "-") +
+                     (temMosaico() ? "m" : "-");
   if (estadioAssinatura === assinatura) return;
   caixaEl.innerHTML = desenharEstadio();
   estadioAssinatura = assinatura;
 
-  const frases = {
-    "--": "Terreno limpo, campo de terra batida e as quatro arquibancadas de pé. " +
-          "Toda campanha começa assim.",
-    "g-": "Grama plantada e cal fresca nas linhas. Já dá pra jogar bola.",
-    "-c": "Arquibancadas cobertas, campo ainda na terra. A obra vai por partes.",
-    "gc": "Grama no chão e arquibancada coberta. Cara de casa de decisão."
-  };
-  $("#legendaEstadio").textContent = frases[assinatura];
+  $("#legendaEstadio").textContent = fraseDoEstadio();
 
   const campo = $("#legendaCampo");
   if (campo) {
@@ -4227,8 +4251,39 @@ function renderEstadio() {
       ? CORES_EST.campo : CORES_EST.campoTerra;
     campo.querySelector("b").textContent = temGrama() ? "Gramado" : "Terra batida";
   }
+  const assentos = $("#legendaAssentos");
+  if (assentos) {
+    assentos.querySelector("i").style.background = temMosaico()
+      ? "linear-gradient(90deg," + CORES_EST.assento + " 34%," +
+        CORES_EST.mosaicoClaro + " 34% 67%," + CORES_EST.mosaicoEscuro + " 67%)"
+      : CORES_EST.assento;
+    assentos.querySelector("b").textContent = temMosaico() ? "Mosaico" : "Assentos";
+  }
   const leg = $("#legendaCobertura");
   if (leg) leg.hidden = !temCobertura();
+}
+
+/**
+ * Monta a frase a partir das obras entregues. Com três itens já seriam oito
+ * combinações para escrever à mão, e cada obra nova dobraria a lista.
+ */
+function fraseDoEstadio() {
+  const feitas = [];
+  if (temGrama()) feitas.push("grama no chão");
+  if (temMosaico()) feitas.push("mosaico tricolor nos assentos");
+  if (temCobertura()) feitas.push("arquibancada coberta");
+
+  if (!feitas.length) {
+    return "Terreno limpo, campo de terra batida e as quatro arquibancadas de pé. " +
+           "Toda campanha começa assim.";
+  }
+  const lista = feitas.length === 1
+    ? feitas[0]
+    : feitas.slice(0, -1).join(", ") + " e " + feitas[feitas.length - 1];
+  const fecho = feitas.length === 3
+    ? "Casa de decisão, soberano."
+    : (temGrama() ? "A obra vai andando." : "A obra vai por partes — o campo ainda é terra.");
+  return lista.charAt(0).toUpperCase() + lista.slice(1) + ". " + fecho;
 }
 
 /* --------------------------------------------------------------------------
