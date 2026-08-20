@@ -1479,66 +1479,164 @@ function bipeCurto() {
  * Recebe um destino próprio para dar pra renderizar fora do alto-falante e
  * conferir o resultado.
  */
+/** Ruído rosa: mais grave que o branco, base melhor para massa de vozes. */
+function ruidoRosa(ctx, segundos) {
+  const n = Math.ceil(ctx.sampleRate * segundos);
+  const buffer = ctx.createBuffer(1, n, ctx.sampleRate);
+  const d = buffer.getChannelData(0);
+  let b0 = 0, b1 = 0, b2 = 0;
+  for (let i = 0; i < n; i++) {
+    const branco = Math.random() * 2 - 1;
+    b0 = 0.99765 * b0 + branco * 0.0990460;
+    b1 = 0.96300 * b1 + branco * 0.2965164;
+    b2 = 0.57000 * b2 + branco * 1.0526913;
+    d[i] = (b0 + b1 + b2 + branco * 0.1848) * 0.25;
+  }
+  return buffer;
+}
+
+/** Resposta de impulso do estádio: ruído que decai, usado como reverberação. */
+function impulsoDeEstadio(ctx, segundos, curva) {
+  const n = Math.ceil(ctx.sampleRate * segundos);
+  const buffer = ctx.createBuffer(2, n, ctx.sampleRate);
+  for (let c = 0; c < 2; c++) {
+    const d = buffer.getChannelData(c);
+    for (let i = 0; i < n; i++) {
+      d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, curva);
+    }
+  }
+  return buffer;
+}
+
+/**
+ * Um grito solto, desses que furam a massa. Sem eles a torcida vira um bloco
+ * uniforme, e bloco uniforme o ouvido lê como máquina, não como gente.
+ */
+function vozSolta(ctx, t, volume, destino, fonteRuido) {
+  const dur = 0.28 + Math.random() * 0.5;
+  const src = ctx.createBufferSource();
+  src.buffer = fonteRuido;
+
+  const base = 430 + Math.random() * 620;
+  const f1 = ctx.createBiquadFilter();
+  f1.type = "bandpass"; f1.frequency.value = base; f1.Q.value = 11;
+  const f2 = ctx.createBiquadFilter();
+  f2.type = "bandpass"; f2.frequency.value = base * (2.1 + Math.random() * 0.7); f2.Q.value = 9;
+  const g2 = ctx.createGain(); g2.gain.value = 0.5;
+
+  const g = ctx.createGain();
+  const pico = volume * (0.10 + Math.random() * 0.13);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(pico, t + 0.05);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+  src.connect(f1); f1.connect(g);
+  src.connect(f2); f2.connect(g2); g2.connect(g);
+  g.connect(destino);
+  src.start(t, Math.random() * 0.9);
+  src.stop(t + dur + 0.02);
+}
+
+/**
+ * A torcida.
+ *
+ * A primeira versão era ruído rosa por filtros largos, e soava artificial —
+ * um "shhh" e não um "aaah". Quatro coisas consertam isso, numeradas abaixo:
+ *  (1) formantes, as ressonâncias estreitas que fazem a voz soar como voz;
+ *  (2) gritos soltos por cima da massa;
+ *  (3) ondulação irregular, no lugar de um pulso único e mecânico;
+ *  (4) reverberação de estádio, para o som ter tamanho.
+ */
 function camadaTorcida(ctx, inicio, volume, destino, op) {
   const saida = destino || ctx.destination;
   const forca = Math.max(0.02, Math.min(1, volume));
   const dur = op.dur;
 
-  /* ---------------------------------------------------------- a torcida */
-  const amostras = Math.ceil(ctx.sampleRate * dur);
-  const buffer = ctx.createBuffer(1, amostras, ctx.sampleRate);
-  const dados = buffer.getChannelData(0);
-  let b0 = 0, b1 = 0, b2 = 0;
-  for (let i = 0; i < amostras; i++) {
-    const branco = Math.random() * 2 - 1;
-    b0 = 0.99765 * b0 + branco * 0.0990460;
-    b1 = 0.96300 * b1 + branco * 0.2965164;
-    b2 = 0.57000 * b2 + branco * 1.0526913;
-    dados[i] = (b0 + b1 + b2 + branco * 0.1848) * 0.25;
-  }
-  const ruido = ctx.createBufferSource();
-  ruido.buffer = buffer;
-
-  const corpo = ctx.createBiquadFilter();
-  corpo.type = "bandpass"; corpo.frequency.value = 900; corpo.Q.value = 0.7;
-  const ronco = ctx.createBiquadFilter();
-  ronco.type = "lowpass"; ronco.frequency.value = 220;
-  // terceira camada: o ruído rosa cai 3 dB por oitava, então sem reforçar o
-  // agudo a torcida soava só como ronco. Esta faixa é o grito por cima.
-  const brilho = ctx.createBiquadFilter();
-  brilho.type = "bandpass"; brilho.frequency.value = 2400; brilho.Q.value = 0.9;
-
-  const gCorpo = ctx.createGain(); gCorpo.gain.value = 1;
-  const gRonco = ctx.createGain(); gRonco.gain.value = 0.7;
-  const gBrilho = ctx.createGain(); gBrilho.gain.value = 1.5;
-
-  const torcida = ctx.createGain();
+  /* -------- envelope geral: o formato do grito ao longo do tempo -------- */
+  const envelope = ctx.createGain();
   const pico = forca * op.pico;
-  torcida.gain.setValueAtTime(0.0001, inicio);
+  envelope.gain.setValueAtTime(0.0001, inicio);
   // primeiro ponto é a explosão; o resto é o vaivém e a queda. A queda em duas
   // etapas existe porque só exponencial o som morria e a cauda ficava muda,
   // em vez de virar aquele resto de grito se afastando.
-  torcida.gain.exponentialRampToValueAtTime(pico * op.curva[0][1], inicio + op.curva[0][0]);
+  envelope.gain.exponentialRampToValueAtTime(pico * op.curva[0][1], inicio + op.curva[0][0]);
   op.curva.slice(1).forEach((p) =>
-    torcida.gain.linearRampToValueAtTime(pico * p[1], inicio + p[0]));
-  torcida.gain.exponentialRampToValueAtTime(0.0001, inicio + dur - 0.05);
+    envelope.gain.linearRampToValueAtTime(pico * p[1], inicio + p[0]));
+  envelope.gain.exponentialRampToValueAtTime(0.0001, inicio + dur - 0.05);
 
-  const onda = ctx.createOscillator();
-  const ondaGanho = ctx.createGain();
-  onda.type = "sine";
-  onda.frequency.value = op.onda || 3.2;
-  ondaGanho.gain.value = forca * 0.05;
-  onda.connect(ondaGanho);
-  ondaGanho.connect(torcida.gain);
-  onda.start(inicio);
-  onda.stop(inicio + dur);
+  // (4) reverberação: som seco parece gravado numa caixa
+  const eco = ctx.createConvolver();
+  eco.buffer = impulsoDeEstadio(ctx, 2.2, 2.0);
+  const gEco = ctx.createGain();
+  // o convolver normaliza a resposta pela energia dela, e uma resposta longa
+  // tem muita energia — por isso o eco precisa de ganho bem acima de 1 para
+  // virar cauda audível em vez de sumir a 1% do nível
+  gEco.gain.value = 6;
+  envelope.connect(eco); eco.connect(gEco); gEco.connect(saida);
+  envelope.connect(saida);
 
-  ruido.connect(corpo);  corpo.connect(gCorpo);   gCorpo.connect(torcida);
-  ruido.connect(ronco);  ronco.connect(gRonco);   gRonco.connect(torcida);
-  ruido.connect(brilho); brilho.connect(gBrilho); gBrilho.connect(torcida);
-  torcida.connect(saida);
+  /* (3) ondulação irregular: um oscilador só dava pulso mecânico, então são
+     três, em frequências que não batem entre si */
+  const massa = ctx.createGain();
+  massa.gain.value = 1;
+  massa.connect(envelope);
+  [[2.7, 0.09], [4.3, 0.06], [7.1, 0.035]].forEach((par) => {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = par[0] * (op.onda ? op.onda / 3.2 : 1);
+    g.gain.value = par[1];
+    osc.connect(g); g.connect(massa.gain);
+    osc.start(inicio); osc.stop(inicio + dur);
+  });
+
+  /* ------------------------------- a massa de vozes -------------------- */
+  const ruido = ctx.createBufferSource();
+  ruido.buffer = ruidoRosa(ctx, dur);
+
+  // (1) formantes: faixas estreitas nas ressonâncias da voz humana.
+  // Os dois de cima levam ganho maior porque o ruído rosa cai com a
+  // frequência — com ganho igual, só o formante grave aparecia.
+  [[620, 7, 1], [1180, 9, 1.5], [2500, 8, 1.7]].forEach((f, i) => {
+    const filtro = ctx.createBiquadFilter();
+    filtro.type = "bandpass";
+    filtro.frequency.value = f[0];
+    filtro.Q.value = f[1];
+    const g = ctx.createGain();
+    g.gain.value = f[2];
+    // deriva lenta: multidão não fica parada na mesma vogal
+    const deriva = ctx.createOscillator();
+    const dg = ctx.createGain();
+    deriva.type = "sine";
+    deriva.frequency.value = 0.23 + i * 0.17;
+    dg.gain.value = f[0] * 0.1;
+    deriva.connect(dg); dg.connect(filtro.frequency);
+    deriva.start(inicio); deriva.stop(inicio + dur);
+    ruido.connect(filtro); filtro.connect(g); g.connect(massa);
+  });
+
+  // ronco grave do estádio, por baixo de tudo
+  const ronco = ctx.createBiquadFilter();
+  ronco.type = "lowpass"; ronco.frequency.value = 200;
+  const gRonco = ctx.createGain(); gRonco.gain.value = 0.5;
+  ruido.connect(ronco); ronco.connect(gRonco); gRonco.connect(massa);
+
+  // um resto de banda larga, para não soar filtrado demais
+  const ar = ctx.createBiquadFilter();
+  ar.type = "highpass"; ar.frequency.value = 1200;
+  const gAr = ctx.createGain(); gAr.gain.value = 0.32;
+  ruido.connect(ar); ar.connect(gAr); gAr.connect(massa);
+
   ruido.start(inicio);
   ruido.stop(inicio + dur);
+
+  // (2) gritos soltos furando a massa, em tempos aleatórios
+  const fonteVozes = ruidoRosa(ctx, 1.4);
+  const vozes = op.vozes || 16;
+  for (let i = 0; i < vozes; i++) {
+    const t = inicio + 0.12 + Math.random() * Math.max(0.2, dur - 0.85);
+    vozSolta(ctx, t, forca, massa, fonteVozes);
+  }
 }
 
 /** A buzina de estádio: três serras desafinadas de leve, num acorde. */
