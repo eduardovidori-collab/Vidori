@@ -2041,6 +2041,9 @@ const OBRAS_ESTADIO = {
   mosaico: { nome: "Mosaico tricolor", niveis: [
     { desc: "Os assentos viram faixas de vermelho, branco e preto ao longo dos setores.", preco: 45 }
   ]},
+  cantos: { nome: "Cantos fechados", niveis: [
+    { desc: "Blocos de concreto fechando os quatro vãos, com os refletores montados em cima.", preco: 55 }
+  ]},
   cobertura: { nome: "Cobertura das arquibancadas", niveis: [
     { desc: "Laje suspensa sobre os quatro setores, com pilares e a sombra nos assentos.", preco: 60 }
   ]},
@@ -4269,6 +4272,8 @@ const CORES_EST = {
   linha: "#F4F7F5",
   arqTopo: "#CFD3D8", arqDir: "#AAB0B8", arqEsq: "#8D949E",
   anelTopo: "#D8DCE0", anelDir: "#B4BAC1", anelEsq: "#979EA7",
+  cantoTopo: "#C6CAD0", cantoDir: "#A2A8B0", cantoEsq: "#868D96",
+  cantoFriso: "rgba(40,48,56,.30)",
   degrauDir: "#9AA1A9", degrauEsq: "#7E858D",
   assento: "#C62828", assentoLinha: "#8E1B1B",
   mosaicoClaro: "#FFFFFF", mosaicoEscuro: "#1E2429",
@@ -4296,6 +4301,35 @@ function temRefletores() { return nivelDaObra("refletores") >= 1; }
 function temRedes()      { return nivelDaObra("redes") >= 1; }
 function temBandeiras()  { return nivelDaObra("bandeiras") >= 1; }
 function temPublico()    { return nivelDaObra("publico") >= 1; }
+function temCantos()     { return nivelDaObra("cantos") >= 1; }
+
+/** O bloco de canto acompanha o convés mais alto, para o anel ficar contínuo. */
+function alturaDoCanto() {
+  return EST.arqAlt + (temAnel() ? EST.altAnel : 0);
+}
+
+/**
+ * Bloco de canto: estrutura sólida fechando o vão entre dois setores.
+ * Em estádio de verdade o canto costuma ser escadaria ou torre de acesso, e
+ * não arquibancada curva — por isso ele é maciço e não tem degrau.
+ */
+function blocoDeCanto(sx, sy) {
+  const C = CORES_EST;
+  const mx = EST.campoX, my = EST.campoY;
+  const ax = mx + EST.pista + EST.arqFundo, ay = my + EST.pista + EST.arqFundo;
+  const x0 = Math.min(sx * mx, sx * ax), x1 = Math.max(sx * mx, sx * ax);
+  const y0 = Math.min(sy * my, sy * ay), y1 = Math.max(sy * my, sy * ay);
+  const z = alturaDoCanto();
+
+  let s = caixa(x0, y0, x1, y1, 0, z, C.cantoTopo, C.cantoDir, C.cantoEsq);
+  // frisos nas duas faces à vista: sem eles o canto lê como caixa lisa
+  for (let i = 1; i <= 3; i++) {
+    const zf = z * (i / 4);
+    s += traco([[x1, y0, zf], [x1, y1, zf]], C.cantoFriso, 0.6, 1);
+    s += traco([[x0, y1, zf], [x1, y1, zf]], C.cantoFriso, 0.6, 1);
+  }
+  return s;
+}
 
 /**
  * Faixas de corte. Só as claras são desenhadas, por cima do verde do campo —
@@ -4521,9 +4555,12 @@ function arquibancada(a) {
 }
 
 /** Torre de refletor: poste e a caixa de lâmpadas em cima. */
-function torreDeLuz(cx, cy, indice) {
+function torreDeLuz(cx, cy, indice, zBase) {
   const C = CORES_EST;
+  // a lâmpada fica sempre na mesma altura: com o bloco de canto o mastro só
+  // encurta, então feixe e poça de luz não precisam de nenhum ajuste
   const zPoste = EST.torreAlt, zTopo = zPoste + EST.lampadaAlt;
+  const zPe = zBase || 0;
   let s = "";
 
   if (temRefletores()) {
@@ -4556,7 +4593,7 @@ function torreDeLuz(cx, cy, indice) {
     }
   }
 
-  s += caixa(cx - 2.2, cy - 2.2, cx + 2.2, cy + 2.2, 0, zPoste, C.torre, C.torreDir, C.torreEsq);
+  s += caixa(cx - 2.2, cy - 2.2, cx + 2.2, cy + 2.2, zPe, zPoste, C.torre, C.torreDir, C.torreEsq);
   s += caixa(cx - 5.5, cy - 4.5, cx + 5.5, cy + 4.5, zPoste, zTopo,
              temRefletores() ? C.lampadaAcesa : C.lampada,
              temRefletores() ? "#F2E4A4" : "#B6C0C6",
@@ -4724,19 +4761,31 @@ function desenharEstadio() {
   // peças em pé, do fundo para a frente: quem tem x+y menor está mais atrás
   const tx = EST.torreX, ty = EST.torreY;
   const pecas = [
-    { d: -tx - ty, svg: () => torreDeLuz(-tx, -ty, 0) },
     { d: -(ax + px) / 2, svg: () => arquibancada({ x0:-ax, y0:-my, x1:-px, y1:my, perto:"x1", aoLongoDeX:false }) },
     { d: -(ay + py) / 2, svg: () => arquibancada({ x0:-mx, y0:-ay, x1:mx, y1:-py, perto:"y1", aoLongoDeX:true }) },
-    { d: -tx + ty, svg: () => torreDeLuz(-tx, ty, 1) },
-    { d: tx - ty, svg: () => torreDeLuz(tx, -ty, 2) },
     { d: (ay + py) / 2, svg: () => arquibancada({ x0:-mx, y0:py, x1:mx, y1:ay, perto:"y0", aoLongoDeX:true }) },
     { d: (ax + px) / 2, svg: () => arquibancada({ x0:px, y0:-my, x1:ax, y1:my, perto:"x0", aoLongoDeX:false }) },
-    { d: tx + ty, svg: () => torreDeLuz(tx, ty, 3) },
     // as balizas e as bandeirinhas entram na mesma ordenação. Fora dela, uma
     // torre pintada depois cobria a bandeirinha que está NA FRENTE dela.
     { d: -mx - 2.75, svg: () => baliza(-mx, -1) },
     { d: mx + 2.75, svg: () => baliza(mx, 1) }
   ];
+
+  /* Cantos e torres. Com o bloco comprado, os dois viram uma peça só: a torre
+     se apoia no topo do bloco, e desenhar junto garante que ela venha depois
+     dele — separados, a ordem por profundidade colocaria o bloco por cima. */
+  const zTorre = temCantos() ? alturaDoCanto() : 0;
+  [[-1,-1], [-1,1], [1,-1], [1,1]].forEach((c, i) => {
+    const sx = c[0], sy = c[1];
+    const torre = () => torreDeLuz(sx * tx, sy * ty, i, zTorre);
+    if (temCantos()) {
+      pecas.push({ d: sx * (mx + ax) / 2 + sy * (my + ay) / 2,
+                   svg: () => blocoDeCanto(sx, sy) + torre() });
+    } else {
+      pecas.push({ d: sx * tx + sy * ty, svg: torre });
+    }
+  });
+
   if (temBandeiras()) {
     [[-1,-1], [-1,1], [1,-1], [1,1]].forEach((c) => {
       pecas.push({ d: c[0] * mx + c[1] * my, svg: () => bandeirinha(c[0], c[1]) });
@@ -4763,7 +4812,7 @@ function renderEstadio() {
                      (temMosaico() ? "m" : "-") + (temAnel() ? "a" : "-") +
                      (temRefletores() ? "r" : "-") + (temRedes() ? "n" : "-") +
                      (temBandeiras() ? "b" : "-") + (temPublico() ? "p" : "-") +
-                     (temListras() ? "l" : "-");
+                     (temListras() ? "l" : "-") + (temCantos() ? "k" : "-");
   if (estadioAssinatura === assinatura) return;
   caixaEl.innerHTML = desenharEstadio();
   estadioAssinatura = assinatura;
@@ -4808,6 +4857,7 @@ function fraseDoEstadio() {
   if (temPublico()) feitas.push("torcida na arquibancada");
   if (temMosaico()) feitas.push("mosaico tricolor nos assentos");
   if (temAnel()) feitas.push("segundo anel de arquibancada");
+  if (temCantos()) feitas.push("cantos fechados");
   if (temCobertura()) feitas.push("arquibancada coberta");
   if (temRefletores()) feitas.push("refletores acesos");
 
