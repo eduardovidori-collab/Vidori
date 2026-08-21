@@ -848,6 +848,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
         <span id="legendaAssentos"><i style="background:#C62828"></i><b>Assentos</b></span>
         <span id="legendaRefletores"><i style="background:#607D8B"></i><b>Refletores</b></span>
         <span id="legendaCobertura" hidden><i style="background:#E6EAED"></i>Cobertura</span>
+        <span id="legendaPublico" hidden><i style="background:#D8A47A"></i>Torcida</span>
       </div>
       <p class="dica">Obra em andamento. As melhorias entram numa próxima etapa —
         por enquanto é o estádio de pé, do jeito que toda campanha começa.</p>
@@ -1997,6 +1998,12 @@ const MELHORIAS_ESTADIO = {
     nome: "Redes nos gols",
     desc: "Malha nas duas balizas: fundo, laterais e teto. Antes eram só as traves.",
     preco: 15,
+    tipo: "estadio"
+  },
+  publico: {
+    nome: "Público na arquibancada",
+    desc: "Primeira leva de torcedores espalhados pelos setores. Ainda tem muito lugar vago.",
+    preco: 30,
     tipo: "estadio"
   },
   grama: {
@@ -4179,6 +4186,7 @@ const EST = {
   recuoAnel: 9, altAnel: 6,     // o anel de cima recua do campo e sobe menos
   assentosAnel: 7,
   degraus: 4, quedaDegraus: 3.4,  // fileiras escalonadas descendo pro campo
+  areaPorTorcedor: 16,            // nível 1: esparso, muito lugar vago
   recuoCobertura: 7,            // a laje para antes da beirada do convés
   torreX: 57, torreY: 38,       // torres encaixadas no vão de canto
   torreAlt: 21, lampadaAlt: 3.5
@@ -4203,7 +4211,10 @@ const CORES_EST = {
   lampada: "#ECEFF1", lampadaAcesa: "#FFF8D2",
   trave: "#F7F9FA", traveDir: "#DCE1E4", traveEsq: "#BFC6CB",
   rede: "#FFFFFF",
-  mastro: "#EDF0F2", mastroDir: "#C8CFD3", bandeira: "#C62828"
+  mastro: "#EDF0F2", mastroDir: "#C8CFD3", bandeira: "#C62828",
+  // tons que se leem tanto sobre o vermelho do assento quanto sobre as faixas
+  // branca e preta do mosaico
+  publico: ["#3A4046", "#D8A47A", "#6E7B87", "#3A4046", "#E8DCCB", "#D8A47A"]
 };
 
 /** Obras já entregues. */
@@ -4214,6 +4225,17 @@ function temAnel()      { return temItem("estadio", "anel"); }
 function temRefletores() { return temItem("estadio", "refletores"); }
 function temRedes()      { return temItem("estadio", "redes"); }
 function temBandeiras()  { return temItem("estadio", "bandeiras"); }
+function temPublico()    { return temItem("estadio", "publico"); }
+
+/**
+ * Sorteio com semente. O público precisa ficar no MESMO lugar a cada
+ * redesenho — com Math.random a torcida se remanejava toda vez que uma obra
+ * era comprada, o que lê como falha e não como gente sentada.
+ */
+function aleatorioEstavel(semente) {
+  let s = Math.abs(Math.round(semente)) % 2147483647 + 1;
+  return function () { s = (s * 48271) % 2147483647; return s / 2147483647; };
+}
 
 /** As quatro torres, na ordem em que os gradientes de feixe são nomeados. */
 function posicoesDasTorres() {
@@ -4336,7 +4358,25 @@ function assentosDe(a, zTopo, d, zBase) {
     s += poligono([[f.x1,f.y0,f.z],[f.x1,f.y1,f.z],[f.x1,f.y1,zb],[f.x1,f.y0,zb]], C.degrauDir);
     s += poligono([[f.x0,f.y1,f.z],[f.x1,f.y1,f.z],[f.x1,f.y1,zb],[f.x0,f.y1,zb]], C.degrauEsq);
     s += topoDoDegrau(f);
+    s += publicoNaFatia(f);
   });
+  return s;
+}
+
+/** Torcedores espalhados sobre um degrau. Vale para os dois anéis. */
+function publicoNaFatia(f) {
+  if (!temPublico()) return "";
+  const cores = CORES_EST.publico;
+  const larg = f.x1 - f.x0, fundo = f.y1 - f.y0;
+  const quantos = Math.round(Math.abs(larg * fundo) / EST.areaPorTorcedor);
+  // a semente vem da posição do degrau: cada um sorteia sempre igual
+  const sorte = aleatorioEstavel(f.x0 * 7.3 + f.y0 * 13.1 + f.z * 29.7 + 101);
+  let s = "";
+  for (let i = 0; i < quantos; i++) {
+    const p = iso(f.x0 + sorte() * larg, f.y0 + sorte() * fundo, f.z + 0.45);
+    s += '<circle cx="' + p.x.toFixed(2) + '" cy="' + p.y.toFixed(2) +
+         '" r="0.62" fill="' + cores[Math.floor(sorte() * cores.length)] + '"/>';
+  }
   return s;
 }
 
@@ -4637,7 +4677,7 @@ function renderEstadio() {
   const assinatura = (temGrama() ? "g" : "-") + (temCobertura() ? "c" : "-") +
                      (temMosaico() ? "m" : "-") + (temAnel() ? "a" : "-") +
                      (temRefletores() ? "r" : "-") + (temRedes() ? "n" : "-") +
-                     (temBandeiras() ? "b" : "-");
+                     (temBandeiras() ? "b" : "-") + (temPublico() ? "p" : "-");
   if (estadioAssinatura === assinatura) return;
   caixaEl.innerHTML = desenharEstadio();
   estadioAssinatura = assinatura;
@@ -4666,6 +4706,8 @@ function renderEstadio() {
   }
   const leg = $("#legendaCobertura");
   if (leg) leg.hidden = !temCobertura();
+  const pub = $("#legendaPublico");
+  if (pub) pub.hidden = !temPublico();
 }
 
 /**
@@ -4677,6 +4719,7 @@ function fraseDoEstadio() {
   if (temGrama()) feitas.push("grama no chão");
   if (temRedes()) feitas.push("rede nos gols");
   if (temBandeiras()) feitas.push("bandeirinha nos escanteios");
+  if (temPublico()) feitas.push("torcida na arquibancada");
   if (temMosaico()) feitas.push("mosaico tricolor nos assentos");
   if (temAnel()) feitas.push("segundo anel de arquibancada");
   if (temCobertura()) feitas.push("arquibancada coberta");
