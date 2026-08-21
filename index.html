@@ -4539,9 +4539,12 @@ function bandeirinha(sx, sy) {
   const cx = sx * EST.campoX, cy = sy * EST.campoY, alt = 4.6;
   let s = caixa(cx - 0.32, cy - 0.32, cx + 0.32, cy + 0.32, 0, alt,
                 C.mastro, C.mastroDir, C.mastroDir);
-  // flâmula saindo do topo, na diagonal para fora do campo
-  s += poligono([[cx, cy, alt], [cx + sx * 2.8, cy + sy * 1.9, alt - 0.55],
-                 [cx, cy, alt - 1.9]], C.bandeira);
+  /* A flâmula aponta no eixo X, e não na diagonal do canto. Na diagonal ela
+     ficava de perfil em dois dos quatro cantos: naquela direção x e y variam
+     juntos, x-y quase não muda e o triângulo colapsa numa tira de poucos
+     pixels. Apontando em X, x-y varia o mesmo nos quatro. */
+  s += poligono([[cx, cy, alt], [cx + sx * 3.8, cy, alt - 0.7],
+                 [cx, cy, alt - 2.2]], C.bandeira);
   return s;
 }
 
@@ -4592,10 +4595,6 @@ function desenharEstadio() {
   s += poligono([[-mx,-my,0.04],[mx,-my,0.04],[mx,my,0.04],[-mx,my,0.04]],
                 temGrama() ? C.campo : C.campoTerra);
   s += marcacoes();
-  s += baliza(-mx, -1) + baliza(mx, 1);
-  if (temBandeiras()) {
-    [[-1,-1], [-1,1], [1,-1], [1,1]].forEach((c) => { s += bandeirinha(c[0], c[1]); });
-  }
 
   // peças em pé, do fundo para a frente: quem tem x+y menor está mais atrás
   const tx = EST.torreX, ty = EST.torreY;
@@ -4607,8 +4606,17 @@ function desenharEstadio() {
     { d: tx - ty, svg: () => torreDeLuz(tx, -ty, 2) },
     { d: (ay + py) / 2, svg: () => arquibancada({ x0:-mx, y0:py, x1:mx, y1:ay, perto:"y0", aoLongoDeX:true }) },
     { d: (ax + px) / 2, svg: () => arquibancada({ x0:px, y0:-my, x1:ax, y1:my, perto:"x0", aoLongoDeX:false }) },
-    { d: tx + ty, svg: () => torreDeLuz(tx, ty, 3) }
+    { d: tx + ty, svg: () => torreDeLuz(tx, ty, 3) },
+    // as balizas e as bandeirinhas entram na mesma ordenação. Fora dela, uma
+    // torre pintada depois cobria a bandeirinha que está NA FRENTE dela.
+    { d: -mx - 2.75, svg: () => baliza(-mx, -1) },
+    { d: mx + 2.75, svg: () => baliza(mx, 1) }
   ];
+  if (temBandeiras()) {
+    [[-1,-1], [-1,1], [1,-1], [1,1]].forEach((c) => {
+      pecas.push({ d: c[0] * mx + c[1] * my, svg: () => bandeirinha(c[0], c[1]) });
+    });
+  }
   pecas.sort((a, b) => a.d - b.d).forEach((p) => { s += p.svg(); });
 
   const defs = defsDeLuz();
