@@ -497,6 +497,12 @@ canvas{display:block; width:100%; height:auto}
 }
 .item-loja .desc{font-size:12.5px; color:var(--fraco); flex:1 1 auto}
 .item-acoes{display:flex; gap:8px; flex-wrap:wrap}
+/* escadinha de níveis: quantos degraus a obra tem e quantos já foram */
+.escada{display:flex; gap:5px; align-items:center}
+.escada i{
+  width:20px; height:5px; border-radius:3px; background:#DFE1E6; display:block;
+}
+.escada i.feito{background:var(--vermelho)}
 .item-acoes .btn{flex:1 1 auto}
 
 /* aviso discreto na aba quando dá pra comprar algo novo */
@@ -1281,10 +1287,32 @@ const MARCOS = [100, 250, 500, 1000, 2000, 5000];
 
 /* Loja: o que já foi gasto, o que foi comprado e o que está em uso. */
 let loja = Object.assign(
-  { gastas: 0, comprados: [], golAtivo: "padrao", apitoAtivo: "padrao" },
+  { gastas: 0, comprados: [], niveis: {}, golAtivo: "padrao", apitoAtivo: "padrao" },
   Armazem.ler(CHAVES.loja, {})
 );
 if (!Array.isArray(loja.comprados)) loja.comprados = [];
+if (!loja.niveis || typeof loja.niveis !== "object") loja.niveis = {};
+
+/* As obras do estádio eram itens soltos e passaram a ser níveis de uma obra
+   só. Converte o que já estava comprado, sem tirar nada de quem pagou. */
+(function migrarObrasParaNiveis() {
+  const DE_PARA = {
+    "estadio:bandeiras": ["bandeiras", 1], "estadio:redes": ["redes", 1],
+    "estadio:publico": ["publico", 1], "estadio:grama": ["gramado", 1],
+    "estadio:listras": ["gramado", 2], "estadio:mosaico": ["mosaico", 1],
+    "estadio:cobertura": ["cobertura", 1], "estadio:refletores": ["refletores", 1],
+    "estadio:anel": ["anel", 1]
+  };
+  let mudou = false;
+  loja.comprados = loja.comprados.filter((c) => {
+    const alvo = DE_PARA[c];
+    if (!alvo) return true;
+    loja.niveis[alvo[0]] = Math.max(loja.niveis[alvo[0]] || 0, alvo[1]);
+    mudou = true;
+    return false;
+  });
+  if (mudou) Armazem.gravar(CHAVES.loja, loja);
+})();
 
 // os fogos de artifício viraram a virada da bateria: quem já tinha comprado
 // não pode perder o item nem o que gastou nele
@@ -1987,89 +2015,58 @@ const SONS = {
 
 /* Melhorias do estádio: compradas uma vez e aplicadas para sempre — não têm
    "usar", diferente dos sons, onde só um fica ativo por vez. */
-const MELHORIAS_ESTADIO = {
-  bandeiras: {
-    nome: "Bandeirinhas de escanteio",
-    desc: "Mastro e flâmula vermelha nos quatro cantos do gramado.",
-    preco: 10,
-    tipo: "estadio"
-  },
-  redes: {
-    nome: "Redes nos gols",
-    desc: "Malha nas duas balizas: fundo, laterais e teto. Antes eram só as traves.",
-    preco: 15,
-    tipo: "estadio"
-  },
-  publico: {
-    nome: "Público na arquibancada",
-    desc: "Primeira leva de torcedores espalhados pelos setores. Ainda tem muito lugar vago.",
-    preco: 30,
-    tipo: "estadio"
-  },
-  grama: {
-    nome: "Gramado",
-    desc: "Troca a terra batida por grama de verdade, e a cal das marcações fica nítida.",
-    preco: 35,
-    tipo: "estadio"
-  },
-  listras: {
-    nome: "Gramado listrado",
-    desc: "Faixas de corte alternadas, como campo aparado pra dia de decisão.",
-    preco: 40,
-    requer: "grama",
-    tipo: "estadio"
-  },
-  mosaico: {
-    nome: "Mosaico tricolor",
-    desc: "Os assentos viram faixas de vermelho, branco e preto ao longo dos quatro setores.",
-    preco: 45,
-    tipo: "estadio"
-  },
-  cobertura: {
-    nome: "Cobertura das arquibancadas",
-    desc: "Laje suspensa sobre os quatro setores, com pilares e a sombra caindo nos assentos.",
-    preco: 60,
-    tipo: "estadio"
-  },
-  refletores: {
-    nome: "Refletores acesos",
-    desc: "Acende as quatro torres: lâmpadas brilhando, feixe descendo e poça de luz no gramado.",
-    preco: 70,
-    tipo: "estadio"
-  },
-  anel: {
-    nome: "Segundo anel",
-    desc: "Mais um anel de arquibancada acima do atual, recuado do campo. A cobertura sobe junto.",
-    preco: 90,
-    tipo: "estadio"
-  }
+/**
+ * Obras do estádio, em NÍVEIS.
+ *
+ * Cada obra é um cartão só na loja, e a compra sobe o nível dela. Assim o
+ * nível 2 não precisa de regra de pré-requisito: ele simplesmente é o próximo
+ * da mesma obra, e não existe jeito de comprar fora de ordem.
+ *
+ * Acrescentar "refletores nível 2" depois é acrescentar um item ao array.
+ */
+const OBRAS_ESTADIO = {
+  bandeiras: { nome: "Bandeirinhas de escanteio", niveis: [
+    { desc: "Mastro e flâmula vermelha nos quatro cantos do gramado.", preco: 10 }
+  ]},
+  redes: { nome: "Redes nos gols", niveis: [
+    { desc: "Malha nas duas balizas: fundo, laterais e teto. Antes eram só as traves.", preco: 15 }
+  ]},
+  publico: { nome: "Público", niveis: [
+    { desc: "Primeira leva de torcedores espalhados pelos setores. Ainda tem muito lugar vago.", preco: 30 }
+  ]},
+  gramado: { nome: "Gramado", niveis: [
+    { desc: "Troca a terra batida por grama de verdade, e a cal das marcações fica nítida.", preco: 35 },
+    { desc: "Faixas de corte alternadas, como campo aparado pra dia de decisão.", preco: 40 }
+  ]},
+  mosaico: { nome: "Mosaico tricolor", niveis: [
+    { desc: "Os assentos viram faixas de vermelho, branco e preto ao longo dos setores.", preco: 45 }
+  ]},
+  cobertura: { nome: "Cobertura das arquibancadas", niveis: [
+    { desc: "Laje suspensa sobre os quatro setores, com pilares e a sombra nos assentos.", preco: 60 }
+  ]},
+  refletores: { nome: "Refletores", niveis: [
+    { desc: "Acende as quatro torres: lâmpadas, feixe descendo e poça de luz no gramado.", preco: 70 }
+  ]},
+  anel: { nome: "Segundo anel", niveis: [
+    { desc: "Mais um anel de arquibancada acima do atual, recuado do campo.", preco: 90 }
+  ]}
 };
 
-const CATALOGO = { gol: SONS.gol, apito: SONS.apito, estadio: MELHORIAS_ESTADIO };
+/** Nível já entregue de uma obra. Zero é o estádio como ele nasce. */
+function nivelDaObra(f) {
+  return (loja.niveis && loja.niveis[f]) || 0;
+}
+function proximoNivel(f) {
+  const obra = OBRAS_ESTADIO[f];
+  const n = nivelDaObra(f);
+  return (obra && n < obra.niveis.length) ? obra.niveis[n] : null;
+}
+
+const CATALOGO = { gol: SONS.gol, apito: SONS.apito };
 function itemDoCatalogo(categoria, id) {
   return CATALOGO[categoria] && CATALOGO[categoria][id];
 }
 
-/** Alguns itens só fazem sentido depois de outro — listra em terra não existe. */
-function preRequisitoOk(categoria, id) {
-  const item = itemDoCatalogo(categoria, id);
-  return !item || !item.requer || temItem(categoria, item.requer);
-}
-function nomeDoPreRequisito(categoria, id) {
-  const item = itemDoCatalogo(categoria, id);
-  const dono = item && item.requer && itemDoCatalogo(categoria, item.requer);
-  return dono ? dono.nome : "";
-}
-
-/**
- * O que aparece na prateleira. Item ainda trancado nem entra na lista: cartão
- * que não dá pra comprar só ocupa espaço e confunde. Ele surge no momento em
- * que o pré-requisito é entregue.
- */
-function itensVisiveis(categoria) {
-  return Object.keys(CATALOGO[categoria]).filter((id) =>
-    temItem(categoria, id) || preRequisitoOk(categoria, id));
-}
 
 function somAtivo(categoria) {
   const escolhido = categoria === "gol" ? loja.golAtivo : loja.apitoAtivo;
@@ -4043,10 +4040,6 @@ function itemEmUso(categoria, id) {
 function comprarItem(categoria, id) {
   const item = itemDoCatalogo(categoria, id);
   if (!item || temItem(categoria, id)) return;
-  if (!preRequisitoOk(categoria, id)) {
-    mostrarAviso("Antes precisa de: " + nomeDoPreRequisito(categoria, id) + ".");
-    return;
-  }
   if (saldoMoedas() < item.preco) {
     const falta = item.preco - saldoMoedas();
     mostrarAviso("Faltam " + falta + (falta === 1 ? " moeda" : " moedas") +
@@ -4057,15 +4050,9 @@ function comprarItem(categoria, id) {
   loja.comprados.push(categoria + ":" + id);
   salvarLoja();
 
-  if (item.tipo === "estadio") {
-    renderEstadio();                             // a assinatura mudou: redesenha
-    renderLoja();
-    mostrarAviso("Obra entregue: " + item.nome.toLowerCase() + ". Dá uma olhada no estádio.", "recorde");
-  } else {
-    usarItem(categoria, id);                     // som já entra em uso na hora
-    mostrarAviso('"' + item.nome + '" é teu, soberano.', "recorde");
-    tocarSom(categoria, id);
-  }
+  usarItem(categoria, id);                       // som já entra em uso na hora
+  mostrarAviso('"' + item.nome + '" é teu, soberano.', "recorde");
+  tocarSom(categoria, id);
 }
 
 function usarItem(categoria, id) {
@@ -4075,36 +4062,81 @@ function usarItem(categoria, id) {
   renderLoja();
 }
 
+/** Sobe um nível da obra. Não existe pular etapa: só dá pra comprar o próximo. */
+function comprarNivel(familia) {
+  const obra = OBRAS_ESTADIO[familia];
+  const prox = proximoNivel(familia);
+  if (!obra || !prox) return;
+  if (saldoMoedas() < prox.preco) {
+    const falta = prox.preco - saldoMoedas();
+    mostrarAviso("Faltam " + falta + (falta === 1 ? " moeda" : " moedas") +
+                 " — dá em " + (falta * MIN_POR_MOEDA) + " min de estudo.");
+    return;
+  }
+  const nivel = nivelDaObra(familia) + 1;
+  loja.gastas = (loja.gastas || 0) + prox.preco;
+  loja.niveis[familia] = nivel;
+  salvarLoja();
+  renderEstadio();
+  renderLoja();
+  mostrarAviso("Obra entregue: " + obra.nome.toLowerCase() +
+               (obra.niveis.length > 1 ? ", nível " + nivel : "") +
+               ". Dá uma olhada no estádio.", "recorde");
+}
+
+/** Um cartão por obra, mostrando o nível atual e o que vem a seguir. */
+function cartaoDeObra(familia) {
+  const obra = OBRAS_ESTADIO[familia];
+  const nivel = nivelDaObra(familia);
+  const total = obra.niveis.length;
+  const prox = proximoNivel(familia);
+  const pode = prox && saldoMoedas() >= prox.preco;
+  const temNiveis = total > 1;
+
+  let selo;
+  if (!prox) selo = '<span class="selo-uso">' + (temNiveis ? "Nível " + total : "Instalada") + "</span>";
+  else selo = '<span class="preco' + (pode ? " pode" : "") + '">' + prox.preco + " moedas</span>";
+
+  const escada = temNiveis
+    ? '<span class="escada">' +
+        obra.niveis.map((_, i) => '<i' + (i < nivel ? ' class="feito"' : "") + "></i>").join("") +
+        "</span>" : "";
+
+  const titulo = obra.nome + (temNiveis && nivel > 0 && prox ? " · nível " + nivel : "");
+  const desc = prox
+    ? (temNiveis ? "<b>Nível " + (nivel + 1) + ":</b> " : "") + prox.desc
+    : obra.niveis[total - 1].desc;
+
+  return '<div class="item-loja' + (nivel > 0 ? " em-uso" : " bloqueado") + '">' +
+    '<div class="item-topo"><h3>' + escapar(titulo) + "</h3>" + selo + "</div>" +
+    escada +
+    '<p class="desc">' + desc + "</p>" +
+    (prox ? '<div class="item-acoes">' +
+      '<button class="btn btn-pequeno btn-principal" data-loja="obra" data-familia="' + familia +
+      '"' + (pode ? "" : " disabled") + ">Comprar</button></div>" : "") +
+    "</div>";
+}
+
 function cartaoDeItem(categoria, id) {
   const item = itemDoCatalogo(categoria, id);
   const tem = temItem(categoria, id);
-  const pode = preRequisitoOk(categoria, id) && saldoMoedas() >= item.preco;
-  const ehEstadio = item.tipo === "estadio";
-  const emUso = tem && !ehEstadio && itemEmUso(categoria, id);
+  const pode = saldoMoedas() >= item.preco;
+  const emUso = tem && itemEmUso(categoria, id);
 
-  const botaoComprar = '<button class="btn btn-pequeno btn-principal" data-loja="comprar" ' +
-    'data-cat="' + categoria + '" data-id="' + id + '"' + (pode ? "" : " disabled") +
-    ">Comprar</button>";
+  let selo;
+  if (emUso) selo = '<span class="selo-uso">Em uso</span>';
+  else if (tem) selo = '<span class="selo-tem">Teu</span>';
+  else selo = '<span class="preco' + (pode ? " pode" : "") + '">' + item.preco + " moedas</span>";
 
-  let selo, acoes;
-  if (ehEstadio) {
-    // melhoria de obra: comprou, ficou. Não tem prévia nem troca.
-    selo = tem ? '<span class="selo-uso">Instalada</span>'
-               : '<span class="preco' + (pode ? " pode" : "") + '">' + item.preco + " moedas</span>";
-    acoes = tem ? "" : botaoComprar;
-  } else {
-    if (emUso) selo = '<span class="selo-uso">Em uso</span>';
-    else if (tem) selo = '<span class="selo-tem">Teu</span>';
-    else selo = '<span class="preco' + (pode ? " pode" : "") + '">' + item.preco + " moedas</span>";
-    const acao = tem
-      ? (emUso ? "" : '<button class="btn btn-pequeno btn-preto" data-loja="usar" ' +
-                      'data-cat="' + categoria + '" data-id="' + id + '">Usar</button>')
-      : botaoComprar;
-    acoes = '<button class="btn btn-pequeno" data-loja="ouvir" data-cat="' + categoria +
-            '" data-id="' + id + '">Ouvir</button>' + acao;
-  }
+  const acao = tem
+    ? (emUso ? "" : '<button class="btn btn-pequeno btn-preto" data-loja="usar" ' +
+                    'data-cat="' + categoria + '" data-id="' + id + '">Usar</button>')
+    : '<button class="btn btn-pequeno btn-principal" data-loja="comprar" data-cat="' + categoria +
+      '" data-id="' + id + '"' + (pode ? "" : " disabled") + ">Comprar</button>";
+  const acoes = '<button class="btn btn-pequeno" data-loja="ouvir" data-cat="' + categoria +
+                '" data-id="' + id + '">Ouvir</button>' + acao;
 
-  return '<div class="item-loja' + ((emUso || (ehEstadio && tem)) ? " em-uso" : tem ? "" : " bloqueado") + '">' +
+  return '<div class="item-loja' + (emUso ? " em-uso" : tem ? "" : " bloqueado") + '">' +
     '<div class="item-topo"><h3>' + escapar(item.nome) + "</h3>" + selo + "</div>" +
     '<p class="desc">' + escapar(item.desc) + "</p>" +
     (acoes ? '<div class="item-acoes">' + acoes + "</div>" : "") +
@@ -4119,10 +4151,9 @@ function renderLoja() {
     "Já rendeu <b>" + moedasGanhas() + "</b> no total" +
     (loja.gastas ? ", com <b>" + loja.gastas + "</b> gastas" : "") + ".";
 
-  $("#itensGol").innerHTML = itensVisiveis("gol").map((id) => cartaoDeItem("gol", id)).join("");
-  $("#itensApito").innerHTML = itensVisiveis("apito").map((id) => cartaoDeItem("apito", id)).join("");
-  $("#itensEstadio").innerHTML = itensVisiveis("estadio")
-    .map((id) => cartaoDeItem("estadio", id)).join("");
+  $("#itensGol").innerHTML = Object.keys(SONS.gol).map((id) => cartaoDeItem("gol", id)).join("");
+  $("#itensApito").innerHTML = Object.keys(SONS.apito).map((id) => cartaoDeItem("apito", id)).join("");
+  $("#itensEstadio").innerHTML = Object.keys(OBRAS_ESTADIO).map(cartaoDeObra).join("");
   renderAvisoLoja();
 }
 
@@ -4146,8 +4177,9 @@ function resetarLoja() {
   if (!confirm("Resetar a loja?\n\nTudo que você comprou volta a ficar bloqueado, os sons " +
                "voltam ao padrão e o saldo passa a ser tudo que você já ganhou (" +
                moedasGanhas() + " moedas).\n\nNão tem volta.")) return;
-  loja = { gastas: 0, comprados: [], golAtivo: "padrao", apitoAtivo: "padrao" };
+  loja = { gastas: 0, comprados: [], niveis: {}, golAtivo: "padrao", apitoAtivo: "padrao" };
   salvarLoja();
+  renderEstadio();
   renderLoja();
   mostrarAviso("Loja resetada. Saldo de volta em " + saldoMoedas() + ".");
 }
@@ -4157,9 +4189,14 @@ function renderAvisoLoja() {
   const aba = $$(".aba-btn").find((b) => b.dataset.painel === "loja");
   if (!aba) return;
   const saldo = saldoMoedas();
-  const podeAlgo = Object.keys(CATALOGO).some((cat) =>
+  const podeSom = Object.keys(CATALOGO).some((cat) =>
     Object.keys(CATALOGO[cat]).some((id) =>
-      !temItem(cat, id) && preRequisitoOk(cat, id) && saldo >= CATALOGO[cat][id].preco));
+      !temItem(cat, id) && saldo >= CATALOGO[cat][id].preco));
+  const podeObra = Object.keys(OBRAS_ESTADIO).some((f) => {
+    const p = proximoNivel(f);
+    return p && saldo >= p.preco;
+  });
+  const podeAlgo = podeSom || podeObra;
   const ponto = aba.querySelector(".ponto-novo");
   if (podeAlgo && !ponto) {
     const p = document.createElement("span");
@@ -4250,15 +4287,15 @@ const CORES_EST = {
 };
 
 /** Obras já entregues. */
-function temCobertura() { return temItem("estadio", "cobertura"); }
-function temGrama()     { return temItem("estadio", "grama"); }
-function temMosaico()   { return temItem("estadio", "mosaico"); }
-function temAnel()      { return temItem("estadio", "anel"); }
-function temRefletores() { return temItem("estadio", "refletores"); }
-function temRedes()      { return temItem("estadio", "redes"); }
-function temBandeiras()  { return temItem("estadio", "bandeiras"); }
-function temPublico()    { return temItem("estadio", "publico"); }
-function temListras()    { return temItem("estadio", "listras"); }
+function temCobertura()  { return nivelDaObra("cobertura") >= 1; }
+function temGrama()      { return nivelDaObra("gramado") >= 1; }
+function temListras()    { return nivelDaObra("gramado") >= 2; }
+function temMosaico()    { return nivelDaObra("mosaico") >= 1; }
+function temAnel()       { return nivelDaObra("anel") >= 1; }
+function temRefletores() { return nivelDaObra("refletores") >= 1; }
+function temRedes()      { return nivelDaObra("redes") >= 1; }
+function temBandeiras()  { return nivelDaObra("bandeiras") >= 1; }
+function temPublico()    { return nivelDaObra("publico") >= 1; }
 
 /**
  * Faixas de corte. Só as claras são desenhadas, por cima do verde do campo —
@@ -4781,11 +4818,12 @@ function fraseDoEstadio() {
   const lista = feitas.length === 1
     ? feitas[0]
     : feitas.slice(0, -1).join(", ") + " e " + feitas[feitas.length - 1];
-  // conta OBRAS, não frases: grama e listras dividem uma frase só, então
-  // comparar pelo tamanho da lista nunca fechava
-  const obras = Object.keys(MELHORIAS_ESTADIO);
-  const entregues = obras.filter((id) => temItem("estadio", id)).length;
-  const fecho = entregues === obras.length
+  // conta NÍVEIS entregues, não frases: gramado tem dois níveis numa frase só,
+  // então comparar pelo tamanho da lista nunca fechava
+  const familias = Object.keys(OBRAS_ESTADIO);
+  const total = familias.reduce((s, f) => s + OBRAS_ESTADIO[f].niveis.length, 0);
+  const entregues = familias.reduce((s, f) => s + nivelDaObra(f), 0);
+  const fecho = entregues === total
     ? "Casa de decisão, soberano."
     : (temGrama() ? "A obra vai andando." : "A obra vai por partes — o campo ainda é terra.");
   return lista.charAt(0).toUpperCase() + lista.slice(1) + ". " + fecho;
@@ -4915,7 +4953,8 @@ document.addEventListener("click", (e) => {
   if (!btn || btn.disabled) return;
   const cat = btn.dataset.cat, id = btn.dataset.id;
   acordarAudio();
-  if (btn.dataset.loja === "ouvir") tocarSom(cat, id);
+  if (btn.dataset.loja === "obra") comprarNivel(btn.dataset.familia);
+  else if (btn.dataset.loja === "ouvir") tocarSom(cat, id);
   else if (btn.dataset.loja === "comprar") comprarItem(cat, id);
   else if (btn.dataset.loja === "usar") {
     usarItem(cat, id);
