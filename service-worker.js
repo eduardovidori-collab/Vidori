@@ -7,7 +7,7 @@
    https://usuario.github.io/Vidori/ e em qualquer outra subpasta.
    ========================================================================== */
 
-const VERSAO = "vidori-v29";
+const VERSAO = "vidori-v30";
 
 /* Tudo que forma o app. Se algum arquivo mudar, é só subir o número da VERSAO. */
 const ARQUIVOS = [

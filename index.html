@@ -497,6 +497,10 @@ canvas{display:block; width:100%; height:auto}
 }
 .item-loja .desc{font-size:12.5px; color:var(--fraco); flex:1 1 auto}
 .item-acoes{display:flex; gap:8px; flex-wrap:wrap}
+.trava{
+  font-size:12px; font-weight:600; color:var(--fraco);
+  border:1.5px dashed var(--borda); border-radius:9px; padding:6px 11px; flex:1 1 auto;
+}
 .item-acoes .btn{flex:1 1 auto}
 
 /* aviso discreto na aba quando dá pra comprar algo novo */
@@ -2012,6 +2016,13 @@ const MELHORIAS_ESTADIO = {
     preco: 35,
     tipo: "estadio"
   },
+  listras: {
+    nome: "Gramado listrado",
+    desc: "Faixas de corte alternadas, como campo aparado pra dia de decisão.",
+    preco: 40,
+    requer: "grama",
+    tipo: "estadio"
+  },
   mosaico: {
     nome: "Mosaico tricolor",
     desc: "Os assentos viram faixas de vermelho, branco e preto ao longo dos quatro setores.",
@@ -2041,6 +2052,17 @@ const MELHORIAS_ESTADIO = {
 const CATALOGO = { gol: SONS.gol, apito: SONS.apito, estadio: MELHORIAS_ESTADIO };
 function itemDoCatalogo(categoria, id) {
   return CATALOGO[categoria] && CATALOGO[categoria][id];
+}
+
+/** Alguns itens só fazem sentido depois de outro — listra em terra não existe. */
+function preRequisitoOk(categoria, id) {
+  const item = itemDoCatalogo(categoria, id);
+  return !item || !item.requer || temItem(categoria, item.requer);
+}
+function nomeDoPreRequisito(categoria, id) {
+  const item = itemDoCatalogo(categoria, id);
+  const dono = item && item.requer && itemDoCatalogo(categoria, item.requer);
+  return dono ? dono.nome : "";
 }
 
 function somAtivo(categoria) {
@@ -4015,6 +4037,10 @@ function itemEmUso(categoria, id) {
 function comprarItem(categoria, id) {
   const item = itemDoCatalogo(categoria, id);
   if (!item || temItem(categoria, id)) return;
+  if (!preRequisitoOk(categoria, id)) {
+    mostrarAviso("Antes precisa de: " + nomeDoPreRequisito(categoria, id) + ".");
+    return;
+  }
   if (saldoMoedas() < item.preco) {
     const falta = item.preco - saldoMoedas();
     mostrarAviso("Faltam " + falta + (falta === 1 ? " moeda" : " moedas") +
@@ -4046,7 +4072,8 @@ function usarItem(categoria, id) {
 function cartaoDeItem(categoria, id) {
   const item = itemDoCatalogo(categoria, id);
   const tem = temItem(categoria, id);
-  const pode = saldoMoedas() >= item.preco;
+  const liberado = preRequisitoOk(categoria, id);
+  const pode = liberado && saldoMoedas() >= item.preco;
   const ehEstadio = item.tipo === "estadio";
   const emUso = tem && !ehEstadio && itemEmUso(categoria, id);
 
@@ -4060,6 +4087,10 @@ function cartaoDeItem(categoria, id) {
     selo = tem ? '<span class="selo-uso">Instalada</span>'
                : '<span class="preco' + (pode ? " pode" : "") + '">' + item.preco + " moedas</span>";
     acoes = tem ? "" : botaoComprar;
+    if (!tem && !liberado) {
+      acoes = '<span class="trava">Precisa de: ' +
+              escapar(nomeDoPreRequisito(categoria, id)) + "</span>";
+    }
   } else {
     if (emUso) selo = '<span class="selo-uso">Em uso</span>';
     else if (tem) selo = '<span class="selo-tem">Teu</span>';
@@ -4127,7 +4158,7 @@ function renderAvisoLoja() {
   const saldo = saldoMoedas();
   const podeAlgo = Object.keys(CATALOGO).some((cat) =>
     Object.keys(CATALOGO[cat]).some((id) =>
-      !temItem(cat, id) && saldo >= CATALOGO[cat][id].preco));
+      !temItem(cat, id) && preRequisitoOk(cat, id) && saldo >= CATALOGO[cat][id].preco));
   const ponto = aba.querySelector(".ponto-novo");
   if (podeAlgo && !ponto) {
     const p = document.createElement("span");
@@ -4196,7 +4227,7 @@ const CORES_EST = {
   terra: "#8D6E63", terraDir: "#795548", terraEsq: "#5D4037",
   gramaFora: "#57A85C", gramaForaDir: "#489150", gramaForaEsq: "#3C7C43",
   pista: "#8B99A3", pistaDir: "#77858F", pistaEsq: "#65727C",
-  campo: "#2E7D32", campoTerra: "#B0794D",
+  campo: "#2E7D32", campoTerra: "#B0794D", campoListra: "#38903D",
   linha: "#F4F7F5",
   arqTopo: "#CFD3D8", arqDir: "#AAB0B8", arqEsq: "#8D949E",
   anelTopo: "#D8DCE0", anelDir: "#B4BAC1", anelEsq: "#979EA7",
@@ -4226,6 +4257,21 @@ function temRefletores() { return temItem("estadio", "refletores"); }
 function temRedes()      { return temItem("estadio", "redes"); }
 function temBandeiras()  { return temItem("estadio", "bandeiras"); }
 function temPublico()    { return temItem("estadio", "publico"); }
+function temListras()    { return temItem("estadio", "listras"); }
+
+/**
+ * Faixas de corte. Só as claras são desenhadas, por cima do verde do campo —
+ * metade dos polígonos pelo mesmo resultado.
+ */
+function listrasDoGramado() {
+  const mx = EST.campoX, my = EST.campoY, n = 12, z = 0.05;
+  let s = "";
+  for (let i = 0; i < n; i += 2) {
+    const x0 = -mx + 2 * mx * (i / n), x1 = -mx + 2 * mx * ((i + 1) / n);
+    s += poligono([[x0,-my,z],[x1,-my,z],[x1,my,z],[x0,my,z]], CORES_EST.campoListra);
+  }
+  return s;
+}
 
 /**
  * Sorteio com semente. O público precisa ficar no MESMO lugar a cada
@@ -4634,6 +4680,7 @@ function desenharEstadio() {
   // o campo: terra batida até a grama ser plantada
   s += poligono([[-mx,-my,0.04],[mx,-my,0.04],[mx,my,0.04],[-mx,my,0.04]],
                 temGrama() ? C.campo : C.campoTerra);
+  if (temGrama() && temListras()) s += listrasDoGramado();
   s += marcacoes();
 
   // peças em pé, do fundo para a frente: quem tem x+y menor está mais atrás
@@ -4677,7 +4724,8 @@ function renderEstadio() {
   const assinatura = (temGrama() ? "g" : "-") + (temCobertura() ? "c" : "-") +
                      (temMosaico() ? "m" : "-") + (temAnel() ? "a" : "-") +
                      (temRefletores() ? "r" : "-") + (temRedes() ? "n" : "-") +
-                     (temBandeiras() ? "b" : "-") + (temPublico() ? "p" : "-");
+                     (temBandeiras() ? "b" : "-") + (temPublico() ? "p" : "-") +
+                     (temListras() ? "l" : "-");
   if (estadioAssinatura === assinatura) return;
   caixaEl.innerHTML = desenharEstadio();
   estadioAssinatura = assinatura;
@@ -4716,7 +4764,7 @@ function renderEstadio() {
  */
 function fraseDoEstadio() {
   const feitas = [];
-  if (temGrama()) feitas.push("grama no chão");
+  if (temGrama()) feitas.push(temListras() ? "gramado listrado" : "grama no chão");
   if (temRedes()) feitas.push("rede nos gols");
   if (temBandeiras()) feitas.push("bandeirinha nos escanteios");
   if (temPublico()) feitas.push("torcida na arquibancada");
@@ -4732,8 +4780,11 @@ function fraseDoEstadio() {
   const lista = feitas.length === 1
     ? feitas[0]
     : feitas.slice(0, -1).join(", ") + " e " + feitas[feitas.length - 1];
-  const total = Object.keys(MELHORIAS_ESTADIO).length;
-  const fecho = feitas.length === total
+  // conta OBRAS, não frases: grama e listras dividem uma frase só, então
+  // comparar pelo tamanho da lista nunca fechava
+  const obras = Object.keys(MELHORIAS_ESTADIO);
+  const entregues = obras.filter((id) => temItem("estadio", id)).length;
+  const fecho = entregues === obras.length
     ? "Casa de decisão, soberano."
     : (temGrama() ? "A obra vai andando." : "A obra vai por partes — o campo ainda é terra.");
   return lista.charAt(0).toUpperCase() + lista.slice(1) + ". " + fecho;
