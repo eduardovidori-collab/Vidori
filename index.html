@@ -497,10 +497,6 @@ canvas{display:block; width:100%; height:auto}
 }
 .item-loja .desc{font-size:12.5px; color:var(--fraco); flex:1 1 auto}
 .item-acoes{display:flex; gap:8px; flex-wrap:wrap}
-.trava{
-  font-size:12px; font-weight:600; color:var(--fraco);
-  border:1.5px dashed var(--borda); border-radius:9px; padding:6px 11px; flex:1 1 auto;
-}
 .item-acoes .btn{flex:1 1 auto}
 
 /* aviso discreto na aba quando dá pra comprar algo novo */
@@ -2063,6 +2059,16 @@ function nomeDoPreRequisito(categoria, id) {
   const item = itemDoCatalogo(categoria, id);
   const dono = item && item.requer && itemDoCatalogo(categoria, item.requer);
   return dono ? dono.nome : "";
+}
+
+/**
+ * O que aparece na prateleira. Item ainda trancado nem entra na lista: cartão
+ * que não dá pra comprar só ocupa espaço e confunde. Ele surge no momento em
+ * que o pré-requisito é entregue.
+ */
+function itensVisiveis(categoria) {
+  return Object.keys(CATALOGO[categoria]).filter((id) =>
+    temItem(categoria, id) || preRequisitoOk(categoria, id));
 }
 
 function somAtivo(categoria) {
@@ -4072,8 +4078,7 @@ function usarItem(categoria, id) {
 function cartaoDeItem(categoria, id) {
   const item = itemDoCatalogo(categoria, id);
   const tem = temItem(categoria, id);
-  const liberado = preRequisitoOk(categoria, id);
-  const pode = liberado && saldoMoedas() >= item.preco;
+  const pode = preRequisitoOk(categoria, id) && saldoMoedas() >= item.preco;
   const ehEstadio = item.tipo === "estadio";
   const emUso = tem && !ehEstadio && itemEmUso(categoria, id);
 
@@ -4087,10 +4092,6 @@ function cartaoDeItem(categoria, id) {
     selo = tem ? '<span class="selo-uso">Instalada</span>'
                : '<span class="preco' + (pode ? " pode" : "") + '">' + item.preco + " moedas</span>";
     acoes = tem ? "" : botaoComprar;
-    if (!tem && !liberado) {
-      acoes = '<span class="trava">Precisa de: ' +
-              escapar(nomeDoPreRequisito(categoria, id)) + "</span>";
-    }
   } else {
     if (emUso) selo = '<span class="selo-uso">Em uso</span>';
     else if (tem) selo = '<span class="selo-tem">Teu</span>';
@@ -4118,9 +4119,9 @@ function renderLoja() {
     "Já rendeu <b>" + moedasGanhas() + "</b> no total" +
     (loja.gastas ? ", com <b>" + loja.gastas + "</b> gastas" : "") + ".";
 
-  $("#itensGol").innerHTML = Object.keys(SONS.gol).map((id) => cartaoDeItem("gol", id)).join("");
-  $("#itensApito").innerHTML = Object.keys(SONS.apito).map((id) => cartaoDeItem("apito", id)).join("");
-  $("#itensEstadio").innerHTML = Object.keys(MELHORIAS_ESTADIO)
+  $("#itensGol").innerHTML = itensVisiveis("gol").map((id) => cartaoDeItem("gol", id)).join("");
+  $("#itensApito").innerHTML = itensVisiveis("apito").map((id) => cartaoDeItem("apito", id)).join("");
+  $("#itensEstadio").innerHTML = itensVisiveis("estadio")
     .map((id) => cartaoDeItem("estadio", id)).join("");
   renderAvisoLoja();
 }
