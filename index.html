@@ -4279,11 +4279,15 @@ const CORES_EST = {
   cantoTopo: "#C6CAD0", cantoDir: "#A2A8B0", cantoEsq: "#868D96",
   cantoFriso: "rgba(40,48,56,.30)",
   tronco: "#7A5443", troncoDir: "#5F4034",
-  copaTopo: ["#4A9E4E", "#54AC58", "#5FBA63"],
-  copaDir:  ["#3E8A42", "#468F4A", "#509D54"],
-  copaEsq:  ["#317135", "#39793D", "#43863F"],
+  copaTopo: ["#3F9143", "#489C4C", "#52A857", "#5CB561", "#68C16C"],
+  copaDir:  ["#347C38", "#3B8540", "#449148", "#4D9D51", "#57A95B"],
+  copaEsq:  ["#2A672E", "#306E34", "#387939", "#3F8442", "#478F4A"],
   predioTopo: "#E7DEC9", predioDir: "#D3C6AB", predioEsq: "#B3A68C",
-  janela: "rgba(58,72,88,.50)",
+  predioBase: "#C3B69C", predioBaseDir: "#AEA189", predioBaseEsq: "#948871",
+  parapeito: "#F0E9D8", parapeitoDir: "#D9CDB4", parapeitoEsq: "#B9AC93",
+  janela: "rgba(58,72,88,.52)", janelaAcesa: "rgba(255,225,150,.60)",
+  porta: "rgba(52,64,78,.62)",
+  sombraChao: "rgba(28,46,24,.20)",
   degrauDir: "#9AA1A9", degrauEsq: "#7E858D",
   assento: "#C62828", assentoLinha: "#8E1B1B",
   mosaicoClaro: "#FFFFFF", mosaicoEscuro: "#1E2429",
@@ -4322,36 +4326,82 @@ function densidadeDoPublico() {
 function temCantos()     { return nivelDaObra("cantos") >= 1; }
 function temArredores()  { return nivelDaObra("arredores") >= 1; }
 
-/** Árvore: tronco e três andares de copa, cada um menor que o de baixo. */
+/**
+ * Sombra no chão. É o detalhe que mais rende: sem ela a peça parece colada
+ * sobre a grama, e não apoiada nela.
+ */
+function sombraNoChao(cx, cy, rx, ry) {
+  const pts = [];
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2;
+    pts.push([cx + Math.cos(a) * rx, cy + Math.sin(a) * (ry || rx), 0.03]);
+  }
+  return poligono(pts, CORES_EST.sombraChao);
+}
+
+/**
+ * Árvore: tronco e cinco andares de copa.
+ * Os andares se sobrepõem em altura e saem levemente do eixo — empilhados
+ * certinho e sem encostar, liam como bolo de casamento e não como copa.
+ */
+const ANDARES_COPA = [
+  [4.8,  3.4,  7.6,  0.0,  0.0],
+  [4.2,  6.6,  9.8,  0.5, -0.4],
+  [3.4,  8.9, 11.6, -0.4,  0.4],
+  [2.5, 10.9, 13.2,  0.3,  0.2],
+  [1.5, 12.6, 14.1, -0.2, -0.3]
+];
+
 function arvore(cx, cy, e) {
   const C = CORES_EST;
-  let s = caixa(cx - 0.9*e, cy - 0.9*e, cx + 0.9*e, cy + 0.9*e, 0, 4.6*e,
-                C.tronco, C.troncoDir, C.troncoDir);
-  [[4.6, 3.8, 8.4], [3.4, 8.4, 11.4], [2.0, 11.4, 13.4]].forEach((a, i) => {
-    const r = a[0] * e;
-    s += caixa(cx - r, cy - r, cx + r, cy + r, a[1]*e, a[2]*e,
+  let s = sombraNoChao(cx, cy, 5.2 * e);
+  s += caixa(cx - 0.85*e, cy - 0.85*e, cx + 0.85*e, cy + 0.85*e, 0, 4.4*e,
+             C.tronco, C.troncoDir, C.troncoDir);
+  ANDARES_COPA.forEach((a, i) => {
+    const r = a[0] * e, ox = cx + a[3] * e, oy = cy + a[4] * e;
+    s += caixa(ox - r, oy - r, ox + r, oy + r, a[1]*e, a[2]*e,
                C.copaTopo[i], C.copaDir[i], C.copaEsq[i]);
   });
   return s;
 }
 
-/** Prédio baixo do outro lado da rua, com janelas nas duas faces à vista. */
+/** Prédio baixo: embasamento, corpo com janelas, parapeito e casa de máquinas. */
 function predio(cx, cy) {
   const C = CORES_EST;
-  const lx = 9, ly = 7, alt = 16;
-  let s = caixa(cx - lx, cy - ly, cx + lx, cy + ly, 0, alt,
-                C.predioTopo, C.predioDir, C.predioEsq);
+  const lx = 9, ly = 7, base = 2.4, alt = 16;
+  // sombra elíptica, seguindo a planta: redonda ela passava da borda do terreno
+  let s = sombraNoChao(cx, cy, 9.6, 8.2);
+
+  // embasamento um pouco mais largo: dá pé ao prédio
+  s += caixa(cx - lx - 0.8, cy - ly - 0.8, cx + lx + 0.8, cy + ly + 0.8, 0, base,
+             C.predioBase, C.predioBaseDir, C.predioBaseEsq);
+  s += caixa(cx - lx, cy - ly, cx + lx, cy + ly, base, alt,
+             C.predioTopo, C.predioDir, C.predioEsq);
+
+  // janelas, com algumas acesas para não ficarem todas iguais
+  let n = 0;
   for (let piso = 1; piso <= 4; piso++) {
-    const z0 = alt * (piso / 5) - 1.1, z1 = alt * (piso / 5) + 1.1;
+    const z0 = base + (alt - base) * (piso / 5) - 1.1, z1 = z0 + 2.2;
     for (let k = -1; k <= 1; k++) {
+      const cor = (n++ % 3 === 1) ? C.janelaAcesa : C.janela;
       const ty = k * ly * 0.56;
       s += poligono([[cx+lx, cy+ty-1.1, z1], [cx+lx, cy+ty+1.1, z1],
-                     [cx+lx, cy+ty+1.1, z0], [cx+lx, cy+ty-1.1, z0]], C.janela);
+                     [cx+lx, cy+ty+1.1, z0], [cx+lx, cy+ty-1.1, z0]], cor);
+      const cor2 = (n++ % 3 === 1) ? C.janelaAcesa : C.janela;
       const tx = k * lx * 0.56;
       s += poligono([[cx+tx-1.5, cy+ly, z1], [cx+tx+1.5, cy+ly, z1],
-                     [cx+tx+1.5, cy+ly, z0], [cx+tx-1.5, cy+ly, z0]], C.janela);
+                     [cx+tx+1.5, cy+ly, z0], [cx+tx-1.5, cy+ly, z0]], cor2);
     }
   }
+  // porta no embasamento, na face virada pra frente
+  s += poligono([[cx-1.6, cy+ly+0.8, 2.1], [cx+1.6, cy+ly+0.8, 2.1],
+                 [cx+1.6, cy+ly+0.8, 0.1], [cx-1.6, cy+ly+0.8, 0.1]], C.porta);
+
+  // parapeito e casa de máquinas quebram o topo chapado
+  s += caixa(cx - lx - 0.5, cy - ly - 0.5, cx + lx + 0.5, cy + ly + 0.5, alt, alt + 0.9,
+             C.parapeito, C.parapeitoDir, C.parapeitoEsq);
+  s += caixa(cx - 3, cy - 2.4, cx + 3, cy + 2.4, alt + 0.9, alt + 4,
+             C.predioTopo, C.predioDir, C.predioEsq);
   return s;
 }
 
@@ -4359,7 +4409,7 @@ function predio(cx, cy) {
 const ARREDORES = [
   { x: -95, y:   8, svg: () => arvore(-95, 8, 1.0) },
   { x: -91, y:  28, svg: () => arvore(-91, 28, 0.82) },
-  { x:  95, y: -45, svg: () => predio(95, -45) }
+  { x:  93, y: -45, svg: () => predio(93, -45) }
 ];
 
 /** O bloco de canto acompanha o convés mais alto, para o anel ficar contínuo. */
