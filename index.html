@@ -2032,7 +2032,8 @@ const OBRAS_ESTADIO = {
     { desc: "Malha nas duas balizas: fundo, laterais e teto. Antes eram só as traves.", preco: 15 }
   ]},
   publico: { nome: "Público", niveis: [
-    { desc: "Primeira leva de torcedores espalhados pelos setores. Ainda tem muito lugar vago.", preco: 30 }
+    { desc: "Primeira leva de torcedores espalhados pelos setores. Ainda tem muito lugar vago.", preco: 30 },
+    { desc: "A arquibancada enche: mais que o dobro de gente, com pouco lugar sobrando.", preco: 60 }
   ]},
   gramado: { nome: "Gramado", niveis: [
     { desc: "Troca a terra batida por grama de verdade, e a cal das marcações fica nítida.", preco: 35 },
@@ -4258,7 +4259,7 @@ const EST = {
   recuoAnel: 9, altAnel: 6,     // o anel de cima recua do campo e sobe menos
   assentosAnel: 7,
   degraus: 4, quedaDegraus: 3.4,  // fileiras escalonadas descendo pro campo
-  areaPorTorcedor: 16,            // nível 1: esparso, muito lugar vago
+  areaPorTorcedor: [16, 7],       // unidades de arquibancada por pessoa, por nível
   recuoCobertura: 7,            // a laje para antes da beirada do convés
   torreX: 57, torreY: 38,       // torres encaixadas no vão de canto
   torreAlt: 21, lampadaAlt: 3.5
@@ -4301,6 +4302,14 @@ function temRefletores() { return nivelDaObra("refletores") >= 1; }
 function temRedes()      { return nivelDaObra("redes") >= 1; }
 function temBandeiras()  { return nivelDaObra("bandeiras") >= 1; }
 function temPublico()    { return nivelDaObra("publico") >= 1; }
+
+/** Quanto de arquibancada cabe por pessoa. Quanto menor, mais cheia. */
+function densidadeDoPublico() {
+  const n = nivelDaObra("publico");
+  if (n < 1) return 0;
+  const escala = EST.areaPorTorcedor;
+  return escala[Math.min(n, escala.length) - 1];
+}
 function temCantos()     { return nivelDaObra("cantos") >= 1; }
 
 /** O bloco de canto acompanha o convés mais alto, para o anel ficar contínuo. */
@@ -4486,7 +4495,7 @@ function publicoNaFatia(f) {
   if (!temPublico()) return "";
   const cores = CORES_EST.publico;
   const larg = f.x1 - f.x0, fundo = f.y1 - f.y0;
-  const quantos = Math.round(Math.abs(larg * fundo) / EST.areaPorTorcedor);
+  const quantos = Math.round(Math.abs(larg * fundo) / densidadeDoPublico());
   // a semente vem da posição do degrau: cada um sorteia sempre igual
   const sorte = aleatorioEstavel(f.x0 * 7.3 + f.y0 * 13.1 + f.z * 29.7 + 101);
   let s = "";
@@ -4812,7 +4821,8 @@ function renderEstadio() {
                      (temMosaico() ? "m" : "-") + (temAnel() ? "a" : "-") +
                      (temRefletores() ? "r" : "-") + (temRedes() ? "n" : "-") +
                      (temBandeiras() ? "b" : "-") + (temPublico() ? "p" : "-") +
-                     (temListras() ? "l" : "-") + (temCantos() ? "k" : "-");
+                     (temListras() ? "l" : "-") + (temCantos() ? "k" : "-") +
+                     nivelDaObra("publico");
   if (estadioAssinatura === assinatura) return;
   caixaEl.innerHTML = desenharEstadio();
   estadioAssinatura = assinatura;
@@ -4854,7 +4864,9 @@ function fraseDoEstadio() {
   if (temGrama()) feitas.push(temListras() ? "gramado listrado" : "grama no chão");
   if (temRedes()) feitas.push("rede nos gols");
   if (temBandeiras()) feitas.push("bandeirinha nos escanteios");
-  if (temPublico()) feitas.push("torcida na arquibancada");
+  if (temPublico()) {
+    feitas.push(nivelDaObra("publico") >= 2 ? "arquibancada cheia" : "torcida na arquibancada");
+  }
   if (temMosaico()) feitas.push("mosaico tricolor nos assentos");
   if (temAnel()) feitas.push("segundo anel de arquibancada");
   if (temCantos()) feitas.push("cantos fechados");
