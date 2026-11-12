@@ -2043,7 +2043,7 @@ const OBRAS_ESTADIO = {
     { desc: "Faixas de corte alternadas, como campo aparado pra dia de decisão.", preco: 40 }
   ]},
   mosaico: { nome: "Mosaico tricolor", niveis: [
-    { desc: "Os assentos viram faixas de vermelho, branco e preto ao longo dos setores.", preco: 45 }
+    { desc: "Faixas largas de vermelho, branco e preto contornam as arquibancadas, alinhadas nos cantos e nos dois anéis.", preco: 45 }
   ]},
   cantos: { nome: "Cantos fechados", niveis: [
     { desc: "Setores arredondados com assentos, escadas de acesso e refletores na borda externa, unindo as arquibancadas.", preco: 55 }
@@ -4261,7 +4261,7 @@ const EST = {
   assentos: 10,                 // quanto da arquibancada é assento
   recuoAnel: 9, altAnel: 6,     // o anel de cima recua do campo e sobe menos
   assentosAnel: 7,
-  degraus: 4, quedaDegraus: 3.4,  // fileiras escalonadas descendo pro campo
+  degraus: 6, inclinacaoAssentos: 0.22, // desnível proporcional à largura de cada anel
   areaPorTorcedor: [16, 7],       // unidades de arquibancada por pessoa, por nível
   terrenoX: 121, terrenoY: 108, // espaço livre mesmo com anel e cobertura
   torreX: 57, torreY: 38,       // torres encaixadas no vão de canto
@@ -4425,7 +4425,7 @@ function alturaDoCanto() {
  */
 function setorDeCanto(sx, sy) {
   const C = CORES_EST, raioFora = EST.pista + EST.arqFundo;
-  const segmentos = 13, passo = Math.PI / (2 * segmentos);
+  const segmentos = 21, passo = Math.PI / (2 * segmentos);
   function ponto(r, ang, z) {
     return [sx * (EST.campoX + r * Math.cos(ang)),
             sy * (EST.campoY + r * Math.sin(ang)), z];
@@ -4440,8 +4440,9 @@ function setorDeCanto(sx, sy) {
         const passeio = fila === EST.degraus;
         const r0 = passeio ? raioDentro + assentos : raioDentro + assentos * fila / EST.degraus;
         const r1 = passeio ? raioFora : raioDentro + assentos * (fila + 1) / EST.degraus;
-        const z = passeio ? zTopo : zTopo - EST.quedaDegraus * (1 - fila / (EST.degraus - 1));
+        const z = passeio ? zTopo : zTopo - assentos * EST.inclinacaoAssentos * (1 - fila / (EST.degraus - 1));
         const topo = [ponto(r0,a0,z), ponto(r1,a0,z), ponto(r1,a1,z), ponto(r0,a1,z)];
+        const cor = (passeio || escada) ? C.cantoTopo : corDaFileira(fila);
         const faces = [];
         // Faces à vista: a normal da aresta aponta para a câmera (+x,+y).
         const orientacao = sx * sy;
@@ -4449,24 +4450,29 @@ function setorDeCanto(sx, sy) {
           const q = topo[(j + 1) % topo.length];
           const nx = orientacao * (q[1] - p[1]), ny = orientacao * (p[0] - q[0]);
           if (nx + ny <= 0) return;
-          const cor = nx > ny ? C.cantoDir : C.cantoEsq;
+          const concreto = nx > ny ? C.cantoDir : C.cantoEsq;
+          const zFriso = Math.max(zBase, z - 0.24);
           faces.push({ d: p[0] + p[1] + q[0] + q[1],
-            svg: poligono([p,q,[q[0],q[1],zBase],[p[0],p[1],zBase]], cor) });
+            svg: poligono([p,q,[q[0],q[1],zBase],[p[0],p[1],zBase]], concreto) +
+              (passeio ? "" : poligono([p,q,[q[0],q[1],zFriso],[p[0],p[1],zFriso]],
+                                      sombraDoAssento(cor, nx > ny ? 0.82 : 0.70))) });
         });
         let svg = faces.sort((a,b) => a.d - b.d).map(f => f.svg).join("");
-        const cor = (passeio || escada) ? C.cantoTopo
-          : temMosaico() ? [C.assento,C.mosaicoClaro,C.mosaicoEscuro][i % 3] : C.assento;
         svg += poligono(topo, cor);
+        if (!passeio) {
+          svg += traco([ponto(r0,a0,z+0.01),ponto(r0,a1,z+0.01)], "#283440", 0.12, 0.15);
+        }
         if (!passeio && !escada && temPublico()) {
           const area = (r1*r1 - r0*r0) * passo / 2;
-          const total = Math.round(area / densidadeDoPublico());
           const sorte = aleatorioEstavel(sx * 371 + sy * 911 + i * 37 + fila * 101 + zTopo * 53);
+          const esperado = area / densidadeDoPublico();
+          const total = Math.floor(esperado) + (sorte() < esperado % 1 ? 1 : 0);
           for (let n = 0; n < total; n++) {
             const r = Math.sqrt(r0*r0 + sorte() * (r1*r1 - r0*r0));
             const p = ponto(r, a0 + sorte() * passo, z + 0.45);
             const q = iso(p[0],p[1],p[2]);
             svg += '<circle cx="' + q.x.toFixed(2) + '" cy="' + q.y.toFixed(2) +
-              '" r="0.62" fill="' + C.publico[Math.floor(sorte() * C.publico.length)] + '"/>';
+              '" r="0.46" fill="' + C.publico[Math.floor(sorte() * C.publico.length)] + '"/>';
           }
         }
         const meio = ponto((r0+r1)/2, (a0+a1)/2, z);
@@ -4632,7 +4638,8 @@ function fatiasDeAssento(a, zTopo, d) {
     fatias.push({
       x0: eixoY ? sx0 : p0, x1: eixoY ? sx1 : p1,
       y0: eixoY ? p0 : sy0, y1: eixoY ? p1 : sy1,
-      z: zTopo - EST.quedaDegraus * (1 - t),
+      z: zTopo - d * EST.inclinacaoAssentos * (1 - t),
+      fileira: campoNoMinimo ? i : n - 1 - i,
       doCampo: (1 - t) * d,                   // distância da beirada
       aoLongoDeX: a.aoLongoDeX
     });
@@ -4658,7 +4665,7 @@ function assentosDe(a, zTopo, d, zBase) {
   fatiasDeAssento(a, zTopo, d).forEach((f) => {
     s += poligono([[f.x1,f.y0,f.z],[f.x1,f.y1,f.z],[f.x1,f.y1,zb],[f.x1,f.y0,zb]], C.degrauDir);
     s += poligono([[f.x0,f.y1,f.z],[f.x1,f.y1,f.z],[f.x1,f.y1,zb],[f.x0,f.y1,zb]], C.degrauEsq);
-    s += topoDoDegrau(f);
+    s += topoDoDegrau(f, zb);
     s += publicoNaFatia(f);
   });
   return s;
@@ -4674,31 +4681,46 @@ function publicoNaFatia(f) {
   const sorte = aleatorioEstavel(f.x0 * 7.3 + f.y0 * 13.1 + f.z * 29.7 + 101);
   let s = "";
   for (let i = 0; i < quantos; i++) {
-    const p = iso(f.x0 + sorte() * larg, f.y0 + sorte() * fundo, f.z + 0.45);
+    const x = f.x0 + sorte() * larg, y = f.y0 + sorte() * fundo;
+    // O corredor de acesso permanece livre nos dois anéis.
+    if (Math.abs(f.aoLongoDeX ? x : y) < 1.1) continue;
+    const p = iso(x, y, f.z + 0.45);
     s += '<circle cx="' + p.x.toFixed(2) + '" cy="' + p.y.toFixed(2) +
-         '" r="0.62" fill="' + cores[Math.floor(sorte() * cores.length)] + '"/>';
+         '" r="0.46" fill="' + cores[Math.floor(sorte() * cores.length)] + '"/>';
   }
   return s;
 }
 
-/** O topo de um degrau: cor chapada ou as faixas do mosaico. */
-function topoDoDegrau(f) {
+/** Uma paleta por fileira: as faixas continuam pelas curvas e pelos dois anéis. */
+function corDaFileira(fileira) {
   const C = CORES_EST;
-  if (!temMosaico()) {
-    return poligono([[f.x0,f.y0,f.z],[f.x1,f.y0,f.z],[f.x1,f.y1,f.z],[f.x0,f.y1,f.z]], C.assento);
-  }
-  const cores = [C.assento, C.mosaicoClaro, C.mosaicoEscuro];
-  const comprimento = f.aoLongoDeX ? (f.x1 - f.x0) : (f.y1 - f.y0);
-  const faixas = Math.max(3, Math.round(comprimento / 9));
-  let s = "";
-  for (let i = 0; i < faixas; i++) {
-    const t0 = i / faixas, t1 = (i + 1) / faixas;
-    s += poligono(f.aoLongoDeX
-      ? [[f.x0+(f.x1-f.x0)*t0, f.y0, f.z], [f.x0+(f.x1-f.x0)*t1, f.y0, f.z],
-         [f.x0+(f.x1-f.x0)*t1, f.y1, f.z], [f.x0+(f.x1-f.x0)*t0, f.y1, f.z]]
-      : [[f.x0, f.y0+(f.y1-f.y0)*t0, f.z], [f.x1, f.y0+(f.y1-f.y0)*t0, f.z],
-         [f.x1, f.y0+(f.y1-f.y0)*t1, f.z], [f.x0, f.y0+(f.y1-f.y0)*t1, f.z]], cores[i % 3]);
-  }
+  if (!temMosaico()) return C.assento;
+  return [C.assento, C.mosaicoClaro, C.mosaicoEscuro][
+    Math.min(2, Math.floor(fileira * 3 / EST.degraus))];
+}
+function sombraDoAssento(cor, intensidade) {
+  return "#" + cor.slice(1).match(/../g).map(c =>
+    Math.round(parseInt(c,16) * intensidade).toString(16).padStart(2,"0")).join("");
+}
+
+/** Assentos e espelhos com a mesma cor, separados por uma borda discreta. */
+function topoDoDegrau(f, zBase) {
+  const cor = corDaFileira(f.fileira), z = f.z;
+  const baixo = Math.max(zBase, z - 0.24);
+  let s = poligono([[f.x1,f.y0,z],[f.x1,f.y1,z],[f.x1,f.y1,baixo],[f.x1,f.y0,baixo]],
+                  sombraDoAssento(cor,0.82));
+  s += poligono([[f.x0,f.y1,z],[f.x1,f.y1,z],[f.x1,f.y1,baixo],[f.x0,f.y1,baixo]],
+                sombraDoAssento(cor,0.70));
+  s += poligono([[f.x0,f.y0,z],[f.x1,f.y0,z],[f.x1,f.y1,z],[f.x0,f.y1,z]], cor);
+  s += traco([[f.x1,f.y0,z+0.01],[f.x1,f.y1,z+0.01],[f.x0,f.y1,z+0.01]], "#283440", 0.12, 0.15);
+
+  // Uma escada central em cada setor reto dá continuidade aos acessos dos cantos.
+  const x0 = f.aoLongoDeX ? -1.1 : f.x0, x1 = f.aoLongoDeX ? 1.1 : f.x1;
+  const y0 = f.aoLongoDeX ? f.y0 : -1.1, y1 = f.aoLongoDeX ? f.y1 : 1.1;
+  const C = CORES_EST;
+  s += poligono([[x1,y0,z],[x1,y1,z],[x1,y1,baixo],[x1,y0,baixo]], C.degrauDir);
+  s += poligono([[x0,y1,z],[x1,y1,z],[x1,y1,baixo],[x0,y1,baixo]], C.degrauEsq);
+  s += poligono([[x0,y0,z+0.02],[x1,y0,z+0.02],[x1,y1,z+0.02],[x0,y1,z+0.02]], C.cantoTopo);
   return s;
 }
 
