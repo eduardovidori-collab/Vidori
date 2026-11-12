@@ -4366,21 +4366,21 @@ function arvore(cx, cy, e) {
   return s;
 }
 
-/** Prédio de dois pavimentos, mais baixo que a arquibancada com segundo anel. */
+/** Prédio de três pavimentos, mais baixo que a arquibancada com segundo anel. */
 function predio(cx, cy) {
   const C = CORES_EST;
-  const lx = 7, ly = 5, base = 0.7, alt = 8.8;
-  let s = sombraNoChao(cx + 1, cy + 1, 9, 6.7);
+  const lx = 9, ly = 6.5, base = 0.7, alt = 12.5;
+  let s = sombraNoChao(cx + 1, cy + 1, 11, 8.2);
   s += caixa(cx - lx - 1.4, cy - ly - 1.4, cx + lx + 1.4, cy + ly + 1.4, 0, base,
              C.predioBase, C.predioBaseDir, C.predioBaseEsq);
   s += caixa(cx - lx, cy - ly, cx + lx, cy + ly, base, alt,
              C.predioTopo, C.predioDir, C.predioEsq);
 
-  // Dois pavimentos com vãos espaçados, na mesma escala das estruturas do estádio.
-  for (let piso = 0; piso < 2; piso++) {
+  // Três pavimentos com vãos espaçados, na mesma escala das estruturas do estádio.
+  for (let piso = 0; piso < 3; piso++) {
     const z0 = 1.7 + piso * 3.7, z1 = z0 + 2;
     for (let k = -1; k <= 1; k++) {
-      const ty = k * 2.9, tx = k * 4.2;
+      const ty = k * ly * 0.58, tx = k * lx * 0.6;
       s += poligono([[cx+lx,cy+ty-0.7,z1],[cx+lx,cy+ty+0.7,z1],
                      [cx+lx,cy+ty+0.7,z0],[cx+lx,cy+ty-0.7,z0]], C.janela);
       if (piso === 0 && k === 0) continue;
