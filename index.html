@@ -2055,7 +2055,7 @@ const OBRAS_ESTADIO = {
     { desc: "Acende os painéis de seis módulos LED, inclinados para o campo, com luz branca suave no gramado.", preco: 70 }
   ]},
   anel: { nome: "Segundo anel", niveis: [
-    { desc: "Mais um anel de arquibancada acima do atual, recuado do campo.", preco: 90 }
+    { desc: "Segundo anel integrado ao primeiro, com fileiras e escadas contínuas até o alto da arquibancada.", preco: 90 }
   ]}
 };
 
@@ -4259,8 +4259,8 @@ const EST = {
   pista: 9,                     // faixa entre a linha e a arquibancada
   arqFundo: 21, arqAlt: 8,      // profundidade e altura das arquibancadas
   assentos: 10,                 // quanto da arquibancada é assento
-  recuoAnel: 9, altAnel: 6,     // o anel de cima recua do campo e sobe menos
-  assentosAnel: 7,
+  recuoAnel: 9, altAnel: 4,     // o anel de cima recua do campo e sobe menos
+  assentosAnel: 9,
   degraus: 6, inclinacaoAssentos: 0.22, // desnível proporcional à largura de cada anel
   areaPorTorcedor: [16, 7],       // unidades de arquibancada por pessoa, por nível
   terrenoX: 121, terrenoY: 108, // espaço livre mesmo com anel e cobertura
@@ -4413,6 +4413,18 @@ function pisoDosArredores() {
     traco([[96,-21,0.16],[96,-2,0.16]], "#BCC5BA", 0.4);
 }
 
+/** Perfil contínuo: o segundo anel prolonga as fileiras a partir da base existente. */
+function perfilDaArquibancada() {
+  const duplo = temAnel();
+  const altura = EST.arqAlt + (duplo ? EST.altAnel : 0);
+  const inicio = EST.arqAlt - EST.assentos * EST.inclinacaoAssentos;
+  return {
+    altura, queda: altura - inicio,
+    assentos: duplo ? EST.recuoAnel + EST.assentosAnel : EST.assentos,
+    fileiras: EST.degraus * (duplo ? 2 : 1)
+  };
+}
+
 /** Os cantos acompanham a altura dos anéis das arquibancadas. */
 function alturaDoCanto() {
   return EST.arqAlt + (temAnel() ? EST.altAnel : 0);
@@ -4430,19 +4442,20 @@ function setorDeCanto(sx, sy) {
     return [sx * (EST.campoX + r * Math.cos(ang)),
             sy * (EST.campoY + r * Math.sin(ang)), z];
   }
+  const perfil = perfilDaArquibancada();
   function anel(raioDentro, assentos, zTopo, zBase) {
-    const pecas = [];
+    const pecas = [], n = perfil.fileiras;
     for (let i = 0; i < segmentos; i++) {
       const a0 = i * passo, a1 = (i + 1) * passo;
       // O corredor central não recebe assentos nem público.
       const escada = i === Math.floor(segmentos / 2);
-      for (let fila = 0; fila <= EST.degraus; fila++) {
-        const passeio = fila === EST.degraus;
-        const r0 = passeio ? raioDentro + assentos : raioDentro + assentos * fila / EST.degraus;
-        const r1 = passeio ? raioFora : raioDentro + assentos * (fila + 1) / EST.degraus;
-        const z = passeio ? zTopo : zTopo - assentos * EST.inclinacaoAssentos * (1 - fila / (EST.degraus - 1));
+      for (let fila = 0; fila <= n; fila++) {
+        const passeio = fila === n;
+        const r0 = passeio ? raioDentro + assentos : raioDentro + assentos * fila / n;
+        const r1 = passeio ? raioFora : raioDentro + assentos * (fila + 1) / n;
+        const z = passeio ? zTopo : zTopo - perfil.queda * (1 - fila / (n - 1));
         const topo = [ponto(r0,a0,z), ponto(r1,a0,z), ponto(r1,a1,z), ponto(r0,a1,z)];
-        const cor = (passeio || escada) ? C.cantoTopo : corDaFileira(fila);
+        const cor = (passeio || escada) ? C.cantoTopo : corDaFileira(fila % EST.degraus);
         const faces = [];
         // Faces à vista: a normal da aresta aponta para a câmera (+x,+y).
         const orientacao = sx * sy;
@@ -4492,11 +4505,7 @@ function setorDeCanto(sx, sy) {
     svg += traco(arco, C.estrutura, 0.3);
     return svg;
   }
-  let s = anel(EST.pista, EST.assentos, EST.arqAlt, 0);
-  if (temAnel()) {
-    s += anel(EST.pista + EST.recuoAnel, EST.assentosAnel, alturaDoCanto(), EST.arqAlt);
-  }
-  return s;
+  return anel(EST.pista, perfil.assentos, perfil.altura, 0);
 }
 
 /**
@@ -4617,7 +4626,7 @@ function coberturaDe(a) {
  * Os dois anéis usam a mesma função, então o mosaico vale para os dois sem
  * nada duplicado.
  */
-function fatiasDeAssento(a, zTopo, d) {
+function fatiasDeAssento(a, zTopo, d, n = EST.degraus, queda = d * EST.inclinacaoAssentos) {
   // a faixa de assentos, encostada na borda que dá pro campo
   let sx0 = a.x0, sy0 = a.y0, sx1 = a.x1, sy1 = a.y1;
   if (a.perto === "x1") sx0 = a.x1 - d;
@@ -4628,7 +4637,7 @@ function fatiasDeAssento(a, zTopo, d) {
   const eixoY = a.aoLongoDeX;                 // setor corre em x, fatias em y
   const campoNoMinimo = (a.perto === "x0" || a.perto === "y0");
   const de = eixoY ? sy0 : sx0, ate = eixoY ? sy1 : sx1;
-  const n = EST.degraus, passo = (ate - de) / n;
+  const passo = (ate - de) / n;
 
   const fatias = [];
   for (let i = 0; i < n; i++) {
@@ -4638,8 +4647,8 @@ function fatiasDeAssento(a, zTopo, d) {
     fatias.push({
       x0: eixoY ? sx0 : p0, x1: eixoY ? sx1 : p1,
       y0: eixoY ? p0 : sy0, y1: eixoY ? p1 : sy1,
-      z: zTopo - d * EST.inclinacaoAssentos * (1 - t),
-      fileira: campoNoMinimo ? i : n - 1 - i,
+      z: zTopo - queda * (1 - t),
+      fileira: (campoNoMinimo ? i : n - 1 - i) % EST.degraus,
       doCampo: (1 - t) * d,                   // distância da beirada
       aoLongoDeX: a.aoLongoDeX
     });
@@ -4658,11 +4667,11 @@ function fatiasDeAssento(a, zTopo, d) {
  * Cada degrau é uma caixa inteira, do chão até a sua altura, e não só um topo
  * solto: fatias vizinhas se sobrepõem e não sobra vão aparecendo o fundo.
  */
-function assentosDe(a, zTopo, d, zBase) {
+function assentosDe(a, zTopo, d, zBase, n, queda) {
   const C = CORES_EST;
   const zb = zBase || 0;
   let s = "";
-  fatiasDeAssento(a, zTopo, d).forEach((f) => {
+  fatiasDeAssento(a, zTopo, d, n, queda).forEach((f) => {
     s += poligono([[f.x1,f.y0,f.z],[f.x1,f.y1,f.z],[f.x1,f.y1,zb],[f.x1,f.y0,zb]], C.degrauDir);
     s += poligono([[f.x0,f.y1,f.z],[f.x1,f.y1,f.z],[f.x1,f.y1,zb],[f.x0,f.y1,zb]], C.degrauEsq);
     s += topoDoDegrau(f, zb);
@@ -4725,27 +4734,21 @@ function topoDoDegrau(f, zBase) {
 }
 
 /** Um convés: o bloco de concreto do fundo mais os degraus na frente dele. */
-function conves(a, zTopo, d, cTopo, cDir, cEsq, zBase) {
+function conves(a, zTopo, d, cTopo, cDir, cEsq, zBase, n, queda) {
   const zb = zBase || 0;
   const fundo = recuarDoCampo(a, d);          // a parte sem assento, lá atrás
   const bloco = caixa(fundo.x0, fundo.y0, fundo.x1, fundo.y1, zb, zTopo, cTopo, cDir, cEsq);
-  const degraus = assentosDe(a, zTopo, d, zb);
+  const degraus = assentosDe(a, zTopo, d, zb, n, queda);
   // pinta na ordem da profundidade: nos setores em que o campo fica no lado de
   // menor coordenada, os degraus estão atrás do bloco, e não na frente
   return (a.perto === "x0" || a.perto === "y0") ? degraus + bloco : bloco + degraus;
 }
 
-/** Uma arquibancada: um ou dois anéis de concreto com assentos virados pro campo. */
+/** O segundo anel amplia o mesmo plano de assentos, sem parede intermediária. */
 function arquibancada(a) {
-  const C = CORES_EST, z1 = EST.arqAlt;
-  let s = conves(a, z1, EST.assentos, C.arqTopo, C.arqDir, C.arqEsq);
-
-  if (temAnel()) {
-    // o anel de cima ocupa só a parte de fora, senão taparia o campo
-    const cima = recuarDoCampo(a, EST.recuoAnel);
-    s += conves(cima, z1 + EST.altAnel, EST.assentosAnel,
-                C.anelTopo, C.anelDir, C.anelEsq, z1);
-  }
+  const C = CORES_EST, perfil = perfilDaArquibancada();
+  let s = conves(a, perfil.altura, perfil.assentos, C.arqTopo, C.arqDir, C.arqEsq,
+                 0, perfil.fileiras, perfil.queda);
 
   if (temCobertura()) {
     // a sombra fica no concreto plano do fundo: sobre os degraus ela flutuaria
