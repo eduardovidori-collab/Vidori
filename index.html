@@ -2032,7 +2032,7 @@ const OBRAS_ESTADIO = {
     { desc: "Malha nas duas balizas: fundo, laterais e teto. Antes eram só as traves.", preco: 15 }
   ]},
   arredores: { nome: "Arredores", niveis: [
-    { desc: "Duas árvores e um prédio baixo do lado de fora, pro estádio não ficar sozinho no terreno.", preco: 25 }
+    { desc: "Área externa com árvores afastadas das arquibancadas e um prédio baixo em escala com o estádio.", preco: 25 }
   ]},
   publico: { nome: "Público", niveis: [
     { desc: "Primeira leva de torcedores espalhados pelos setores. Ainda tem muito lugar vago.", preco: 30 },
@@ -2049,7 +2049,7 @@ const OBRAS_ESTADIO = {
     { desc: "Blocos de concreto fechando os quatro vãos, com os refletores montados em cima.", preco: 55 }
   ]},
   cobertura: { nome: "Cobertura das arquibancadas", niveis: [
-    { desc: "Laje suspensa sobre os quatro setores, com pilares e a sombra nos assentos.", preco: 60 }
+    { desc: "Cobertura leve e curva sobre os quatro setores, com estrutura metálica e acabamento tricolor.", preco: 60 }
   ]},
   refletores: { nome: "Refletores", niveis: [
     { desc: "Acende as quatro torres: lâmpadas, feixe descendo e poça de luz no gramado.", preco: 70 }
@@ -4263,7 +4263,7 @@ const EST = {
   assentosAnel: 7,
   degraus: 4, quedaDegraus: 3.4,  // fileiras escalonadas descendo pro campo
   areaPorTorcedor: [16, 7],       // unidades de arquibancada por pessoa, por nível
-  recuoCobertura: 7,            // a laje para antes da beirada do convés
+  terrenoX: 121, terrenoY: 108, // espaço livre mesmo com anel e cobertura
   torreX: 57, torreY: 38,       // torres encaixadas no vão de canto
   torreAlt: 21, lampadaAlt: 3.5
 };
@@ -4292,8 +4292,9 @@ const CORES_EST = {
   assento: "#C62828", assentoLinha: "#8E1B1B",
   mosaicoClaro: "#FFFFFF", mosaicoEscuro: "#1E2429",
   mosaicoLinha: "rgba(0,0,0,.26)",
-  cobTopo: "#E6EAED", cobDir: "#C3C9CF", cobEsq: "#A2AAB2",
-  pilar: "#9AA3AB", pilarDir: "#848E97",
+  cobTopo: "#F3F5F6", cobDir: "#CCD5DC", cobEsq: "#A8B5BF",
+  cobFriso: "#C62828", cobJunta: "#B8C5CF", estrutura: "#52616E",
+  pilar: "#7C8B97", pilarDir: "#586875",
   sombra: "rgba(18,24,30,.34)",
   torre: "#78868F", torreDir: "#63717A", torreEsq: "#4E5C66",
   lampada: "#ECEFF1", lampadaAcesa: "#FFF8D2",
@@ -4365,52 +4366,53 @@ function arvore(cx, cy, e) {
   return s;
 }
 
-/** Prédio baixo: embasamento, corpo com janelas, parapeito e casa de máquinas. */
+/** Prédio de dois pavimentos, mais baixo que a arquibancada com segundo anel. */
 function predio(cx, cy) {
   const C = CORES_EST;
-  const lx = 9, ly = 7, base = 2.4, alt = 16;
-  // sombra elíptica, seguindo a planta: redonda ela passava da borda do terreno
-  let s = sombraNoChao(cx, cy, 9.6, 8.2);
-
-  // embasamento um pouco mais largo: dá pé ao prédio
-  s += caixa(cx - lx - 0.8, cy - ly - 0.8, cx + lx + 0.8, cy + ly + 0.8, 0, base,
+  const lx = 7, ly = 5, base = 0.7, alt = 8.8;
+  let s = sombraNoChao(cx + 1, cy + 1, 9, 6.7);
+  s += caixa(cx - lx - 1.4, cy - ly - 1.4, cx + lx + 1.4, cy + ly + 1.4, 0, base,
              C.predioBase, C.predioBaseDir, C.predioBaseEsq);
   s += caixa(cx - lx, cy - ly, cx + lx, cy + ly, base, alt,
              C.predioTopo, C.predioDir, C.predioEsq);
 
-  // janelas, com algumas acesas para não ficarem todas iguais
-  let n = 0;
-  for (let piso = 1; piso <= 4; piso++) {
-    const z0 = base + (alt - base) * (piso / 5) - 1.1, z1 = z0 + 2.2;
+  // Dois pavimentos com vãos espaçados, na mesma escala das estruturas do estádio.
+  for (let piso = 0; piso < 2; piso++) {
+    const z0 = 1.7 + piso * 3.7, z1 = z0 + 2;
     for (let k = -1; k <= 1; k++) {
-      const cor = (n++ % 3 === 1) ? C.janelaAcesa : C.janela;
-      const ty = k * ly * 0.56;
-      s += poligono([[cx+lx, cy+ty-1.1, z1], [cx+lx, cy+ty+1.1, z1],
-                     [cx+lx, cy+ty+1.1, z0], [cx+lx, cy+ty-1.1, z0]], cor);
-      const cor2 = (n++ % 3 === 1) ? C.janelaAcesa : C.janela;
-      const tx = k * lx * 0.56;
-      s += poligono([[cx+tx-1.5, cy+ly, z1], [cx+tx+1.5, cy+ly, z1],
-                     [cx+tx+1.5, cy+ly, z0], [cx+tx-1.5, cy+ly, z0]], cor2);
+      const ty = k * 2.9, tx = k * 4.2;
+      s += poligono([[cx+lx,cy+ty-0.7,z1],[cx+lx,cy+ty+0.7,z1],
+                     [cx+lx,cy+ty+0.7,z0],[cx+lx,cy+ty-0.7,z0]], C.janela);
+      if (piso === 0 && k === 0) continue;
+      s += poligono([[cx+tx-1,cy+ly,z1],[cx+tx+1,cy+ly,z1],
+                     [cx+tx+1,cy+ly,z0],[cx+tx-1,cy+ly,z0]], C.janela);
     }
   }
-  // porta no embasamento, na face virada pra frente
-  s += poligono([[cx-1.6, cy+ly+0.8, 2.1], [cx+1.6, cy+ly+0.8, 2.1],
-                 [cx+1.6, cy+ly+0.8, 0.1], [cx-1.6, cy+ly+0.8, 0.1]], C.porta);
-
-  // parapeito e casa de máquinas quebram o topo chapado
-  s += caixa(cx - lx - 0.5, cy - ly - 0.5, cx + lx + 0.5, cy + ly + 0.5, alt, alt + 0.9,
+  s += poligono([[cx-1.2,cy+ly,3.6],[cx+1.2,cy+ly,3.6],
+                 [cx+1.2,cy+ly,base],[cx-1.2,cy+ly,base]], C.porta);
+  // Marquise discreta sobre a entrada; cobertura sem um volume extra no topo.
+  s += caixa(cx - 2, cy + ly - 0.2, cx + 2, cy + ly + 1.5, 3.8, 4.1,
              C.parapeito, C.parapeitoDir, C.parapeitoEsq);
-  s += caixa(cx - 3, cy - 2.4, cx + 3, cy + 2.4, alt + 0.9, alt + 4,
-             C.predioTopo, C.predioDir, C.predioEsq);
+  s += caixa(cx - lx - 0.5, cy - ly - 0.5, cx + lx + 0.5, cy + ly + 0.5, alt, alt + 0.5,
+             C.parapeito, C.parapeitoDir, C.parapeitoEsq);
   return s;
 }
 
-/* Onde ficam, na faixa de grama entre o estádio e a borda do terreno. */
+/* Praça externa: as copas e o prédio ficam além do limite do segundo anel.
+   No lado próximo da cena, as árvores permanecem visíveis com todas as obras. */
 const ARREDORES = [
-  { x: -95, y:   8, svg: () => arvore(-95, 8, 1.0) },
-  { x: -91, y:  28, svg: () => arvore(-91, 28, 0.82) },
-  { x:  93, y: -45, svg: () => predio(93, -45) }
+  { x: -38, y: 94, svg: () => arvore(-38, 94, 0.78) },
+  { x:  -6, y: 94, svg: () => arvore(-6, 94, 0.68) },
+  { x: 106, y: -12, svg: () => predio(106, -12) }
 ];
+
+/** Calçada da praça e acesso ao prédio, sempre fora da estrutura do estádio. */
+function pisoDosArredores() {
+  return caixa(-51, 85, 5, 103, 0, 0.14, "#DADDD5", "#BDC4BB", "#ACB6AB") +
+    caixa(94, -23, 118, 0, 0, 0.14, "#DADDD5", "#BDC4BB", "#ACB6AB") +
+    traco([[-49,89,0.16],[3,89,0.16]], "#BCC5BA", 0.4) +
+    traco([[96,-21,0.16],[96,-2,0.16]], "#BCC5BA", 0.4);
+}
 
 /** O bloco de canto acompanha o convés mais alto, para o anel ficar contínuo. */
 function alturaDoCanto() {
@@ -4493,42 +4495,60 @@ function convesDeCima(a) {
 }
 
 /**
- * Cobertura: laje suspensa sobre o setor, apoiada em pilares na borda de fora
- * e avançando sobre os assentos. A sombra que ela joga é o que faz a laje
- * parecer suspensa, e não colada em cima do concreto.
+ * Marquise metálica de perfil curvo, dividida em painéis finos.
+ * O balanço cobre o fundo do setor e mantém as fileiras da frente à vista.
+ * As coordenadas locais (comprimento, distância da borda externa) permitem
+ * usar o mesmo desenho nas quatro orientações e nos dois tamanhos de convés.
  */
 function coberturaDe(a) {
-  const C = CORES_EST;
-  // apoia no convés mais alto: com o segundo anel, a laje sobe um andar
-  const conves = convesDeCima(a);
-  const zPilar = conves.z, zLaje = zPilar + 4, zTopo = zLaje + 1.2;
-  const fora = 2, ponta = 1;
-  // A laje NÃO avança sobre o campo e para antes da beirada: cobrindo o setor
-  // inteiro, os assentos sumiam e o estádio virava um anel branco liso.
-  const recuo = EST.recuoCobertura;
-  a = conves.r;
-
-  let x0 = a.x0, x1 = a.x1, y0 = a.y0, y1 = a.y1;
-  if (a.perto === "x1")      { x1 -= recuo; x0 -= fora; y0 -= ponta; y1 += ponta; }
-  else if (a.perto === "x0") { x0 += recuo; x1 += fora; y0 -= ponta; y1 += ponta; }
-  else if (a.perto === "y1") { y1 -= recuo; y0 -= fora; x0 -= ponta; x1 += ponta; }
-  else                       { y0 += recuo; y1 += fora; x0 -= ponta; x1 += ponta; }
-
-  // pilares na borda externa, longe do campo
-  let s = "";
+  const C = CORES_EST, conves = convesDeCima(a), r = conves.r;
   const aoLongo = a.aoLongoDeX;
-  const de = aoLongo ? a.x0 : a.y0, ate = aoLongo ? a.x1 : a.y1;
-  const fixo = (a.perto === "x1") ? a.x0 + 1.6
-             : (a.perto === "x0") ? a.x1 - 1.6
-             : (a.perto === "y1") ? a.y0 + 1.6 : a.y1 - 1.6;
-  for (let i = 0; i <= 3; i++) {
-    const t = de + (ate - de) * (0.08 + 0.28 * i);
-    const px = aoLongo ? t : fixo, py = aoLongo ? fixo : t;
-    s += caixa(px - 1.3, py - 1.3, px + 1.3, py + 1.3, zPilar, zLaje,
-               C.pilar, C.pilarDir, C.pilarDir);
+  const de = (aoLongo ? r.x0 : r.y0) - 0.8;
+  const ate = (aoLongo ? r.x1 : r.y1) + 0.8;
+  const profundidade = aoLongo ? r.y1 - r.y0 : r.x1 - r.x0;
+  const largura = Math.min(12, profundidade - 3);
+  const z = conves.z, espessura = 0.38;
+  const perfil = [[-1.5, 4.7], [largura * 0.25, 5.7],
+                  [largura * 0.65, 5.9], [largura, 5.1]];
+  function ponto(t, d, h) {
+    if (a.perto === "x1") return [r.x0 + d, t, h];
+    if (a.perto === "x0") return [r.x1 - d, t, h];
+    if (a.perto === "y1") return [t, r.y0 + d, h];
+    return [t, r.y1 - d, h];
   }
 
-  s += caixa(x0, y0, x1, y1, zLaje, zTopo, C.cobTopo, C.cobDir, C.cobEsq);
+  let s = "";
+  const apoios = Math.max(3, Math.round((ate - de) / 23));
+  for (let i = 0; i <= apoios; i++) {
+    const t = de + (ate - de) * (0.05 + 0.9 * i / apoios);
+    // Pilares esbeltos no fundo, com mão francesa sob o balanço.
+    s += traco([ponto(t, 0.7, z), ponto(t, 0.7, z + 5.1)], C.estrutura, 0.65);
+    s += traco([ponto(t, 0.7, z + 2.7), ponto(t, largura * 0.7, z + 5.25)], C.estrutura, 0.45);
+  }
+
+  // Cada faixa acompanha a curva; a espessura aparece nas bordas abertas.
+  const faixas = perfil.slice(0, -1).map((p, i) => ({ p, q: perfil[i + 1] }));
+  if (a.perto === "x0" || a.perto === "y0") faixas.reverse();
+  faixas.forEach(({ p, q }, i) => {
+    s += poligono([ponto(de,p[0],z+p[1]), ponto(ate,p[0],z+p[1]),
+                   ponto(ate,q[0],z+q[1]), ponto(de,q[0],z+q[1])],
+                  [C.cobTopo, "#E6ECF0", "#D8E1E7"][i]);
+    [de, ate].forEach((t) => {
+      s += poligono([ponto(t,p[0],z+p[1]), ponto(t,q[0],z+q[1]),
+                     ponto(t,q[0],z+q[1]-espessura), ponto(t,p[0],z+p[1]-espessura)], C.cobEsq);
+    });
+  });
+  // Juntas transversais dão escala aos painéis sem engrossar a silhueta.
+  const paineis = Math.ceil((ate - de) / 8);
+  for (let i = 1; i < paineis; i++) {
+    const t = de + (ate - de) * i / paineis;
+    s += traco(perfil.map(([d,h]) => ponto(t,d,z+h+0.02)), C.cobJunta, 0.22, 0.7);
+  }
+  [perfil[0], perfil[perfil.length - 1]].forEach(([d,h], i) => {
+    s += poligono([ponto(de,d,z+h), ponto(ate,d,z+h),
+                   ponto(ate,d,z+h-espessura), ponto(de,d,z+h-espessura)],
+                  i ? C.cobFriso : C.estrutura);
+  });
   return s;
 }
 
@@ -4853,12 +4873,13 @@ function desenharEstadio() {
   const mx = EST.campoX, my = EST.campoY;
   const px = mx + EST.pista, py = my + EST.pista;          // borda da pista
   const ax = px + EST.arqFundo, ay = py + EST.arqFundo;    // borda externa
-  const bx = 105, by = 86;                                  // terreno
+  const bx = EST.terrenoX, by = EST.terrenoY;               // terreno
 
   let s = "";
 
   // terreno: bloco de terra com grama em cima
   s += caixa(-bx, -by, bx, by, -7, 0, C.gramaFora, C.terraDir, C.terraEsq);
+  if (temArredores()) s += pisoDosArredores();
   // pista ao redor do campo
   s += poligono([[-px,-py,0.02],[px,-py,0.02],[px,py,0.02],[-px,py,0.02]], C.pista);
   // o campo: terra batida até a grama ser plantada
@@ -4907,7 +4928,7 @@ function desenharEstadio() {
   pecas.sort((a, b) => a.d - b.d).forEach((p) => { s += p.svg(); });
 
   const defs = defsDeLuz();
-  return '<svg viewBox="-172 -104 344 213" preserveAspectRatio="xMidYMid meet" ' +
+  return '<svg viewBox="-205 -122 410 248" preserveAspectRatio="xMidYMid meet" ' +
          'role="img" aria-label="Estádio isométrico do Vidori: campo, quatro arquibancadas e ' +
          'quatro torres de refletores' + (temRefletores() ? ", acesos" : "") + '">' +
          (defs ? "<defs>" + defs + "</defs>" : "") + s + "</svg>";
