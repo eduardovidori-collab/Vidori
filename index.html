@@ -4430,6 +4430,40 @@ function alturaDoCanto() {
   return EST.arqAlt + (temAnel() ? EST.altAnel : 0);
 }
 
+/** Lugares regulares por fileira, com distância mínima também na projeção da tela. */
+function lugaresDaTorcidaNoCanto(sx, sy, perfil) {
+  if (!temPublico()) return [];
+  const candidatos = [], larguraFila = perfil.assentos / perfil.fileiras;
+  const intervalo = Math.max(2.4, EST.areaPorTorcedor[1] / larguraFila);
+  const ocupacao = Math.min(1, EST.areaPorTorcedor[1] / densidadeDoPublico());
+  for (let fila = 0; fila < perfil.fileiras; fila++) {
+    const r = EST.pista + (fila + 0.5) * larguraFila;
+    const z = perfil.altura - perfil.queda * (1 - fila / (perfil.fileiras - 1));
+    const lugares = Math.max(1, Math.floor(r * Math.PI / 2 / intervalo));
+    for (let lugar = 0; lugar < lugares; lugar++) {
+      const angulo = (lugar + 0.5) * Math.PI / (2 * lugares);
+      // Folga nas emendas com os setores retos e no corredor central.
+      if (Math.min(angulo, Math.PI/2-angulo) * r < 1.1 ||
+          Math.abs(angulo-Math.PI/4) * r < 1.15) continue;
+      const sorte = aleatorioEstavel(sx*371 + sy*911 + fila*101 + lugar*197 + 7907);
+      sorte(); // dispersa a primeira amostra para sementes próximas
+      const prioridade = sorte();
+      if (prioridade >= ocupacao) continue;
+      const q = iso(sx*(EST.campoX+r*Math.cos(angulo)),
+                    sy*(EST.campoY+r*Math.sin(angulo)), z+0.45);
+      candidatos.push({ fila, angulo, x:q.x, y:q.y, prioridade,
+        cor:CORES_EST.publico[Math.floor(sorte()*CORES_EST.publico.length)] });
+    }
+  }
+  // A ocupação inicial tem prioridade: subir o público acrescenta pessoas
+  // sem mudar os lugares que já estavam ocupados.
+  const aceitos = [];
+  candidatos.sort((a,b) => a.prioridade-b.prioridade).forEach((p) => {
+    if (aceitos.every(q => Math.hypot(p.x-q.x,p.y-q.y) >= 1.25)) aceitos.push(p);
+  });
+  return aceitos;
+}
+
 /**
  * Um quarto de arquibancada, com os mesmos raios, degraus e alturas dos
  * setores retos. O vazio central acompanha a pista e a fachada externa
@@ -4442,7 +4476,13 @@ function setorDeCanto(sx, sy) {
     return [sx * (EST.campoX + r * Math.cos(ang)),
             sy * (EST.campoY + r * Math.sin(ang)), z];
   }
-  const perfil = perfilDaArquibancada();
+  const perfil = perfilDaArquibancada(), torcidaPorFatia = new Map();
+  lugaresDaTorcidaNoCanto(sx,sy,perfil).forEach((p) => {
+    const segmento = Math.min(segmentos-1, Math.floor(p.angulo/passo));
+    const chave = p.fila*segmentos+segmento;
+    if (!torcidaPorFatia.has(chave)) torcidaPorFatia.set(chave,[]);
+    torcidaPorFatia.get(chave).push(p);
+  });
   function anel(raioDentro, assentos, zTopo, zBase) {
     const pecas = [], n = perfil.fileiras;
     for (let i = 0; i < segmentos; i++) {
@@ -4475,18 +4515,11 @@ function setorDeCanto(sx, sy) {
         if (!passeio) {
           svg += traco([ponto(r0,a0,z+0.01),ponto(r0,a1,z+0.01)], "#283440", 0.12, 0.15);
         }
-        if (!passeio && !escada && temPublico()) {
-          const area = (r1*r1 - r0*r0) * passo / 2;
-          const sorte = aleatorioEstavel(sx * 371 + sy * 911 + i * 37 + fila * 101 + zTopo * 53);
-          const esperado = area / densidadeDoPublico();
-          const total = Math.floor(esperado) + (sorte() < esperado % 1 ? 1 : 0);
-          for (let n = 0; n < total; n++) {
-            const r = Math.sqrt(r0*r0 + sorte() * (r1*r1 - r0*r0));
-            const p = ponto(r, a0 + sorte() * passo, z + 0.45);
-            const q = iso(p[0],p[1],p[2]);
-            svg += '<circle cx="' + q.x.toFixed(2) + '" cy="' + q.y.toFixed(2) +
-              '" r="0.46" fill="' + C.publico[Math.floor(sorte() * C.publico.length)] + '"/>';
-          }
+        if (!passeio && !escada) {
+          (torcidaPorFatia.get(fila*segmentos+i) || []).forEach((p) => {
+            svg += '<circle cx="' + p.x.toFixed(2) + '" cy="' + p.y.toFixed(2) +
+              '" r="0.46" fill="' + p.cor + '"/>';
+          });
         }
         const meio = ponto((r0+r1)/2, (a0+a1)/2, z);
         pecas.push({ d: meio[0]+meio[1], svg });
