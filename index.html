@@ -451,6 +451,39 @@ canvas{display:block; width:100%; height:auto}
   background:linear-gradient(175deg,#EDF3F8 0%,#DFE9F1 55%,#D6E2EB 100%);
 }
 .caixa-estadio svg{display:block; width:100%; height:auto}
+.estadio-topo,.estadio-controles{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.estadio-topo{margin-bottom:12px}.estadio-topo h3{margin:0}
+.estadio-saldo{background:#F4EEE0;border:1px solid #E5D8B8;border-radius:999px;padding:8px 13px;font-size:12px;white-space:nowrap}
+.estadio-saldo b{font-size:17px;margin-right:3px}
+.cena-estadio{position:relative;margin-top:14px}
+.baloes-estadio{position:absolute;inset:0;pointer-events:none}
+.baloes-estadio[hidden],.estadio-zonas[hidden]{display:none}
+.obra-pin{position:absolute;left:var(--pin-x);top:var(--pin-y);transform:translate(-50%,-100%);display:flex;align-items:center;gap:7px;pointer-events:auto;
+ border:1px solid #D6DFDC;border-radius:12px;padding:7px 10px;background:#FFFDF8;color:#283A34;box-shadow:0 4px 13px #233E3826;cursor:pointer;font:inherit;text-align:left;z-index:1}
+.obra-pin::after{content:"";position:absolute;left:calc(50% - 4px);bottom:-5px;width:8px;height:8px;background:inherit;border-right:1px solid #D6DFDC;border-bottom:1px solid #D6DFDC;transform:rotate(45deg)}
+.obra-pin:hover,.obra-pin:focus-visible{z-index:3;border-color:var(--vermelho);outline:2px solid #C628282B;outline-offset:2px}
+.obra-pin-icone{display:flex;color:var(--vermelho)}.obra-pin-icone svg{width:20px;height:20px}
+.obra-pin-texto{display:grid;gap:2px;white-space:nowrap}.obra-pin-texto strong{font-size:11px}.obra-pin-texto small{font-size:10px;color:var(--fraco)}
+.obra-pin-sinal{position:absolute;right:-5px;top:-6px;background:var(--vermelho);color:#FFF;border:2px solid #FFF;border-radius:50%;width:18px;height:18px;display:grid;place-items:center;font-size:12px;font-weight:800;line-height:1}
+.obra-pin.sem-saldo .obra-pin-sinal{background:#7C8E87}.obra-pin.concluida .obra-pin-icone{color:#39775B}.obra-pin.concluida .obra-pin-sinal{background:#39775B}
+.estadio-zonas{display:none;gap:7px;flex-wrap:wrap;margin-top:12px}
+.estadio-zonas button{font-size:11px}
+.obra-estadio-dialog{border:0;border-radius:18px;padding:0;width:min(510px,calc(100% - 32px));max-height:calc(100dvh - 40px);color:var(--texto);background:#FFF;box-shadow:0 24px 70px #0005;overflow:auto}
+.obra-estadio-dialog::backdrop{background:#1119;backdrop-filter:blur(2px)}
+.obra-dialog-corpo{padding:22px}.obra-dialog-topo{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:12px}
+.obra-dialog-topo h2{font-size:20px;margin:0}.obra-dialog-topo button{min-width:36px;min-height:36px}
+.obra-dialog-saldo{font-size:12px;color:var(--fraco);margin-bottom:14px}
+.obra-escolhas{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}.obra-escolhas .btn{font-size:11px}
+.obra-escolhas[hidden]{display:none}
+.obra-escolhas [aria-pressed=true]{background:#253E33;border-color:#253E33;color:#FFF}
+.obra-estadio-dialog .item-loja{margin:0;box-shadow:none}.obra-estadio-dialog .item-acoes .btn{width:100%}
+.obra-falta{font-size:12px;color:var(--fraco);margin-top:10px;line-height:1.5}
+@media(max-width:1100px){
+ .obra-pin{width:30px;height:30px;padding:5px;justify-content:center;border-radius:10px;top:max(38px,var(--pin-y))}
+ .obra-pin[data-estadio-grupo=arquibancadas]{left:calc(var(--pin-x) - 18px);top:max(38px,calc(var(--pin-y) - 6px))}
+ .obra-pin-texto{display:none}.obra-pin-icone svg{width:19px;height:19px}.obra-pin-sinal{width:16px;height:16px;font-size:10px}
+ .estadio-zonas{display:flex}
+}
 .legenda-estadio{
   display:flex; gap:8px 20px; flex-wrap:wrap; margin-top:14px;
   font-size:12px; color:var(--fraco);
@@ -971,10 +1004,17 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
   <div class="cartao">
     <div class="faixas faixas-fina"></div>
     <div class="cartao-corpo">
-      <h3>Estádio</h3>
+      <div class="estadio-topo"><h3 id="tituloEstadio" tabindex="-1">Estádio</h3>
+        <div class="estadio-controles"><span class="estadio-saldo" role="status" aria-live="polite"><b id="saldoEstadio">0</b> moedas</span>
+          <button class="btn btn-pequeno" type="button" id="btnBaloesEstadio" aria-pressed="true" aria-controls="baloesEstadio estadioZonas">Ocultar balões</button></div>
+      </div>
       <p class="subtexto" id="legendaEstadio">Terreno limpo, gramado plantado e as quatro
         arquibancadas de pé. O resto vem com o trabalho.</p>
-      <div class="caixa-estadio" id="caixaEstadio" style="margin-top:14px"></div>
+      <p class="dica">Toque nos balões para escolher uma melhoria e construir aqui mesmo.</p>
+      <div class="cena-estadio" id="cenaEstadio"><div class="caixa-estadio" id="caixaEstadio"></div>
+        <div class="baloes-estadio" id="baloesEstadio" role="group" aria-label="Melhorias nas partes do estádio"></div>
+      </div>
+      <div class="estadio-zonas" id="estadioZonas" role="group" aria-label="Escolher setor para melhorar"></div>
       <div class="legenda-estadio">
         <span id="legendaCampo"><i style="background:#B0794D"></i><b>Terra batida</b></span>
         <span><i style="background:#CFD3D8"></i>Arquibancada</span>
@@ -986,7 +1026,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
         <span id="legendaPublico" hidden><i style="background:#D8A47A"></i>Torcida</span>
         <span id="legendaPlacar" hidden><i style="background:#172431"></i><b></b></span>
       </div>
-      <p class="dica" id="dicaEstadio">As obras da loja transformam o estádio a cada compra.</p>
+      <p class="dica" id="dicaEstadio">Escolha um balão para melhorar essa parte do estádio.</p>
     </div>
   </div>
 </section>
@@ -1150,8 +1190,8 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 
   <div class="cartao"><div class="cartao-corpo">
     <h2>Obras do estádio</h2>
-    <p class="subtexto" style="margin-bottom:4px">Comprou, ficou. Melhoria de obra não se troca nem se desfaz.</p>
-    <div class="grade-itens" id="itensEstadio"></div>
+    <p class="subtexto" style="margin-bottom:12px">Agora você constrói direto no estádio. Toque nos balões para escolher uma melhoria.</p>
+    <button class="btn" type="button" id="btnVisitarEstadio">Ir para Estádio</button>
   </div></div>
 </section>
 
@@ -1241,6 +1281,16 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     </div>
   </div>
 </div>
+
+<!-- ================================================= MELHORIAS DO ESTÁDIO -->
+<dialog class="obra-estadio-dialog" id="modalObraEstadio" aria-labelledby="tituloObraEstadio">
+  <div class="faixas"></div><div class="obra-dialog-corpo">
+    <div class="obra-dialog-topo"><h2 id="tituloObraEstadio">Melhorar estádio</h2><button class="btn btn-pequeno" type="button" id="fecharObraEstadio" aria-label="Fechar melhorias">✕</button></div>
+    <p class="obra-dialog-saldo" id="saldoObraEstadio"></p>
+    <div class="obra-escolhas" id="escolhasObraEstadio" role="group" aria-label="Melhorias deste setor"></div>
+    <div id="detalheObraEstadio"></div>
+  </div>
+</dialog>
 
 <!-- ================================================= MODAL: PACOTE DE JOGADORES -->
 <div class="modal" id="modalPacote" role="dialog" aria-modal="true" aria-labelledby="tituloPacote" aria-describedby="resumoPacote">
@@ -4621,25 +4671,83 @@ function usarItem(categoria, id) {
 }
 
 /** Sobe um nível da obra. Não existe pular etapa: só dá pra comprar o próximo. */
-function comprarNivel(familia) {
+function comprarNivel(familia,nivelEsperado) {
   const obra = OBRAS_ESTADIO[familia];
   const prox = proximoNivel(familia);
-  if (!obra || !prox) return;
+  if (!obra || !prox) return false;
+  if(nivelEsperado!==undefined && nivelEsperado!==nivelDaObra(familia)+1) return false;
   if (saldoMoedas() < prox.preco) {
     const falta = prox.preco - saldoMoedas();
     mostrarAviso("Faltam " + falta + (falta === 1 ? " moeda" : " moedas") +
                  " — dá em " + (falta * MIN_POR_MOEDA) + " min de estudo.");
-    return;
+    return false;
   }
   const nivel = nivelDaObra(familia) + 1;
-  loja.gastas = (loja.gastas || 0) + prox.preco;
-  loja.niveis[familia] = nivel;
-  salvarLoja();
+  const gastas=(loja.gastas||0)+prox.preco;
+  if(!Number.isSafeInteger(gastas)) return false;
+  const proximo={...loja,gastas,niveis:{...loja.niveis,[familia]:nivel}};
+  if(!Armazem.gravar(CHAVES.loja,proximo)) return false;
+  loja=proximo;
   renderEstadio();
   renderLoja();
   mostrarAviso("Obra entregue: " + obra.nome.toLowerCase() +
                (obra.niveis.length > 1 ? ", nível " + nivel : "") +
-               ". Dá uma olhada no estádio.", "recorde");
+               ".", "recorde");
+  return true;
+}
+
+const GRUPOS_OBRAS_ESTADIO = {
+  cobertura:{nome:"Cobertura",obras:["cobertura"],posicao:()=>[-16,60,perfilDaArquibancada().altura+5.5],icone:'<path d="M3 13Q12 2 21 13M5 13v7m14-7v7M3 13h18"/>'},
+  arquibancadas:{nome:"Arquibancadas",obras:["anel","publico","mosaico","cantos"],posicao:()=>[-61,-9,perfilDaArquibancada().altura+1],icone:'<path d="M3 20v-4h6v-5h6V6h6v14H3Z"/>'},
+  campo:{nome:"Campo",obras:["gramado","redes","bandeiras"],posicao:()=>[8,6,1],icone:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 5v14"/><circle cx="12" cy="12" r="3"/>'},
+  refletores:{nome:"Refletores",obras:["refletores"],posicao:()=>[-72,-53,33],icone:'<path d="M5 3h14v8H5zM8 3v8m4-8v8m4-8v8M5 7h14m-7 4v10m-4 0h8"/>'},
+  placar:{nome:"Placar",obras:["placar"],posicao:()=>[-12,-87,28],icone:'<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M7 17v4m10-4v4M7 8h3v5H7zm7 0h3v5h-3z"/>'},
+  arredores:{nome:"Arredores",obras:["arredores"],posicao:()=>[132,24,10],icone:'<path d="M3 21V9h7v12m0-16h10v16M6 12v1m0 3v1m8-9v1m3-1v1m-3 3v1m3-1v1m-3 3v1m3-1v1M2 21h20"/>'}
+};
+let mostrarBaloesEstadio=true,grupoObraAtivo="cobertura",obraEstadioSelecionada="cobertura";
+
+function renderBaloesEstadio() {
+  $("#saldoEstadio").textContent=saldoMoedas();
+  const svg=$("#caixaEstadio svg");
+  if(!svg) return;
+  const v=svg.viewBox.baseVal,foco=document.activeElement?.dataset.estadioGrupo;
+  $("#baloesEstadio").hidden=!mostrarBaloesEstadio;
+  $("#estadioZonas").hidden=!mostrarBaloesEstadio;
+  $("#baloesEstadio").innerHTML=Object.entries(GRUPOS_OBRAS_ESTADIO).map(([id,g])=>{
+    const proximas=g.obras.map(proximoNivel).filter(Boolean),feita=proximas.length===0;
+    const preco=feita?0:Math.min(...proximas.map(p=>p.preco));
+    const p=iso(...g.posicao()),x=(p.x-v.x)/v.width*100,y=(p.y-v.y)/v.height*100;
+    const nivel=g.obras.length===1&&OBRAS_ESTADIO[g.obras[0]].niveis.length>1?"Nível "+(nivelDaObra(g.obras[0])+1)+" · ":"";
+    const resumo=feita?"Concluído":(g.obras.length>1?"Desde ":nivel)+preco+" moedas";
+    return '<button type="button" class="obra-pin'+(feita?' concluida':saldoMoedas()<preco?' sem-saldo':'')+'" data-estadio-grupo="'+id+'" '+
+      'style="--pin-x:'+x.toFixed(2)+'%;--pin-y:'+y.toFixed(2)+'%" aria-haspopup="dialog" aria-label="'+g.nome+': '+resumo+'">'+
+      '<span class="obra-pin-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+g.icone+'</svg></span>'+
+      '<span class="obra-pin-texto"><strong>'+g.nome+'</strong><small>'+resumo+'</small></span><span class="obra-pin-sinal" aria-hidden="true">'+(feita?'✓':'+')+'</span></button>';
+  }).join('');
+  $("#estadioZonas").innerHTML=Object.entries(GRUPOS_OBRAS_ESTADIO).map(([id,g])=>
+    '<button class="btn btn-pequeno" type="button" data-estadio-grupo="'+id+'" aria-haspopup="dialog">'+g.nome+'</button>').join('');
+  if(foco&&!$("#modalObraEstadio").open) $("#baloesEstadio [data-estadio-grupo="+foco+"]")?.focus({preventScroll:true});
+  if($("#modalObraEstadio").open) renderDetalheObraEstadio();
+}
+
+function abrirObrasEstadio(grupo) {
+  const g=GRUPOS_OBRAS_ESTADIO[grupo];
+  if(!g) return;
+  grupoObraAtivo=grupo;
+  obraEstadioSelecionada=g.obras.find(f=>proximoNivel(f)&&saldoMoedas()>=proximoNivel(f).preco)||g.obras.find(f=>proximoNivel(f))||g.obras[0];
+  renderDetalheObraEstadio();
+  if(!$("#modalObraEstadio").open) $("#modalObraEstadio").showModal();
+  $("#fecharObraEstadio").focus();
+}
+
+function renderDetalheObraEstadio() {
+  const g=GRUPOS_OBRAS_ESTADIO[grupoObraAtivo];
+  $("#tituloObraEstadio").textContent=g.nome;
+  $("#saldoObraEstadio").textContent="Seu saldo: "+saldoMoedas()+" moedas";
+  $("#escolhasObraEstadio").hidden=g.obras.length<2;
+  $("#escolhasObraEstadio").innerHTML=g.obras.length<2?"":g.obras.map(f=>
+    '<button class="btn btn-pequeno" type="button" data-obra-escolher="'+f+'" aria-pressed="'+(f===obraEstadioSelecionada)+'">'+escapar(OBRAS_ESTADIO[f].nome)+'</button>').join('');
+  $("#detalheObraEstadio").innerHTML=cartaoDeObra(obraEstadioSelecionada);
 }
 
 /** Um cartão por obra, mostrando o nível atual e o que vem a seguir. */
@@ -4670,8 +4778,9 @@ function cartaoDeObra(familia) {
     escada +
     '<p class="desc">' + desc + "</p>" +
     (prox ? '<div class="item-acoes">' +
-      '<button class="btn btn-pequeno btn-principal" data-loja="obra" data-familia="' + familia +
-      '"' + (pode ? "" : " disabled") + ">Comprar</button></div>" : "") +
+      '<button type="button" class="btn btn-pequeno btn-principal" data-obra-comprar="' + familia +
+      '" data-obra-nivel="'+(nivel+1)+'"' + (pode ? "" : " disabled") + ">Construir · "+prox.preco+" moedas</button></div>"+
+      (pode?"":'<p class="obra-falta">Faltam '+(prox.preco-saldoMoedas())+' moedas para esta melhoria.</p>') : "") +
     "</div>";
 }
 
@@ -4712,7 +4821,7 @@ function renderLoja() {
 
   $("#itensGol").innerHTML = Object.keys(SONS.gol).map((id) => cartaoDeItem("gol", id)).join("");
   $("#itensApito").innerHTML = Object.keys(SONS.apito).map((id) => cartaoDeItem("apito", id)).join("");
-  $("#itensEstadio").innerHTML = Object.keys(OBRAS_ESTADIO).map(cartaoDeObra).join("");
+  renderBaloesEstadio();
   renderPacoteBase();
   renderAvisoLoja();
 }
@@ -4778,8 +4887,6 @@ function resgatarPresente() {
 
 /** Bolinha na aba quando dá pra comprar algo que ele ainda não tem. */
 function renderAvisoLoja() {
-  const aba = $$(".aba-btn").find((b) => b.dataset.painel === "loja");
-  if (!aba) return;
   const saldo = saldoMoedas();
   const podeSom = Object.keys(CATALOGO).some((cat) =>
     Object.keys(CATALOGO[cat]).some((id) =>
@@ -4788,7 +4895,12 @@ function renderAvisoLoja() {
     const p = proximoNivel(f);
     return p && saldo >= p.preco;
   });
-  const podeAlgo = podeSom || podeObra || saldo>=PACOTE_BASE.preco;
+  marcarAbaComNovidade("loja",podeSom || saldo>=PACOTE_BASE.preco);
+  marcarAbaComNovidade("estadio",podeObra);
+}
+function marcarAbaComNovidade(nome,podeAlgo) {
+  const aba=$$(".aba-btn").find(b=>b.dataset.painel===nome);
+  if(!aba) return;
   const ponto = aba.querySelector(".ponto-novo");
   if (podeAlgo && !ponto) {
     const p = document.createElement("span");
@@ -6259,9 +6371,10 @@ function renderEstadio() {
                      (temListras() ? "l" : "-") + (temCantos() ? "k" : "-") +
                      nivelDaObra("publico") + ":" + nivelDaObra("arredores") + ":" + nivelDaObra("cobertura") +
                      ":" + (temPlacar() ? JSON.stringify([ciclo && ciclo.id,ciclo && ciclo.nome,golsDoPlacar()]) : "-");
-  if (estadioAssinatura === assinatura) return;
+  if (estadioAssinatura === assinatura) {renderBaloesEstadio();return;}
   caixaEl.innerHTML = desenharEstadio();
   estadioAssinatura = assinatura;
+  renderBaloesEstadio();
 
   $("#legendaEstadio").textContent = fraseDoEstadio();
 
@@ -6301,7 +6414,7 @@ function renderEstadio() {
   $("#dicaEstadio").textContent = temPlacar()
     ? (ciclo ? "Ciclo: " + ciclo.nome + ". Cada 60 minutos vinculados a ele valem 1 gol. Um novo ciclo começa com o placar zerado."
              : "Abra um ciclo em Ciclo & Ajustes para marcar gols. Só os estudos vinculados ao ciclo ativo contam no placar.")
-    : "As obras da loja transformam o estádio a cada compra.";
+    : "Escolha um balão para ver o próximo nível e construir com suas moedas.";
 }
 
 /**
@@ -6472,14 +6585,45 @@ $("#btnTestarApito").addEventListener("click", () => { acordarAudio(); tocarApit
 $("#btnZerarSaldo").addEventListener("click", zerarSaldo);
 $("#btnResetarLoja").addEventListener("click", resetarLoja);
 $("#btnResetarTime").addEventListener("click", resetarTime);
+$("#btnVisitarEstadio").addEventListener("click",()=>{irParaPainel("estadio");$("#tituloEstadio").focus();});
+$("#btnBaloesEstadio").addEventListener("click",()=>{
+  mostrarBaloesEstadio=!mostrarBaloesEstadio;
+  $("#btnBaloesEstadio").textContent=mostrarBaloesEstadio?"Ocultar balões":"Mostrar balões";
+  $("#btnBaloesEstadio").setAttribute("aria-pressed",String(mostrarBaloesEstadio));
+  renderBaloesEstadio();
+});
+$("#painel-estadio").addEventListener("click",e=>{
+  const pin=e.target.closest("[data-estadio-grupo]");
+  if(pin) abrirObrasEstadio(pin.dataset.estadioGrupo);
+});
+$("#fecharObraEstadio").addEventListener("click",()=>$("#modalObraEstadio").close());
+$("#modalObraEstadio").addEventListener("close",()=>{
+  const pin=$("#baloesEstadio [data-estadio-grupo="+grupoObraAtivo+"]");
+  (mostrarBaloesEstadio?pin:$("#btnBaloesEstadio"))?.focus({preventScroll:true});
+});
+$("#modalObraEstadio").addEventListener("keydown",e=>{
+  if(e.key!=="Tab") return;
+  const botoes=Array.from($("#modalObraEstadio").querySelectorAll("button:not([disabled])")).filter(b=>b.getClientRects().length);
+  const primeiro=botoes[0],ultimo=botoes[botoes.length-1];
+  if(e.shiftKey&&document.activeElement===primeiro) {e.preventDefault();ultimo.focus();}
+  else if(!e.shiftKey&&document.activeElement===ultimo) {e.preventDefault();primeiro.focus();}
+});
+$("#modalObraEstadio").addEventListener("click",e=>{
+  const escolha=e.target.closest("[data-obra-escolher]"),compra=e.target.closest("[data-obra-comprar]");
+  if(escolha) {
+    obraEstadioSelecionada=escolha.dataset.obraEscolher;renderDetalheObraEstadio();
+    $("#escolhasObraEstadio [data-obra-escolher="+obraEstadioSelecionada+"]")?.focus();
+  } else if(compra&&!compra.disabled) {
+    if(comprarNivel(compra.dataset.obraComprar,Number(compra.dataset.obraNivel))) $("#modalObraEstadio").close();
+  }
+});
 
 document.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-loja]");
   if (!btn || btn.disabled) return;
   const cat = btn.dataset.cat, id = btn.dataset.id;
   acordarAudio();
-  if (btn.dataset.loja === "obra") comprarNivel(btn.dataset.familia);
-  else if (btn.dataset.loja === "ouvir") tocarSom(cat, id);
+  if (btn.dataset.loja === "ouvir") tocarSom(cat, id);
   else if (btn.dataset.loja === "comprar") comprarItem(cat, id);
   else if (btn.dataset.loja === "usar") {
     usarItem(cat, id);
@@ -6703,6 +6847,7 @@ $("#notifFechar").addEventListener("click", fecharModalNotif);
 document.addEventListener("keydown", (e) => {
   const alvo = e.target;
   const digitando = alvo && (alvo.tagName === "INPUT" || alvo.tagName === "TEXTAREA" || alvo.isContentEditable);
+  if($("#modalObraEstadio").open) return;
 
   if (e.key === "Escape") {
     fecharModalFim(); fecharModalNotif(); fecharModalOrfaos();
