@@ -4269,6 +4269,7 @@ const EST = {
   degraus: 6, inclinacaoAssentos: 0.22, // desnível proporcional à largura de cada anel
   areaPorTorcedor: [16, 7],       // unidades de arquibancada por pessoa, por nível
   terrenoX: 121, terrenoY: 108, // espaço livre mesmo com anel e cobertura
+  terrenoXDireita: 164,         // extensão lateral para o lote separado do prédio
   torreX: 57, torreY: 38,       // torres encaixadas no vão de canto
   torreAlt: 28, lampadaAlt: 5.2
 };
@@ -4411,10 +4412,11 @@ function predio(cx, cy) {
 
 /* Praça externa: as copas e o prédio ficam além do limite do segundo anel.
    No lado próximo da cena, as árvores permanecem visíveis com todas as obras. */
+const LOTE_PREDIO = { x:143, y:-12, meioX:13, meioY:12 };
 const ARREDORES = [
   { x: -38, y: 94, svg: () => arvore(-38, 94, 0.78) },
   { x:  -6, y: 94, svg: () => arvore(-6, 94, 0.68) },
-  { x: 106, y: -12, svg: () => predio(106, -12) }
+  { x:LOTE_PREDIO.x, y:LOTE_PREDIO.y, svg:() => predio(LOTE_PREDIO.x,LOTE_PREDIO.y) }
 ];
 
 /** Texto no plano vertical da fachada, acompanhando a projeção do estádio. */
@@ -4544,16 +4546,19 @@ const ARREDORES_NIVEL_2 = [
 
 /** Praça em pedra clara, jardins e caminhos conectados à entrada do estádio. */
 function pisoDosArredores() {
+  const lote=LOTE_PREDIO;
+  const pisoDoPredio=caixa(lote.x-lote.meioX,lote.y-lote.meioY,lote.x+lote.meioX,lote.y+lote.meioY,
+                          0,0.14,"#CDD5D0","#ADBDB1","#94AA9A");
   if(nivelDaObra("arredores")<2) {
     return caixa(-51,85,5,103,0,0.14,"#DADDD5","#BDC4BB","#ACB6AB") +
-      caixa(94,-23,118,0,0,0.14,"#DADDD5","#BDC4BB","#ACB6AB") +
       traco([[-49,89,0.16],[3,89,0.16]],"#BCC5BA",0.4) +
-      traco([[96,-21,0.16],[96,-2,0.16]],"#BCC5BA",0.4);
+      pisoDoPredio;
   }
   const z=0.17, pedra="#DDDCD0";
   let s=poligono([[-56,83,z],[-50,78,z],[67,78,z],[76,85,z],[76,100,z],[70,105,z],[-50,105,z],[-56,100,z]],pedra);
   s+=poligono([[64,91,z],[74,104,z],[115,80,z],[104,63,z]],pedra);
-  s+=caixa(90,-24,116,78,0,0.14,pedra,"#BEC6B6","#A8B69F");
+  s+=caixa(90,20,116,78,0,0.14,pedra,"#BEC6B6","#A8B69F");
+  s+=pisoDoPredio;
   // Juntas discretas dão escala ao pavimento.
   for(let x=-44;x<70;x+=10) s+=traco([[x,80,z+0.01],[x,103,z+0.01]],"#BAC4B1",0.18,0.6);
   [86,96].forEach(y=>{s+=traco([[-53,y,z+0.01],[73,y,z+0.01]],"#BAC4B1",0.18,0.6);});
@@ -5213,11 +5218,12 @@ function desenharEstadio() {
   const px = mx + EST.pista, py = my + EST.pista;          // borda da pista
   const ax = px + EST.arqFundo, ay = py + EST.arqFundo;    // borda externa
   const bx = EST.terrenoX, by = EST.terrenoY;               // terreno
+  const bxDireita = temArredores() ? EST.terrenoXDireita : bx;
 
   let s = "";
 
   // terreno: bloco de terra com grama em cima
-  s += caixa(-bx, -by, bx, by, -7, 0, C.gramaFora, C.terraDir, C.terraEsq);
+  s += caixa(-bx, -by, bxDireita, by, -7, 0, C.gramaFora, C.terraDir, C.terraEsq);
   if (temArredores()) s += pisoDosArredores();
   if (temPlacar()) s += caixa(-35,-93,11,-81,0,0.14,"#DADDD5","#BDC4BB","#ACB6AB");
   // pista ao redor do campo
@@ -5271,7 +5277,8 @@ function desenharEstadio() {
   pecas.sort((a, b) => a.d - b.d).forEach((p) => { s += p.svg(); });
 
   const defs = defsDeLuz();
-  return '<svg viewBox="-205 -122 410 248" preserveAspectRatio="xMidYMid meet" ' +
+  const enquadramento = temArredores() ? "-205 -122 448 268" : "-205 -122 410 248";
+  return '<svg viewBox="' + enquadramento + '" preserveAspectRatio="xMidYMid meet" ' +
          'role="img" aria-label="Estádio isométrico do Vidori: campo, quatro arquibancadas e ' +
          'quatro torres de refletores' + (temRefletores() ? ", acesos" : "") +
          (temPlacar() ? ". Placar do ciclo: " + golsDoPlacar() + (golsDoPlacar() === 1 ? " gol" : " gols") : "") + '">' +
