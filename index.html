@@ -460,6 +460,65 @@ canvas{display:block; width:100%; height:auto}
 .legenda-estadio i{width:11px; height:11px; border-radius:3px; display:block; flex:0 0 auto}
 .legenda-estadio b{font-weight:inherit}
 
+/* ---------------------------------------------------------------- meu time */
+.time-apresentacao{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.time-identidade{display:flex;align-items:center;gap:14px;min-width:0}
+.time-identidade>div{min-width:0}
+.time-identidade h2{margin-bottom:3px;font-size:10px;letter-spacing:.16em}
+.time-identidade h3{font-size:23px;overflow-wrap:anywhere;margin-bottom:3px}
+.time-marcadores{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.time-formacao{background:var(--preto);color:#fff;border-radius:9px;padding:8px 13px;font-size:19px;font-weight:800;letter-spacing:.04em}
+.time-contagem{font-size:12px;font-weight:700;color:var(--fraco)}
+.grade-time{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start;margin-top:18px}
+.grade-time>.coluna{min-width:0}
+.time-campo-card{background:#153E2D;border-color:#29513C}
+.time-campo-topo{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 19px;color:#F2F7ED}
+.time-campo-topo h3{margin:0;font-size:14px}
+.time-campo-topo span{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#C0D0BE}
+.time-campo{position:relative;width:100%;max-width:600px;margin:0 auto;aspect-ratio:5/6;isolation:isolate;
+ background:linear-gradient(180deg,rgba(5,36,22,.12),rgba(5,36,22,.28)),repeating-linear-gradient(0deg,#3D7C48 0 10%,#478852 10% 20%)}
+.time-linhas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.65;z-index:-1}
+.time-posicoes{position:absolute;inset:0}
+.time-posicao{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,-50%);width:84px;min-height:86px;
+ padding:5px 2px;border:1.5px solid transparent;border-radius:12px;background:transparent;color:#fff;cursor:pointer;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.time-posicao:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.35)}
+.time-posicao[aria-pressed=true]{background:rgba(12,40,25,.42);border-color:#ECF4DF;box-shadow:0 0 0 3px rgba(246,250,239,.1)}
+.time-posicao:focus-visible{outline:3px solid #FFF2AE;outline-offset:3px}
+.camisa-time{display:block;width:49px;height:46px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.20));flex-shrink:0}
+.time-pos-sigla{font-size:10px;font-weight:800;letter-spacing:.09em;color:#EFF7E7}
+.time-pos-nome{display:block;max-width:100%;font-size:10px;font-weight:600;line-height:1.2;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+.time-posicao.vazia .time-pos-nome{color:#DAE6D4;font-size:9px;font-weight:400}
+.time-adicionar{position:absolute;right:12px;top:22px;width:16px;height:16px;display:grid;place-items:center;border-radius:50%;background:var(--vermelho);color:white;font-size:14px;line-height:1;font-weight:700}
+.time-instrucao{color:#D9E6D1;text-align:center;padding:12px 14px;font-size:12px;min-height:41px}
+.time-form-nome{display:flex;gap:7px;align-items:center}
+.time-form-nome input{min-width:0;font-size:14px}
+.time-form-nome .btn{padding:10px 12px;flex-shrink:0}
+.time-escolha-pos{display:inline-flex;background:#FCECED;color:#A7212C;font-size:10px;font-weight:800;letter-spacing:.08em;border-radius:6px;padding:4px 8px;margin-bottom:10px}
+.time-vazio{text-align:center;padding:25px 10px 19px;border:1px dashed #D9DEE4;border-radius:12px;background:#FAFBFC;margin-top:16px}
+.time-vazio .camisa-time{width:66px;height:60px;margin:0 auto 12px;filter:none;opacity:.78}
+.time-vazio strong{display:block;font-size:14px;margin-bottom:6px}
+.time-vazio p{font-size:12px;line-height:1.6;color:var(--fraco);max-width:230px;margin:0 auto}
+.time-cartas{display:grid;gap:10px;margin-top:14px}
+.time-carta{border:1px solid var(--borda);border-radius:11px;padding:12px;background:#FAFBFC}
+.time-carta-topo{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.time-carta-nome{min-width:0;flex:1}
+.time-carta-nome strong{display:block;font-size:14px;overflow-wrap:anywhere}
+.time-carta-nome span{font-size:11px;color:var(--fraco)}
+.time-iniciais{width:40px;height:44px;flex-shrink:0;border-radius:8px;background:linear-gradient(180deg,#FFFFFF 38%,#BE303C 38% 48%,#FFFFFF 48% 54%,#24282C 54% 64%,#FFFFFF 64%);border:1px solid #D7DADE;display:grid;place-items:center;font-size:12px;font-weight:800;color:#111;text-shadow:0 0 3px white,0 0 3px white}
+.time-carta .btn{width:100%}
+.time-remover{margin-top:12px;width:100%}
+#painel-time [hidden]{display:none}
+@media(max-width:900px){.grade-time{grid-template-columns:minmax(0,1fr)}.grade-time>.coluna{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}}
+@media(max-width:580px){
+ .time-apresentacao{gap:12px}.time-identidade h3{font-size:20px}.time-identidade .escudo{width:30px;height:36px}
+ .time-marcadores{width:100%;justify-content:space-between}.time-formacao{font-size:15px;padding:5px 11px}
+ .grade-time>.coluna{grid-template-columns:minmax(0,1fr)}.time-campo-topo{padding:12px}.time-campo-topo h3{font-size:12px}
+ .time-campo-topo span{font-size:9px}.time-posicao{width:58px;min-height:58px;padding:2px 1px;gap:1px;border-radius:8px}
+ .camisa-time{width:32px;height:30px}.time-pos-sigla{font-size:9px;line-height:1}.time-pos-nome{font-size:8px;line-height:1.1}.time-posicao.vazia .time-pos-nome{font-size:8px}
+ .time-adicionar{right:6px;top:14px;width:13px;height:13px;font-size:11px}.time-instrucao{font-size:11px;padding:10px;min-height:36px}
+}
+
 /* -------------------------------------------------------------------- loja */
 .caixa-saldo{display:flex; align-items:center; gap:22px; flex-wrap:wrap}
 .saldo{
@@ -655,6 +714,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     <button class="aba-btn" data-painel="progresso" role="tab">Progresso</button>
     <button class="aba-btn" data-painel="estante" role="tab">Estante</button>
     <button class="aba-btn" data-painel="estadio" role="tab">Estádio</button>
+    <button class="aba-btn" data-painel="time" role="tab" aria-controls="painel-time" aria-selected="false">Meu time</button>
     <button class="aba-btn" data-painel="historico" role="tab">Histórico</button>
     <button class="aba-btn" data-painel="loja" role="tab">Loja</button>
     <button class="aba-btn" data-painel="ciclo" role="tab">Ciclo &amp; Ajustes</button>
@@ -863,6 +923,61 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
   </div>
 </section>
 
+<!-- ======================================================= PAINEL: MEU TIME -->
+<section class="painel" id="painel-time" aria-labelledby="timeTitulo">
+  <div class="cartao">
+    <div class="faixas faixas-fina"></div>
+    <div class="cartao-corpo time-apresentacao">
+      <div class="time-identidade">
+        <span class="escudo" aria-hidden="true"></span>
+        <div>
+          <h2 id="timeTitulo">Meu time</h2>
+          <h3 id="timeNomeExibido">Meu Tricolor</h3>
+          <p class="subtexto">Seu elenco, sua escalação.</p>
+        </div>
+      </div>
+      <div class="time-marcadores"><span class="time-formacao">4-3-3</span><span class="time-contagem" id="timeContagem" aria-live="polite">0 de 11 escalados</span></div>
+    </div>
+  </div>
+  <div class="grade-time">
+    <div class="cartao time-campo-card">
+      <div class="time-campo-topo"><h3>Escalação titular</h3><span>Defesa · Meio · Ataque</span></div>
+      <div class="time-campo">
+        <svg class="time-linhas" viewBox="0 0 600 720" aria-hidden="true" preserveAspectRatio="none">
+          <g fill="none" stroke="#ECF4DD" stroke-width="2">
+            <rect x="24" y="24" width="552" height="672" rx="2"/>
+            <path d="M24 360H576M175 24V126H425V24M233 24V66H367V24M175 696V594H425V696M233 696V654H367V696"/>
+            <circle cx="300" cy="360" r="66"/>
+            <path d="M250 126Q300 167 350 126M250 594Q300 553 350 594M265 24V10H335V24M265 696V710H335V696"/>
+          </g>
+          <g fill="#ECF4DD"><circle cx="300" cy="360" r="3"/><circle cx="300" cy="100" r="3"/><circle cx="300" cy="620" r="3"/></g>
+        </svg>
+        <div class="time-posicoes" id="timePosicoes" role="group" aria-label="Escalação em 4-3-3"></div>
+      </div>
+      <p class="time-instrucao" id="timeInstrucao" aria-live="polite">Selecione uma camisa para escolher o jogador.</p>
+    </div>
+    <div class="coluna">
+      <div class="cartao"><div class="cartao-corpo">
+        <h3>Identidade do time</h3>
+        <form id="formNomeTime">
+          <div class="campo" style="margin:12px 0 0">
+            <label for="nomeMeuTime">Nome do time</label>
+            <div class="time-form-nome"><input type="text" id="nomeMeuTime" maxlength="40" required autocomplete="off"><button class="btn btn-pequeno btn-preto" type="submit">Salvar</button></div>
+          </div>
+        </form>
+      </div></div>
+      <div class="cartao"><div class="cartao-corpo">
+        <span class="time-escolha-pos" id="timeEscolhaSigla">GOL</span>
+        <h3 id="timeEscolhaTitulo">Escolher goleiro</h3>
+        <p class="subtexto" id="timeElencoResumo"></p>
+        <div id="timeOpcoes" class="time-cartas"></div>
+        <button class="btn btn-pequeno time-remover" id="btnRemoverTitular" type="button" hidden>Retirar desta posição</button>
+        <p class="dica">A escalação é salva automaticamente.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
 <!-- =================================================== PAINEL: HISTÓRICO -->
 <section class="painel" id="painel-historico">
   <div class="cartao"><div class="cartao-corpo">
@@ -986,7 +1101,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       </div>
 
       <div class="linha-config">
-        <div><b>Apagar tudo</b><div class="desc">Zera blocos, ciclos e recordes. Não tem volta.</div></div>
+        <div><b>Apagar tudo</b><div class="desc">Zera os estudos, as compras e o time. Não tem volta.</div></div>
         <button class="btn btn-pequeno" id="btnApagarTudo">Apagar</button>
       </div>
     </div></div>
@@ -1261,7 +1376,8 @@ const CHAVES = {
   recordes: "vidori.recordes",
   marcos:   "vidori.marcos",
   timer:    "vidori.timer",
-  loja:     "vidori.loja"
+  loja:     "vidori.loja",
+  meuTime:  "vidori.meuTime"
 };
 
 /* --------------------------------------------------------------------------
@@ -1322,6 +1438,43 @@ if (loja.comprados.indexOf("gol:fogos") !== -1) {
   if (loja.golAtivo === "fogos") loja.golAtivo = "virada";
   Armazem.gravar(CHAVES.loja, loja);
 }
+
+/* A formação é fixa. Os identificadores distinguem as duas vagas de ZAG e MC. */
+const POSICOES_TIME = [
+  {id:"gol",sigla:"GOL",nome:"goleiro",x:50,y:88},
+  {id:"le",sigla:"LE",nome:"lateral esquerdo",x:13,y:70},
+  {id:"zag-e",sigla:"ZAG",nome:"zagueiro esquerdo",x:37,y:70},
+  {id:"zag-d",sigla:"ZAG",nome:"zagueiro direito",x:63,y:70},
+  {id:"ld",sigla:"LD",nome:"lateral direito",x:87,y:70},
+  {id:"vol",sigla:"VOL",nome:"volante",x:50,y:52},
+  {id:"mc-e",sigla:"MC",nome:"meia central esquerdo",x:28,y:38},
+  {id:"mc-d",sigla:"MC",nome:"meia central direito",x:72,y:38},
+  {id:"pe",sigla:"PE",nome:"ponta esquerda",x:18,y:20},
+  {id:"ata",sigla:"ATA",nome:"atacante",x:50,y:13},
+  {id:"pd",sigla:"PD",nome:"ponta direita",x:82,y:20}
+];
+
+function normalizarMeuTime(dados) {
+  const fonte=dados && typeof dados==="object" ? dados : {};
+  const nome=typeof fonte.nome==="string" ? fonte.nome.trim().slice(0,40) : "";
+  const jogadores=[],ids=new Set(),codigos=new Set(POSICOES_TIME.map(p=>p.sigla));
+  if(Array.isArray(fonte.jogadores)) fonte.jogadores.forEach(j=>{
+    if(!j || typeof j.id!=="string" || !j.id || typeof j.nome!=="string" || !j.nome.trim() ||
+       !codigos.has(j.posicao) || ids.has(j.id)) return;
+    ids.add(j.id);
+    jogadores.push({id:j.id,nome:j.nome.trim().slice(0,60),posicao:j.posicao});
+  });
+  const escalacao={},usados=new Set();
+  POSICOES_TIME.forEach(p=>{
+    const id=fonte.escalacao && fonte.escalacao[p.id];
+    const j=jogadores.find(j=>j.id===id);
+    if(j && j.posicao===p.sigla && !usados.has(id)) {escalacao[p.id]=id;usados.add(id);}
+  });
+  return {nome:nome || "Meu Tricolor",jogadores,escalacao};
+}
+let meuTime=normalizarMeuTime(Armazem.ler(CHAVES.meuTime,null));
+let posicaoTimeSelecionada="gol";
+function salvarMeuTime() { Armazem.gravar(CHAVES.meuTime,meuTime); }
 
 const MIN_POR_MOEDA = 5;
 
@@ -3517,6 +3670,7 @@ function renderTudo() {
   renderAssuntos();
   renderFormCiclo();
   renderLoja();
+  renderMeuTime();
   renderEstadio();      // refaz quando as obras ou os gols do placar mudam
   // o bloco de pausas mora na aba Foco: precisa acompanhar qualquer mudança
   // de configuração, inclusive a que vem de uma importação de JSON
@@ -3561,7 +3715,7 @@ function exportarJSON() {
     app: "vidori",
     versao: 1,
     exportadoEm: new Date().toISOString(),
-    blocos, ciclos, config, recordes, marcos: marcosOk, loja: loja
+    blocos, ciclos, config, recordes, marcos: marcosOk, loja: loja, meuTime
   };
   const blob = new Blob([JSON.stringify(pacote, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -3587,7 +3741,8 @@ function importarJSON(arquivo) {
       return;
     }
     if (!confirm("Importar substitui TODO o histórico atual (" + blocos.length +
-                 " blocos) por " + dados.blocos.length + " blocos do arquivo. Continuar?")) return;
+                 " blocos) por " + dados.blocos.length + " blocos do arquivo." +
+                 (dados.meuTime ? "\nO time e o elenco do arquivo também serão restaurados." : "") + " Continuar?")) return;
 
     blocos = dados.blocos.filter((b) => b && b.dia && typeof b.minutos === "number");
     ciclos = Array.isArray(dados.ciclos) ? dados.ciclos : [];
@@ -3596,6 +3751,7 @@ function importarJSON(arquivo) {
       loja = Object.assign({ gastas: 0, comprados: [], golAtivo: "padrao", apitoAtivo: "padrao" }, dados.loja);
       if (!Array.isArray(loja.comprados)) loja.comprados = [];
     }
+    if (dados.meuTime) { meuTime=normalizarMeuTime(dados.meuTime); salvarMeuTime(); }
     marcosOk = null;                 // recalcula sem comemorar tudo de novo
     salvarBlocos(); salvarCiclos(); salvarConfig(); salvarLoja();
     conferirRecordes(true);
@@ -3608,11 +3764,12 @@ function importarJSON(arquivo) {
 }
 
 function apagarTudo() {
-  if (!confirm("Apagar TODOS os blocos, ciclos e recordes?\n\nNão tem volta. Exporta o JSON antes se quiser guardar.")) return;
+  if (!confirm("Apagar TODOS os blocos, ciclos, recordes, compras e o time?\n\nNão tem volta. Exporta o JSON antes se quiser guardar.")) return;
   if (!confirm("Confirma mesmo, " + NOME + "? A estante inteira some.")) return;
   blocos = []; ciclos = []; marcosOk = []; recordes = { dia:0, semana:0, sequencia:0 };
   loja = { gastas: 0, comprados: [], golAtivo: "padrao", apitoAtivo: "padrao" };
   salvarBlocos(); salvarCiclos(); salvarMarcos(); salvarRecordes(); salvarLoja();
+  meuTime=normalizarMeuTime(null); salvarMeuTime();
   Armazem.apagar(CHAVES.timer);
   zerarTimer();
   renderTudo();
@@ -4036,6 +4193,92 @@ async function baixarArquivo(id) {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
+
+/* --------------------------------------------------------------------------
+   MEU TIME — escalação fixa em 4-3-3, separada das moedas e dos estudos.
+   -------------------------------------------------------------------------- */
+function camisaDoTime() {
+  return '<svg class="camisa-time" viewBox="0 0 64 60" aria-hidden="true">' +
+    '<path d="M22 5L12 9 2 23 13 31 19 23V56H45V23L51 31 62 23 52 9 42 5 38 11H26Z" fill="#FAFBF6" stroke="#D8DFD7" stroke-width="1.3"/>' +
+    '<path d="M19 25H45V31H19Z" fill="#C72F3D"/><path d="M19 34H45V40H19Z" fill="#252B2B"/>' +
+    '<path d="M26 5Q32 15 38 5" fill="none" stroke="#C7CEC6" stroke-width="2"/></svg>';
+}
+function jogadorDaVaga(id) {
+  return meuTime.jogadores.find(j=>j.id===meuTime.escalacao[id]) || null;
+}
+function focarPosicaoTime() {
+  const botao=$("#timePosicoes").querySelector('[data-time-pos="'+posicaoTimeSelecionada+'"]');
+  if(botao) botao.focus({preventScroll:true});
+}
+function renderMeuTime() {
+  const posicao=POSICOES_TIME.find(p=>p.id===posicaoTimeSelecionada) || POSICOES_TIME[0];
+  posicaoTimeSelecionada=posicao.id;
+  $("#timeNomeExibido").textContent=meuTime.nome;
+  if(document.activeElement!==$("#nomeMeuTime")) $("#nomeMeuTime").value=meuTime.nome;
+  const escalados=POSICOES_TIME.filter(p=>jogadorDaVaga(p.id)).length;
+  $("#timeContagem").textContent=escalados+" de 11 escalados";
+  $("#timePosicoes").innerHTML=POSICOES_TIME.map(p=>{
+    const jogador=jogadorDaVaga(p.id);
+    return '<button type="button" class="time-posicao'+(jogador?'':' vazia')+'" '+
+      'style="--x:'+p.x+'%;--y:'+p.y+'%" data-time-pos="'+p.id+'" '+
+      'aria-pressed="'+(p.id===posicao.id)+'" aria-label="Escolher '+p.nome+
+      (jogador?': '+escapar(jogador.nome):', vaga livre')+'" title="'+p.nome+'">'+
+      '<span class="time-pos-sigla">'+p.sigla+'</span>'+camisaDoTime()+
+      (!jogador?'<span class="time-adicionar" aria-hidden="true">+</span>':'')+
+      '<span class="time-pos-nome">'+(jogador?escapar(jogador.nome):'Vaga livre')+'</span></button>';
+  }).join('');
+  $("#timeEscolhaSigla").textContent=posicao.sigla;
+  $("#timeEscolhaTitulo").textContent="Escolher "+posicao.nome;
+  $("#timeInstrucao").textContent=posicao.nome.charAt(0).toUpperCase()+posicao.nome.slice(1)+" · escolha no elenco quem joga nesta vaga.";
+  const opcoes=meuTime.jogadores.filter(j=>j.posicao===posicao.sigla);
+  $("#timeElencoResumo").textContent=meuTime.jogadores.length
+    ? meuTime.jogadores.length+(meuTime.jogadores.length===1?' jogador no elenco':' jogadores no elenco')
+    : 'Sua coleção ainda está vazia.';
+  if(!opcoes.length) {
+    $("#timeOpcoes").innerHTML='<div class="time-vazio">'+camisaDoTime()+
+      '<strong>'+(!meuTime.jogadores.length?'Seu elenco começa aqui':'Nenhum jogador desta posição')+'</strong>'+
+      '<p>'+(!meuTime.jogadores.length?'Os jogadores do seu elenco aparecerão aqui para você montar o time.':'Escolha outra posição no campo para ver os jogadores disponíveis.')+'</p></div>';
+  } else {
+    $("#timeOpcoes").innerHTML=opcoes.map(j=>{
+      const vaga=POSICOES_TIME.find(p=>meuTime.escalacao[p.id]===j.id);
+      const atual=vaga && vaga.id===posicao.id;
+      const iniciais=j.nome.split(/\s+/).slice(0,2).map(n=>n[0]).join('').toUpperCase();
+      return '<div class="time-carta"><div class="time-carta-topo"><span class="time-iniciais" aria-hidden="true">'+escapar(iniciais)+'</span>'+
+        '<div class="time-carta-nome"><strong>'+escapar(j.nome)+'</strong><span>'+j.posicao+(vaga?' · Em campo':' · Disponível')+'</span></div></div>'+
+        '<button type="button" class="btn btn-pequeno '+(atual?'':'btn-principal')+'" data-time-escalar="'+escapar(j.id)+'"'+(atual?' disabled':'')+'>'+
+        (atual?'Escalado nesta posição':vaga?'Mover para esta vaga':'Escalar')+'</button></div>';
+    }).join('');
+  }
+  $("#btnRemoverTitular").hidden=!jogadorDaVaga(posicao.id);
+}
+function escalarJogadorNoTime(id) {
+  const posicao=POSICOES_TIME.find(p=>p.id===posicaoTimeSelecionada);
+  const jogador=meuTime.jogadores.find(j=>j.id===id);
+  if(!posicao || !jogador || jogador.posicao!==posicao.sigla) return false;
+  // A mesma carta pode ocupar só uma vaga, inclusive entre os dois ZAG/MC.
+  POSICOES_TIME.forEach(p=>{if(meuTime.escalacao[p.id]===id) delete meuTime.escalacao[p.id];});
+  meuTime.escalacao[posicao.id]=id;
+  salvarMeuTime();renderMeuTime();focarPosicaoTime();
+  mostrarAviso(jogador.nome+" escalado como "+posicao.sigla+".");
+  return true;
+}
+$("#painel-time").addEventListener("click",e=>{
+  const vaga=e.target.closest('[data-time-pos]');
+  if(vaga) {posicaoTimeSelecionada=vaga.dataset.timePos;renderMeuTime();focarPosicaoTime();return;}
+  const carta=e.target.closest('[data-time-escalar]');
+  if(carta) escalarJogadorNoTime(carta.dataset.timeEscalar);
+});
+$("#formNomeTime").addEventListener("submit",e=>{
+  e.preventDefault();
+  const nome=$("#nomeMeuTime").value.trim().slice(0,40);
+  if(!nome) {mostrarAviso("Dê um nome ao seu time.");return;}
+  meuTime.nome=nome;salvarMeuTime();renderMeuTime();
+  mostrarAviso("Nome do time salvo.");
+});
+$("#btnRemoverTitular").addEventListener("click",()=>{
+  delete meuTime.escalacao[posicaoTimeSelecionada];
+  salvarMeuTime();renderMeuTime();focarPosicaoTime();
+});
 
 /* --------------------------------------------------------------------------
    14d. LOJA
@@ -5473,11 +5716,15 @@ function fraseDoEstadio() {
    -------------------------------------------------------------------------- */
 function irParaPainel(nome) {
   $$(".painel").forEach((p) => p.classList.toggle("ativo", p.id === "painel-" + nome));
-  $$(".aba-btn").forEach((b) => b.classList.toggle("ativa", b.dataset.painel === nome));
+  $$(".aba-btn").forEach((b) => {
+    const ativa=b.dataset.painel===nome;
+    b.classList.toggle("ativa",ativa);b.setAttribute("aria-selected",String(ativa));
+  });
   if (nome === "progresso") { renderCalor(); renderComparativo(); }
   if (nome === "arquivos") renderAcervo();
   if (nome === "loja") renderLoja();
   if (nome === "estadio") renderEstadio();
+  if (nome === "time") renderMeuTime();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -5828,6 +6075,7 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && alvo.id === "assunto" && !T.rodando) { e.preventDefault(); iniciarTimer(); }
     return;
   }
+  if (alvo && alvo.closest("button,select,a,[role=button]")) return;
   if (e.ctrlKey || e.altKey || e.metaKey) return;
 
   if (e.code === "Space") {
