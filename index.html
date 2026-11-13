@@ -1639,7 +1639,11 @@ function normalizarMeuTime(dados) {
   const ultimoPacote=Array.isArray(fonte.ultimoPacote)?fonte.ultimoPacote.filter(c=>c && ids.has(c.id) &&
     JOGADORES_SPFC.some(j=>j.id===c.id)).slice(0,2).map(c=>({id:c.id,nova:!!c.nova})):[];
   const gastoPacotes=Number.isSafeInteger(fonte.gastoPacotes)&&fonte.gastoPacotes>=0?fonte.gastoPacotes:0;
-  return {nome:nome || "Meu Tricolor",jogadores,escalacao,gastoPacotes,
+  // Um elenco vazio do reset antigo mantém o gasto perdido, sem reembolso retroativo.
+  const gastoPacotesPerdido=Number.isSafeInteger(fonte.gastoPacotesPerdido)&&fonte.gastoPacotesPerdido>=0
+    ? Math.min(fonte.gastoPacotesPerdido,gastoPacotes) : (jogadores.length?0:gastoPacotes);
+  return {nome:nome || "Meu Tricolor",jogadores,escalacao,gastoPacotes,gastoPacotesPerdido,
+    bonusTesteResgatado:fonte.bonusTesteResgatado===true,
     ultimoPacote:ultimoPacote.length===2&&ultimoPacote[0].id!==ultimoPacote[1].id?ultimoPacote:[]};
 }
 const timeSalvo=Armazem.ler(CHAVES.meuTime,null);
@@ -1652,13 +1656,13 @@ function salvarMeuTime() { meuTime=normalizarMeuTime(meuTime); return Armazem.gr
 const MIN_POR_MOEDA = 5;
 
 /**
- * As moedas são DERIVADAS do histórico, não um contador guardado à parte.
- * Assim não existe saldo que descola do que foi realmente estudado, e importar
- * um backup não precisa de conserto: a conta se refaz sozinha.
+ * As moedas de estudo são derivadas do histórico. O presente é um crédito
+ * separado, registrado no time junto dos gastos. O backup preserva a conta.
  */
 function moedasGanhas() { return Math.floor(totalMinutos() / MIN_POR_MOEDA); }
+function bonusDeMoedas() { return meuTime.bonusTesteResgatado ? 5 : 0; }
 function totalMoedasGastas() { return (loja.gastas || 0) + meuTime.gastoPacotes; }
-function saldoMoedas()  { return Math.max(0, moedasGanhas() - totalMoedasGastas()); }
+function saldoMoedas()  { return Math.max(0, moedasGanhas() + bonusDeMoedas() - totalMoedasGastas()); }
 
 function salvarBlocos()   { Armazem.gravar(CHAVES.blocos, blocos); }
 function salvarLoja()     { Armazem.gravar(CHAVES.loja, loja); }
@@ -4692,6 +4696,7 @@ function renderLoja() {
   $("#explicaMoeda").innerHTML =
     "1 moeda a cada <b>" + MIN_POR_MOEDA + " min</b> de estudo. " +
     "Já rendeu <b>" + moedasGanhas() + "</b> no total" +
+    (bonusDeMoedas() ? ", mais <b>5</b> moedas de presente" : "") +
     (totalMoedasGastas() ? ", com <b>" + totalMoedasGastas() + "</b> gastas" : "") + ".";
 
   $("#itensGol").innerHTML = Object.keys(SONS.gol).map((id) => cartaoDeItem("gol", id)).join("");
@@ -4710,7 +4715,7 @@ function zerarSaldo() {
   if (saldoMoedas() === 0) { mostrarAviso("O saldo já está em zero."); return; }
   if (!confirm("Zerar o saldo?\n\nVocê fica com 0 moedas e mantém tudo que já comprou. " +
                "O histórico de estudo não muda.\n\nNão tem volta.")) return;
-  loja.gastas = Math.max(0,moedasGanhas()-meuTime.gastoPacotes);
+  loja.gastas = Math.max(0,moedasGanhas()+bonusDeMoedas()-meuTime.gastoPacotes);
   salvarLoja();
   renderLoja();
   mostrarAviso("Saldo zerado, soberano.");
@@ -4727,11 +4732,13 @@ function resetarLoja() {
   mostrarAviso("Loja resetada. Saldo de volta em " + saldoMoedas() + ".");
 }
 
-/** Apaga a coleção e a escalação sem devolver as moedas dos pacotes. */
+/** Apaga o time e devolve o gasto dos pacotes desta coleção. */
 function resetarTime() {
+  const reembolso=meuTime.gastoPacotes-meuTime.gastoPacotesPerdido;
   if (!confirm("Resetar seu time?\n\nVocê perde todos os jogadores, as cópias extras, a escalação e o nome do time. " +
-               "As moedas gastas em pacotes não são devolvidas. Seu saldo, seus estudos e as outras compras da loja são mantidos.\n\nNão tem volta.")) return;
-  const proximo=normalizarMeuTime({gastoPacotes:meuTime.gastoPacotes});
+               "Você recebe de volta " + reembolso + " moedas gastas nos pacotes deste time. Seus estudos e as outras compras da loja são mantidos.\n\nNão tem volta.")) return;
+  const proximo=normalizarMeuTime({gastoPacotes:meuTime.gastoPacotesPerdido,
+    gastoPacotesPerdido:meuTime.gastoPacotesPerdido,bonusTesteResgatado:meuTime.bonusTesteResgatado});
   if (!Armazem.gravar(CHAVES.meuTime,proximo)) return;
   meuTime=proximo;
   fecharModalPacote();
@@ -4739,7 +4746,23 @@ function resetarTime() {
   posicaoTimeSelecionada="gol";
   renderMeuTime();renderLoja();
   $("#btnResetarTime").focus({preventScroll:true});
-  mostrarAviso("Time resetado. Seu elenco e sua escalação estão vazios.");
+  mostrarAviso("Time resetado. " + reembolso + " moedas devolvidas ao saldo.");
+}
+
+/** Presente solicitado pelo usuário: o link credita cinco moedas uma única vez. */
+function resgatarPresente() {
+  const url=new URL(window.location.href);
+  if(url.searchParams.get("presente")!=="e8c419b27f0940bba9c66d05") return;
+  const jaRecebido=meuTime.bonusTesteResgatado;
+  if(!jaRecebido) {
+    const proximo=normalizarMeuTime({...meuTime,bonusTesteResgatado:true});
+    if(!Armazem.gravar(CHAVES.meuTime,proximo)) return;
+    meuTime=proximo;
+  }
+  url.searchParams.delete("presente");
+  window.history.replaceState(window.history.state,"",url.href);
+  renderMeuTime();renderLoja();irParaPainel("loja");
+  mostrarAviso(jaRecebido?"Você já recebeu as 5 moedas deste presente.":"Presente recebido: +5 moedas no seu saldo!");
 }
 
 /** Bolinha na aba quando dá pra comprar algo que ele ainda não tem. */
@@ -6477,6 +6500,7 @@ function iniciarApp() {
   if (T.rodando) ligarLoop();
 
   mensagemDeRetomada();
+  resgatarPresente();
 
   if (!Armazem.disponivel) {
     const aviso = document.createElement("div");
