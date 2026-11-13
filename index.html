@@ -2034,7 +2034,7 @@ const OBRAS_ESTADIO = {
   ]},
   arredores: { nome: "Arredores", niveis: [
     { desc: "Área externa com árvores afastadas das arquibancadas e um prédio baixo em escala com o estádio.", preco: 25 },
-    { desc: "Amplia a praça com pórtico de entrada, bilheteria, bancos e postes de iluminação, preservando as árvores e o prédio.", preco: 75 }
+    { desc: "Praça tricolor com entrada monumental, jardins floridos, bancos e bilheteria conectados por caminhos até o estádio.", preco: 75 }
   ]},
   publico: { nome: "Público", niveis: [
     { desc: "Primeira leva de torcedores espalhados pelos setores. Ainda tem muito lugar vago.", preco: 30 },
@@ -2048,7 +2048,7 @@ const OBRAS_ESTADIO = {
     { desc: "Faixas largas de vermelho, branco e preto contornam as arquibancadas, alinhadas nos cantos e nos dois anéis.", preco: 45 }
   ]},
   placar: { nome: "Placar de gols de estudo", niveis: [
-    { desc: "Placar no estádio: cada 60 minutos registrados no histórico valem 1 gol. As horas já estudadas também contam.", preco: 50 }
+    { desc: "Cada 60 minutos de estudo vinculados ao ciclo ativo valem 1 gol. O placar começa do zero a cada novo ciclo.", preco: 50 }
   ]},
   cantos: { nome: "Cantos fechados", niveis: [
     { desc: "Setores arredondados com assentos, escadas de acesso e refletores na borda externa, unindo as arquibancadas.", preco: 55 }
@@ -4329,7 +4329,12 @@ function densidadeDoPublico() {
   return escala[Math.min(n, escala.length) - 1];
 }
 function temPlacar()     { return nivelDaObra("placar") >= 1; }
-function golsDoPlacar()  { return Math.max(0, Math.floor(totalMinutos() / 60)); }
+function golsDoPlacar() {
+  const ciclo = cicloAtivo();
+  if (!ciclo) return 0;
+  const minutos = blocos.reduce((s,b) => s + (b.cicloId === ciclo.id ? b.minutos : 0), 0);
+  return Math.max(0, Math.floor(minutos / 60));
+}
 function temCantos()     { return nivelDaObra("cantos") >= 1; }
 function temArredores()  { return nivelDaObra("arredores") >= 1; }
 
@@ -4422,7 +4427,7 @@ function textoNaFachada(cx, cy, z, texto, tamanho, cor, extra) {
     escapar(texto) + '</text></g>';
 }
 
-/** Placar independente das outras obras, com os gols derivados do histórico. */
+/** Placar independente das outras obras, com os gols do ciclo ativo. */
 function placarDeEstudo() {
   const cx = -12, cy = -87;
   let s = sombraNoChao(cx,cy,22,5);
@@ -4434,82 +4439,136 @@ function placarDeEstudo() {
   s += poligono([[cx-17.8,cy+1.05,29.7],[cx+17.8,cy+1.05,29.7],
                  [cx+17.8,cy+1.05,13.3],[cx-17.8,cy+1.05,13.3]],"#101E2A");
   s += caixa(cx-19,cy-1,cx+19,cy+1,30.2,31,"#D44247","#AC252E","#8D1B25");
-  s += textoNaFachada(cx,cy+1.1,27.5,"GOLS DE ESTUDO",1.9,"#C5D2DC");
+  s += textoNaFachada(cx,cy+1.1,27.5,"GOLS DO CICLO",1.9,"#C5D2DC");
   const numero = golsDoPlacar().toLocaleString("pt-BR").padStart(2,"0");
   const tamanho = Math.min(9.5,30/(numero.length*0.65));
   s += textoNaFachada(cx,cy+1.12,21.3,numero,tamanho,"#F3FAFF",
     ' font-variant-numeric="tabular-nums" letter-spacing="0.5"');
-  s += textoNaFachada(cx,cy+1.1,15.3,"1 HORA = 1 GOL",1.6,"#99B4C7");
+  s += textoNaFachada(cx,cy+1.1,15.3,cicloAtivo() ? "1 HORA = 1 GOL" : "SEM CICLO ATIVO",1.6,"#99B4C7");
   return s;
 }
 
+/** Bancos com madeira ripada, encosto baixo e pés metálicos. */
 function bancoDaPraca(cx,cy) {
   const C = CORES_EST;
   let s = sombraNoChao(cx,cy,5.8,2);
   [-3.7,3.7].forEach(dx => {
     s += caixa(cx+dx-0.3,cy-0.9,cx+dx+0.3,cy+1,0,2.1,C.estrutura,C.torreDir,C.torreEsq);
   });
-  s += caixa(cx-5,cy-1.1,cx+5,cy+1.1,2,2.4,"#B68B61","#8B6444","#765239");
-  s += caixa(cx-5,cy-1.25,cx+5,cy-0.9,2.4,4.5,"#B68B61","#8B6444","#765239");
+  [-0.7,0,0.7].forEach(d => {
+    s += caixa(cx-5,cy+d-0.25,cx+5,cy+d+0.25,2,2.35,"#BC9166","#946C49","#77553B");
+  });
+  [3,4].forEach(z => {
+    s += caixa(cx-5,cy-1.25,cx+5,cy-0.85,z,z+0.65,"#BC9166","#946C49","#77553B");
+  });
   return s;
 }
 
 function posteDaPraca(cx,cy) {
   const C = CORES_EST;
   let s = caixa(cx-0.6,cy-0.6,cx+0.6,cy+0.6,0,0.6,C.torre,C.torreDir,C.torreEsq);
-  s += caixa(cx-0.22,cy-0.22,cx+0.22,cy+0.22,0.6,6.8,C.torre,C.torreDir,C.torreEsq);
-  s += caixa(cx-1.1,cy-0.8,cx+1.1,cy+0.8,6.8,7.4,"#E7EDF0","#C8D4DB","#A5B6C1");
-  s += caixa(cx-1.3,cy-1,cx+1.3,cy+1,7.4,7.7,C.estrutura,C.torreDir,C.torreEsq);
+  s += caixa(cx-0.22,cy-0.22,cx+0.22,cy+0.22,0.6,7.8,C.torre,C.torreDir,C.torreEsq);
+  s += traco([[cx,cy,7.8],[cx+1.8,cy,8.3]],C.estrutura,0.3);
+  s += caixa(cx+0.8,cy-0.7,cx+2.8,cy+0.7,8,8.3,"#DCE8EC","#B9C9D0","#96ADB8");
   return s;
 }
 
+/** Pórtico com vão aberto, pilares duplos e marquise leve com faixa tricolor. */
 function porticoDeEntrada(cx,cy) {
   const C = CORES_EST;
-  let s = "";
-  [-10,10].forEach(dx => {
-    s += caixa(cx+dx-0.8,cy-0.8,cx+dx+0.8,cy+0.8,0,8.5,"#DAE0E4","#B1BDC5","#929FA9");
+  let s = sombraNoChao(cx,cy,18,5);
+  [-15,15].forEach(dx => {
+    [-2.2,2.2].forEach(dy => {
+      s += caixa(cx+dx-0.65,cy+dy-0.65,cx+dx+0.65,cy+dy+0.65,0,12.2,"#EEF0EB","#C6CEC9","#A4B3AC");
+    });
+    s += caixa(cx+dx-1.1,cy-3,cx+dx+1.1,cy+3,0,0.8,"#A7B5AD","#879B90","#73897D");
   });
-  s += caixa(cx-11.2,cy-1,cx+11.2,cy+1,6.5,9.4,"#C83B43","#A42630","#87202A");
-  s += textoNaFachada(cx,cy+1.05,7.9,"ENTRADA",1.7,"#FFFFFF");
-  [-7,-3.5,0,3.5,7].forEach(dx => {
-    s += traco([[cx+dx,cy,0.2],[cx+dx,cy,3.8]],C.estrutura,0.25);
-  });
-  s += traco([[cx-8,cy,3.8],[cx+8,cy,3.8]],C.estrutura,0.3);
+  s += caixa(cx-17.5,cy-4.2,cx+17.5,cy+4.2,11.8,12.5,"#F3F2EC","#C9D2CC","#AFBEB4");
+  s += caixa(cx-17.8,cy+3.5,cx+17.8,cy+4.3,11,11.8,"#D03D45","#B52A34","#8E1E28");
+  s += caixa(cx-13,cy-1.8,cx+13,cy-0.9,9.8,11.7,"#26362F","#26362F","#26362F");
+  s += textoNaFachada(cx,cy-0.85,10.7,"ENTRADA TRICOLOR",1.55,"#F6F7F2");
+  s += textoNaFachada(cx,cy+4.35,11.4,"COPEIRO",1.55,"#FFFFFF",' letter-spacing="0.5"');
   return s;
 }
 
+/** Bilheteria envidraçada, com marquise branca e detalhes vermelhos. */
 function bilheteria(cx,cy) {
-  let s = sombraNoChao(cx+1,cy+1,8.5,6);
-  s += caixa(cx-6,cy-4.5,cx+6,cy+4.5,0.2,6.5,"#E7E8E1","#C8CEC9","#A9B4AF");
-  // Guichê e balcão na fachada da praça.
-  s += poligono([[cx-3.6,cy+4.52,4.8],[cx+3.6,cy+4.52,4.8],
-                 [cx+3.6,cy+4.52,2.7],[cx-3.6,cy+4.52,2.7]],"#334B5C");
-  s += caixa(cx-4,cy+4.3,cx+4,cy+5.4,2.5,2.8,"#B9C4CC","#8B9CA9","#748793");
-  s += caixa(cx-7.2,cy-5.4,cx+7.2,cy+5.5,6.5,7.1,"#C83B43","#A42630","#87202A");
-  s += textoNaFachada(cx,cy+4.55,5.7,"BILHETERIA",1.05,"#465A66");
+  let s = sombraNoChao(cx+1,cy+1,9,7);
+  s += caixa(cx-7,cy-5.5,cx+7,cy+5.5,0.2,8.1,"#E9ECE5","#C7D3C9","#A8B9AC");
+  s += poligono([[cx-5.9,cy+5.52,6.4],[cx+5.9,cy+5.52,6.4],
+                 [cx+5.9,cy+5.52,2.6],[cx-5.9,cy+5.52,2.6]],"#4F7181");
+  [-2,2].forEach(dx => {
+    s += traco([[cx+dx,cy+5.56,2.6],[cx+dx,cy+5.56,6.4]],"#A5BAC2",0.25);
+    s += traco([[cx+dx-1.5,cy+5.57,5.3],[cx+dx-0.4,cy+5.57,6.1]],"#D2E4E9",0.28,0.6);
+  });
+  s += caixa(cx-6,cy+5.4,cx+6,cy+6.5,2.4,2.8,"#D9DED6","#A8B8AD","#8A9F91");
+  s += caixa(cx-7,cy+4.9,cx+7,cy+5.7,6.6,8.1,"#C53540","#AC2430","#8F1B25");
+  s += textoNaFachada(cx,cy+5.76,7.35,"BILHETERIA",1.25,"#FFFFFF");
+  s += caixa(cx-8.5,cy-7,cx+8.5,cy+7.5,8.1,8.7,"#F4F3EC","#CBD6CC","#A8BDAE");
+  return s;
+}
+
+/** Canteiros baixos, com folhagem e flores vermelhas, sem encobrir as árvores. */
+function canteiroDaPraca(cx,cy,lx,ly) {
+  let s = caixa(cx-lx,cy-ly,cx+lx,cy+ly,0.15,1.25,"#E1E4D9","#BDC8B9","#A0B39D");
+  s += caixa(cx-lx+0.55,cy-ly+0.55,cx+lx-0.55,cy+ly-0.55,1.25,1.55,"#4D845A","#3E704B","#345F40");
+  for(let x=cx-lx+1.5; x<=cx+lx-1; x+=2.6) {
+    [-1,1].forEach(lado => {
+      const q=iso(x,cy+lado*(ly-1.2),1.7);
+      s += '<ellipse cx="'+q.x.toFixed(2)+'" cy="'+q.y.toFixed(2)+'" rx="1.15" ry="0.65" fill="#356F49"/>';
+      s += '<circle cx="'+q.x.toFixed(2)+'" cy="'+q.y.toFixed(2)+'" r="0.38" fill="#CF4A52"/>';
+    });
+  }
+  return s;
+}
+
+/** A avenida da praça chega a uma porta na fachada externa do estádio. */
+function acessoDaArquibancada() {
+  const cx=36,cy=EST.campoY+EST.pista+EST.arqFundo+0.06;
+  let s=poligono([[cx-3.6,cy,4.7],[cx+3.6,cy,4.7],[cx+3.6,cy,0.2],[cx-3.6,cy,0.2]],"#364B46");
+  s+=traco([[cx,cy+0.01,0.2],[cx,cy+0.01,4.7]],"#81998A",0.22);
+  s+=poligono([[cx-4.2,cy+0.02,5.2],[cx+4.2,cy+0.02,5.2],[cx+4.2,cy+0.02,4.7],[cx-4.2,cy+0.02,4.7]],"#BB303B");
   return s;
 }
 
 const ARREDORES_NIVEL_2 = [
-  { x:-22, y:99, svg:() => bancoDaPraca(-22,99) },
-  { x: 12, y:99, svg:() => bancoDaPraca(12,99) },
-  { x: 40, y:94, svg:() => porticoDeEntrada(40,94) },
-  { x: 99, y:40, svg:() => bilheteria(99,40) },
-  { x:-49, y:87, svg:() => posteDaPraca(-49,87) },
-  { x: 62, y:99, svg:() => posteDaPraca(62,99) }
+  { x:-22,y:99,svg:()=>bancoDaPraca(-22,99) },
+  { x:12,y:99,svg:()=>bancoDaPraca(12,99) },
+  { x:36,y:96,svg:()=>porticoDeEntrada(36,96) },
+  { x:99,y:40,svg:()=>bilheteria(99,40) },
+  { x:-51,y:84,svg:()=>posteDaPraca(-51,84) },
+  { x:65,y:99,svg:()=>posteDaPraca(65,99) },
+  { x:111,y:57,svg:()=>posteDaPraca(111,57) },
+  { x:36,y:63,svg:acessoDaArquibancada }
 ];
 
-/** Calçadas ampliadas no nível 2, com espaço livre até as arquibancadas. */
+/** Praça em pedra clara, jardins e caminhos conectados à entrada do estádio. */
 function pisoDosArredores() {
-  const ampliado = nivelDaObra("arredores") >= 2;
-  let s = caixa(-51,85,ampliado ? 66 : 5,103,0,0.14,"#DADDD5","#BDC4BB","#ACB6AB") +
-    caixa(94,-23,118,0,0,0.14,"#DADDD5","#BDC4BB","#ACB6AB") +
-    traco([[-49,89,0.16],[ampliado ? 64 : 3,89,0.16]],"#BCC5BA",0.4) +
-    traco([[96,-21,0.16],[96,-2,0.16]],"#BCC5BA",0.4);
-  if (ampliado) {
-    s += caixa(89,29,110,52,0,0.14,"#DADDD5","#BDC4BB","#ACB6AB");
-    s += caixa(102,0,107,29,0,0.14,"#DADDD5","#BDC4BB","#ACB6AB");
+  if(nivelDaObra("arredores")<2) {
+    return caixa(-51,85,5,103,0,0.14,"#DADDD5","#BDC4BB","#ACB6AB") +
+      caixa(94,-23,118,0,0,0.14,"#DADDD5","#BDC4BB","#ACB6AB") +
+      traco([[-49,89,0.16],[3,89,0.16]],"#BCC5BA",0.4) +
+      traco([[96,-21,0.16],[96,-2,0.16]],"#BCC5BA",0.4);
   }
+  const z=0.17, pedra="#DDDCD0";
+  let s=poligono([[-56,83,z],[-50,78,z],[67,78,z],[76,85,z],[76,100,z],[70,105,z],[-50,105,z],[-56,100,z]],pedra);
+  s+=poligono([[64,91,z],[74,104,z],[115,80,z],[104,63,z]],pedra);
+  s+=caixa(90,-24,116,78,0,0.14,pedra,"#BEC6B6","#A8B69F");
+  // Juntas discretas dão escala ao pavimento.
+  for(let x=-44;x<70;x+=10) s+=traco([[x,80,z+0.01],[x,103,z+0.01]],"#BAC4B1",0.18,0.6);
+  [86,96].forEach(y=>{s+=traco([[-53,y,z+0.01],[73,y,z+0.01]],"#BAC4B1",0.18,0.6);});
+  // Caminho central com bordas vermelhas, passando sob o pórtico até a fachada.
+  s+=caixa(29,63,43,107,0,0.19,"#F1EDE1","#C8CEBD","#AEBFA4");
+  [29.6,42.4].forEach(x=>{s+=traco([[x,63,z+0.04],[x,106,z+0.04]],"#BA3942",0.5);});
+  // Emblema tricolor em pedra, no caminho de chegada.
+  s+=poligono([[32,70,0.23],[40,70,0.23],[40,75,0.23],[36,79,0.23],[32,75,0.23]],"#FDFBF5");
+  s+=poligono([[32.6,70.6,0.24],[39.4,70.6,0.24],[39.4,72.4,0.24],[32.6,72.4,0.24]],"#2E3735");
+  s+=poligono([[32.6,73,0.24],[35.6,73,0.24],[35.6,77.6,0.24],[32.6,74.8,0.24]],"#BC3540");
+  s+=poligono([[36.4,73,0.24],[39.4,73,0.24],[39.4,74.8,0.24],[36.4,77.6,0.24]],"#2E3735");
+  s+=canteiroDaPraca(-38,94,7,5.6);
+  s+=canteiroDaPraca(-6,94,6.2,5.1);
+  s+=canteiroDaPraca(65,86,7.3,3.8);
+  s+=canteiroDaPraca(106,64,7,3.2);
   return s;
 }
 
@@ -5215,7 +5274,7 @@ function desenharEstadio() {
   return '<svg viewBox="-205 -122 410 248" preserveAspectRatio="xMidYMid meet" ' +
          'role="img" aria-label="Estádio isométrico do Vidori: campo, quatro arquibancadas e ' +
          'quatro torres de refletores' + (temRefletores() ? ", acesos" : "") +
-         (temPlacar() ? ". Placar: " + golsDoPlacar() + (golsDoPlacar() === 1 ? " gol" : " gols") : "") + '">' +
+         (temPlacar() ? ". Placar do ciclo: " + golsDoPlacar() + (golsDoPlacar() === 1 ? " gol" : " gols") : "") + '">' +
          (defs ? "<defs>" + defs + "</defs>" : "") + s + "</svg>";
 }
 
@@ -5227,13 +5286,14 @@ let estadioAssinatura = null;
 function renderEstadio() {
   const caixaEl = $("#caixaEstadio");
   if (!caixaEl) return;
+  const ciclo = temPlacar() ? cicloAtivo() : null;
   const assinatura = (temGrama() ? "g" : "-") + (temCobertura() ? "c" : "-") +
                      (temMosaico() ? "m" : "-") + (temAnel() ? "a" : "-") +
                      (temRefletores() ? "r" : "-") + (temRedes() ? "n" : "-") +
                      (temBandeiras() ? "b" : "-") + (temPublico() ? "p" : "-") +
                      (temListras() ? "l" : "-") + (temCantos() ? "k" : "-") +
                      nivelDaObra("publico") + ":" + nivelDaObra("arredores") +
-                     ":" + (temPlacar() ? golsDoPlacar() : "-");
+                     ":" + (temPlacar() ? JSON.stringify([ciclo && ciclo.id,ciclo && ciclo.nome,golsDoPlacar()]) : "-");
   if (estadioAssinatura === assinatura) return;
   caixaEl.innerHTML = desenharEstadio();
   estadioAssinatura = assinatura;
@@ -5268,10 +5328,11 @@ function renderEstadio() {
   placar.hidden = !temPlacar();
   if (temPlacar()) {
     const gols = golsDoPlacar();
-    placar.querySelector("b").textContent = "Placar: " + gols.toLocaleString("pt-BR") + (gols === 1 ? " gol" : " gols");
+    placar.querySelector("b").textContent = "Placar do ciclo: " + gols.toLocaleString("pt-BR") + (gols === 1 ? " gol" : " gols");
   }
   $("#dicaEstadio").textContent = temPlacar()
-    ? "Cada 60 minutos registrados valem 1 gol no placar. Todo o histórico de estudos conta."
+    ? (ciclo ? "Ciclo: " + ciclo.nome + ". Cada 60 minutos vinculados a ele valem 1 gol. Um novo ciclo começa com o placar zerado."
+             : "Abra um ciclo em Ciclo & Ajustes para marcar gols. Só os estudos vinculados ao ciclo ativo contam no placar.")
     : "As obras da loja transformam o estádio a cada compra.";
 }
 
@@ -5291,7 +5352,7 @@ function fraseDoEstadio() {
   if (temAnel()) feitas.push("segundo anel de arquibancada");
   if (temCantos()) feitas.push("cantos fechados");
   if (temArredores()) feitas.push(nivelDaObra("arredores") >= 2
-    ? "praça com entrada, bilheteria e bancos" : "árvores e prédio no entorno");
+    ? "praça tricolor com jardins, entrada e bilheteria" : "árvores e prédio no entorno");
   if (temPlacar()) {
     const gols = golsDoPlacar();
     feitas.push("placar com " + gols.toLocaleString("pt-BR") + (gols === 1 ? " gol" : " gols"));
