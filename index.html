@@ -2034,7 +2034,8 @@ const OBRAS_ESTADIO = {
   ]},
   arredores: { nome: "Arredores", niveis: [
     { desc: "Área externa com árvores afastadas das arquibancadas e um prédio baixo em escala com o estádio.", preco: 25 },
-    { desc: "Praça tricolor com entrada monumental, jardins floridos, bancos e bilheteria conectados por caminhos até o estádio.", preco: 75 }
+    { desc: "Praça tricolor com entrada monumental, jardins floridos, bancos e bilheteria conectados por caminhos até o estádio.", preco: 75 },
+    { desc: "Praça da torcida com monumento de taça, pergolado de madeira, bancos e novos jardins, ligada aos caminhos existentes.", preco: 100 }
   ]},
   publico: { nome: "Público", niveis: [
     { desc: "Primeira leva de torcedores espalhados pelos setores. Ainda tem muito lugar vago.", preco: 30 },
@@ -4544,6 +4545,82 @@ const ARREDORES_NIVEL_2 = [
   { x:36,y:63,svg:acessoDaArquibancada }
 ];
 
+/** Pérgola aberta com ripas de madeira e bancos à sombra. */
+function pergoladoDaTorcida(cx,cy) {
+  let s="";
+  [-10,10].forEach(dx=>[-4.5,4.5].forEach(dy=>{
+    s+=caixa(cx+dx-0.45,cy+dy-0.45,cx+dx+0.45,cy+dy+0.45,0.2,7.8,"#B38C63","#8C6746","#715238");
+  }));
+  s+=bancoDaPraca(cx,cy+1.8);
+  [-4.5,4.5].forEach(dy=>{
+    s+=caixa(cx-11.2,cy+dy-0.4,cx+11.2,cy+dy+0.4,7.3,7.9,"#B38C63","#8C6746","#715238");
+  });
+  for(let dx=-11.2;dx<=11.3;dx+=2.25) {
+    s+=caixa(cx+dx-0.32,cy-6,cx+dx+0.32,cy+6,7.9,8.35,"#C5A178","#9C7651","#80603F");
+  }
+  return s;
+}
+
+/** Monumento de taça sobre pedestal, como marco da praça da torcida. */
+function monumentoDaTorcida(cx,cy) {
+  let s=sombraNoChao(cx,cy,5.8,4.8);
+  s+=caixa(cx-4,cy-3.6,cx+4,cy+3.6,0.2,0.8,"#E9E9DE","#C4CFC1","#A8BBA6");
+  s+=caixa(cx-2.7,cy-2.3,cx+2.7,cy+2.3,0.8,3.3,"#4D5C54","#374A40","#2D3D33");
+  s+=textoNaFachada(cx,cy+2.33,2.1,"TORCIDA",0.9,"#EEE9D9");
+  s+=caixa(cx-1.5,cy-1.2,cx+1.5,cy+1.2,3.3,3.8,"#DFB665","#BC8D41","#9A7132");
+  s+=caixa(cx-0.55,cy-0.55,cx+0.55,cy+0.55,3.8,5.7,"#E8C77F","#C69B4F","#AA7E36");
+  [-1,1].forEach(d=>{
+    s+=traco([[cx+d*2.4,cy,8.9],[cx+d*4.1,cy,8.7],[cx+d*4.2,cy,7.3],
+               [cx+d*3,cy,6.3],[cx+d*1.1,cy,6.1]],"#CE9C4D",0.7);
+  });
+  const topo=[],interior=[];
+  for(let i=0;i<24;i++) {
+    const a=i*Math.PI/12,b=(i+1)*Math.PI/12;
+    const p=[cx+2.7*Math.cos(a),cy+2.7*Math.sin(a),9.8];
+    const q=[cx+2.7*Math.cos(b),cy+2.7*Math.sin(b),9.8];
+    topo.push(p);
+    interior.push([cx+2.15*Math.cos(a),cy+2.15*Math.sin(a),9.81]);
+    if(Math.cos((a+b)/2)+Math.sin((a+b)/2)>0) {
+      s+=poligono([p,q,[cx+0.9*Math.cos(b),cy+0.9*Math.sin(b),5.7],
+                       [cx+0.9*Math.cos(a),cy+0.9*Math.sin(a),5.7]],
+                     Math.cos((a+b)/2)>Math.sin((a+b)/2)?"#E2B961":"#B8893E");
+    }
+  }
+  s+=poligono(topo,"#EACD89")+poligono(interior,"#8E6A37");
+  return s;
+}
+
+function pisoDaPracaDaTorcida() {
+  const z=0.18;
+  let s=caixa(100,-36,108,20,0,0.15,"#DDDCD0","#BEC6B6","#A8B69F");
+  s+=poligono([[94,-74,z],[100,-80,z],[131,-80,z],[137,-74,z],
+               [137,-39,z],[130,-32,z],[100,-32,z],[94,-38,z]],"#DDDCD0");
+  // Caminho central e medalhão em pedra tricolor ao redor do monumento.
+  s+=caixa(110,-57,118,-32,0,0.2,"#EFEBDD","#C8CEBD","#AEBFA4");
+  const disco=(r,cor,h)=>{
+    const pts=[];
+    for(let i=0;i<32;i++) {
+      const a=i*Math.PI/16;pts.push([114+r*Math.cos(a),-65+r*Math.sin(a),h]);
+    }
+    return poligono(pts,cor);
+  };
+  s+=disco(7.8,"#F4F0E4",0.21)+disco(7.1,"#B83741",0.22)+disco(6.5,"#D9DCCE",0.23);
+  s+=canteiroDaPraca(99,-71,5.3,5.1);
+  s+=canteiroDaPraca(130,-71,5.3,5.1);
+  s+=canteiroDaPraca(132,-43,3.2,6.5);
+  return s;
+}
+
+const ARREDORES_NIVEL_3 = [
+  {x:99,y:-71,svg:()=>arvore(99,-71,0.72)},
+  {x:130,y:-71,svg:()=>arvore(130,-71,0.78)},
+  {x:114,y:-65,svg:()=>monumentoDaTorcida(114,-65)},
+  {x:115,y:-42,svg:()=>pergoladoDaTorcida(115,-42)},
+  {x:103,y:-55,svg:()=>bancoDaPraca(103,-55)},
+  {x:129,y:-56,svg:()=>bancoDaPraca(129,-56)},
+  {x:96,y:-39,svg:()=>posteDaPraca(96,-39)}
+];
+
 /** Praça em pedra clara, jardins e caminhos conectados à entrada do estádio. */
 function pisoDosArredores() {
   const lote=LOTE_PREDIO;
@@ -4574,6 +4651,7 @@ function pisoDosArredores() {
   s+=canteiroDaPraca(-6,94,6.2,5.1);
   s+=canteiroDaPraca(65,86,7.3,3.8);
   s+=canteiroDaPraca(106,64,7,3.2);
+  if(nivelDaObra("arredores")>=3) s+=pisoDaPracaDaTorcida();
   return s;
 }
 
@@ -5266,6 +5344,9 @@ function desenharEstadio() {
     if (nivelDaObra("arredores") >= 2) {
       ARREDORES_NIVEL_2.forEach((a) => { pecas.push({ d:a.x+a.y, svg:a.svg }); });
     }
+    if (nivelDaObra("arredores") >= 3) {
+      ARREDORES_NIVEL_3.forEach((a) => { pecas.push({ d:a.x+a.y, svg:a.svg }); });
+    }
   }
   if (temPlacar()) pecas.push({ d:-99, svg:placarDeEstudo });
 
@@ -5281,6 +5362,7 @@ function desenharEstadio() {
   return '<svg viewBox="' + enquadramento + '" preserveAspectRatio="xMidYMid meet" ' +
          'role="img" aria-label="Estádio isométrico do Vidori: campo, quatro arquibancadas e ' +
          'quatro torres de refletores' + (temRefletores() ? ", acesos" : "") +
+         (nivelDaObra("arredores")>=3 ? ". Praça da torcida com monumento de taça e pergolado" : "") +
          (temPlacar() ? ". Placar do ciclo: " + golsDoPlacar() + (golsDoPlacar() === 1 ? " gol" : " gols") : "") + '">' +
          (defs ? "<defs>" + defs + "</defs>" : "") + s + "</svg>";
 }
@@ -5358,8 +5440,9 @@ function fraseDoEstadio() {
   if (temMosaico()) feitas.push("mosaico tricolor nos assentos");
   if (temAnel()) feitas.push("segundo anel de arquibancada");
   if (temCantos()) feitas.push("cantos fechados");
-  if (temArredores()) feitas.push(nivelDaObra("arredores") >= 2
-    ? "praça tricolor com jardins, entrada e bilheteria" : "árvores e prédio no entorno");
+  if (temArredores()) feitas.push(nivelDaObra("arredores") >= 3
+    ? "praça da torcida com monumento, pergolado e jardins"
+    : nivelDaObra("arredores") >= 2 ? "praça tricolor com jardins, entrada e bilheteria" : "árvores e prédio no entorno");
   if (temPlacar()) {
     const gols = golsDoPlacar();
     feitas.push("placar com " + gols.toLocaleString("pt-BR") + (gols === 1 ? " gol" : " gols"));
