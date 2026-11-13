@@ -1081,6 +1081,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <div class="controles" style="margin-top:16px">
         <button class="btn btn-pequeno" id="btnZerarSaldo">Zerar saldo</button>
         <button class="btn btn-pequeno" id="btnResetarLoja">Resetar a loja</button>
+        <button class="btn btn-pequeno" type="button" id="btnResetarTime">Resetar time</button>
       </div>
     </div>
   </div>
@@ -4726,6 +4727,21 @@ function resetarLoja() {
   mostrarAviso("Loja resetada. Saldo de volta em " + saldoMoedas() + ".");
 }
 
+/** Apaga a coleção e a escalação sem devolver as moedas dos pacotes. */
+function resetarTime() {
+  if (!confirm("Resetar seu time?\n\nVocê perde todos os jogadores, as cópias extras, a escalação e o nome do time. " +
+               "As moedas gastas em pacotes não são devolvidas. Seu saldo, seus estudos e as outras compras da loja são mantidos.\n\nNão tem volta.")) return;
+  const proximo=normalizarMeuTime({gastoPacotes:meuTime.gastoPacotes});
+  if (!Armazem.gravar(CHAVES.meuTime,proximo)) return;
+  meuTime=proximo;
+  fecharModalPacote();
+  $("#cartasDoPacote").replaceChildren();
+  posicaoTimeSelecionada="gol";
+  renderMeuTime();renderLoja();
+  $("#btnResetarTime").focus({preventScroll:true});
+  mostrarAviso("Time resetado. Seu elenco e sua escalação estão vazios.");
+}
+
 /** Bolinha na aba quando dá pra comprar algo que ele ainda não tem. */
 function renderAvisoLoja() {
   const aba = $$(".aba-btn").find((b) => b.dataset.painel === "loja");
@@ -6119,6 +6135,7 @@ $("#btnTestarApito").addEventListener("click", () => { acordarAudio(); tocarApit
 /* ------------------------------------------------------------ aba da loja */
 $("#btnZerarSaldo").addEventListener("click", zerarSaldo);
 $("#btnResetarLoja").addEventListener("click", resetarLoja);
+$("#btnResetarTime").addEventListener("click", resetarTime);
 
 document.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-loja]");
