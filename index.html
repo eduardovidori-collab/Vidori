@@ -519,6 +519,61 @@ canvas{display:block; width:100%; height:auto}
  .time-adicionar{right:6px;top:14px;width:13px;height:13px;font-size:11px}.time-instrucao{font-size:11px;padding:10px;min-height:36px}
 }
 
+/* ---------------------------------------------------------- pacotes e cartas */
+.raridade-comum{--carta:#64776B;--carta-fundo:#EDF2ED}
+.raridade-raro{--carta:#286BA0;--carta-fundo:#EAF3FC}
+.raridade-epico{--carta:#7D4BAC;--carta-fundo:#F2EBF9}
+.raridade-idolo{--carta:#B57922;--carta-fundo:#FBF0D9}
+.raridade-lenda{--carta:#B52D42;--carta-fundo:#FBE9ED}
+.carta-raridade{font-size:10px;font-weight:800;color:var(--carta);letter-spacing:.03em}
+.carta-ovr{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:40px;min-height:43px;padding:4px 6px;border-radius:7px;background:var(--carta-fundo);color:var(--carta);font-size:22px;font-weight:800;line-height:1}
+.carta-ovr small{font-size:8px;letter-spacing:.09em;margin-top:3px}
+.time-carta{border-left:3px solid var(--carta,#64776B)}
+.time-carta-metadados{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;font-size:10px;color:var(--fraco)}
+.time-ovr-campo{position:absolute;left:7px;top:24px;background:#1A2B21;color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:4px;padding:2px 3px;font-size:8px;font-weight:800;line-height:1}
+.pacote-loja{margin-bottom:18px;scroll-margin-top:185px}
+.pacote-loja [hidden]{display:none}
+.pacote-principal{display:grid;grid-template-columns:110px minmax(0,1fr);gap:20px;align-items:center}
+.pacote-arte{height:143px;border-radius:9px;border:1px solid #D4DADD;background:linear-gradient(160deg,#fff 0 45%,#C52F3B 45% 55%,#fff 55% 59%,#222A2D 59% 69%,#F6F7F3 69%);box-shadow:0 6px 13px rgba(15,25,30,.12);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:12px 6px}
+.pacote-arte span{font-size:10px;font-weight:800;letter-spacing:.13em}
+.pacote-arte .camisa-time{width:48px;height:46px;margin-bottom:12px}
+.pacote-arte small{font-size:9px;font-weight:700}
+.pacote-titulo{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.pacote-titulo h3{font-size:18px;margin:0}
+.pacote-descricao{font-size:13px;color:var(--fraco);line-height:1.6;margin-bottom:12px}
+.pacote-acoes{display:flex;gap:8px;flex-wrap:wrap}
+.pacote-detalhes{border-top:1px solid var(--borda);padding-top:12px;margin-top:14px}
+.pacote-detalhes summary{font-size:12px;font-weight:700;cursor:pointer;padding:2px 0}
+.pacote-detalhes p{font-size:12px;color:var(--fraco);line-height:1.6;margin:10px 0}
+.pacote-tabela{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.pacote-tabela th,.pacote-tabela td{text-align:left;padding:8px 6px;border-bottom:1px solid #EBEDF0;overflow-wrap:anywhere}
+.pacote-tabela th{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--fraco)}
+.pacote-tabela th:last-child,.pacote-tabela td:last-child{text-align:right;white-space:nowrap}
+.catalogo-cartas{max-height:310px;overflow:auto;margin-top:10px}
+.catalogo-cartas .pacote-tabela{table-layout:fixed;margin:0}
+.catalogo-cartas th:nth-child(2){width:44px}.catalogo-cartas th:last-child{width:48px}
+.pacote-revelacao{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}
+.carta-revelada{position:relative;border:2px solid var(--carta);border-radius:14px;padding:14px 12px;text-align:center;background:linear-gradient(145deg,#fff,var(--carta-fundo));animation:cartaEntrando .25s ease-out both}
+.carta-revelada:nth-child(2){animation-delay:.09s}
+.carta-revelada-topo{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left}
+.carta-revelada .carta-ovr{background:none;padding:0;align-items:flex-start;font-size:31px}
+.carta-revelada .carta-pos{font-size:11px;font-weight:800;color:var(--carta)}
+.carta-revelada .camisa-time{width:70px;height:66px;margin:18px auto 10px}
+.carta-revelada h3{font-size:16px;margin:9px 0 4px;overflow-wrap:anywhere}
+.carta-revelada .carta-raridade{font-size:11px}
+.carta-revelada .carta-repetida{font-size:10px;color:var(--fraco);margin-top:12px}
+#modalPacote .modal-caixa{max-width:580px}
+#modalPacote .modal-botoes{margin-top:18px}
+@keyframes cartaEntrando{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.carta-revelada{animation:none}}
+@media(max-width:580px){
+ .pacote-principal{grid-template-columns:82px minmax(0,1fr);gap:13px}.pacote-arte{height:125px}
+ .pacote-titulo h3{font-size:16px}.pacote-descricao{font-size:12px}.pacote-acoes .btn{width:100%}
+ .pacote-revelacao{gap:9px}.carta-revelada{padding:12px 8px}.carta-revelada h3{font-size:14px}
+ .carta-revelada .camisa-time{width:57px;height:54px}.carta-revelada .carta-ovr{font-size:27px}
+ .time-ovr-campo{left:3px;top:16px;font-size:7px;padding:2px}
+}
+
 /* -------------------------------------------------------------------- loja */
 .caixa-saldo{display:flex; align-items:center; gap:22px; flex-wrap:wrap}
 .saldo{
@@ -1019,6 +1074,27 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     </div>
   </div>
 
+  <div class="cartao pacote-loja" id="pacotesLoja"><div class="cartao-corpo">
+    <h2>Pacotes de jogadores</h2>
+    <div class="pacote-principal">
+      <div class="pacote-arte" aria-hidden="true"><span>BASE</span><span class="escudo"></span><small>2 JOGADORES</small></div>
+      <div>
+        <div class="pacote-titulo"><h3>Pacote Base</h3><span class="preco" id="precoPacoteBase">20 moedas</span></div>
+        <p class="pacote-descricao">Dois jogadores diferentes que passaram pelo SPFC. Quanto maior o OVR, mais difícil de tirar.</p>
+        <div class="pacote-acoes"><button class="btn btn-principal" type="button" id="btnComprarPacoteBase">Comprar e abrir · 20 moedas</button><button class="btn btn-pequeno" type="button" id="btnUltimoPacote" hidden>Ver último pacote</button></div>
+      </div>
+    </div>
+    <details class="pacote-detalhes"><summary>Raridades e probabilidades</summary>
+      <p>Chances da primeira carta. Cada pacote contém dois jogadores diferentes. Uma carta OVR 90 é duas vezes mais difícil de tirar que uma OVR 80.</p>
+      <table class="pacote-tabela"><thead><tr><th scope="col">Raridade</th><th scope="col">OVR</th><th scope="col">Chance</th></tr></thead><tbody id="chancesPacote"></tbody></table>
+      <p>Cartas repetidas em outros pacotes ficam guardadas como cópias extras no elenco.</p>
+    </details>
+    <details class="pacote-detalhes"><summary>Jogadores e OVRs do pacote</summary>
+      <p>Notas próprias do Copeiro, inspiradas na passagem de cada jogador pelo clube, para equilibrar a coleção.</p>
+      <div class="catalogo-cartas"><table class="pacote-tabela"><thead><tr><th scope="col">Jogador</th><th scope="col">Pos.</th><th scope="col">OVR</th></tr></thead><tbody id="catalogoPacote"></tbody></table></div>
+    </details>
+  </div></div>
+
   <div class="cartao" style="margin-bottom:18px"><div class="cartao-corpo">
     <h2>Comemoração de fim de bloco</h2>
     <div class="grade-itens" id="itensGol"></div>
@@ -1121,6 +1197,16 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <div class="modal-botoes" id="botoesFim"></div>
     </div>
   </div>
+</div>
+
+<!-- ================================================= MODAL: PACOTE DE JOGADORES -->
+<div class="modal" id="modalPacote" role="dialog" aria-modal="true" aria-labelledby="tituloPacote" aria-describedby="resumoPacote">
+  <div class="modal-caixa"><div class="faixas"></div><div class="modal-corpo">
+    <div class="frase" id="tituloPacote">Seu Pacote Base</div>
+    <p class="subtexto" id="resumoPacote">Duas cartas adicionadas ao seu elenco.</p>
+    <div class="pacote-revelacao" id="cartasDoPacote"></div>
+    <div class="modal-botoes"><button class="btn btn-principal" type="button" id="pacoteMeuTime">Ir para Meu time</button><button class="btn" type="button" id="pacoteFechar">Fechar</button></div>
+  </div></div>
 </div>
 
 <!-- ============================== MODAL: NOME DE PASTA / ARQUIVO -->
@@ -1454,6 +1540,114 @@ const POSICOES_TIME = [
   {id:"pd",sigla:"PD",nome:"ponta direita",x:82,y:20}
 ];
 
+const PACOTE_BASE = {preco:20,quantidade:2};
+const RARIDADES_TIME = [
+  {id:"comum",nome:"Comum",min:50,max:69,cor:"#64776B"},
+  {id:"raro",nome:"Raro",min:70,max:79,cor:"#286BA0"},
+  {id:"epico",nome:"Épico",min:80,max:89,cor:"#7D4BAC"},
+  {id:"idolo",nome:"Ídolo",min:90,max:94,cor:"#B57922"},
+  {id:"lenda",nome:"Lenda",min:95,max:100,cor:"#B52D42"}
+];
+// OVRs de equilíbrio do jogo, fixos por atleta; não são avaliações oficiais.
+const JOGADORES_SPFC = [
+  {"id":"thiago-couto","nome":"Thiago Couto","posicao":"GOL","ovr":52},
+  {"id":"sidao","nome":"Sidão","posicao":"GOL","ovr":58},
+  {"id":"denis","nome":"Denis","posicao":"GOL","ovr":64},
+  {"id":"volpi","nome":"Tiago Volpi","posicao":"GOL","ovr":76},
+  {"id":"zetti","nome":"Zetti","posicao":"GOL","ovr":94},
+  {"id":"ceni","nome":"Rogério Ceni","posicao":"GOL","ovr":100},
+  {"id":"lucao","nome":"Lucão","posicao":"ZAG","ovr":50},
+  {"id":"edson-silva","nome":"Edson Silva","posicao":"ZAG","ovr":60},
+  {"id":"paulo-miranda","nome":"Paulo Miranda","posicao":"ZAG","ovr":66},
+  {"id":"maicon-zag","nome":"Maicon","posicao":"ZAG","ovr":78},
+  {"id":"arboleda","nome":"Arboleda","posicao":"ZAG","ovr":85},
+  {"id":"miranda","nome":"Miranda","posicao":"ZAG","ovr":89},
+  {"id":"ricardo-rocha","nome":"Ricardo Rocha","posicao":"ZAG","ovr":91},
+  {"id":"dario-pereyra","nome":"Dario Pereyra","posicao":"ZAG","ovr":95},
+  {"id":"lugano","nome":"Lugano","posicao":"ZAG","ovr":96},
+  {"id":"douglas","nome":"Douglas","posicao":"LD","ovr":54},
+  {"id":"bruno","nome":"Bruno","posicao":"LD","ovr":55},
+  {"id":"orejuela","nome":"Orejuela","posicao":"LD","ovr":56},
+  {"id":"buffarini","nome":"Buffarini","posicao":"LD","ovr":62},
+  {"id":"ilsinho","nome":"Ilsinho","posicao":"LD","ovr":76},
+  {"id":"cicinho","nome":"Cicinho","posicao":"LD","ovr":88},
+  {"id":"cafu","nome":"Cafu","posicao":"LD","ovr":96},
+  {"id":"clemente","nome":"Clemente Rodríguez","posicao":"LE","ovr":54},
+  {"id":"edimar","nome":"Edimar","posicao":"LE","ovr":60},
+  {"id":"cortez","nome":"Cortez","posicao":"LE","ovr":65},
+  {"id":"reinaldo","nome":"Reinaldo","posicao":"LE","ovr":73},
+  {"id":"alvaro-pereira","nome":"Álvaro Pereira","posicao":"LE","ovr":75},
+  {"id":"fabio-santos","nome":"Fábio Santos","posicao":"LE","ovr":80},
+  {"id":"junior","nome":"Júnior","posicao":"LE","ovr":86},
+  {"id":"leonardo","nome":"Leonardo","posicao":"LE","ovr":90},
+  {"id":"hudson","nome":"Hudson","posicao":"VOL","ovr":62},
+  {"id":"wellington","nome":"Wellington","posicao":"VOL","ovr":67},
+  {"id":"jucilei","nome":"Jucilei","posicao":"VOL","ovr":74},
+  {"id":"denilson-vol","nome":"Denílson (volante)","posicao":"VOL","ovr":75},
+  {"id":"mineiro","nome":"Mineiro","posicao":"VOL","ovr":84},
+  {"id":"josue","nome":"Josué","posicao":"VOL","ovr":85},
+  {"id":"cerezo","nome":"Toninho Cerezo","posicao":"VOL","ovr":94},
+  {"id":"carlinhos-paraiba","nome":"Carlinhos Paraíba","posicao":"MC","ovr":59},
+  {"id":"nestor","nome":"Rodrigo Nestor","posicao":"MC","ovr":78},
+  {"id":"cueva","nome":"Cueva","posicao":"MC","ovr":81},
+  {"id":"ganso","nome":"Ganso","posicao":"MC","ovr":85},
+  {"id":"danilo","nome":"Danilo","posicao":"MC","ovr":86},
+  {"id":"hernanes","nome":"Hernanes","posicao":"MC","ovr":91},
+  {"id":"kaka","nome":"Kaká","posicao":"MC","ovr":97},
+  {"id":"rai","nome":"Raí","posicao":"MC","ovr":99},
+  {"id":"fernandinho","nome":"Fernandinho","posicao":"PE","ovr":62},
+  {"id":"marlos","nome":"Marlos","posicao":"PE","ovr":64},
+  {"id":"osvaldo","nome":"Osvaldo","posicao":"PE","ovr":77},
+  {"id":"michel-bastos","nome":"Michel Bastos","posicao":"PE","ovr":80},
+  {"id":"dagoberto","nome":"Dagoberto","posicao":"PE","ovr":87},
+  {"id":"denilson","nome":"Denílson","posicao":"PE","ovr":89},
+  {"id":"muller","nome":"Müller","posicao":"PE","ovr":93},
+  {"id":"wellington-nem","nome":"Wellington Nem","posicao":"PD","ovr":58},
+  {"id":"centurion","nome":"Centurión","posicao":"PD","ovr":63},
+  {"id":"ademilson","nome":"Ademilson","posicao":"PD","ovr":64},
+  {"id":"marcos-guilherme","nome":"Marcos Guilherme","posicao":"PD","ovr":69},
+  {"id":"neres","nome":"David Neres","posicao":"PD","ovr":82},
+  {"id":"antony","nome":"Antony","posicao":"PD","ovr":84},
+  {"id":"lucas","nome":"Lucas Moura","posicao":"PD","ovr":92},
+  {"id":"trellez","nome":"Santiago Tréllez","posicao":"ATA","ovr":55},
+  {"id":"pablo","nome":"Pablo","posicao":"ATA","ovr":60},
+  {"id":"gilberto","nome":"Gilberto","posicao":"ATA","ovr":68},
+  {"id":"aloisio","nome":"Aloísio Chulapa","posicao":"ATA","ovr":81},
+  {"id":"calleri","nome":"Calleri","posicao":"ATA","ovr":87},
+  {"id":"franca","nome":"França","posicao":"ATA","ovr":89},
+  {"id":"luis-fabiano","nome":"Luís Fabiano","posicao":"ATA","ovr":94},
+  {"id":"careca","nome":"Careca","posicao":"ATA","ovr":98},
+  {"id":"leonidas","nome":"Leônidas da Silva","posicao":"ATA","ovr":99},
+  {"id":"richarlyson","nome":"Richarlyson","posicao":"VOL","ovr":78},
+  {"id":"alex-silva","nome":"Alex Silva","posicao":"ZAG","ovr":79},
+  {"id":"rodrigo-caio","nome":"Rodrigo Caio","posicao":"ZAG","ovr":79},
+  {"id":"souza","nome":"Souza","posicao":"MC","ovr":78},
+  {"id":"alisson","nome":"Alisson","posicao":"MC","ovr":76},
+  {"id":"wellington-rato","nome":"Wellington Rato","posicao":"PD","ovr":74},
+  {"id":"aloisio-boi","nome":"Aloísio (Boi Bandido)","posicao":"ATA","ovr":77},
+  {"id":"eder","nome":"Éder","posicao":"ATA","ovr":72}
+];
+
+function raridadeDoJogador(j) {
+  return RARIDADES_TIME.find(r=>j.ovr>=r.min && j.ovr<=r.max) || null;
+}
+// Cada 10 pontos a mais de OVR reduzem pela metade o peso individual.
+function pesoDoJogador(j) { return Math.pow(0.5,(j.ovr-50)/10); }
+function chancesDoPacote() {
+  const total=JOGADORES_SPFC.reduce((s,j)=>s+pesoDoJogador(j),0);
+  return RARIDADES_TIME.map(r=>({...r,chance:JOGADORES_SPFC.filter(j=>j.ovr>=r.min&&j.ovr<=r.max)
+    .reduce((s,j)=>s+pesoDoJogador(j),0)/total*100}));
+}
+function sortearJogadorDoPacote(excluidos=[]) {
+  const candidatos=JOGADORES_SPFC.filter(j=>!excluidos.includes(j.id)).sort((a,b)=>a.ovr-b.ovr||a.nome.localeCompare(b.nome,"pt-BR"));
+  const total=candidatos.reduce((s,j)=>s+pesoDoJogador(j),0);
+  const aleatorio=crypto.getRandomValues(new Uint32Array(1))[0]/4294967296;
+  let ponto=aleatorio*total;
+  for(const j of candidatos) { ponto-=pesoDoJogador(j);if(ponto<0) return j; }
+  return candidatos[candidatos.length-1];
+}
+let abrindoPacote=false;
+
 function normalizarMeuTime(dados) {
   const fonte=dados && typeof dados==="object" ? dados : {};
   const nome=typeof fonte.nome==="string" ? fonte.nome.trim().slice(0,40) : "";
@@ -1462,7 +1656,10 @@ function normalizarMeuTime(dados) {
     if(!j || typeof j.id!=="string" || !j.id || typeof j.nome!=="string" || !j.nome.trim() ||
        !codigos.has(j.posicao) || ids.has(j.id)) return;
     ids.add(j.id);
-    jogadores.push({id:j.id,nome:j.nome.trim().slice(0,60),posicao:j.posicao});
+    const ficha=JOGADORES_SPFC.find(f=>f.id===j.id);
+    jogadores.push({id:j.id,nome:ficha?ficha.nome:j.nome.trim().slice(0,60),posicao:ficha?ficha.posicao:j.posicao,
+      ovr:ficha?ficha.ovr:(Number.isInteger(j.ovr)&&j.ovr>=50&&j.ovr<=100?j.ovr:null),
+      quantidade:Number.isSafeInteger(j.quantidade)&&j.quantidade>0?j.quantidade:1});
   });
   const escalacao={},usados=new Set();
   POSICOES_TIME.forEach(p=>{
@@ -1470,11 +1667,15 @@ function normalizarMeuTime(dados) {
     const j=jogadores.find(j=>j.id===id);
     if(j && j.posicao===p.sigla && !usados.has(id)) {escalacao[p.id]=id;usados.add(id);}
   });
-  return {nome:nome || "Meu Tricolor",jogadores,escalacao};
+  const ultimoPacote=Array.isArray(fonte.ultimoPacote)?fonte.ultimoPacote.filter(c=>c && ids.has(c.id) &&
+    JOGADORES_SPFC.some(j=>j.id===c.id)).slice(0,2).map(c=>({id:c.id,nova:!!c.nova})):[];
+  const gastoPacotes=Number.isSafeInteger(fonte.gastoPacotes)&&fonte.gastoPacotes>=0?fonte.gastoPacotes:0;
+  return {nome:nome || "Meu Tricolor",jogadores,escalacao,gastoPacotes,
+    ultimoPacote:ultimoPacote.length===2&&ultimoPacote[0].id!==ultimoPacote[1].id?ultimoPacote:[]};
 }
 let meuTime=normalizarMeuTime(Armazem.ler(CHAVES.meuTime,null));
 let posicaoTimeSelecionada="gol";
-function salvarMeuTime() { Armazem.gravar(CHAVES.meuTime,meuTime); }
+function salvarMeuTime() { meuTime=normalizarMeuTime(meuTime); return Armazem.gravar(CHAVES.meuTime,meuTime); }
 
 const MIN_POR_MOEDA = 5;
 
@@ -1484,7 +1685,8 @@ const MIN_POR_MOEDA = 5;
  * um backup não precisa de conserto: a conta se refaz sozinha.
  */
 function moedasGanhas() { return Math.floor(totalMinutos() / MIN_POR_MOEDA); }
-function saldoMoedas()  { return Math.max(0, moedasGanhas() - (loja.gastas || 0)); }
+function totalMoedasGastas() { return (loja.gastas || 0) + meuTime.gastoPacotes; }
+function saldoMoedas()  { return Math.max(0, moedasGanhas() - totalMoedasGastas()); }
 
 function salvarBlocos()   { Armazem.gravar(CHAVES.blocos, blocos); }
 function salvarLoja()     { Armazem.gravar(CHAVES.loja, loja); }
@@ -4224,27 +4426,32 @@ function renderMeuTime() {
       'aria-pressed="'+(p.id===posicao.id)+'" aria-label="Escolher '+p.nome+
       (jogador?': '+escapar(jogador.nome):', vaga livre')+'" title="'+p.nome+'">'+
       '<span class="time-pos-sigla">'+p.sigla+'</span>'+camisaDoTime()+
+      (jogador&&jogador.ovr?'<span class="time-ovr-campo" aria-label="OVR '+jogador.ovr+'">'+jogador.ovr+'</span>':'')+
       (!jogador?'<span class="time-adicionar" aria-hidden="true">+</span>':'')+
       '<span class="time-pos-nome">'+(jogador?escapar(jogador.nome):'Vaga livre')+'</span></button>';
   }).join('');
   $("#timeEscolhaSigla").textContent=posicao.sigla;
   $("#timeEscolhaTitulo").textContent="Escolher "+posicao.nome;
   $("#timeInstrucao").textContent=posicao.nome.charAt(0).toUpperCase()+posicao.nome.slice(1)+" · escolha no elenco quem joga nesta vaga.";
-  const opcoes=meuTime.jogadores.filter(j=>j.posicao===posicao.sigla);
+  const opcoes=meuTime.jogadores.filter(j=>j.posicao===posicao.sigla).sort((a,b)=>(b.ovr||0)-(a.ovr||0)||a.nome.localeCompare(b.nome,"pt-BR"));
   $("#timeElencoResumo").textContent=meuTime.jogadores.length
     ? meuTime.jogadores.length+(meuTime.jogadores.length===1?' jogador no elenco':' jogadores no elenco')
     : 'Sua coleção ainda está vazia.';
   if(!opcoes.length) {
     $("#timeOpcoes").innerHTML='<div class="time-vazio">'+camisaDoTime()+
       '<strong>'+(!meuTime.jogadores.length?'Seu elenco começa aqui':'Nenhum jogador desta posição')+'</strong>'+
-      '<p>'+(!meuTime.jogadores.length?'Os jogadores do seu elenco aparecerão aqui para você montar o time.':'Escolha outra posição no campo para ver os jogadores disponíveis.')+'</p></div>';
+      '<p>'+(!meuTime.jogadores.length?'Ganhe seus primeiros jogadores com o Pacote Base da loja.':'Escolha outra posição no campo para ver os jogadores disponíveis.')+'</p>'+
+      '<button class="btn btn-pequeno" type="button" data-time-loja style="margin-top:12px">Ver Pacote Base</button></div>';
   } else {
     $("#timeOpcoes").innerHTML=opcoes.map(j=>{
       const vaga=POSICOES_TIME.find(p=>meuTime.escalacao[p.id]===j.id);
       const atual=vaga && vaga.id===posicao.id;
       const iniciais=j.nome.split(/\s+/).slice(0,2).map(n=>n[0]).join('').toUpperCase();
-      return '<div class="time-carta"><div class="time-carta-topo"><span class="time-iniciais" aria-hidden="true">'+escapar(iniciais)+'</span>'+
-        '<div class="time-carta-nome"><strong>'+escapar(j.nome)+'</strong><span>'+j.posicao+(vaga?' · Em campo':' · Disponível')+'</span></div></div>'+
+      const raridade=raridadeDoJogador(j);
+      return '<div class="time-carta raridade-'+(raridade?raridade.id:'comum')+'"><div class="time-carta-topo"><span class="time-iniciais" aria-hidden="true">'+escapar(iniciais)+'</span>'+
+        '<div class="time-carta-nome"><strong>'+escapar(j.nome)+'</strong><span>'+j.posicao+(vaga?' · Em campo':' · Disponível')+'</span></div>'+
+        (j.ovr?'<span class="carta-ovr">'+j.ovr+'<small>OVR</small></span>':'')+'</div>'+
+        '<div class="time-carta-metadados"><span class="carta-raridade">'+(raridade?raridade.nome:'Sem OVR')+'</span><span>'+j.quantidade+(j.quantidade===1?' carta':' cópias')+'</span></div>'+
         '<button type="button" class="btn btn-pequeno '+(atual?'':'btn-principal')+'" data-time-escalar="'+escapar(j.id)+'"'+(atual?' disabled':'')+'>'+
         (atual?'Escalado nesta posição':vaga?'Mover para esta vaga':'Escalar')+'</button></div>';
     }).join('');
@@ -4263,6 +4470,7 @@ function escalarJogadorNoTime(id) {
   return true;
 }
 $("#painel-time").addEventListener("click",e=>{
+  if(e.target.closest('[data-time-loja]')) {irParaPainel("loja");$("#pacotesLoja").scrollIntoView({block:"start"});return;}
   const vaga=e.target.closest('[data-time-pos]');
   if(vaga) {posicaoTimeSelecionada=vaga.dataset.timePos;renderMeuTime();focarPosicaoTime();return;}
   const carta=e.target.closest('[data-time-escalar]');
@@ -4281,8 +4489,88 @@ $("#btnRemoverTitular").addEventListener("click",()=>{
 });
 
 /* --------------------------------------------------------------------------
+   PACOTE BASE — duas cartas distintas; elenco e débito gravados juntos.
+   -------------------------------------------------------------------------- */
+function renderPacoteBase() {
+  const pode=saldoMoedas()>=PACOTE_BASE.preco && !abrindoPacote;
+  $("#btnComprarPacoteBase").disabled=!pode;
+  $("#btnComprarPacoteBase").textContent="Comprar e abrir · "+PACOTE_BASE.preco+" moedas";
+  $("#precoPacoteBase").textContent=PACOTE_BASE.preco+" moedas";
+  $("#precoPacoteBase").classList.toggle("pode",pode);
+  $("#btnUltimoPacote").hidden=meuTime.ultimoPacote.length!==2;
+  $("#chancesPacote").innerHTML=chancesDoPacote().map(r=>
+    '<tr class="raridade-'+r.id+'"><td><span class="carta-raridade">'+r.nome+'</span></td><td>'+r.min+'–'+r.max+'</td><td>'+r.chance.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+'%</td></tr>').join('');
+  $("#catalogoPacote").innerHTML=[...JOGADORES_SPFC].sort((a,b)=>b.ovr-a.ovr||a.nome.localeCompare(b.nome,"pt-BR")).map(j=>
+    '<tr class="raridade-'+raridadeDoJogador(j).id+'"><td>'+escapar(j.nome)+'</td><td>'+j.posicao+'</td><td><span class="carta-raridade">'+j.ovr+'</span></td></tr>').join('');
+}
+function abrirResultadoPacote() {
+  if(meuTime.ultimoPacote.length!==2) return;
+  abrindoPacote=true;
+  $("#cartasDoPacote").innerHTML=meuTime.ultimoPacote.map(c=>{
+    const j=JOGADORES_SPFC.find(j=>j.id===c.id),r=raridadeDoJogador(j);
+    const guardado=meuTime.jogadores.find(p=>p.id===j.id);
+    return '<article class="carta-revelada raridade-'+r.id+'"><div class="carta-revelada-topo">'+
+      '<span class="carta-ovr">'+j.ovr+'<small>OVR</small></span><span class="carta-pos">'+j.posicao+'</span></div>'+camisaDoTime()+
+      '<span class="carta-raridade">'+r.nome+'</span><h3>'+escapar(j.nome)+'</h3>'+
+      '<p class="carta-repetida">'+(c.nova?'Nova carta':'Cópia extra')+' · '+(guardado?guardado.quantidade:1)+' no elenco</p></article>';
+  }).join('');
+  $("#resumoPacote").textContent="As duas cartas já estão salvas no seu elenco.";
+  $("#modalPacote").classList.add("aberto");
+  renderPacoteBase();
+  $("#pacoteFechar").focus();
+}
+function comprarPacoteBase() {
+  if(abrindoPacote) return false;
+  if(saldoMoedas()<PACOTE_BASE.preco) {mostrarAviso("O Pacote Base custa "+PACOTE_BASE.preco+" moedas.");return false;}
+  const primeiro=sortearJogadorDoPacote();
+  const segundo=sortearJogadorDoPacote([primeiro.id]);
+  const jogadores=meuTime.jogadores.map(j=>({...j})),resultado=[];
+  for(const carta of [primeiro,segundo]) {
+    const existente=jogadores.find(j=>j.id===carta.id);
+    if(existente) {
+      if(!Number.isSafeInteger(existente.quantidade+1)) return false;
+      existente.quantidade+=1;
+    } else jogadores.push({...carta,quantidade:1});
+    resultado.push({id:carta.id,nova:!existente});
+  }
+  const gasto=meuTime.gastoPacotes+PACOTE_BASE.preco;
+  if(!Number.isSafeInteger(gasto)) return false;
+  const proximo=normalizarMeuTime({...meuTime,jogadores,gastoPacotes:gasto,ultimoPacote:resultado});
+  // Uma única gravação persiste tanto as cartas quanto o custo do pacote.
+  if(!Armazem.gravar(CHAVES.meuTime,proximo)) return false;
+  meuTime=proximo;
+  abrirResultadoPacote();
+  renderMeuTime();renderLoja();
+  return true;
+}
+function fecharModalPacote() {
+  if(!$("#modalPacote").classList.contains("aberto")) return;
+  $("#modalPacote").classList.remove("aberto");abrindoPacote=false;renderPacoteBase();
+  ($("#btnComprarPacoteBase").disabled?$("#btnUltimoPacote"):$("#btnComprarPacoteBase")).focus({preventScroll:true});
+}
+$("#btnComprarPacoteBase").addEventListener("click",comprarPacoteBase);
+$("#btnUltimoPacote").addEventListener("click",abrirResultadoPacote);
+$("#pacoteFechar").addEventListener("click",fecharModalPacote);
+$("#pacoteMeuTime").addEventListener("click",()=>{
+  const carta=JOGADORES_SPFC.find(j=>j.id===meuTime.ultimoPacote[0]?.id);
+  if(carta) {
+    const vaga=POSICOES_TIME.find(p=>p.sigla===carta.posicao&&!jogadorDaVaga(p.id)) || POSICOES_TIME.find(p=>p.sigla===carta.posicao);
+    if(vaga) posicaoTimeSelecionada=vaga.id;
+  }
+  fecharModalPacote();irParaPainel("time");focarPosicaoTime();
+});
+$("#modalPacote").addEventListener("click",e=>{if(e.target.id==="modalPacote") fecharModalPacote();});
+$("#modalPacote").addEventListener("keydown",e=>{
+  if(e.key!=="Tab") return;
+  const botoes=Array.from($("#modalPacote").querySelectorAll("button")).filter(b=>!b.disabled);
+  const primeiro=botoes[0],ultimo=botoes[botoes.length-1];
+  if(e.shiftKey&&document.activeElement===primeiro){e.preventDefault();ultimo.focus();}
+  else if(!e.shiftKey&&document.activeElement===ultimo){e.preventDefault();primeiro.focus();}
+});
+
+/* --------------------------------------------------------------------------
    14d. LOJA
-   Cosmético e nada mais: os itens só trocam som, nunca mexem em estatística.
+   Sons, obras e pacotes usam moedas derivadas dos estudos.
    -------------------------------------------------------------------------- */
 function temItem(categoria, id) {
   const item = itemDoCatalogo(categoria, id);
@@ -4405,11 +4693,12 @@ function renderLoja() {
   $("#explicaMoeda").innerHTML =
     "1 moeda a cada <b>" + MIN_POR_MOEDA + " min</b> de estudo. " +
     "Já rendeu <b>" + moedasGanhas() + "</b> no total" +
-    (loja.gastas ? ", com <b>" + loja.gastas + "</b> gastas" : "") + ".";
+    (totalMoedasGastas() ? ", com <b>" + totalMoedasGastas() + "</b> gastas" : "") + ".";
 
   $("#itensGol").innerHTML = Object.keys(SONS.gol).map((id) => cartaoDeItem("gol", id)).join("");
   $("#itensApito").innerHTML = Object.keys(SONS.apito).map((id) => cartaoDeItem("apito", id)).join("");
   $("#itensEstadio").innerHTML = Object.keys(OBRAS_ESTADIO).map(cartaoDeObra).join("");
+  renderPacoteBase();
   renderAvisoLoja();
 }
 
@@ -4422,7 +4711,7 @@ function zerarSaldo() {
   if (saldoMoedas() === 0) { mostrarAviso("O saldo já está em zero."); return; }
   if (!confirm("Zerar o saldo?\n\nVocê fica com 0 moedas e mantém tudo que já comprou. " +
                "O histórico de estudo não muda.\n\nNão tem volta.")) return;
-  loja.gastas = moedasGanhas();
+  loja.gastas = Math.max(0,moedasGanhas()-meuTime.gastoPacotes);
   salvarLoja();
   renderLoja();
   mostrarAviso("Saldo zerado, soberano.");
@@ -4430,9 +4719,8 @@ function zerarSaldo() {
 
 /** Volta a loja ao estado de fábrica: nada comprado, sons no padrão. */
 function resetarLoja() {
-  if (!confirm("Resetar a loja?\n\nTudo que você comprou volta a ficar bloqueado, os sons " +
-               "voltam ao padrão e o saldo passa a ser tudo que você já ganhou (" +
-               moedasGanhas() + " moedas).\n\nNão tem volta.")) return;
+  if (!confirm("Resetar os sons e as obras da loja?\n\nEsses itens voltam a ficar bloqueados e as moedas gastas neles retornam ao saldo. " +
+               "Seu elenco e as moedas gastas em pacotes são mantidos.\n\nNão tem volta.")) return;
   loja = { gastas: 0, comprados: [], niveis: {}, golAtivo: "padrao", apitoAtivo: "padrao" };
   salvarLoja();
   renderEstadio();
@@ -4452,7 +4740,7 @@ function renderAvisoLoja() {
     const p = proximoNivel(f);
     return p && saldo >= p.preco;
   });
-  const podeAlgo = podeSom || podeObra;
+  const podeAlgo = podeSom || podeObra || saldo>=PACOTE_BASE.preco;
   const ponto = aba.querySelector(".ponto-novo");
   if (podeAlgo && !ponto) {
     const p = document.createElement("span");
@@ -6067,9 +6355,10 @@ document.addEventListener("keydown", (e) => {
 
   if (e.key === "Escape") {
     fecharModalFim(); fecharModalNotif(); fecharModalOrfaos();
-    fecharModalCampo(); fecharVisor();
+    fecharModalCampo(); fecharVisor(); fecharModalPacote();
     return;
   }
+  if ($("#modalPacote").classList.contains("aberto")) return;
   if (digitando) {
     // Enter no campo de assunto já começa o bloco
     if (e.key === "Enter" && alvo.id === "assunto" && !T.rodando) { e.preventDefault(); iniciarTimer(); }
