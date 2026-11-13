@@ -982,7 +982,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
         <span id="legendaRefletores"><i style="background:#607D8B"></i><b>Refletores</b></span>
         <span><i style="background:#B72C38"></i>Túnel dos jogadores</span>
         <span><i style="background:#A6C5CD"></i>Bancos de reservas</span>
-        <span id="legendaCobertura" hidden><i style="background:#E6EAED"></i>Cobertura</span>
+        <span id="legendaCobertura" hidden><i style="background:#E6EAED"></i><b>Cobertura</b></span>
         <span id="legendaPublico" hidden><i style="background:#D8A47A"></i>Torcida</span>
         <span id="legendaPlacar" hidden><i style="background:#172431"></i><b></b></span>
       </div>
@@ -2396,7 +2396,8 @@ const OBRAS_ESTADIO = {
     { desc: "Setores arredondados com assentos, escadas de acesso e refletores na borda externa, unindo as arquibancadas.", preco: 55 }
   ]},
   cobertura: { nome: "Cobertura das arquibancadas", niveis: [
-    { desc: "Cobertura leve e curva sobre os quatro setores, com estrutura metálica e acabamento tricolor.", preco: 60 }
+    { desc: "Cobertura leve e curva sobre os quatro setores, com estrutura metálica e acabamento tricolor.", preco: 60 },
+    { desc: "Cobertura ampliada com faixa translúcida, estrutura de sustentação e friso tricolor contínuo. Acompanha os cantos fechados, formando uma cobertura integrada.", preco: 80 }
   ]},
   refletores: { nome: "Refletores", niveis: [
     { desc: "Acende os painéis de seis módulos LED, inclinados para o campo, com luz branca suave no gramado.", preco: 70 }
@@ -4892,6 +4893,7 @@ const CORES_EST = {
 
 /** Obras já entregues. */
 function temCobertura()  { return nivelDaObra("cobertura") >= 1; }
+function temCoberturaAmpliada() { return nivelDaObra("cobertura") >= 2; }
 function temGrama()      { return nivelDaObra("gramado") >= 1; }
 function temListras()    { return nivelDaObra("gramado") >= 2; }
 function temMosaico()    { return nivelDaObra("mosaico") >= 1; }
@@ -5488,7 +5490,8 @@ function setorDeCanto(sx, sy) {
     svg += traco(arco, C.estrutura, 0.3);
     return svg;
   }
-  return anel(EST.pista, perfil.assentos, perfil.altura, 0);
+  return anel(EST.pista, perfil.assentos, perfil.altura, 0) +
+    (temCoberturaAmpliada() ? coberturaAmpliadaDoCanto(sx,sy) : "");
 }
 
 /**
@@ -5553,6 +5556,7 @@ function convesDeCima(a) {
  * usar o mesmo desenho nas quatro orientações e nos dois tamanhos de convés.
  */
 function coberturaDe(a) {
+  if(temCoberturaAmpliada()) return coberturaAmpliadaDe(a);
   const C = CORES_EST, conves = convesDeCima(a), r = conves.r;
   const aoLongo = a.aoLongoDeX;
   const de = (aoLongo ? r.x0 : r.y0) - 0.8;
@@ -5602,6 +5606,85 @@ function coberturaDe(a) {
                   i ? C.cobFriso : C.estrutura);
   });
   return s;
+}
+
+/** Mesmo perfil nos quatro setores e nos cantos: as emendas têm altura e raio iguais. */
+const PERFIL_COBERTURA_2 = [[-1.5,4.8],[3.5,5.8],[6.2,6.15],[8.6,6.15],[14.5,5.4]];
+const CORES_COBERTURA_2 = ["#F4F7F5","#E3EBEE","#B8D5DE","#EDF3F1"];
+
+function coberturaAmpliadaDe(a) {
+  const C=CORES_EST,c=convesDeCima(a),r=c.r,z=c.z,perfil=PERFIL_COBERTURA_2;
+  const margem=temCantos()?0:0.8;
+  const de=(a.aoLongoDeX?r.x0:r.y0)-margem,ate=(a.aoLongoDeX?r.x1:r.y1)+margem;
+  const ponto=(t,d,h)=>a.perto==="x1"?[r.x0+d,t,h]:a.perto==="x0"?[r.x1-d,t,h]:
+    a.perto==="y1"?[t,r.y0+d,h]:[t,r.y1-d,h];
+  let s="";
+  const apoios=Math.max(3,Math.round((ate-de)/22));
+  for(let i=0;i<=apoios;i++) {
+    const t=de+(ate-de)*(0.04+0.92*i/apoios);
+    s+=traco([ponto(t,0.5,z),ponto(t,0.5,z+4.9)],C.estrutura,0.55);
+    s+=traco([ponto(t,0.5,z+2.6),ponto(t,13.8,z+4.85)],C.estrutura,0.38);
+    s+=traco(perfil.map(([d,h])=>ponto(t,d,z+h-0.3)),"#A8BBC2",0.32);
+  }
+  const faixas=perfil.slice(0,-1).map((p,i)=>({p,q:perfil[i+1],i}));
+  if(a.perto==="x0"||a.perto==="y0") faixas.reverse();
+  faixas.forEach(({p,q,i})=>{
+    s+=poligono([ponto(de,p[0],z+p[1]),ponto(ate,p[0],z+p[1]),
+                  ponto(ate,q[0],z+q[1]),ponto(de,q[0],z+q[1])],CORES_COBERTURA_2[i],
+                  i===2?' fill-opacity=".68"':"");
+    if(!temCantos()) [de,ate].forEach(t=>{
+      s+=poligono([ponto(t,p[0],z+p[1]),ponto(t,q[0],z+q[1]),
+                    ponto(t,q[0],z+q[1]-0.32),ponto(t,p[0],z+p[1]-0.32)],C.cobEsq);
+    });
+  });
+  const paineis=Math.ceil((ate-de)/7);
+  for(let i=1;i<paineis;i++) {
+    const t=de+(ate-de)*i/paineis;
+    s+=traco(perfil.map(([d,h])=>ponto(t,d,z+h+0.02)),C.cobJunta,0.18,0.75);
+  }
+  [perfil[0],perfil[perfil.length-1]].forEach(([d,h],i)=>{
+    s+=poligono([ponto(de,d,z+h),ponto(ate,d,z+h),
+                  ponto(ate,d,z+h-0.36),ponto(de,d,z+h-0.36)],i?C.cobFriso:C.estrutura);
+    if(i) s+=traco([ponto(de,d,z+h-0.43),ponto(ate,d,z+h-0.43)],"#303C43",0.16);
+  });
+  return '<g data-cobertura="2" data-cobertura-setor="reto">'+s+'</g>';
+}
+
+/** Marquise curva contínua, sobre o passeio e as fileiras de trás dos cantos. */
+function coberturaAmpliadaDoCanto(sx,sy) {
+  const C=CORES_EST,perfil=PERFIL_COBERTURA_2,z=alturaDoCanto(),raio=EST.pista+EST.arqFundo;
+  const ponto=(d,a,h)=>[sx*(EST.campoX+(raio-d)*Math.cos(a)),
+    sy*(EST.campoY+(raio-d)*Math.sin(a)),h];
+  let s="";
+  [Math.PI/12,Math.PI/4,5*Math.PI/12].forEach(a=>{
+    s+=traco([ponto(0.5,a,z),ponto(0.5,a,z+4.9)],C.estrutura,0.55);
+    s+=traco([ponto(0.5,a,z+2.6),ponto(13.8,a,z+4.85)],C.estrutura,0.38);
+  });
+  const pecas=[],segmentos=18;
+  for(let i=0;i<segmentos;i++) {
+    const a0=i*Math.PI/(2*segmentos),a1=(i+1)*Math.PI/(2*segmentos);
+    perfil.slice(0,-1).forEach(([d0,h0],j)=>{
+      const [d1,h1]=perfil[j+1];
+      let svg="";
+      if(j===0||j===perfil.length-2) {
+        const d=j===0?d0:d1,h=j===0?h0:h1;
+        svg+=poligono([ponto(d,a0,z+h),ponto(d,a1,z+h),
+                        ponto(d,a1,z+h-0.36),ponto(d,a0,z+h-0.36)],j===0?C.estrutura:C.cobFriso);
+        if(j!==0) svg+=traco([ponto(d,a0,z+h-0.43),ponto(d,a1,z+h-0.43)],"#303C43",0.16);
+      }
+      svg+=poligono([ponto(d0,a0,z+h0),ponto(d0,a1,z+h0),
+                     ponto(d1,a1,z+h1),ponto(d1,a0,z+h1)],CORES_COBERTURA_2[j],
+                     j===2?' fill-opacity=".68"':"");
+      const meio=ponto((d0+d1)/2,(a0+a1)/2,0);
+      pecas.push({d:meio[0]+meio[1],svg});
+    });
+  }
+  s+=pecas.sort((a,b)=>a.d-b.d).map(p=>p.svg).join("");
+  for(let i=0;i<=6;i++) {
+    const a=i*Math.PI/12;
+    s+=traco(perfil.map(([d,h])=>ponto(d,a,z+h+0.02)),C.cobJunta,0.18,0.75);
+  }
+  return '<g data-cobertura="2" data-cobertura-setor="canto">'+s+'</g>';
 }
 
 /**
@@ -6112,7 +6195,8 @@ function desenharEstadio() {
   ];
 
   // Cada setor de canto e seu refletor formam uma peça na ordem de desenho.
-  const zTorre = temCantos() ? alturaDoCanto() : 0;
+  // Com a marquise nos cantos, só a parte da torre acima dela fica exposta.
+  const zTorre = temCantos() ? alturaDoCanto() + (temCoberturaAmpliada()?5.6:0) : 0;
   [[-1,-1], [-1,1], [1,-1], [1,1]].forEach((c, i) => {
     const sx = c[0], sy = c[1];
     const [tx, ty] = torres[i];
@@ -6152,6 +6236,7 @@ function desenharEstadio() {
          'role="img" aria-label="Estádio isométrico do Vidori: campo, quatro arquibancadas e ' +
          'quatro torres de refletores' + (temRefletores() ? ", acesos" : "") +
          ". Túnel central de acesso ao campo e bancos cobertos de reservas da casa e visitante" +
+         (temCoberturaAmpliada() ? ". Cobertura nível 2 ampliada, com faixa translúcida" + (temCantos()?" e cantos integrados":"") : "") +
          (nivelDaObra("arredores")>=3 ? ". Praça da torcida com monumento de taça e pergolado" : "") +
          (temCidade() ? ". Bairro com ruas, faixas de pedestres, prédios, comércio, carros e ponto de ônibus" : "") +
          (temPlacar() ? ". Placar do ciclo: " + golsDoPlacar() + (golsDoPlacar() === 1 ? " gol" : " gols") : "") + '">' +
@@ -6172,7 +6257,7 @@ function renderEstadio() {
                      (temRefletores() ? "r" : "-") + (temRedes() ? "n" : "-") +
                      (temBandeiras() ? "b" : "-") + (temPublico() ? "p" : "-") +
                      (temListras() ? "l" : "-") + (temCantos() ? "k" : "-") +
-                     nivelDaObra("publico") + ":" + nivelDaObra("arredores") +
+                     nivelDaObra("publico") + ":" + nivelDaObra("arredores") + ":" + nivelDaObra("cobertura") +
                      ":" + (temPlacar() ? JSON.stringify([ciclo && ciclo.id,ciclo && ciclo.nome,golsDoPlacar()]) : "-");
   if (estadioAssinatura === assinatura) return;
   caixaEl.innerHTML = desenharEstadio();
@@ -6201,7 +6286,10 @@ function renderEstadio() {
     refl.querySelector("b").textContent = temRefletores() ? "Refletores acesos" : "Refletores";
   }
   const leg = $("#legendaCobertura");
-  if (leg) leg.hidden = !temCobertura();
+  if (leg) {
+    leg.hidden = !temCobertura();
+    leg.querySelector("b").textContent=temCoberturaAmpliada()?"Cobertura nível 2":"Cobertura";
+  }
   const pub = $("#legendaPublico");
   if (pub) pub.hidden = !temPublico();
   const placar = $("#legendaPlacar");
@@ -6239,7 +6327,8 @@ function fraseDoEstadio() {
     const gols = golsDoPlacar();
     feitas.push("placar com " + gols.toLocaleString("pt-BR") + (gols === 1 ? " gol" : " gols"));
   }
-  if (temCobertura()) feitas.push("arquibancada coberta");
+  if (temCobertura()) feitas.push(temCoberturaAmpliada()
+    ? "cobertura ampliada com faixa translúcida" + (temCantos()?" e cantos integrados":"") : "arquibancada coberta");
   if (temRefletores()) feitas.push("refletores acesos");
 
   if (!feitas.length) {
