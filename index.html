@@ -4998,9 +4998,8 @@ const CORES_EST = {
   trave: "#F7F9FA", traveDir: "#DCE1E4", traveEsq: "#BFC6CB",
   rede: "#FFFFFF",
   mastro: "#EDF0F2", mastroDir: "#C8CFD3", bandeira: "#C62828",
-  // tons que se leem tanto sobre o vermelho do assento quanto sobre as faixas
-  // branca e preta do mosaico
-  publico: ["#3A4046", "#D8A47A", "#6E7B87", "#3A4046", "#E8DCCB", "#D8A47A"]
+  // Predomínio de camisas claras, com vermelho e preto como acentos.
+  publico: ["#F0EDE3", "#F0EDE3", "#F0EDE3", "#B63843", "#B63843", "#303B40"]
 };
 
 /** Obras já entregues. */
@@ -5499,7 +5498,6 @@ function lugaresDaTorcidaNoCanto(sx, sy, perfil) {
   if (!temPublico()) return [];
   const candidatos = [], larguraFila = perfil.assentos / perfil.fileiras;
   const intervalo = Math.max(2.4, EST.areaPorTorcedor[1] / larguraFila);
-  const ocupacao = Math.min(1, EST.areaPorTorcedor[1] / densidadeDoPublico());
   for (let fila = 0; fila < perfil.fileiras; fila++) {
     const r = EST.pista + (fila + 0.5) * larguraFila;
     const z = perfil.altura - perfil.queda * (1 - fila / (perfil.fileiras - 1));
@@ -5507,25 +5505,19 @@ function lugaresDaTorcidaNoCanto(sx, sy, perfil) {
     for (let lugar = 0; lugar < lugares; lugar++) {
       const angulo = (lugar + 0.5) * Math.PI / (2 * lugares);
       // Folga nas emendas com os setores retos e no corredor central.
-      if (Math.min(angulo, Math.PI/2-angulo) * r < 1.1 ||
-          Math.abs(angulo-Math.PI/4) * r < 1.15) continue;
-      const sorte = aleatorioEstavel(sx*371 + sy*911 + fila*101 + lugar*197 + 7907);
+      if (Math.min(angulo, Math.PI/2-angulo) * r < 1.5 ||
+          Math.abs(angulo-Math.PI/4) * r < 1.7) continue;
+      const semente=sx*371 + sy*911 + fila*101 + lugar*197 + 7907;
+      const sorte = aleatorioEstavel(semente);
       sorte(); // dispersa a primeira amostra para sementes próximas
       const prioridade = sorte();
-      if (prioridade >= ocupacao) continue;
       const q = iso(sx*(EST.campoX+r*Math.cos(angulo)),
-                    sy*(EST.campoY+r*Math.sin(angulo)), z+0.45);
-      candidatos.push({ fila, angulo, x:q.x, y:q.y, prioridade,
-        cor:CORES_EST.publico[Math.floor(sorte()*CORES_EST.publico.length)] });
+                    sy*(EST.campoY+r*Math.sin(angulo)), z+0.08);
+      candidatos.push({ fila, angulo, x:q.x, y:q.y, prioridade,distribuicao:sorte(),semente,
+        id:"c:"+sx+":"+sy+":"+fila+":"+lugar });
     }
   }
-  // A ocupação inicial tem prioridade: subir o público acrescenta pessoas
-  // sem mudar os lugares que já estavam ocupados.
-  const aceitos = [];
-  candidatos.sort((a,b) => a.prioridade-b.prioridade).forEach((p) => {
-    if (aceitos.every(q => Math.hypot(p.x-q.x,p.y-q.y) >= 1.25)) aceitos.push(p);
-  });
-  return aceitos;
+  return selecionarLugaresDaTorcida(candidatos);
 }
 
 /**
@@ -5581,8 +5573,7 @@ function setorDeCanto(sx, sy) {
         }
         if (!passeio && !escada) {
           (torcidaPorFatia.get(fila*segmentos+i) || []).forEach((p) => {
-            svg += '<circle cx="' + p.x.toFixed(2) + '" cy="' + p.y.toFixed(2) +
-              '" r="0.46" fill="' + p.cor + '"/>';
+            svg += desenharTorcedor(p,"canto");
           });
         }
         const meio = ponto((r0+r1)/2, (a0+a1)/2, z);
@@ -5826,6 +5817,7 @@ function fatiasDeAssento(a, zTopo, d, n = EST.degraus, queda = d * EST.inclinaca
       x0: eixoY ? sx0 : p0, x1: eixoY ? sx1 : p1,
       y0: eixoY ? p0 : sy0, y1: eixoY ? p1 : sy1,
       z: zTopo - queda * (1 - t),
+      indice: campoNoMinimo ? i : n-1-i,
       fileira: (campoNoMinimo ? i : n - 1 - i) % EST.degraus,
       doCampo: (1 - t) * d,                   // distância da beirada
       aoLongoDeX: a.aoLongoDeX
@@ -5849,33 +5841,79 @@ function assentosDe(a, zTopo, d, zBase, n, queda) {
   const C = CORES_EST;
   const zb = zBase || 0;
   let s = "";
-  fatiasDeAssento(a, zTopo, d, n, queda).forEach((f) => {
+  const fatias=fatiasDeAssento(a,zTopo,d,n,queda),torcida=lugaresDaTorcidaNoSetor(fatias);
+  fatias.forEach((f,i) => {
     s += poligono([[f.x1,f.y0,f.z],[f.x1,f.y1,f.z],[f.x1,f.y1,zb],[f.x1,f.y0,zb]], C.degrauDir);
     s += poligono([[f.x0,f.y1,f.z],[f.x1,f.y1,f.z],[f.x1,f.y1,zb],[f.x0,f.y1,zb]], C.degrauEsq);
     s += topoDoDegrau(f, zb);
-    s += publicoNaFatia(f);
+    s += (torcida.get(i)||[]).map(p=>desenharTorcedor(p,"reto")).join("");
   });
   return s;
 }
 
-/** Torcedores espalhados sobre um degrau. Vale para os dois anéis. */
-function publicoNaFatia(f) {
-  if (!temPublico()) return "";
-  const cores = CORES_EST.publico;
-  const larg = f.x1 - f.x0, fundo = f.y1 - f.y0;
-  const quantos = Math.round(Math.abs(larg * fundo) / densidadeDoPublico());
-  // a semente vem da posição do degrau: cada um sorteia sempre igual
-  const sorte = aleatorioEstavel(f.x0 * 7.3 + f.y0 * 13.1 + f.z * 29.7 + 101);
-  let s = "";
-  for (let i = 0; i < quantos; i++) {
-    const x = f.x0 + sorte() * larg, y = f.y0 + sorte() * fundo;
-    // O corredor de acesso permanece livre nos dois anéis.
-    if (Math.abs(f.aoLongoDeX ? x : y) < 1.1) continue;
-    const p = iso(x, y, f.z + 0.45);
-    s += '<circle cx="' + p.x.toFixed(2) + '" cy="' + p.y.toFixed(2) +
-         '" r="0.46" fill="' + cores[Math.floor(sorte() * cores.length)] + '"/>';
-  }
-  return s;
+/** Lugares fixos: mais público preenche vagas, sem deslocar quem já estava sentado. */
+function selecionarLugaresDaTorcida(candidatos) {
+  const aceitos=[],ocupacao=Math.min(1,EST.areaPorTorcedor[1]/densidadeDoPublico());
+  candidatos.sort((a,b)=>a.distribuicao-b.distribuicao).forEach(p=>{
+    if(aceitos.every(q=>Math.hypot(p.x-q.x,p.y-q.y)>=2.05)) aceitos.push(p);
+  });
+  return aceitos.filter(p=>p.prioridade<ocupacao);
+}
+
+/** Fileiras regulares com pequenos deslocamentos, deixando as escadas desocupadas. */
+function lugaresDaTorcidaNoSetor(fatias) {
+  const porFatia=new Map();
+  if(!temPublico()) return porFatia;
+  const candidatos=[];
+  fatias.forEach((f,fatia)=>{
+    const inicio=f.aoLongoDeX?f.x0:f.y0,fim=f.aoLongoDeX?f.x1:f.y1;
+    const largura=f.aoLongoDeX?f.y1-f.y0:f.x1-f.x0;
+    const lugares=Math.max(1,Math.floor((fim-inicio)/Math.max(2.4,EST.areaPorTorcedor[1]/largura)));
+    for(let lugar=0;lugar<lugares;lugar++) {
+      const semente=f.x0*307+f.y0*613+f.indice*997+lugar*1871+24001;
+      const sorte=aleatorioEstavel(semente);sorte();
+      const prioridade=sorte(),distribuicao=sorte();
+      const t=inicio+(lugar+0.5+(f.indice%2?0.18:-0.18)+(sorte()-0.5)*0.12)*(fim-inicio)/lugares;
+      if(t<inicio+1.5||t>fim-1.5||Math.abs(t)<1.7) continue;
+      const x=f.aoLongoDeX?t:(f.x0+f.x1)/2,y=f.aoLongoDeX?(f.y0+f.y1)/2:t;
+      const q=iso(x,y,f.z+0.08);
+      candidatos.push({x:q.x,y:q.y,fatia,profundidade:x+y,prioridade,distribuicao,semente,
+        id:"r:"+(f.aoLongoDeX?"x":"y")+":"+Math.sign(f.aoLongoDeX?y:x)+":"+f.indice+":"+lugar});
+    }
+  });
+  selecionarLugaresDaTorcida(candidatos).sort((a,b)=>a.profundidade-b.profundidade).forEach(p=>{
+    if(!porFatia.has(p.fatia)) porFatia.set(p.fatia,[]);
+    porFatia.get(p.fatia).push(p);
+  });
+  return porFatia;
+}
+
+/** Figuras compartilhadas no SVG mantêm a torcida leve, inclusive no celular. */
+function defsDaTorcida() {
+  if(!temPublico()) return "";
+  return '<g id="torcedor-base">'+
+    '<ellipse cy=".06" rx=".48" ry=".16" fill="#20342D" opacity=".16"/>'+
+    '<path d="M-.22-.45V0M.22-.45V0" stroke="#37464A" stroke-width=".18" stroke-linecap="round"/>'+
+    '<path d="M-.45-.3L-.47-.95Q-.43-1.32-.22-1.35H.22Q.43-1.32.47-.95L.45-.3Z" fill="var(--camisa)" stroke="#30433B" stroke-width=".09"/>'+
+    '<path d="M-.34-1.03H.34" stroke="#B82E3A" stroke-width=".11"/>'+
+    '<path d="M-.34-.89H.34" stroke="#29363C" stroke-width=".09"/>'+
+    '<circle cy="-1.63" r=".29" fill="var(--pele)"/>'+
+    '<path d="M-.28-1.62Q-.27-1.94 0-1.94Q.27-1.94.28-1.62L.2-1.76Q0-1.9-.2-1.76Z" fill="var(--cabelo)"/>'+
+    '</g><g id="torcedor-bracos"><use href="#torcedor-base"/>'+
+    '<path d="M-.43-1.08L-.68-1.67M.43-1.08L.68-1.67" stroke="var(--pele)" stroke-width=".17" stroke-linecap="round"/>'+
+    '</g><g id="torcedor-aceno"><use href="#torcedor-base"/>'+
+    '<path d="M.43-1.08L.67-1.75" stroke="var(--pele)" stroke-width=".17" stroke-linecap="round"/></g>';
+}
+
+function desenharTorcedor(p,setor) {
+  const sorte=aleatorioEstavel(p.semente+51787);sorte();
+  const camisa=CORES_EST.publico[Math.floor(sorte()*CORES_EST.publico.length)];
+  const pele=["#E1B28C","#C69571","#A77351","#79503A"][Math.floor(sorte()*4)];
+  const cabelo=["#3C302A","#594337","#292D2B"][Math.floor(sorte()*3)];
+  const gesto=sorte(),tipo=gesto<0.08?"bracos":gesto<0.17?"aceno":"base",escala=(0.94+sorte()*0.12).toFixed(2);
+  return '<use data-torcedor="'+setor+'" data-lugar="'+p.id+'" href="#torcedor-'+tipo+'" '+
+    'transform="translate('+p.x.toFixed(2)+' '+p.y.toFixed(2)+') scale('+escala+')" '+
+    'style="--camisa:'+camisa+';--pele:'+pele+';--cabelo:'+cabelo+'" aria-hidden="true"/>';
 }
 
 /** Uma paleta por fileira: as faixas continuam pelas curvas e pelos dois anéis. */
@@ -6342,7 +6380,7 @@ function desenharEstadio() {
   }
   pecas.sort((a, b) => a.d - b.d).forEach((p) => { s += p.svg(); });
 
-  const defs = defsDeLuz();
+  const defs = defsDeLuz()+defsDaTorcida();
   const enquadramento = temCidade() ? "-225 -146 490 294" : temArredores() ? "-205 -122 448 268" : "-205 -122 410 248";
   return '<svg viewBox="' + enquadramento + '" preserveAspectRatio="xMidYMid meet" ' +
          'role="img" aria-label="Estádio isométrico do Vidori: campo, quatro arquibancadas e ' +
