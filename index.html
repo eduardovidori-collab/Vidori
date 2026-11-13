@@ -980,6 +980,8 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
         <span><i style="background:#CFD3D8"></i>Arquibancada</span>
         <span id="legendaAssentos"><i style="background:#C62828"></i><b>Assentos</b></span>
         <span id="legendaRefletores"><i style="background:#607D8B"></i><b>Refletores</b></span>
+        <span><i style="background:#B72C38"></i>Túnel dos jogadores</span>
+        <span><i style="background:#A6C5CD"></i>Bancos de reservas</span>
         <span id="legendaCobertura" hidden><i style="background:#E6EAED"></i>Cobertura</span>
         <span id="legendaPublico" hidden><i style="background:#D8A47A"></i>Torcida</span>
         <span id="legendaPlacar" hidden><i style="background:#172431"></i><b></b></span>
@@ -5725,6 +5727,77 @@ function conves(a, zTopo, d, cTopo, cDir, cEsq, zBase, n, queda) {
   return (a.perto === "x0" || a.perto === "y0") ? degraus + bloco : bloco + degraus;
 }
 
+/** Bancos cobertos na pista, com assentos voltados ao campo e cobertura translúcida. */
+function bancoDeReservas(cx,casa) {
+  const y=-(EST.campoY+EST.pista), fundo=y+1.1, frente=y+6.1;
+  const cor=casa?"#BE303B":"#35434C",sombra=casa?"#92232E":"#25333D";
+  let s=caixa(cx-9.5,fundo,cx+9.5,frente,0.04,0.26,"#CDD4D2","#A6B5B3","#91A5A3");
+  // O espaço técnico termina antes da linha lateral.
+  s+=traco([[cx-10,frente+0.4,0.05],[cx-10,-EST.campoY-0.8,0.05],
+             [cx+10,-EST.campoY-0.8,0.05],[cx+10,frente+0.4,0.05]],"#E5EBE7",0.18,0.8);
+  s+=poligono([[cx-9.1,fundo,0.3],[cx+9.1,fundo,0.3],
+                [cx+9.1,fundo,4.3],[cx-9.1,fundo,4.3]],"#8DB6C2",' fill-opacity=".38"');
+  for(let i=-3;i<=3;i++) {
+    const x=cx+i*2.35;
+    s+=caixa(x-0.65,fundo+0.9,x+0.65,fundo+2.3,0.26,1.1,"#73868B","#536B72","#455C64");
+    s+=caixa(x-0.9,fundo+0.9,x+0.9,fundo+2.5,1.1,1.45,cor,sombra,sombra);
+    s+=caixa(x-0.9,fundo+0.6,x+0.9,fundo+1.05,1.45,2.9,cor,sombra,sombra);
+  }
+  const perfil=[[fundo,4.3],[fundo+0.9,5.1],[frente-1.5,5.1],[frente,4.3]];
+  perfil.slice(0,-1).forEach(([y0,z0],i)=>{
+    const [y1,z1]=perfil[i+1];
+    s+=poligono([[cx-9.3,y0,z0],[cx+9.3,y0,z0],
+                  [cx+9.3,y1,z1],[cx-9.3,y1,z1]],"#C8E0E5",' fill-opacity=".48"');
+  });
+  s+=poligono([[cx+9.3,fundo,0.3],[cx+9.3,frente,0.3],
+                [cx+9.3,frente,4.3],[cx+9.3,frente-1.5,5.1],
+                [cx+9.3,fundo+0.9,5.1],[cx+9.3,fundo,4.3]],"#A5C7D0",' fill-opacity=".28"');
+  [-9.3,-3.1,3.1,9.3].forEach(dx=>{
+    s+=traco([[cx+dx,fundo,0.3],...perfil.map(([cy,z])=>[cx+dx,cy,z]),
+               [cx+dx,frente,0.3]],"#EAF1EF",0.24);
+  });
+  s+=poligono([[cx-9.3,frente+0.02,4],[cx+9.3,frente+0.02,4],
+                [cx+9.3,frente+0.02,4.5],[cx-9.3,frente+0.02,4.5]],cor);
+  s+=textoNaFachada(cx,frente+0.04,4.25,casa?"CASA":"VISITANTE",0.78,"#FFF9F2");
+  const nome=casa?"Banco de reservas da casa":"Banco de reservas visitante";
+  return '<g data-setor="'+(casa?"banco-casa":"banco-visitante")+'"><title>'+nome+'</title>'+s+'</g>';
+}
+
+/** Saída central sob as arquibancadas, com túnel retrátil e boca voltada ao campo. */
+function tunelDosJogadores() {
+  const fundo=-(EST.campoY+EST.pista),frente=fundo+5.4;
+  let s=caixa(-4.8,fundo+0.03,4.8,-EST.campoY-1.1,0.03,0.09,"#B5C0BE","#94A5A2","#7E9691");
+  // A abertura fica abaixo da primeira fileira e alinhada à escada central.
+  s+=poligono([[-4.3,fundo+0.02,0.1],[4.3,fundo+0.02,0.1],
+                [4.3,fundo+0.02,4.6],[3.3,fundo+0.02,5.5],
+                [-3.3,fundo+0.02,5.5],[-4.3,fundo+0.02,4.6]],"#526568");
+  s+=poligono([[-3.8,fundo+0.04,0.1],[3.8,fundo+0.04,0.1],
+                [3.8,fundo+0.04,4.3],[3,fundo+0.04,5],
+                [-3,fundo+0.04,5],[-3.8,fundo+0.04,4.3]],"#1C2A30");
+  const perfil=[[-4.3,2.6],[-3.3,4.7],[3.3,4.7],[4.3,2.6]];
+  s+=poligono([[4.3,fundo,0.2],[4.3,frente,0.2],
+                [4.3,frente,2.6],[4.3,fundo,2.6]],"#8F2833");
+  perfil.slice(0,-1).forEach(([x0,z0],i)=>{
+    const [x1,z1]=perfil[i+1];
+    s+=poligono([[x0,fundo,z0],[x1,fundo,z1],
+                  [x1,frente,z1],[x0,frente,z0]],i===0?"#E8EDE7":i===1?"#C03440":"#A32935");
+  });
+  s+=poligono([[-3.65,frente+0.02,0.18],[3.65,frente+0.02,0.18],
+                [3.65,frente+0.02,2.5],[2.85,frente+0.02,4.1],
+                [-2.85,frente+0.02,4.1],[-3.65,frente+0.02,2.5]],"#233238");
+  s+=poligono([[-2.8,frente-2.3,0.15],[2.8,frente-2.3,0.15],
+                [3.65,frente+0.04,0.15],[-3.65,frente+0.04,0.15]],"#697C7D");
+  for(let i=0;i<=3;i++) {
+    const cy=fundo+(frente-fundo)*i/3;
+    s+=traco([[-4.3,cy,0.2],...perfil.map(([x,z])=>[x,cy,z]),[4.3,cy,0.2]],"#F1F2EB",i===3?0.38:0.23);
+  }
+  s+=textoNaFachada(0,frente+0.04,4.4,"TÚNEL",0.72,"#FFF9F0");
+  [-4.15,4.15].forEach(x=>{
+    s+=traco([[x,frente+0.1,0.12],[x,-EST.campoY-1.2,0.12]],"#AD3440",0.3);
+  });
+  return '<g data-setor="tunel"><title>Túnel de acesso dos jogadores ao campo</title>'+s+'</g>';
+}
+
 /** O segundo anel amplia o mesmo plano de assentos, sem parede intermediária. */
 function arquibancada(a) {
   const C = CORES_EST, perfil = perfilDaArquibancada();
@@ -5739,6 +5812,10 @@ function arquibancada(a) {
     s += poligono([[h.x0, h.y0, zs], [h.x1, h.y0, zs],
                    [h.x1, h.y1, zs], [h.x0, h.y1, zs]], C.sombra);
     s += coberturaDe(a);
+  }
+  // O setor do fundo é desenhado antes dos bancos: a parede não encobre os assentos.
+  if(a.aoLongoDeX && a.perto==="y1") {
+    s+=bancoDeReservas(-19,true)+tunelDosJogadores()+bancoDeReservas(19,false);
   }
   return s;
 }
@@ -6074,6 +6151,7 @@ function desenharEstadio() {
   return '<svg viewBox="' + enquadramento + '" preserveAspectRatio="xMidYMid meet" ' +
          'role="img" aria-label="Estádio isométrico do Vidori: campo, quatro arquibancadas e ' +
          'quatro torres de refletores' + (temRefletores() ? ", acesos" : "") +
+         ". Túnel central de acesso ao campo e bancos cobertos de reservas da casa e visitante" +
          (nivelDaObra("arredores")>=3 ? ". Praça da torcida com monumento de taça e pergolado" : "") +
          (temCidade() ? ". Bairro com ruas, faixas de pedestres, prédios, comércio, carros e ponto de ônibus" : "") +
          (temPlacar() ? ". Placar do ciclo: " + golsDoPlacar() + (golsDoPlacar() === 1 ? " gol" : " gols") : "") + '">' +
@@ -6165,7 +6243,7 @@ function fraseDoEstadio() {
   if (temRefletores()) feitas.push("refletores acesos");
 
   if (!feitas.length) {
-    return "Terreno limpo, campo de terra batida e as quatro arquibancadas de pé. " +
+    return "Campo de terra batida, quatro arquibancadas, túnel dos jogadores e bancos de reservas. " +
            "Toda campanha começa assim.";
   }
   const lista = feitas.length === 1
