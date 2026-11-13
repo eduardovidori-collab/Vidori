@@ -534,10 +534,9 @@ canvas{display:block; width:100%; height:auto}
 .pacote-loja{margin-bottom:18px;scroll-margin-top:185px}
 .pacote-loja [hidden]{display:none}
 .pacote-principal{display:grid;grid-template-columns:110px minmax(0,1fr);gap:20px;align-items:center}
-.pacote-arte{height:143px;border-radius:9px;border:1px solid #D4DADD;background:linear-gradient(160deg,#fff 0 45%,#C52F3B 45% 55%,#fff 55% 59%,#222A2D 59% 69%,#F6F7F3 69%);box-shadow:0 6px 13px rgba(15,25,30,.12);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:12px 6px}
-.pacote-arte span{font-size:10px;font-weight:800;letter-spacing:.13em}
-.pacote-arte .camisa-time{width:48px;height:46px;margin-bottom:12px}
-.pacote-arte small{font-size:9px;font-weight:700}
+.pacote-arte{height:154px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 7px 7px rgba(26,35,39,.17))}
+.pacote-arte svg{display:block;width:100%;height:100%;overflow:visible}
+.pacote-nota-teste{font-size:11px;color:var(--fraco);line-height:1.5;margin:0 0 12px}
 .pacote-titulo{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}
 .pacote-titulo h3{font-size:18px;margin:0}
 .pacote-descricao{font-size:13px;color:var(--fraco);line-height:1.6;margin-bottom:12px}
@@ -567,7 +566,7 @@ canvas{display:block; width:100%; height:auto}
 @keyframes cartaEntrando{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.carta-revelada{animation:none}}
 @media(max-width:580px){
- .pacote-principal{grid-template-columns:82px minmax(0,1fr);gap:13px}.pacote-arte{height:125px}
+ .pacote-principal{grid-template-columns:82px minmax(0,1fr);gap:13px}.pacote-arte{height:130px}
  .pacote-titulo h3{font-size:16px}.pacote-descricao{font-size:12px}.pacote-acoes .btn{width:100%}
  .pacote-revelacao{gap:9px}.carta-revelada{padding:12px 8px}.carta-revelada h3{font-size:14px}
  .carta-revelada .camisa-time{width:57px;height:54px}.carta-revelada .carta-ovr{font-size:27px}
@@ -1077,10 +1076,39 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
   <div class="cartao pacote-loja" id="pacotesLoja"><div class="cartao-corpo">
     <h2>Pacotes de jogadores</h2>
     <div class="pacote-principal">
-      <div class="pacote-arte" aria-hidden="true"><span>BASE</span><span class="escudo"></span><small>2 JOGADORES</small></div>
+      <div class="pacote-arte" aria-hidden="true">
+        <svg viewBox="0 0 140 176" focusable="false">
+          <defs>
+            <linearGradient id="basePacotePapel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFFFFF"/><stop offset=".55" stop-color="#F7F6F0"/><stop offset="1" stop-color="#E7E9E3"/></linearGradient>
+            <linearGradient id="basePacoteDobra"><stop stop-color="#D5DCD5"/><stop offset="1" stop-color="#ABB7AF"/></linearGradient>
+          </defs>
+          <path d="M112 14L123 20V160L113 167Z" fill="url(#basePacoteDobra)"/>
+          <rect x="17" y="11" width="97" height="156" rx="6" fill="url(#basePacotePapel)" stroke="#D4DAD3"/>
+          <path d="M18 10L23 7H108L114 11V20H18Z" fill="#F4F5F0" stroke="#D4DAD3" stroke-width=".7"/>
+          <path d="M18 157H114V166L109 170H23L18 166Z" fill="#E9EDE6" stroke="#CFD7CD" stroke-width=".7"/>
+          <g stroke="#CDD5CD" stroke-width=".6" opacity=".8"><path d="M26 10V17M33 10V17M40 10V17M47 10V17M54 10V17M61 10V17M68 10V17M75 10V17M82 10V17M89 10V17M96 10V17M103 10V17M26 161V167M33 161V167M40 161V167M47 161V167M54 161V167M61 161V167M68 161V167M75 161V167M82 161V167M89 161V167M96 161V167M103 161V167"/></g>
+          <g text-anchor="middle" font-family="Segoe UI,Arial,sans-serif">
+            <text x="66" y="38" font-size="8.5" font-weight="800" letter-spacing="1.5" fill="#27312F">COPEIRO</text>
+            <text x="66" y="50" font-size="5.7" font-weight="600" letter-spacing="2" fill="#7D8A80">PACOTE DE JOGADORES</text>
+          </g>
+          <path d="M25 60H106" stroke="#C82F3D" stroke-width="2.3"/>
+          <path d="M25 64H106" stroke="#25312C" stroke-width="1.2"/>
+          <path d="M41 78H91V101Q80 117 66 124Q52 117 41 101Z" fill="#FCFBF6" stroke="#BEC9BF" stroke-width="1.1"/>
+          <path d="M45 82H87V92H45Z" fill="#26332D"/>
+          <text x="66" y="89.5" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="7" font-weight="800" letter-spacing="1.5" fill="#FFFFFF">BASE</text>
+          <path d="M45 96H63V117Q53 111 45 100Z" fill="#C92D3D"/>
+          <path d="M69 96H87V100Q79 111 69 117Z" fill="#26332D"/>
+          <g text-anchor="middle" font-family="Segoe UI,Arial,sans-serif">
+            <text x="66" y="140" font-size="6.4" font-weight="800" letter-spacing=".65" fill="#344338">2 JOGADORES</text>
+            <text x="66" y="150" font-size="5" letter-spacing="1" fill="#859080">ELENCO TRICOLOR</text>
+          </g>
+          <path d="M21 23V151" stroke="#FFFFFF" stroke-width="1.5" opacity=".8"/>
+        </svg>
+      </div>
       <div>
         <div class="pacote-titulo"><h3>Pacote Base</h3><span class="preco" id="precoPacoteBase">20 moedas</span></div>
         <p class="pacote-descricao">Dois jogadores diferentes que passaram pelo SPFC. Quanto maior o OVR, mais difícil de tirar.</p>
+        <p class="pacote-nota-teste" id="notaCatalogoTeste" hidden></p>
         <div class="pacote-acoes"><button class="btn btn-principal" type="button" id="btnComprarPacoteBase">Comprar e abrir · 20 moedas</button><button class="btn btn-pequeno" type="button" id="btnUltimoPacote" hidden>Ver último pacote</button></div>
       </div>
     </div>
@@ -1090,7 +1118,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <p>Cartas repetidas em outros pacotes ficam guardadas como cópias extras no elenco.</p>
     </details>
     <details class="pacote-detalhes"><summary>Jogadores e OVRs do pacote</summary>
-      <p>Notas próprias do Copeiro, inspiradas na passagem de cada jogador pelo clube, para equilibrar a coleção.</p>
+      <p>Jogadores, posições e OVRs definidos para este teste.</p>
       <div class="catalogo-cartas"><table class="pacote-tabela"><thead><tr><th scope="col">Jogador</th><th scope="col">Pos.</th><th scope="col">OVR</th></tr></thead><tbody id="catalogoPacote"></tbody></table></div>
     </details>
   </div></div>
@@ -1548,84 +1576,10 @@ const RARIDADES_TIME = [
   {id:"idolo",nome:"Ídolo",min:90,max:94,cor:"#B57922"},
   {id:"lenda",nome:"Lenda",min:95,max:100,cor:"#B52D42"}
 ];
-// OVRs de equilíbrio do jogo, fixos por atleta; não são avaliações oficiais.
+// Catálogo de teste definido pelo usuário. Novas cartas entram quando ele indicar.
 const JOGADORES_SPFC = [
-  {"id":"thiago-couto","nome":"Thiago Couto","posicao":"GOL","ovr":52},
-  {"id":"sidao","nome":"Sidão","posicao":"GOL","ovr":58},
-  {"id":"denis","nome":"Denis","posicao":"GOL","ovr":64},
-  {"id":"volpi","nome":"Tiago Volpi","posicao":"GOL","ovr":76},
-  {"id":"zetti","nome":"Zetti","posicao":"GOL","ovr":94},
-  {"id":"ceni","nome":"Rogério Ceni","posicao":"GOL","ovr":100},
-  {"id":"lucao","nome":"Lucão","posicao":"ZAG","ovr":50},
-  {"id":"edson-silva","nome":"Edson Silva","posicao":"ZAG","ovr":60},
-  {"id":"paulo-miranda","nome":"Paulo Miranda","posicao":"ZAG","ovr":66},
-  {"id":"maicon-zag","nome":"Maicon","posicao":"ZAG","ovr":78},
-  {"id":"arboleda","nome":"Arboleda","posicao":"ZAG","ovr":85},
-  {"id":"miranda","nome":"Miranda","posicao":"ZAG","ovr":89},
-  {"id":"ricardo-rocha","nome":"Ricardo Rocha","posicao":"ZAG","ovr":91},
-  {"id":"dario-pereyra","nome":"Dario Pereyra","posicao":"ZAG","ovr":95},
-  {"id":"lugano","nome":"Lugano","posicao":"ZAG","ovr":96},
-  {"id":"douglas","nome":"Douglas","posicao":"LD","ovr":54},
-  {"id":"bruno","nome":"Bruno","posicao":"LD","ovr":55},
-  {"id":"orejuela","nome":"Orejuela","posicao":"LD","ovr":56},
-  {"id":"buffarini","nome":"Buffarini","posicao":"LD","ovr":62},
-  {"id":"ilsinho","nome":"Ilsinho","posicao":"LD","ovr":76},
-  {"id":"cicinho","nome":"Cicinho","posicao":"LD","ovr":88},
-  {"id":"cafu","nome":"Cafu","posicao":"LD","ovr":96},
-  {"id":"clemente","nome":"Clemente Rodríguez","posicao":"LE","ovr":54},
-  {"id":"edimar","nome":"Edimar","posicao":"LE","ovr":60},
-  {"id":"cortez","nome":"Cortez","posicao":"LE","ovr":65},
-  {"id":"reinaldo","nome":"Reinaldo","posicao":"LE","ovr":73},
-  {"id":"alvaro-pereira","nome":"Álvaro Pereira","posicao":"LE","ovr":75},
-  {"id":"fabio-santos","nome":"Fábio Santos","posicao":"LE","ovr":80},
-  {"id":"junior","nome":"Júnior","posicao":"LE","ovr":86},
-  {"id":"leonardo","nome":"Leonardo","posicao":"LE","ovr":90},
-  {"id":"hudson","nome":"Hudson","posicao":"VOL","ovr":62},
-  {"id":"wellington","nome":"Wellington","posicao":"VOL","ovr":67},
-  {"id":"jucilei","nome":"Jucilei","posicao":"VOL","ovr":74},
-  {"id":"denilson-vol","nome":"Denílson (volante)","posicao":"VOL","ovr":75},
-  {"id":"mineiro","nome":"Mineiro","posicao":"VOL","ovr":84},
-  {"id":"josue","nome":"Josué","posicao":"VOL","ovr":85},
-  {"id":"cerezo","nome":"Toninho Cerezo","posicao":"VOL","ovr":94},
-  {"id":"carlinhos-paraiba","nome":"Carlinhos Paraíba","posicao":"MC","ovr":59},
-  {"id":"nestor","nome":"Rodrigo Nestor","posicao":"MC","ovr":78},
-  {"id":"cueva","nome":"Cueva","posicao":"MC","ovr":81},
-  {"id":"ganso","nome":"Ganso","posicao":"MC","ovr":85},
-  {"id":"danilo","nome":"Danilo","posicao":"MC","ovr":86},
-  {"id":"hernanes","nome":"Hernanes","posicao":"MC","ovr":91},
-  {"id":"kaka","nome":"Kaká","posicao":"MC","ovr":97},
-  {"id":"rai","nome":"Raí","posicao":"MC","ovr":99},
-  {"id":"fernandinho","nome":"Fernandinho","posicao":"PE","ovr":62},
-  {"id":"marlos","nome":"Marlos","posicao":"PE","ovr":64},
-  {"id":"osvaldo","nome":"Osvaldo","posicao":"PE","ovr":77},
-  {"id":"michel-bastos","nome":"Michel Bastos","posicao":"PE","ovr":80},
-  {"id":"dagoberto","nome":"Dagoberto","posicao":"PE","ovr":87},
-  {"id":"denilson","nome":"Denílson","posicao":"PE","ovr":89},
-  {"id":"muller","nome":"Müller","posicao":"PE","ovr":93},
-  {"id":"wellington-nem","nome":"Wellington Nem","posicao":"PD","ovr":58},
-  {"id":"centurion","nome":"Centurión","posicao":"PD","ovr":63},
-  {"id":"ademilson","nome":"Ademilson","posicao":"PD","ovr":64},
-  {"id":"marcos-guilherme","nome":"Marcos Guilherme","posicao":"PD","ovr":69},
-  {"id":"neres","nome":"David Neres","posicao":"PD","ovr":82},
-  {"id":"antony","nome":"Antony","posicao":"PD","ovr":84},
-  {"id":"lucas","nome":"Lucas Moura","posicao":"PD","ovr":92},
-  {"id":"trellez","nome":"Santiago Tréllez","posicao":"ATA","ovr":55},
-  {"id":"pablo","nome":"Pablo","posicao":"ATA","ovr":60},
-  {"id":"gilberto","nome":"Gilberto","posicao":"ATA","ovr":68},
-  {"id":"aloisio","nome":"Aloísio Chulapa","posicao":"ATA","ovr":81},
-  {"id":"calleri","nome":"Calleri","posicao":"ATA","ovr":87},
-  {"id":"franca","nome":"França","posicao":"ATA","ovr":89},
-  {"id":"luis-fabiano","nome":"Luís Fabiano","posicao":"ATA","ovr":94},
-  {"id":"careca","nome":"Careca","posicao":"ATA","ovr":98},
-  {"id":"leonidas","nome":"Leônidas da Silva","posicao":"ATA","ovr":99},
-  {"id":"richarlyson","nome":"Richarlyson","posicao":"VOL","ovr":78},
-  {"id":"alex-silva","nome":"Alex Silva","posicao":"ZAG","ovr":79},
-  {"id":"rodrigo-caio","nome":"Rodrigo Caio","posicao":"ZAG","ovr":79},
-  {"id":"souza","nome":"Souza","posicao":"MC","ovr":78},
-  {"id":"alisson","nome":"Alisson","posicao":"MC","ovr":76},
-  {"id":"wellington-rato","nome":"Wellington Rato","posicao":"PD","ovr":74},
-  {"id":"aloisio-boi","nome":"Aloísio (Boi Bandido)","posicao":"ATA","ovr":77},
-  {"id":"eder","nome":"Éder","posicao":"ATA","ovr":72}
+  {id:"pablo",nome:"Pablo",posicao:"ATA",ovr:59},
+  {id:"orejuela",nome:"Orejuela",posicao:"LD",ovr:50}
 ];
 
 function raridadeDoJogador(j) {
@@ -1653,13 +1607,11 @@ function normalizarMeuTime(dados) {
   const nome=typeof fonte.nome==="string" ? fonte.nome.trim().slice(0,40) : "";
   const jogadores=[],ids=new Set(),codigos=new Set(POSICOES_TIME.map(p=>p.sigla));
   if(Array.isArray(fonte.jogadores)) fonte.jogadores.forEach(j=>{
-    if(!j || typeof j.id!=="string" || !j.id || typeof j.nome!=="string" || !j.nome.trim() ||
-       !codigos.has(j.posicao) || ids.has(j.id)) return;
-    ids.add(j.id);
+    if(!j || typeof j.id!=="string" || ids.has(j.id)) return;
     const ficha=JOGADORES_SPFC.find(f=>f.id===j.id);
-    jogadores.push({id:j.id,nome:ficha?ficha.nome:j.nome.trim().slice(0,60),posicao:ficha?ficha.posicao:j.posicao,
-      ovr:ficha?ficha.ovr:(Number.isInteger(j.ovr)&&j.ovr>=50&&j.ovr<=100?j.ovr:null),
-      quantidade:Number.isSafeInteger(j.quantidade)&&j.quantidade>0?j.quantidade:1});
+    if(!ficha || !codigos.has(ficha.posicao)) return;
+    ids.add(j.id);
+    jogadores.push({...ficha,quantidade:Number.isSafeInteger(j.quantidade)&&j.quantidade>0?j.quantidade:1});
   });
   const escalacao={},usados=new Set();
   POSICOES_TIME.forEach(p=>{
@@ -1673,7 +1625,10 @@ function normalizarMeuTime(dados) {
   return {nome:nome || "Meu Tricolor",jogadores,escalacao,gastoPacotes,
     ultimoPacote:ultimoPacote.length===2&&ultimoPacote[0].id!==ultimoPacote[1].id?ultimoPacote:[]};
 }
-let meuTime=normalizarMeuTime(Armazem.ler(CHAVES.meuTime,null));
+const timeSalvo=Armazem.ler(CHAVES.meuTime,null);
+let meuTime=normalizarMeuTime(timeSalvo);
+// Retira do elenco e das vagas as cartas que saíram do catálogo de teste.
+if(timeSalvo && JSON.stringify(timeSalvo)!==JSON.stringify(meuTime)) Armazem.gravar(CHAVES.meuTime,meuTime);
 let posicaoTimeSelecionada="gol";
 function salvarMeuTime() { meuTime=normalizarMeuTime(meuTime); return Armazem.gravar(CHAVES.meuTime,meuTime); }
 
@@ -4492,7 +4447,10 @@ $("#btnRemoverTitular").addEventListener("click",()=>{
    PACOTE BASE — duas cartas distintas; elenco e débito gravados juntos.
    -------------------------------------------------------------------------- */
 function renderPacoteBase() {
-  const pode=saldoMoedas()>=PACOTE_BASE.preco && !abrindoPacote;
+  const pode=saldoMoedas()>=PACOTE_BASE.preco && !abrindoPacote && JOGADORES_SPFC.length>=PACOTE_BASE.quantidade;
+  const teste=JOGADORES_SPFC.length===PACOTE_BASE.quantidade;
+  $("#notaCatalogoTeste").hidden=!teste;
+  $("#notaCatalogoTeste").textContent=teste?"Catálogo de teste: dois jogadores. Cada pacote traz um de cada.":"";
   $("#btnComprarPacoteBase").disabled=!pode;
   $("#btnComprarPacoteBase").textContent="Comprar e abrir · "+PACOTE_BASE.preco+" moedas";
   $("#precoPacoteBase").textContent=PACOTE_BASE.preco+" moedas";
@@ -4520,7 +4478,7 @@ function abrirResultadoPacote() {
   $("#pacoteFechar").focus();
 }
 function comprarPacoteBase() {
-  if(abrindoPacote) return false;
+  if(abrindoPacote || JOGADORES_SPFC.length<PACOTE_BASE.quantidade) return false;
   if(saldoMoedas()<PACOTE_BASE.preco) {mostrarAviso("O Pacote Base custa "+PACOTE_BASE.preco+" moedas.");return false;}
   const primeiro=sortearJogadorDoPacote();
   const segundo=sortearJogadorDoPacote([primeiro.id]);
