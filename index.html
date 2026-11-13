@@ -563,8 +563,20 @@ canvas{display:block; width:100%; height:auto}
 .carta-revelada .carta-repetida{font-size:10px;color:var(--fraco);margin-top:12px}
 #modalPacote .modal-caixa{max-width:580px}
 #modalPacote .modal-botoes{margin-top:18px}
+#modalPacote [hidden]{display:none}
+.pacote-abertura{height:270px;position:relative;display:grid;place-items:center;overflow:hidden;margin-top:12px}
+.pacote-abertura::before{content:"";position:absolute;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,#FFF 10%,#F9E7E8 40%,transparent 70%);animation:pacoteBrilho 1.1s ease-out both}
+.pacote-abertura-involucro{position:relative;width:140px;height:176px;filter:drop-shadow(0 10px 12px rgba(26,35,39,.18));animation:pacoteBalanco 1.1s ease-in-out both}
+.pacote-abertura-parte{position:absolute;inset:0}
+.pacote-abertura-parte svg{display:block;width:100%;height:100%}
+.pacote-abertura-tampa{clip-path:inset(0 0 86% 0);animation:pacoteLacre 1.1s ease-in-out both}
+.pacote-abertura-corpo{clip-path:inset(14% 0 0 0);animation:pacoteDesliza 1.1s ease-in-out both}
+@keyframes pacoteBalanco{0%{opacity:0;transform:translateY(12px) scale(.9)}20%,45%{opacity:1;transform:rotate(0)}30%{transform:rotate(-4deg)}38%{transform:rotate(4deg)}55%,100%{opacity:1;transform:rotate(0)}}
+@keyframes pacoteLacre{0%,52%{transform:translateY(0);opacity:1}82%,100%{transform:translate(12px,-45px) rotate(12deg);opacity:0}}
+@keyframes pacoteDesliza{0%,65%{transform:translateY(0);opacity:1}100%{transform:translateY(35px) scale(1.03);opacity:0}}
+@keyframes pacoteBrilho{0%,35%{opacity:0;transform:scale(.6)}70%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.2)}}
 @keyframes cartaEntrando{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@media(prefers-reduced-motion:reduce){.carta-revelada{animation:none}}
+@media(prefers-reduced-motion:reduce){#modalPacote .modal-caixa,.carta-revelada,.pacote-abertura::before,.pacote-abertura-involucro,.pacote-abertura-parte{animation:none}}
 @media(max-width:580px){
  .pacote-principal{grid-template-columns:82px minmax(0,1fr);gap:13px}.pacote-arte{height:130px}
  .pacote-titulo h3{font-size:16px}.pacote-descricao{font-size:12px}.pacote-acoes .btn{width:100%}
@@ -1231,7 +1243,8 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <div class="modal" id="modalPacote" role="dialog" aria-modal="true" aria-labelledby="tituloPacote" aria-describedby="resumoPacote">
   <div class="modal-caixa"><div class="faixas"></div><div class="modal-corpo">
     <div class="frase" id="tituloPacote">Seu Pacote Base</div>
-    <p class="subtexto" id="resumoPacote">Duas cartas adicionadas ao seu elenco.</p>
+    <p class="subtexto" id="resumoPacote" aria-live="polite">Duas cartas adicionadas ao seu elenco.</p>
+    <div class="pacote-abertura" id="animacaoPacote" aria-hidden="true" hidden></div>
     <div class="pacote-revelacao" id="cartasDoPacote"></div>
     <div class="modal-botoes"><button class="btn btn-principal" type="button" id="pacoteMeuTime">Ir para Meu time</button><button class="btn" type="button" id="pacoteFechar">Fechar</button></div>
   </div></div>
@@ -1579,7 +1592,9 @@ const RARIDADES_TIME = [
 // Catálogo de teste definido pelo usuário. Novas cartas entram quando ele indicar.
 const JOGADORES_SPFC = [
   {id:"pablo",nome:"Pablo",posicao:"ATA",ovr:59},
-  {id:"orejuela",nome:"Orejuela",posicao:"LD",ovr:50}
+  {id:"orejuela",nome:"Orejuela",posicao:"LD",ovr:50},
+  {id:"sidao",nome:"Sidão",posicao:"GOL",ovr:55},
+  {id:"jucilei",nome:"Jucilei",posicao:"VOL",ovr:58}
 ];
 
 function raridadeDoJogador(j) {
@@ -1601,6 +1616,7 @@ function sortearJogadorDoPacote(excluidos=[]) {
   return candidatos[candidatos.length-1];
 }
 let abrindoPacote=false;
+let animacaoPacoteTimer=null;
 
 function normalizarMeuTime(dados) {
   const fonte=dados && typeof dados==="object" ? dados : {};
@@ -4461,8 +4477,10 @@ function renderPacoteBase() {
   $("#catalogoPacote").innerHTML=[...JOGADORES_SPFC].sort((a,b)=>b.ovr-a.ovr||a.nome.localeCompare(b.nome,"pt-BR")).map(j=>
     '<tr class="raridade-'+raridadeDoJogador(j).id+'"><td>'+escapar(j.nome)+'</td><td>'+j.posicao+'</td><td><span class="carta-raridade">'+j.ovr+'</span></td></tr>').join('');
 }
-function abrirResultadoPacote() {
+function abrirResultadoPacote(animar=false) {
   if(meuTime.ultimoPacote.length!==2) return;
+  clearTimeout(animacaoPacoteTimer);
+  animacaoPacoteTimer=null;
   abrindoPacote=true;
   $("#cartasDoPacote").innerHTML=meuTime.ultimoPacote.map(c=>{
     const j=JOGADORES_SPFC.find(j=>j.id===c.id),r=raridadeDoJogador(j);
@@ -4472,7 +4490,26 @@ function abrirResultadoPacote() {
       '<span class="carta-raridade">'+r.nome+'</span><h3>'+escapar(j.nome)+'</h3>'+
       '<p class="carta-repetida">'+(c.nova?'Nova carta':'Cópia extra')+' · '+(guardado?guardado.quantidade:1)+' no elenco</p></article>';
   }).join('');
-  $("#resumoPacote").textContent="As duas cartas já estão salvas no seu elenco.";
+  const animando=animar && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  $("#animacaoPacote").hidden=!animando;
+  $("#cartasDoPacote").hidden=animando;
+  $("#pacoteMeuTime").hidden=animando;
+  $("#tituloPacote").textContent=animando?"Abrindo seu pacote…":"Seu Pacote Base";
+  $("#resumoPacote").textContent=animando?"O seu reforço tricolor está chegando.":"As duas cartas já estão salvas no seu elenco.";
+  if(animando) {
+    // Reutiliza a embalagem da loja; cada cópia tem gradientes próprios no SVG.
+    const arte=lado=>$(".pacote-arte svg").outerHTML.replace(/basePacote/g,"abertura"+lado);
+    $("#animacaoPacote").innerHTML='<div class="pacote-abertura-involucro"><div class="pacote-abertura-parte pacote-abertura-tampa">'+arte("Tampa")+'</div><div class="pacote-abertura-parte pacote-abertura-corpo">'+arte("Corpo")+'</div></div>';
+    animacaoPacoteTimer=setTimeout(()=>{
+      animacaoPacoteTimer=null;
+      $("#animacaoPacote").hidden=true;
+      $("#animacaoPacote").replaceChildren();
+      $("#cartasDoPacote").hidden=false;
+      $("#pacoteMeuTime").hidden=false;
+      $("#tituloPacote").textContent="Seu Pacote Base";
+      $("#resumoPacote").textContent="As duas cartas já estão salvas no seu elenco.";
+    },1100);
+  }
   $("#modalPacote").classList.add("aberto");
   renderPacoteBase();
   $("#pacoteFechar").focus();
@@ -4497,17 +4534,20 @@ function comprarPacoteBase() {
   // Uma única gravação persiste tanto as cartas quanto o custo do pacote.
   if(!Armazem.gravar(CHAVES.meuTime,proximo)) return false;
   meuTime=proximo;
-  abrirResultadoPacote();
+  abrirResultadoPacote(true);
   renderMeuTime();renderLoja();
   return true;
 }
 function fecharModalPacote() {
   if(!$("#modalPacote").classList.contains("aberto")) return;
+  clearTimeout(animacaoPacoteTimer);animacaoPacoteTimer=null;
+  $("#animacaoPacote").replaceChildren();
+  $("#animacaoPacote").hidden=true;
   $("#modalPacote").classList.remove("aberto");abrindoPacote=false;renderPacoteBase();
   ($("#btnComprarPacoteBase").disabled?$("#btnUltimoPacote"):$("#btnComprarPacoteBase")).focus({preventScroll:true});
 }
 $("#btnComprarPacoteBase").addEventListener("click",comprarPacoteBase);
-$("#btnUltimoPacote").addEventListener("click",abrirResultadoPacote);
+$("#btnUltimoPacote").addEventListener("click",()=>abrirResultadoPacote());
 $("#pacoteFechar").addEventListener("click",fecharModalPacote);
 $("#pacoteMeuTime").addEventListener("click",()=>{
   const carta=JOGADORES_SPFC.find(j=>j.id===meuTime.ultimoPacote[0]?.id);
@@ -4520,7 +4560,7 @@ $("#pacoteMeuTime").addEventListener("click",()=>{
 $("#modalPacote").addEventListener("click",e=>{if(e.target.id==="modalPacote") fecharModalPacote();});
 $("#modalPacote").addEventListener("keydown",e=>{
   if(e.key!=="Tab") return;
-  const botoes=Array.from($("#modalPacote").querySelectorAll("button")).filter(b=>!b.disabled);
+  const botoes=Array.from($("#modalPacote").querySelectorAll("button")).filter(b=>!b.disabled&&!b.hidden);
   const primeiro=botoes[0],ultimo=botoes[botoes.length-1];
   if(e.shiftKey&&document.activeElement===primeiro){e.preventDefault();ultimo.focus();}
   else if(!e.shiftKey&&document.activeElement===ultimo){e.preventDefault();primeiro.focus();}
