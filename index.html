@@ -4835,11 +4835,11 @@ function caixa(x0, y0, x1, y1, z0, z1, cTopo, cDir, cEsq) {
 const EST = {
   campoX: 52, campoY: 33,      // meio-campo
   pista: 9,                     // faixa entre a linha e a arquibancada
-  arqFundo: 21, arqAlt: 8,      // profundidade e altura das arquibancadas
+  arqFundo: 21, arqAlt: 11,     // arquibancadas mais altas, mantendo o recuo dos arredores
   assentos: 10,                 // quanto da arquibancada é assento
-  recuoAnel: 9, altAnel: 4,     // o anel de cima recua do campo e sobe menos
+  recuoAnel: 9, altAnel: 6,     // o segundo anel prolonga a subida das fileiras
   assentosAnel: 9,
-  degraus: 6, inclinacaoAssentos: 0.22, // desnível proporcional à largura de cada anel
+  degraus: 6, inclinacaoAssentos: 0.34, // subida mais marcada, com os dois anéis conectados
   areaPorTorcedor: [16, 7],       // unidades de arquibancada por pessoa, por nível
   terrenoX: 121, terrenoY: 108, // espaço livre mesmo com anel e cobertura
   terrenoXDireita: 164,         // extensão lateral para o lote separado do prédio
@@ -5005,21 +5005,21 @@ function textoNaFachada(cx, cy, z, texto, tamanho, cor, extra) {
 /** Placar independente das outras obras, com os gols do ciclo ativo. */
 function placarDeEstudo() {
   const cx = -12, cy = -87;
-  let s = sombraNoChao(cx,cy,22,5);
-  [-13,13].forEach((dx) => {
+  let s = sombraNoChao(cx,cy,18.5,4.5);
+  [-11,11].forEach((dx) => {
     s += caixa(cx+dx-2,cy-2,cx+dx+2,cy+2,0,0.7,"#AAB4BC","#87949E","#72818C");
-    s += caixa(cx+dx-0.85,cy-0.85,cx+dx+0.85,cy+0.85,0.7,15,"#748593","#566875","#40515E");
+    s += caixa(cx+dx-0.85,cy-0.85,cx+dx+0.85,cy+0.85,0.7,13,"#748593","#566875","#40515E");
   });
-  s += caixa(cx-19,cy-1,cx+19,cy+1,12,31,"#506372","#334552","#243541");
-  s += poligono([[cx-17.8,cy+1.05,29.7],[cx+17.8,cy+1.05,29.7],
-                 [cx+17.8,cy+1.05,13.3],[cx-17.8,cy+1.05,13.3]],"#101E2A");
-  s += caixa(cx-19,cy-1,cx+19,cy+1,30.2,31,"#D44247","#AC252E","#8D1B25");
-  s += textoNaFachada(cx,cy+1.1,27.5,"GOLS DO CICLO",1.9,"#C5D2DC");
+  s += caixa(cx-16,cy-1,cx+16,cy+1,10.5,26.5,"#506372","#334552","#243541");
+  s += poligono([[cx-14.9,cy+1.05,25.3],[cx+14.9,cy+1.05,25.3],
+                 [cx+14.9,cy+1.05,11.6],[cx-14.9,cy+1.05,11.6]],"#101E2A");
+  s += caixa(cx-16,cy-1,cx+16,cy+1,25.8,26.5,"#D44247","#AC252E","#8D1B25");
+  s += textoNaFachada(cx,cy+1.1,23.6,"GOLS DO CICLO",1.7,"#C5D2DC");
   const numero = golsDoPlacar().toLocaleString("pt-BR").padStart(2,"0");
-  const tamanho = Math.min(9.5,30/(numero.length*0.65));
-  s += textoNaFachada(cx,cy+1.12,21.3,numero,tamanho,"#F3FAFF",
+  const tamanho = Math.min(8.5,25/(numero.length*0.65));
+  s += textoNaFachada(cx,cy+1.12,18.6,numero,tamanho,"#F3FAFF",
     ' font-variant-numeric="tabular-nums" letter-spacing="0.5"');
-  s += textoNaFachada(cx,cy+1.1,15.3,cicloAtivo() ? "1 HORA = 1 GOL" : "SEM CICLO ATIVO",1.6,"#99B4C7");
+  s += textoNaFachada(cx,cy+1.1,13,cicloAtivo() ? "1 HORA = 1 GOL" : "SEM CICLO ATIVO",1.45,"#99B4C7");
   return s;
 }
 
@@ -5875,7 +5875,7 @@ function desenharEstadio() {
   // terreno: bloco de terra com grama em cima
   s += caixa(-bx, -by, bxDireita, by, -7, 0, C.gramaFora, C.terraDir, C.terraEsq);
   if (temArredores()) s += pisoDosArredores();
-  if (temPlacar()) s += caixa(-35,-93,11,-81,0,0.14,"#DADDD5","#BDC4BB","#ACB6AB");
+  if (temPlacar()) s += caixa(-31,-92,7,-82,0,0.14,"#DADDD5","#BDC4BB","#ACB6AB");
   // pista ao redor do campo
   s += poligono([[-px,-py,0.02],[px,-py,0.02],[px,py,0.02],[-px,py,0.02]], C.pista);
   // o campo: terra batida até a grama ser plantada
