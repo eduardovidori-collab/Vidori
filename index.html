@@ -573,6 +573,11 @@ canvas{display:block; width:100%; height:auto}
 .time-iniciais{width:40px;height:44px;flex-shrink:0;border-radius:8px;background:linear-gradient(180deg,#FFFFFF 38%,#BE303C 38% 48%,#FFFFFF 48% 54%,#24282C 54% 64%,#FFFFFF 64%);border:1px solid #D7DADE;display:grid;place-items:center;font-size:12px;font-weight:800;color:#111;text-shadow:0 0 3px white,0 0 3px white}
 .time-carta .btn{width:100%}
 .time-remover{margin-top:12px;width:100%}
+.time-venda-valores{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+.time-venda-valores span{font-size:11px;font-weight:700;padding:5px 8px;border-radius:7px;background:var(--carta-fundo);color:var(--carta)}
+.time-repetidos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin-top:12px}
+.time-repetidos:empty{display:none}.time-repetidos .time-carta{display:flex;flex-direction:column}
+.time-repetidos .time-carta .btn{margin-top:auto;font-size:12px}.time-venda-info{font-size:11px;color:var(--fraco);line-height:1.5;margin-bottom:12px}
 #painel-time [hidden]{display:none}
 @media(max-width:900px){.grade-time{grid-template-columns:minmax(0,1fr)}.grade-time>.coluna{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}}
 @media(max-width:580px){
@@ -1077,7 +1082,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
           <p class="subtexto">Seu elenco, sua escalação.</p>
         </div>
       </div>
-      <div class="time-marcadores"><span class="time-formacao">4-3-3</span><span class="time-contagem" id="timeContagem" aria-live="polite">0 de 11 escalados</span></div>
+      <div class="time-marcadores"><span class="time-formacao">4-3-3</span><span class="time-contagem" id="timeContagem" aria-live="polite">0 de 11 escalados</span><span class="estadio-saldo" role="status" aria-live="polite"><b id="saldoMeuTime">0</b> moedas</span><button class="btn btn-pequeno" type="button" data-time-repetidos>Ver repetidos</button></div>
     </div>
   </div>
   <div class="grade-time">
@@ -1117,6 +1122,13 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       </div></div>
     </div>
   </div>
+  <div class="cartao" id="repetidosMeuTime" style="margin-top:18px"><div class="cartao-corpo">
+    <h3 id="tituloRepetidos" tabindex="-1">Cartas repetidas</h3>
+    <p class="subtexto">Venda uma cópia extra por vez. A última carta de cada jogador fica no seu elenco.</p>
+    <div class="time-venda-valores" id="valoresVendaRepetidos" aria-label="Valor de venda por raridade"></div>
+    <p class="dica" id="resumoRepetidos" role="status" aria-live="polite"></p>
+    <div class="time-repetidos" id="timeRepetidos"></div>
+  </div></div>
 </section>
 
 <!-- =================================================== PAINEL: HISTÓRICO -->
@@ -1150,7 +1162,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
         <div>
           <p class="subtexto" id="explicaMoeda"></p>
           <p class="dica">Moeda não expira, não zera e não desconta por dia parado.
-            É troco do que já foi estudado — nada além disso.</p>
+            Ganhe estudando ou vendendo cópias repetidas do seu elenco.</p>
         </div>
       </div>
       <div class="controles" style="margin-top:16px">
@@ -1686,11 +1698,11 @@ const POSICOES_TIME = [
 
 const PACOTE_BASE = {preco:15,quantidade:2};
 const RARIDADES_TIME = [
-  {id:"comum",nome:"Comum",min:50,max:69,cor:"#64776B"},
-  {id:"raro",nome:"Raro",min:70,max:79,cor:"#286BA0"},
-  {id:"epico",nome:"Épico",min:80,max:89,cor:"#7D4BAC"},
-  {id:"idolo",nome:"Ídolo",min:90,max:94,cor:"#B57922"},
-  {id:"lenda",nome:"Lenda",min:95,max:100,cor:"#B52D42"}
+  {id:"comum",nome:"Comum",min:50,max:69,cor:"#64776B",venda:5},
+  {id:"raro",nome:"Raro",min:70,max:79,cor:"#286BA0",venda:7},
+  {id:"epico",nome:"Épico",min:80,max:89,cor:"#7D4BAC",venda:10},
+  {id:"idolo",nome:"Ídolo",min:90,max:94,cor:"#B57922",venda:15},
+  {id:"lenda",nome:"Lenda",min:95,max:100,cor:"#B52D42",venda:20}
 ];
 // Catálogo de teste definido pelo usuário. Novas cartas entram quando ele indicar.
 const JOGADORES_SPFC = [
@@ -1717,6 +1729,7 @@ const JOGADORES_SPFC = [
 function raridadeDoJogador(j) {
   return RARIDADES_TIME.find(r=>j.ovr>=r.min && j.ovr<=r.max) || null;
 }
+function precoVendaDoJogador(j) { return j ? (raridadeDoJogador(j)?.venda||0) : 0; }
 // Cada 10 pontos a mais de OVR reduzem pela metade o peso individual.
 function pesoDoJogador(j) { return Math.pow(0.5,(j.ovr-50)/10); }
 function chancesDoPacote() {
@@ -1758,7 +1771,10 @@ function normalizarMeuTime(dados) {
   // Um elenco vazio do reset antigo mantém o gasto perdido, sem reembolso retroativo.
   const gastoPacotesPerdido=Number.isSafeInteger(fonte.gastoPacotesPerdido)&&fonte.gastoPacotesPerdido>=0
     ? Math.min(fonte.gastoPacotesPerdido,gastoPacotes) : (jogadores.length?0:gastoPacotes);
+  const moedasVendas=Number.isSafeInteger(fonte.moedasVendas)&&fonte.moedasVendas>=0?fonte.moedasVendas:0;
+  const vendasNesteTime=Number.isSafeInteger(fonte.vendasNesteTime)&&fonte.vendasNesteTime>=0?Math.min(fonte.vendasNesteTime,moedasVendas):0;
   return {nome:nome || "Meu Tricolor",jogadores,escalacao,gastoPacotes,gastoPacotesPerdido,
+    moedasVendas,vendasNesteTime,
     bonusTesteResgatado:fonte.bonusTesteResgatado===true,
     ultimoPacote:ultimoPacote.length===2&&ultimoPacote[0].id!==ultimoPacote[1].id?ultimoPacote:[]};
 }
@@ -1778,7 +1794,7 @@ const MIN_POR_MOEDA = 5;
 function moedasGanhas() { return Math.floor(totalMinutos() / MIN_POR_MOEDA); }
 function bonusDeMoedas() { return meuTime.bonusTesteResgatado ? 5 : 0; }
 function totalMoedasGastas() { return (loja.gastas || 0) + meuTime.gastoPacotes; }
-function saldoMoedas()  { return Math.max(0, moedasGanhas() + bonusDeMoedas() - totalMoedasGastas()); }
+function saldoMoedas()  { return Math.max(0, moedasGanhas() + bonusDeMoedas() + meuTime.moedasVendas - totalMoedasGastas()); }
 
 function salvarBlocos()   { Armazem.gravar(CHAVES.blocos, blocos); }
 function salvarLoja()     { Armazem.gravar(CHAVES.loja, loja); }
@@ -4496,7 +4512,7 @@ async function baixarArquivo(id) {
 }
 
 /* --------------------------------------------------------------------------
-   MEU TIME — escalação fixa em 4-3-3, separada das moedas e dos estudos.
+   MEU TIME — escalação fixa em 4-3-3, coleção e venda de cópias extras.
    -------------------------------------------------------------------------- */
 function camisaDoTime() {
   return '<svg class="camisa-time" viewBox="0 0 64 60" aria-hidden="true">' +
@@ -4512,6 +4528,7 @@ function focarPosicaoTime() {
   if(botao) botao.focus({preventScroll:true});
 }
 function renderMeuTime() {
+  $("#saldoMeuTime").textContent=saldoMoedas();
   const posicao=POSICOES_TIME.find(p=>p.id===posicaoTimeSelecionada) || POSICOES_TIME[0];
   posicaoTimeSelecionada=posicao.id;
   $("#timeNomeExibido").textContent=meuTime.nome;
@@ -4556,6 +4573,36 @@ function renderMeuTime() {
     }).join('');
   }
   $("#btnRemoverTitular").hidden=!jogadorDaVaga(posicao.id);
+  renderRepetidosDoTime();
+}
+function renderRepetidosDoTime() {
+  const repetidos=meuTime.jogadores.filter(j=>j.quantidade>1).sort((a,b)=>b.ovr-a.ovr||a.nome.localeCompare(b.nome,"pt-BR"));
+  const extras=repetidos.reduce((s,j)=>s+j.quantidade-1,0);
+  $("#valoresVendaRepetidos").innerHTML=RARIDADES_TIME.map(r=>'<span class="raridade-'+r.id+'">'+r.nome+' · '+r.venda+' moedas</span>').join("");
+  $("#resumoRepetidos").textContent=extras?extras+(extras===1?" cópia extra disponível.":" cópias extras disponíveis."):"Você ainda não tem cartas repetidas. As próximas cópias extras aparecerão aqui.";
+  $("#timeRepetidos").innerHTML=repetidos.map(j=>{
+    const raridade=raridadeDoJogador(j),valor=precoVendaDoJogador(j),emCampo=Object.values(meuTime.escalacao).includes(j.id);
+    return '<article class="time-carta raridade-'+raridade.id+'"><div class="time-carta-topo"><div class="time-carta-nome"><strong>'+escapar(j.nome)+'</strong><span>'+j.posicao+(emCampo?' · Em campo':'')+'</span></div>'+
+      '<span class="carta-ovr">'+j.ovr+'<small>OVR</small></span></div><div class="time-carta-metadados"><span class="carta-raridade">'+raridade.nome+'</span><span>'+j.quantidade+' cópias</span></div>'+
+      '<p class="time-venda-info">'+(j.quantidade-1)+((j.quantidade-1)===1?' cópia extra.':' cópias extras.')+' Uma carta fica no elenco.</p>'+
+      '<button class="btn btn-pequeno btn-preto" type="button" data-time-vender="'+j.id+'" data-time-quantidade="'+j.quantidade+'" aria-label="Vender uma cópia extra de '+escapar(j.nome)+' por '+valor+' moedas">Vender 1 extra · '+valor+' moedas</button></article>';
+  }).join("");
+}
+function venderJogadorRepetido(id,quantidadeEsperada) {
+  const jogador=meuTime.jogadores.find(j=>j.id===id),valor=precoVendaDoJogador(jogador);
+  if(!jogador||jogador.quantidade<=1||!valor||abrindoPacote) return false;
+  if(quantidadeEsperada!==undefined&&quantidadeEsperada!==jogador.quantidade) return false;
+  const moedasVendas=meuTime.moedasVendas+valor,vendasNesteTime=meuTime.vendasNesteTime+valor;
+  if(!Number.isSafeInteger(moedasVendas)||!Number.isSafeInteger(vendasNesteTime)) return false;
+  const jogadores=meuTime.jogadores.map(j=>j.id===id?{...j,quantidade:j.quantidade-1}:{...j});
+  const proximo=normalizarMeuTime({...meuTime,jogadores,moedasVendas,vendasNesteTime});
+  // A retirada da cópia e o crédito ficam na mesma gravação.
+  if(!Armazem.gravar(CHAVES.meuTime,proximo)) return false;
+  meuTime=proximo;renderMeuTime();renderLoja();
+  const foco=$("#timeRepetidos [data-time-vender="+id+"]")||$("#timeRepetidos [data-time-vender]")||$("#tituloRepetidos");
+  foco.focus({preventScroll:true});
+  mostrarAviso("Cópia extra de "+jogador.nome+" vendida. +"+valor+" moedas.");
+  return true;
 }
 function escalarJogadorNoTime(id) {
   const posicao=POSICOES_TIME.find(p=>p.id===posicaoTimeSelecionada);
@@ -4569,6 +4616,13 @@ function escalarJogadorNoTime(id) {
   return true;
 }
 $("#painel-time").addEventListener("click",e=>{
+  if(e.target.closest("[data-time-repetidos]")) {
+    const secao=$("#repetidosMeuTime"),cabecalho=$(".cabecalho").getBoundingClientRect().height;
+    window.scrollTo({top:window.scrollY+secao.getBoundingClientRect().top-cabecalho-16,behavior:"smooth"});
+    $("#tituloRepetidos").focus({preventScroll:true});return;
+  }
+  const venda=e.target.closest("[data-time-vender]");
+  if(venda) {venderJogadorRepetido(venda.dataset.timeVender,Number(venda.dataset.timeQuantidade));return;}
   if(e.target.closest('[data-time-loja]')) {irParaPainel("loja");$("#pacotesLoja").scrollIntoView({block:"start"});return;}
   const vaga=e.target.closest('[data-time-pos]');
   if(vaga) {posicaoTimeSelecionada=vaga.dataset.timePos;renderMeuTime();focarPosicaoTime();return;}
@@ -4992,6 +5046,7 @@ function renderLoja() {
     "1 moeda a cada <b>" + MIN_POR_MOEDA + " min</b> de estudo. " +
     "Já rendeu <b>" + moedasGanhas() + "</b> no total" +
     (bonusDeMoedas() ? ", mais <b>5</b> moedas de presente" : "") +
+    (meuTime.moedasVendas ? ", mais <b>"+meuTime.moedasVendas+"</b> em vendas de repetidos" : "") +
     (totalMoedasGastas() ? ", com <b>" + totalMoedasGastas() + "</b> gastas" : "") + ".";
 
   $("#itensGol").innerHTML = Object.keys(SONS.gol).map((id) => cartaoDeItem("gol", id)).join("");
@@ -5010,7 +5065,7 @@ function zerarSaldo() {
   if (saldoMoedas() === 0) { mostrarAviso("O saldo já está em zero."); return; }
   if (!confirm("Zerar o saldo?\n\nVocê fica com 0 moedas e mantém tudo que já comprou. " +
                "O histórico de estudo não muda.\n\nNão tem volta.")) return;
-  loja.gastas = Math.max(0,moedasGanhas()+bonusDeMoedas()-meuTime.gastoPacotes);
+  loja.gastas = Math.max(0,moedasGanhas()+bonusDeMoedas()+meuTime.moedasVendas-meuTime.gastoPacotes);
   salvarLoja();
   renderLoja();
   mostrarAviso("Saldo zerado, soberano.");
@@ -5027,13 +5082,17 @@ function resetarLoja() {
   mostrarAviso("Loja resetada. Saldo de volta em " + saldoMoedas() + ".");
 }
 
-/** Apaga o time e devolve o gasto dos pacotes desta coleção. */
+/** Apaga o time e devolve o gasto da coleção que ainda não retornou pelas vendas. */
 function resetarTime() {
-  const reembolso=meuTime.gastoPacotes-meuTime.gastoPacotesPerdido;
+  const gastoDesteTime=meuTime.gastoPacotes-meuTime.gastoPacotesPerdido;
+  const vendasAbatidas=Math.min(gastoDesteTime,meuTime.vendasNesteTime),reembolso=gastoDesteTime-vendasAbatidas;
   if (!confirm("Resetar seu time?\n\nVocê perde todos os jogadores, as cópias extras, a escalação e o nome do time. " +
-               "Você recebe de volta " + reembolso + " moedas gastas nos pacotes deste time. Seus estudos e as outras compras da loja são mantidos.\n\nNão tem volta.")) return;
-  const proximo=normalizarMeuTime({gastoPacotes:meuTime.gastoPacotesPerdido,
-    gastoPacotesPerdido:meuTime.gastoPacotesPerdido,bonusTesteResgatado:meuTime.bonusTesteResgatado});
+               "Você recebe de volta " + reembolso + " moedas gastas nos pacotes deste time. "+
+               (vendasAbatidas?"As "+vendasAbatidas+" moedas já recebidas em vendas foram descontadas do reembolso. ":"")+
+               "Seus estudos e as outras compras da loja são mantidos.\n\nNão tem volta.")) return;
+  const retido=meuTime.gastoPacotesPerdido+vendasAbatidas;
+  const proximo=normalizarMeuTime({gastoPacotes:retido,gastoPacotesPerdido:retido,
+    moedasVendas:meuTime.moedasVendas,vendasNesteTime:0,bonusTesteResgatado:meuTime.bonusTesteResgatado});
   if (!Armazem.gravar(CHAVES.meuTime,proximo)) return;
   meuTime=proximo;
   fecharModalPacote();
