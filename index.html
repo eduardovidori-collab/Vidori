@@ -1214,8 +1214,8 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     </div>
     <details class="pacote-detalhes"><summary>Raridades e probabilidades</summary>
       <p>Chances atuais da primeira carta, ajustadas ao seu elenco. Cada pacote contém dois jogadores diferentes. As chances base dependem do OVR.</p>
-      <p>Enquanto houver jogadores que você ainda não tem, quem já saiu perde 1 ponto percentual da chance base (ex.: 50% para 49%), uma única vez. Novas cópias não acumulam a redução. A diferença favorece os jogadores que faltam na coleção.</p>
-      <p>Para não excluir cartas do sorteio, a chance mínima é de 0,01%. Ao completar a coleção, voltam a valer as chances base por OVR.</p>
+      <p>Enquanto houver jogadores que você ainda não tem, quem já saiu perde 1% da própria chance base (ex.: 50% para 49,5%; 1% para 0,99%), uma única vez. Novas cópias não acumulam a redução. A diferença favorece os jogadores que faltam na coleção.</p>
+      <p>Ao completar a coleção, voltam a valer as chances base por OVR.</p>
       <table class="pacote-tabela"><thead><tr><th scope="col">Raridade</th><th scope="col">OVR</th><th scope="col">Chance</th></tr></thead><tbody id="chancesPacote"></tbody></table>
       <p>Cartas repetidas em outros pacotes ficam guardadas como cópias extras no elenco.</p>
     </details>
@@ -1756,8 +1756,7 @@ function raridadeDoJogador(j) {
 function precoVendaDoJogador(j) { return j ? (raridadeDoJogador(j)?.venda||0) : 0; }
 // Cada 10 pontos a mais de OVR reduzem pela metade o peso individual.
 function pesoDoJogador(j) { return Math.pow(0.5,(j.ovr-50)/10); }
-const REDUCAO_PRIMEIRA_CARTA = 0.01; // Um ponto percentual: 50% passa a 49%.
-const CHANCE_MINIMA_CARTA = 0.0001; // 0,01%: nenhuma carta é eliminada do sorteio.
+const REDUCAO_PRIMEIRA_CARTA = 0.01; // 1% da própria chance: 50% passa a 49,5%.
 function distribuicaoDoPacote() {
   const total=JOGADORES_SPFC.reduce((s,j)=>s+pesoDoJogador(j),0);
   if(!total) return [];
@@ -1769,7 +1768,7 @@ function distribuicaoDoPacote() {
   let redistribuir=0;
   cartas.forEach(c=>{
     if(!obtidos.has(c.jogador.id)) return;
-    const reduzida=Math.max(c.chance-REDUCAO_PRIMEIRA_CARTA,Math.min(c.chance,CHANCE_MINIMA_CARTA));
+    const reduzida=c.chance*(1-REDUCAO_PRIMEIRA_CARTA);
     redistribuir+=c.chance-reduzida;
     c.chance=reduzida;
   });
