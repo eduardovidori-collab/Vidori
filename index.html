@@ -488,7 +488,7 @@ canvas{display:block; width:100%; height:auto}
 .visita-grade{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:20px;align-items:start}
 .visita-paisagem{position:relative;overflow:hidden;border:1px solid #D6E0DC;border-radius:16px;background:linear-gradient(160deg,#EBF3F5,#D8E6E9)}
 .visita-paisagem>div:first-child{aspect-ratio:16/10}.visita-paisagem svg{display:block;width:100%;height:100%}
-.visita-camera{position:absolute;inset:auto 12px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;pointer-events:none}
+.visita-camera{position:absolute;inset:12px 12px auto;display:flex;align-items:center;justify-content:space-between;gap:8px;pointer-events:none}
 .visita-camera span{font-size:11px;font-weight:700;padding:8px 11px;border-radius:9px;background:#FFFDF4E8;box-shadow:0 2px 8px #18342D18}
 .visita-camera>div{display:flex;gap:5px;pointer-events:auto}.visita-camera button{width:36px;height:36px;padding:0;background:#FFFDF4}
 .visita-detalhe{font-size:12px;color:var(--fraco);line-height:1.6;margin-top:10px}
@@ -824,6 +824,26 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
   .grade-foco,.grade-2,.grade-3{grid-template-columns:1fr}
   .cabecalho-texto{margin-left:0; text-align:left; width:100%}
 }
+/* Dia de jogo: arquibancada em primeira pessoa e treino de pênaltis. */
+.visita-acoes-torcida{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.visita-acoes-torcida .btn{flex:1;font-size:12px;padding:10px 9px}
+.visita-clima{display:flex;align-items:center;gap:12px;margin:14px 0 7px;font-size:12px}.visita-clima strong{white-space:nowrap}.visita-energia{height:7px;flex:1;background:#DEE7DE;border-radius:10px;overflow:hidden}.visita-energia i{display:block;height:100%;width:0;background:#B92F3C;transition:width .4s}
+.visita-reacao{font-size:12px;min-height:36px;color:var(--fraco);line-height:1.5}.visita-convite{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px;background:#F0F4EC;border:1px solid #DEE6D9;border-radius:12px;margin-top:16px}.visita-convite strong{font-size:13px}.visita-convite p{font-size:11px;color:var(--fraco);margin-top:3px}.visita-convite .btn{white-space:nowrap;font-size:12px;flex:0 0 auto}
+.torcedor-visita{transform-box:fill-box;transform-origin:center bottom}.cartolina-visita{opacity:0;transition:opacity .2s}.visita-paisagem[data-efeito=ola] .torcedor-visita{animation:olaDoSetor 1.5s ease-in-out 2;animation-delay:var(--atraso)}
+.visita-paisagem[data-efeito=canto] .torcedor-visita{animation:puloDaTorcida .5s ease-in-out 6;animation-delay:var(--atraso)}
+.visita-paisagem[data-efeito=mosaico] .cartolina-visita{opacity:1}.visita-paisagem[data-efeito=mosaico] .torcedor-visita{animation:erguerMosaico .55s ease-out both}
+@keyframes olaDoSetor{0%,30%,100%{transform:translateY(0)}15%{transform:translateY(-28px) rotate(-3deg)}}
+@keyframes puloDaTorcida{50%{transform:translateY(-12px)}}@keyframes erguerMosaico{to{transform:translateY(-8px)}}
+.penaltis-convite{display:flex;align-items:center;gap:18px;margin-top:18px;padding:20px 22px;border:1px solid #D8E1D7;border-radius:14px;background:linear-gradient(120deg,#EEF4E9,#FBFCF9);box-shadow:var(--sombra)}
+.penaltis-convite>svg{width:64px;flex-shrink:0}.penaltis-convite h3{font-size:17px}.penaltis-convite p{font-size:12px;color:var(--fraco);margin-top:5px}.penaltis-convite .btn{margin-left:auto;white-space:nowrap;flex:0 0 auto}
+.penaltis-dialog{border:0;border-radius:20px;padding:0;width:min(1040px,calc(100% - 24px));max-height:calc(100dvh - 24px);overflow:auto;background:#FBFCF9;color:var(--texto);box-shadow:0 24px 80px #0005}.penaltis-dialog::backdrop{background:#101E19C9;backdrop-filter:blur(4px)}
+.penaltis-corpo{padding:22px}.penaltis-cabecalho{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.penaltis-cabecalho h2{font-size:23px}.penaltis-cabecalho p{font-size:12px;color:var(--fraco);margin-top:3px}
+.penaltis-grade{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:20px;align-items:start}#cenaPenalti{height:100%}.penalti-campo{position:relative;isolation:isolate;overflow:hidden;border-radius:15px;border:1px solid #C8D6CE;background:#B9D6DB;aspect-ratio:5/3}.penalti-campo svg{display:block;width:100%;height:100%}
+.penalti-alvos{position:absolute;left:23%;right:23%;top:25%;bottom:39%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:4px 8px;z-index:1}.penalti-alvos svg{width:24px;height:24px;display:block}.penalti-alvos button{display:grid;place-items:center;border:1px dashed #FFFFFFA0;color:white;background:#173D2825;border-radius:10px;min-width:0;min-height:32px;font-size:21px;cursor:crosshair;text-shadow:0 1px 4px #000A;transition:background .15s}.penalti-alvos button:hover{background:#FFFFFF30}.penalti-alvos [aria-pressed=true]{background:#FFF2B85C;border:2px solid #FFF8D8;box-shadow:0 0 14px #FFF8D850}.penalti-alvos button:focus-visible{outline:3px solid #FFDF66;outline-offset:2px}.penalti-alvos button:disabled{cursor:default;opacity:.55}
+.penalti-campo[data-fase=animando] .penalti-alvos,.penalti-campo[data-fase=final] .penalti-alvos{visibility:hidden}.penalti-placar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;font-size:12px}.penalti-placar strong{font-size:17px;color:#254531}.penalti-tentativas{display:flex;gap:6px}.penalti-tentativas span{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1px solid #CDD8CD;background:white;font-size:12px;font-weight:700}.penalti-tentativas .gol{background:#315E40;color:white;border-color:#315E40}.penalti-tentativas .erro{background:#F8E7E5;color:#A2343C;border-color:#E8C6C2}
+.penalti-painel{padding:17px;border:1px solid #DCE4D9;border-radius:13px;background:#F2F6EF}.penalti-painel h3{font-size:15px}.penalti-painel>p{font-size:12px;line-height:1.6;color:var(--fraco);margin-top:7px}.penalti-timing{margin-top:20px}.penalti-timing label{display:block;font-size:12px;font-weight:700;margin-bottom:11px}.penalti-barra{position:relative;height:15px;border-radius:8px;background:linear-gradient(90deg,#D6DDD0 0 55%,#609260 55% 79%,#D6DDD0 79%);margin:0 3px}.penalti-barra i{position:absolute;left:var(--pos,0%);top:-5px;bottom:-5px;width:5px;border-radius:4px;background:#24392D;transform:translateX(-50%);box-shadow:0 0 0 2px #FFF}.penalti-timing small{display:block;font-size:10px;color:var(--fraco);margin-top:12px}.penalti-painel .btn{width:100%;margin-top:17px}.penalti-mensagem{font-weight:600;color:#274B34!important;min-height:57px}.penalti-recorde{display:flex;justify-content:space-between;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid #DAE3D6;font-size:12px}.penalti-recorde strong{color:#274B34}.penalti-dica{font-size:11px;color:var(--fraco);margin-top:10px;line-height:1.5}.penalti-aviso{font-size:12px;color:#9C3038;min-height:18px;margin-top:10px}
+@media(max-width:760px){.penaltis-grade{grid-template-columns:1fr}.penaltis-corpo{padding:16px}.penalti-painel{padding:15px}.penalti-mensagem{min-height:0}.penaltis-cabecalho h2{font-size:20px}.penaltis-cabecalho .btn{font-size:11px;padding:9px}.penaltis-convite{flex-wrap:wrap;padding:17px;gap:12px}.penaltis-convite>svg{width:46px}.penaltis-convite>div{flex:1}.penaltis-convite .btn{width:100%;margin:0}.visita-convite{align-items:flex-start;flex-direction:column}.visita-convite .btn{width:100%}.penalti-alvos button{font-size:16px;border-radius:7px}.penalti-tentativas span{width:23px;height:23px}}
+@media(prefers-reduced-motion:reduce){.visita-paisagem .torcedor-visita{animation:none!important}.visita-energia i,.cartolina-visita{transition:none}}
+
 </style>
 </head>
 <body>
@@ -1048,7 +1068,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       </div>
       <p class="subtexto" id="legendaEstadio">Terreno limpo, gramado plantado e as quatro
         arquibancadas de pé. O resto vem com o trabalho.</p>
-      <p class="dica">Toque nos balões para construir ou entre na arquibancada para escolher seu bandeirão e ouvir a torcida.</p>
+      <p class="dica">Melhore seu estádio pelos balões, faça a festa na arquibancada ou desça para uma série de pênaltis.</p>
       <div class="cena-estadio" id="cenaEstadio"><div class="caixa-estadio" id="caixaEstadio"></div>
         <div class="baloes-estadio" id="baloesEstadio" role="group" aria-label="Melhorias nas partes do estádio"></div>
       </div>
@@ -1067,6 +1087,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <p class="dica" id="dicaEstadio">Escolha um balão para melhorar essa parte do estádio.</p>
     </div>
   </div>
+  <div class="penaltis-convite"><svg viewBox="0 0 72 62" aria-hidden="true"><path d="M6 43V10h60v33M6 10l8 8h44l8-8M14 18v25m44-25v25M6 43h60M14 27h44m-44 9h44M25 18v25m11-25v25m11-25v25" fill="none" stroke="#718E77" stroke-width="2"/><circle cx="36" cy="50" r="10" fill="#FFF" stroke="#344E3B" stroke-width="1.5"/><path d="m36 44 6 4-2 7h-8l-2-7Z" fill="#344E3B"/></svg><div><h3>Na marca da cal</h3><p>Entre no gramado, escolha seu canto e encare o goleiro em cinco cobranças.</p></div><button class="btn btn-principal" type="button" id="btnDesafioPenaltis" aria-haspopup="dialog">Jogar pênaltis</button></div>
 </section>
 
 <!-- ======================================================= PAINEL: MEU TIME -->
@@ -1343,15 +1364,38 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <!-- ================================================= VISITA À ARQUIBANCADA -->
 <dialog class="visita-arquibancada" id="visitaArquibancada" aria-labelledby="tituloVisitaArquibancada">
   <div class="faixas"></div><div class="visita-corpo">
-    <div class="visita-cabecalho"><div><h2 id="tituloVisitaArquibancada">Dentro da arquibancada</h2><p>Seu setor, seu bandeirão e a voz da torcida.</p></div><button class="btn btn-pequeno" type="button" id="fecharVisitaArquibancada">Voltar ao estádio</button></div>
+    <div class="visita-cabecalho"><div><h2 id="tituloVisitaArquibancada">Dentro da arquibancada</h2><p>A vista do campo, a festa da torcida e você no meio dela.</p></div><button class="btn btn-pequeno" type="button" id="fecharVisitaArquibancada">Voltar ao estádio</button></div>
     <div class="visita-setores" id="setoresVisitaArquibancada" role="group" aria-label="Setor da arquibancada"></div>
     <div class="visita-grade"><div>
       <div class="visita-paisagem"><div id="cenaVisitaArquibancada"></div><div class="visita-camera"><span id="nomeSetorVisita"></span><div><button class="btn" type="button" id="afastarVisita" aria-label="Afastar visão">−</button><button class="btn" type="button" id="aproximarVisita" aria-label="Aproximar visão">+</button></div></div></div>
       <p class="visita-detalhe" id="detalheSetorVisita"></p>
+      <div class="visita-clima"><strong id="climaSetorVisita">Clima do setor</strong><div class="visita-energia" role="meter" aria-label="Animação da torcida" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="energiaTorcidaVisita"><i></i></div></div>
+      <div class="visita-acoes-torcida" role="group" aria-label="Interagir com a torcida"><button class="btn" type="button" data-torcida-acao="ola">Fazer uma ola</button><button class="btn" type="button" data-torcida-acao="mosaico">Erguer mosaico</button><button class="btn btn-preto" type="button" data-torcida-acao="canto">Puxar um canto</button></div>
+      <p class="visita-reacao" id="reacaoTorcidaVisita" role="status" aria-live="polite">Puxe a festa e veja seus vizinhos de setor entrarem no ritmo.</p>
+      <div class="visita-convite"><div><strong>Quer entrar no gramado?</strong><p>O goleiro está esperando para uma série de cinco pênaltis.</p></div><button class="btn btn-principal" type="button" id="penaltisDaVisita">Cobrar pênaltis</button></div>
     </div><aside class="visita-painel">
       <section><h3>Bandeirão deste setor</h3><p class="subtexto">Escolha um modelo. Ele também aparece no seu estádio.</p><div class="visita-bandeiras" id="bandeirasVisita" role="group" aria-label="Modelo do bandeirão"></div></section>
       <section><h3>Som da torcida</h3><p class="subtexto">Ouça uma prévia curta no volume dos seus ajustes.</p><div class="visita-cantos" id="cantosVisita" role="group" aria-label="Prévias da torcida"></div><p class="visita-som-status" id="statusCantoVisita" role="status" aria-live="polite">Escolha um som para ouvir a torcida.</p><div class="visita-som-acoes"><button class="btn btn-pequeno" type="button" id="pararCantoVisita" disabled>Parar som</button><button class="btn btn-pequeno" type="button" id="ativarSomVisita" hidden>Ativar som</button></div></section>
     </aside></div><p class="visita-aviso" id="avisoVisitaArquibancada" role="status"></p>
+  </div>
+</dialog>
+
+<!-- ================================================= DESAFIO DE PÊNALTIS -->
+<dialog class="penaltis-dialog" id="desafioPenaltis" aria-labelledby="tituloPenaltis" aria-describedby="descricaoPenaltis">
+  <div class="faixas"></div><div class="penaltis-corpo">
+    <header class="penaltis-cabecalho"><div><h2 id="tituloPenaltis">Na marca da cal</h2><p id="descricaoPenaltis">Cinco cobranças. Escolha o canto e capriche no tempo do chute.</p></div><button class="btn btn-pequeno" type="button" id="fecharPenaltis">Voltar ao estádio</button></header>
+    <div class="penaltis-grade"><div>
+      <div class="penalti-placar"><strong id="placarPenaltis">0 gols</strong><div class="penalti-tentativas" id="tentativasPenaltis" role="img" aria-label="Nenhuma cobrança realizada"></div><span id="rodadaPenaltis">1 de 5</span></div>
+      <div class="penalti-campo" id="campoPenalti" data-fase="pronto"><div id="cenaPenalti"></div><div class="penalti-alvos" id="alvosPenalti" role="group" aria-label="Escolha onde chutar"></div></div>
+      <p class="penalti-dica" id="cobradorPenalti"></p>
+    </div><aside class="penalti-painel">
+      <h3>Mire. Prepare. Chute.</h3><p>Toque num alvo do gol. Depois, pare o marcador na faixa verde. Um chute preciso no canto pode vencer até a defesa certa.</p>
+      <div class="penalti-timing"><label id="rotuloTempoPenalti">Tempo do chute</label><div class="penalti-barra" id="barraTempoPenalti" role="meter" aria-labelledby="rotuloTempoPenalti" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="ponteiroPenalti"></i></div><small>Prepare e aperte novamente para chutar.</small></div>
+      <button class="btn btn-principal" type="button" id="acaoPenalti">Preparar cobrança</button>
+      <p class="penalti-mensagem" id="mensagemPenalti" role="status" aria-live="polite">Escolha um canto para começar.</p>
+      <div class="penalti-recorde"><span>Seu recorde</span><strong id="recordePenaltis">0 de 5</strong></div>
+      <p class="penalti-dica">Teclado: use as setas nos alvos e Espaço para preparar e chutar.</p>
+    </aside></div><p class="penalti-aviso" id="avisoPenaltis" role="status"></p>
   </div>
 </dialog>
 
@@ -1621,7 +1665,8 @@ const CHAVES = {
   timer:    "vidori.timer",
   loja:     "vidori.loja",
   meuTime:  "vidori.meuTime",
-  arquibancada: "vidori.arquibancada"
+  arquibancada: "vidori.arquibancada",
+  penaltis: "vidori.penaltis"
 };
 
 /* --------------------------------------------------------------------------
@@ -3268,6 +3313,9 @@ function tique() {
 
 /** Chamado quando o tempo chega a zero (em foco ou em pausa). */
 function concluirTempo() {
+  // O fim do foco ou da pausa deve continuar visível durante as atividades do estádio.
+  if($("#desafioPenaltis").open) {pausarPenalti();$("#desafioPenaltis").close();}
+  if($("#visitaArquibancada").open) $("#visitaArquibancada").close();
   const eraFoco = T.modo === "foco";
   T.rodando = false;
   T.restanteMs = 0;
@@ -3954,7 +4002,7 @@ function exportarJSON() {
     app: "vidori",
     versao: 1,
     exportadoEm: new Date().toISOString(),
-    blocos, ciclos, config, recordes, marcos: marcosOk, loja: loja, meuTime, arquibancada:estadoArquibancada
+    blocos, ciclos, config, recordes, marcos: marcosOk, loja: loja, meuTime, arquibancada:estadoArquibancada, penaltis:recordePenaltis
   };
   const blob = new Blob([JSON.stringify(pacote, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -3995,6 +4043,10 @@ function importarJSON(arquivo) {
       const proximo=normalizarArquibancada(dados.arquibancada);
       if(Armazem.gravar(CHAVES.arquibancada,proximo)) estadoArquibancada=proximo;
     }
+    if(dados.penaltis) {
+      const proximo=normalizarPenaltis(dados.penaltis);
+      if(Armazem.gravar(CHAVES.penaltis,proximo))recordePenaltis=proximo;
+    }
     marcosOk = null;                 // recalcula sem comemorar tudo de novo
     salvarBlocos(); salvarCiclos(); salvarConfig(); salvarLoja();
     conferirRecordes(true);
@@ -4014,6 +4066,7 @@ function apagarTudo() {
   salvarBlocos(); salvarCiclos(); salvarMarcos(); salvarRecordes(); salvarLoja();
   meuTime=normalizarMeuTime(null); salvarMeuTime();
   estadoArquibancada=normalizarArquibancada(null);Armazem.gravar(CHAVES.arquibancada,estadoArquibancada);
+  recordePenaltis=normalizarPenaltis(null);Armazem.gravar(CHAVES.penaltis,recordePenaltis);
   Armazem.apagar(CHAVES.timer);
   zerarTimer();
   renderTudo();
@@ -4770,13 +4823,81 @@ function salvarArquibancada(dados) {
   }
   estadoArquibancada=proximo;$("#avisoVisitaArquibancada").textContent="";return true;
 }
+let energiaVisita=0,efeitoVisitaTimer=null;
+function desenharFundoDeJogo(prefix, penalti=false) {
+  const corCampo=temGrama()?"#527D4C":"#AA8059",escuro=temGrama()?"#487246":"#A07752";
+  let partes=[`<defs><linearGradient id="${prefix}-ceu" x2="0" y2="1"><stop stop-color="#C3DFE8"/><stop offset="1" stop-color="#F2F0DB"/></linearGradient><linearGradient id="${prefix}-grama" x2="0" y2="1"><stop stop-color="${corCampo}"/><stop offset="1" stop-color="${escuro}"/></linearGradient></defs><rect width="900" height="540" fill="url(#${prefix}-ceu)"/><circle cx="755" cy="68" r="32" fill="#FFF8D6" opacity=".6"/><path d="M0 166Q450 48 900 166V278H0Z" fill="#CBD4CE"/>`];
+  for(let row=0;row<10;row++) {
+    const y=153+row*10;
+    const cor=temMosaico()?(row<3?"#B9484F":row<6?"#EBEDE5":"#384741"):(row%2?"#ADBDB2":"#C3D0C6");
+    partes.push(`<path d="M0 ${y+22}Q450 ${y-65} 900 ${y+22}" fill="none" stroke="${cor}" stroke-width="8"/>`);
+  }
+  [140,290,450,610,760].forEach(x=>partes.push(`<path d="M${x} 132L${x+(x-450)*.08} 259" stroke="#DCE3DC" stroke-width="6"/>`));
+  if(temPublico()) for(let r=0;r<5;r++) for(let c=0;c<55;c++) {
+    if(nivelDaObra('publico')===1&&(c+r)%3)continue;
+    const x=c*17-9,y=170+r*17-30*Math.sin(Math.PI*Math.max(0,x)/900);
+    const roupa=["#EAECE5","#A73B46","#314039"][Math.floor(c/8)%3];
+    partes.push(`<path d="M${x-3} ${y+7}q3-9 6 0" stroke="${roupa}" stroke-width="4"/><circle cx="${x}" cy="${y}" r="2.5" fill="${c%3?'#B58B6D':'#765641'}"/>`);
+  }
+  if(temCobertura()) partes.push('<path d="M-20 130Q450 7 920 130L898 151Q450 63 2 151Z" fill="#F0F1E9" stroke="#9BAEA9" stroke-width="2"/><path d="M0 133Q450 25 900 133" fill="none" stroke="#BA3946" stroke-width="5"/><path d="M45 141 90 116 136 130 184 94 230 112 280 77 330 102 380 65 430 96 480 65 530 101 580 76 630 112 680 94 730 131 780 116 850 143" fill="none" stroke="#AAB8B0" stroke-width="2"/>');
+  if(temRefletores()) [95,805].forEach(x=>partes.push(`<path d="M${x} 170V63" stroke="#6D8681" stroke-width="4"/><rect x="${x-24}" y="53" width="48" height="18" rx="3" fill="#586E69"/><path d="M${x-18} 62h36" stroke="#FFFFDF" stroke-width="7" stroke-dasharray="5 2"/>`));
+  partes.push(`<path d="M0 260Q450 230 900 260V291H0Z" fill="#314B40"/><text x="450" y="272" fill="#F5F3E6" font-size="15" font-weight="700" letter-spacing="7" text-anchor="middle">MORUMBI · COPEIRO</text><path d="M0 293H900L1080 540H-180Z" fill="url(#${prefix}-grama)"/>`);
+  if(temListras()||penalti)for(let i=0;i<6;i++)partes.push(`<path d="M0 ${296+i*43}H900v21H0Z" fill="#B3C88A" opacity=".09"/>`);
+  partes.push(penalti?'<path d="M235 324 117 475H783L665 324M335 324l-32 64h294l-32-64" fill="none" stroke="#EAF0DA" stroke-width="3" opacity=".8"/><path d="M350 475Q450 522 550 475" fill="none" stroke="#EDF0DE" stroke-width="3"/><ellipse cx="450" cy="463" rx="5" ry="2.5" fill="#F8F8E6"/>':'<path d="M130 315H770L890 488H10ZM450 315V488" fill="none" stroke="#EDF1DB" stroke-width="3"/><ellipse cx="450" cy="392" rx="91" ry="31" fill="none" stroke="#EDF1DB" stroke-width="3"/><ellipse cx="450" cy="392" rx="4" ry="2" fill="#EDF1DB"/>');
+  return partes.join('');
+}
+function golDaCena(x,y,w,h, prefix) {
+  let rede='';for(let i=1;i<16;i++)rede+=`<path d="M${x+i*w/16} ${y}v${h}"/>`;
+  for(let i=1;i<8;i++)rede+=`<path d="M${x} ${y+i*h/8}h${w}"/>`;
+  return `<g id="${prefix}-rede"><path d="M${x} ${y+h}V${y}h${w}v${h}" fill="#D4E4DB20" stroke="#F8FAEE" stroke-width="7" stroke-linejoin="round"/><g fill="none" stroke="#E9F1E7" opacity=".45" stroke-width="1">${rede}</g></g>`;
+}
+function desenharVistaDaTorcida() {
+  const setor=estadoArquibancada.setor,modelo=estadoArquibancada.bandeiroes[setor];
+  const oposto={norte:'SUL',sul:'NORTE',leste:'OESTE',oeste:'LESTE'}[setor];
+  let partes=[`<svg viewBox="0 0 900 540" role="img" aria-label="Vista do campo a partir da arquibancada ${SETORES_ARQUIBANCADA[setor].nome}, com torcedores à sua frente">${desenharFundoDeJogo('torcida')}<text x="450" y="132" text-anchor="middle" fill="#5B7466" font-size="11" letter-spacing="3">SETOR ${oposto}</text>`];
+  if(setor==='leste'||setor==='oeste') partes.push(golDaCena(371,294,158,54,'visita-gol'));
+  else {
+    const golLateral='<path d="M93 356 64 401 41 395 71 350Z" fill="#F4F7E530"/><path d="M93 356V309L64 354v47M93 309l-22-6-30 45v47M41 348l23 6m7-51v47m-22-14 22 6m-28 5 23 7m7-26v49m-10-34v49" fill="none" stroke="#EDF2DE" stroke-width="2"/>';
+    partes.push(golLateral,'<g transform="translate(900 0) scale(-1 1)">'+golLateral+'</g>');
+  }
+  if(temPlacar())partes.push(`<rect x="682" y="178" width="112" height="56" rx="4" fill="#22382F"/><text x="738" y="196" text-anchor="middle" fill="#AFC2A4" font-size="9">GOLS DO CICLO</text><text x="738" y="221" text-anchor="middle" fill="#F8F3CF" font-size="23" font-weight="700">${golsDoPlacar()}</text>`);
+  if(modelo!=='nenhum') {
+    const nome=modelo==='meu-time'?meuTime.nome:modelo==='soberano'?'SOBERANO':'TRICOLOR';
+    partes.push(`<path d="M125 213Q275 192 425 210L414 262Q265 249 134 267Z" fill="#EFEFE5" stroke="#B53C48" stroke-width="3"/><path d="M134 248 416 242" stroke="#B83C48" stroke-width="9"/><path d="M134 259 416 253" stroke="#2B3C33" stroke-width="7"/><text x="276" y="234" text-anchor="middle" font-size="${nome.length>20?11:16}" font-weight="800" fill="#A93340">${escapar(nome.toUpperCase())}</text>`);
+  }
+  partes.push('<path d="M0 499Q450 460 900 499" fill="none" stroke="#7B8B7F" stroke-width="7"/><path d="M30 540V497m170 43v-53m250 53v-63m250 63v-53m170 53v-43" stroke="#8B9C8D" stroke-width="5"/>');
+  const pessoas=temPublico()?22:12;
+  for(let i=0;i<pessoas;i++) {
+    const x=12+i*875/(pessoas-1),y=480+(i%3)*9,cor=['#ECEEE6','#B53543','#2E4036'][Math.floor(i/4)%3];
+    partes.push(`<g transform="translate(${x} ${y})" style="--atraso:${i*.055}s"><g class="torcedor-visita"><path d="M-12 0-25 23l5 8 13-16v44h26V15l13 16 5-8L13 0Z" fill="${cor}" stroke="#263F3220"/><path d="M-9 15H9v5H-9Z" fill="#B63643"/><path d="M-9 24H9v4H-9Z" fill="#263C33"/><rect x="-5" y="-9" width="10" height="14" rx="3" fill="#B58D6F"/><ellipse cx="0" cy="-17" rx="11" ry="13" fill="${['#C9A17E','#946B50','#DDB793'][i%3]}"/><path d="M-11-19q0-16 13-12 10 3 9 16l-5-8-15 2Z" fill="#354138"/><rect class="cartolina-visita" x="-21" y="-51" width="42" height="29" rx="2" fill="${cor}" stroke="#24382E30"/></g></g>`);
+  }
+  partes.push('</svg>');return partes.join('');
+}
+function atualizarClimaVisita() {
+  const rotulo=energiaVisita>=80?'Arquibancada em festa':energiaVisita>=40?'Setor no ritmo':'Vamos animar o setor';
+  $('#climaSetorVisita').textContent=rotulo;
+  $('#energiaTorcidaVisita').setAttribute('aria-valuenow',String(energiaVisita));
+  $('#energiaTorcidaVisita i').style.width=energiaVisita+'%';
+}
+function pararEfeitoVisita() {
+  clearTimeout(efeitoVisitaTimer);efeitoVisitaTimer=null;
+  $('.visita-paisagem').removeAttribute('data-efeito');
+}
+function agirTorcidaVisita(acao) {
+  if(!$('#visitaArquibancada').open||!['ola','mosaico','canto'].includes(acao))return;
+  pararEfeitoVisita();const cena=$('.visita-paisagem');void cena.offsetWidth;cena.dataset.efeito=acao;
+  energiaVisita=Math.min(100,energiaVisita+(acao==='ola'?25:20));atualizarClimaVisita();
+  $('#reacaoTorcidaVisita').textContent={ola:'A ola passa pela sua fileira. Todo mundo de pé!',mosaico:'Cartolinas ao alto: o vermelho, o branco e o preto tomam o setor.',canto:'Você puxou o canto e a arquibancada respondeu!'}[acao];
+  efeitoVisitaTimer=setTimeout(pararEfeitoVisita,4200);
+}
+
 function abrirVisitaArquibancada(setor) {
   pararSomLoja(true);
   $("#avisoVisitaArquibancada").textContent="";
   if(setor&&Object.hasOwn(SETORES_ARQUIBANCADA,setor)&&
     !salvarArquibancada({...estadoArquibancada,setor})) return;
   if($("#modalObraEstadio").open) $("#modalObraEstadio").close();
-  zoomArquibancada=1;renderEstadio();
+  zoomArquibancada=1;energiaVisita=0;pararEfeitoVisita();renderEstadio();
   if(!$("#visitaArquibancada").open) $("#visitaArquibancada").showModal();
   renderVisitaArquibancada();$("#fecharVisitaArquibancada").focus();
 }
@@ -4785,15 +4906,10 @@ function renderVisitaArquibancada() {
   const setor=SETORES_ARQUIBANCADA[estadoArquibancada.setor],modelo=estadoArquibancada.bandeiroes[estadoArquibancada.setor];
   $("#setoresVisitaArquibancada").innerHTML=Object.entries(SETORES_ARQUIBANCADA).map(([id,s])=>
     '<button class="btn btn-pequeno" type="button" data-visita-setor="'+id+'" aria-pressed="'+(id===estadoArquibancada.setor)+'">'+s.nome+'</button>').join("");
-  // A visita usa o estádio real. Prefixos evitam duplicar os IDs de luzes e torcedores.
-  const original=$("#caixaEstadio svg");
-  if(original) {
-    $("#cenaVisitaArquibancada").innerHTML=original.outerHTML.replace(/id="([^"]+)"/g,'id="visita-$1"')
-      .replace(/url\(#([^\)]+)\)/g,'url(#visita-$1)').replace(/href="#([^"]+)"/g,'href="#visita-$1"');
-    const svg=$("#cenaVisitaArquibancada svg"),centro=iso(...setor.camera),largura=205/zoomArquibancada,altura=largura/1.6;
-    svg.setAttribute("viewBox",[centro.x-largura/2,centro.y-altura/2,largura,altura].join(" "));
-    svg.setAttribute("aria-label","Vista aproximada do setor "+setor.nome+". "+setor.descricao);
-  }
+  $("#cenaVisitaArquibancada").innerHTML=desenharVistaDaTorcida();
+  const svg=$("#cenaVisitaArquibancada svg"),largura=900/zoomArquibancada,altura=540/zoomArquibancada;
+  svg.setAttribute("viewBox",[(900-largura)/2,(540-altura)/2,largura,altura].join(" "));
+  atualizarClimaVisita();
   $("#nomeSetorVisita").textContent="Setor "+setor.nome;
   $("#detalheSetorVisita").textContent=setor.descricao+" "+(temAnel()?"Dois anéis conectados.":"Primeiro anel.")+" "+
     (temPublico()?"Torcida nível "+nivelDaObra("publico")+".":"Os assentos ainda estão vazios.");
@@ -4853,6 +4969,161 @@ async function testarCantoVisita(id) {
     atualizarSomVisita();return true;
   } catch(e) {pararCantoVisita("Não foi possível iniciar o som neste navegador.");return false;}
 }
+
+/* Treino livre: cinco cobranças, sem débito ou prêmio na economia de estudos. */
+const ALVOS_PENALTI=[
+  {nome:'Alto à esquerda',x:280,y:181},{nome:'Alto no centro',x:450,y:181},{nome:'Alto à direita',x:620,y:181},
+  {nome:'Baixo à esquerda',x:280,y:282},{nome:'Baixo no centro',x:450,y:282},{nome:'Baixo à direita',x:620,y:282}
+];
+function normalizarPenaltis(dados) {
+  const d=dados&&typeof dados==='object'?dados:{};
+  return {melhor:Number.isInteger(d.melhor)&&d.melhor>=0&&d.melhor<=5?d.melhor:0,
+    series:Number.isSafeInteger(d.series)&&d.series>=0?d.series:0};
+}
+let recordePenaltis=normalizarPenaltis(Armazem.ler(CHAVES.penaltis,null));
+const jogoPenalti={fase:'pronto',alvo:0,resultados:[],inicio:0,tempo:0,raf:null,timer:null,versao:0,animacoes:[],mensagem:'Escolha um canto para começar.'};
+let audioPenalti=null;
+function desenharCenaPenalti() {
+  return `<svg viewBox="0 0 900 540" role="img" aria-label="Vista da marca do pênalti, com o goleiro no centro e seis alvos no gol">${desenharFundoDeJogo('penalti',true)}${golDaCena(205,135,490,190,'penalti')}
+  <g id="goleiroPenalti" style="transform:translate(450px,259px)"><ellipse cx="0" cy="58" rx="36" ry="8" fill="#20382D30"/><path d="M-13 27-19 57M13 27 19 57" stroke="#253D36" stroke-width="13" stroke-linecap="round"/><path d="M-13-12-35 8M13-12 35 8" fill="none" stroke="#E6B851" stroke-width="12" stroke-linecap="round"/><path d="M-15-18H15L21 29H-21Z" fill="#E2B64D" stroke="#967A36" stroke-width="1.5"/><path d="M-17 27H17V38H-17Z" fill="#2C4840"/><circle cx="0" cy="-33" r="12" fill="#BB9270"/><path d="M-12-36q1-17 16-10 9 2 8 13l-7-8-16 5" fill="#354338"/><path d="M-37 7l-5-7m78 7 5-7" stroke="#F1F4E5" stroke-width="12" stroke-linecap="round"/></g>
+  <g id="bolaPenalti" style="transform:translate(450px,465px)"><ellipse cy="13" rx="18" ry="5" fill="#18342945"/><circle r="16" fill="#FAFAED" stroke="#425B49" stroke-width="1.5"/><path d="m0-9 8 6-3 10H-5l-3-10ZM-13-8l5 5m16 0 5-5M-5 7l-4 6m14-6 4 6" fill="#324C3C" stroke="#324C3C" stroke-width="2"/></g></svg>`;
+}
+function pararAudioPenalti() {
+  const atual=audioPenalti;audioPenalti=null;
+  if(atual) {atual.saida.gain.setTargetAtTime(0,atual.ctx.currentTime,.008);setTimeout(()=>atual.saida.disconnect(),45);}
+}
+function somPenalti(gol=false) {
+  if(config.mudo||config.volume<=0)return;
+  const ctx=acordarAudio();if(!ctx)return;
+  pararAudioPenalti();const saida=ctx.createGain();saida.gain.value=.65;saida.connect(ctx.destination);audioPenalti={ctx,saida};
+  const inicio=ctx.currentTime+.02;
+  if(!gol) batidaSurdo(ctx,inicio,config.volume*.26,saida,105);
+  else [523.25,659.25].forEach((freq,i)=>{
+    const t=inicio+i*.12,osc=ctx.createOscillator(),g=ctx.createGain();osc.type='sine';osc.frequency.value=freq;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(config.volume*.11,t+.015);g.gain.exponentialRampToValueAtTime(.0001,t+.28);
+    osc.connect(g);g.connect(saida);osc.start(t);osc.stop(t+.3);
+  });
+  const atual=audioPenalti;setTimeout(()=>{if(audioPenalti===atual)pararAudioPenalti();},650);
+}
+function cancelarAnimacoesPenalti() {
+  jogoPenalti.animacoes.forEach(a=>a.cancel());jogoPenalti.animacoes=[];
+}
+function pausarPenalti() {
+  cancelAnimationFrame(jogoPenalti.raf);jogoPenalti.raf=null;clearTimeout(jogoPenalti.timer);jogoPenalti.timer=null;
+  jogoPenalti.versao++;cancelarAnimacoesPenalti();pararAudioPenalti();
+  if(['carregando','animando'].includes(jogoPenalti.fase)) {
+    jogoPenalti.fase='pronto';jogoPenalti.tempo=0;jogoPenalti.mensagem='Cobrança pausada. Prepare novamente quando quiser.';
+    if($('#desafioPenaltis').open) {$('#cenaPenalti').innerHTML=desenharCenaPenalti();renderPenaltis();}
+  }
+}
+function abrirPenaltis() {
+  pararSomLoja(true);pararCantoVisita();pararEfeitoVisita();
+  if($('#visitaArquibancada').open)$('#visitaArquibancada').close();
+  pausarPenalti();$('#avisoPenaltis').textContent='';$('#cenaPenalti').innerHTML=desenharCenaPenalti();
+  if(!$('#desafioPenaltis').open)$('#desafioPenaltis').showModal();renderPenaltis();$('#acaoPenalti').focus();
+}
+function renderPenaltis() {
+  const gols=jogoPenalti.resultados.filter(r=>r==='gol').length;
+  $('#placarPenaltis').textContent=gols+(gols===1?' gol':' gols');
+  $('#rodadaPenaltis').textContent=Math.min(5,jogoPenalti.resultados.length+1)+' de 5';
+  $('#tentativasPenaltis').innerHTML=Array.from({length:5},(_,i)=>{
+    const r=jogoPenalti.resultados[i];return '<span aria-hidden="true" class="'+(r==='gol'?'gol':r?'erro':'')+'">'+(r==='gol'?'✓':r?'×':'·')+'</span>';
+  }).join('');
+  $('#tentativasPenaltis').setAttribute('aria-label',jogoPenalti.resultados.length+' cobranças realizadas, '+gols+' gols');
+  $('#campoPenalti').dataset.fase=jogoPenalti.fase;
+  $('#alvosPenalti').innerHTML=ALVOS_PENALTI.map((a,i)=>'<button type="button" data-penalti-alvo="'+i+'" aria-label="'+a.nome+'" aria-pressed="'+(jogoPenalti.alvo===i)+'"'+(jogoPenalti.fase!=='pronto'?' disabled':'')+'><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M14 2v7m0 10v7M2 14h7m10 0h7" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="14" r="2" fill="currentColor"/></svg></button>').join('');
+  const texto={pronto:'Preparar cobrança',carregando:'Chutar!',animando:'Bola em jogo…',entre:'Próxima cobrança',final:'Jogar novamente'};
+  $('#acaoPenalti').textContent=texto[jogoPenalti.fase];$('#acaoPenalti').disabled=jogoPenalti.fase==='animando';
+  $('#mensagemPenalti').textContent=jogoPenalti.mensagem;
+  $('#recordePenaltis').textContent=recordePenaltis.melhor+' de 5';
+  $('#barraTempoPenalti').setAttribute('aria-valuenow',String(Math.round(jogoPenalti.tempo*100)));
+  $('#ponteiroPenalti').style.setProperty('--pos',jogoPenalti.tempo*100+'%');
+  const cobrador=jogadorDaVaga('ata');$('#cobradorPenalti').textContent=cobrador?'Na cobrança: '+cobrador.nome+' · '+cobrador.ovr+' OVR':'Treino livre no seu estádio. Mire nos cantos e tente fazer cinco gols.';
+}
+function tempoDoChute(agora) {return (1-Math.cos((agora-jogoPenalti.inicio)/290))/2;}
+function atualizarTempoPenalti(agora) {
+  if(jogoPenalti.fase!=='carregando'||!$('#desafioPenaltis').open)return;
+  jogoPenalti.tempo=tempoDoChute(agora);$('#ponteiroPenalti').style.setProperty('--pos',jogoPenalti.tempo*100+'%');
+  jogoPenalti.raf=requestAnimationFrame(atualizarTempoPenalti);
+}
+function resolverPenalti(alvo,tempo,ladoGoleiro) {
+  const erro=Math.abs(tempo-.67),canto=alvo%3;
+  if(erro>.27)return 'fora';
+  if(canto===ladoGoleiro&&!(canto!==1&&erro<=.065))return 'defesa';
+  return 'gol';
+}
+function animarChutePenalti(resultado,ladoGoleiro) {
+  const alvo=ALVOS_PENALTI[jogoPenalti.alvo],col=jogoPenalti.alvo%3;
+  const duracao=window.matchMedia('(prefers-reduced-motion: reduce)').matches?100:900;
+  const bola=$('#bolaPenalti'),goleiro=$('#goleiroPenalti');
+  let x=alvo.x,y=alvo.y;
+  if(resultado==='fora') {x=col===0?150:col===2?750:450;y=col===1?65:alvo.y-50;}
+  const pos=(px,py,scale=1)=>'translate('+px+'px,'+py+'px) scale('+scale+')';
+  const frames=[{transform:pos(450,465),offset:0},{transform:pos((450+x)/2,Math.min(335,y+28),.75),offset:.48},{transform:pos(x,y,.5),offset:resultado==='defesa'?.72:1}];
+  if(resultado==='defesa')frames.push({transform:pos(x+(col===0?45:-45),385,.65),offset:1});
+  const destinoX=[290,450,610][ladoGoleiro],rotacao=[-64,0,64][ladoGoleiro];
+  jogoPenalti.animacoes.push(bola.animate(frames,{duration:duracao,easing:'ease-out',fill:'forwards'}),goleiro.animate([
+    {transform:'translate(450px,259px) rotate(0deg)',offset:0},
+    {transform:'translate('+destinoX+'px,'+(jogoPenalti.alvo<3?220:277)+'px) rotate('+rotacao+'deg)',offset:.75},
+    {transform:'translate('+destinoX+'px,280px) rotate('+rotacao+'deg)',offset:1}
+  ],{duration:duracao,easing:'ease-out',fill:'forwards'}));
+  return duracao;
+}
+function concluirChutePenalti(resultado) {
+  jogoPenalti.resultados.push(resultado);
+  const gols=jogoPenalti.resultados.filter(r=>r==='gol').length;
+  jogoPenalti.fase=jogoPenalti.resultados.length===5?'final':'entre';
+  jogoPenalti.mensagem={gol:'Gooool! A bola foi para a rede.',defesa:'O goleiro buscou! Tente outro canto ou uma batida mais precisa.',fora:'Passou para fora. Pare o marcador mais perto do centro da faixa verde.'}[resultado];
+  if(resultado==='gol')somPenalti(true);
+  if(jogoPenalti.fase==='final') {
+    const proximo=normalizarPenaltis({melhor:Math.max(recordePenaltis.melhor,gols),series:Math.min(Number.MAX_SAFE_INTEGER,recordePenaltis.series+1)});
+    if(Armazem.gravar(CHAVES.penaltis,proximo))recordePenaltis=proximo;
+    else $('#avisoPenaltis').textContent='A série terminou, mas não consegui salvar o recorde. Tente novamente com o armazenamento disponível.';
+    jogoPenalti.mensagem=gols===5?'Cinco de cinco! Você fechou a série com perfeição.':'Fim de série: '+gols+' de 5. Que tal tentar superar sua marca?';
+  }
+  renderPenaltis();$('#acaoPenalti').focus({preventScroll:true});
+}
+function acaoPenalti() {
+  if(!$('#desafioPenaltis').open||document.hidden)return false;
+  if(jogoPenalti.fase==='animando')return false;
+  if(['entre','final'].includes(jogoPenalti.fase)) {
+    const reiniciar=jogoPenalti.fase==='final';pausarPenalti();if(reiniciar)jogoPenalti.resultados=[];
+    jogoPenalti.fase='pronto';jogoPenalti.tempo=0;jogoPenalti.mensagem='Escolha o canto da próxima cobrança.';
+    $('#cenaPenalti').innerHTML=desenharCenaPenalti();renderPenaltis();return true;
+  }
+  if(jogoPenalti.fase==='pronto') {
+    jogoPenalti.fase='carregando';jogoPenalti.inicio=performance.now();jogoPenalti.mensagem='Agora! Pare o marcador na faixa verde.';renderPenaltis();
+    jogoPenalti.raf=requestAnimationFrame(atualizarTempoPenalti);return true;
+  }
+  cancelAnimationFrame(jogoPenalti.raf);jogoPenalti.raf=null;jogoPenalti.tempo=tempoDoChute(performance.now());
+  const lado=Math.floor(crypto.getRandomValues(new Uint32Array(1))[0]/4294967296*3);
+  const resultado=resolverPenalti(jogoPenalti.alvo,jogoPenalti.tempo,lado);
+  jogoPenalti.fase='animando';jogoPenalti.mensagem='Bola em jogo…';renderPenaltis();somPenalti();
+  const versao=++jogoPenalti.versao,duracao=animarChutePenalti(resultado,lado);
+  jogoPenalti.timer=setTimeout(()=>{jogoPenalti.timer=null;if(versao===jogoPenalti.versao&&$('#desafioPenaltis').open)concluirChutePenalti(resultado);},duracao+50);
+  return true;
+}
+$('#btnDesafioPenaltis').addEventListener('click',abrirPenaltis);
+$('#penaltisDaVisita').addEventListener('click',abrirPenaltis);
+$('#fecharPenaltis').addEventListener('click',()=>$('#desafioPenaltis').close());
+$('#desafioPenaltis').addEventListener('close',()=>{pausarPenalti();$('#btnDesafioPenaltis').focus({preventScroll:true});});
+$('#acaoPenalti').addEventListener('click',acaoPenalti);
+$('#alvosPenalti').addEventListener('click',e=>{
+  const alvo=e.target.closest('[data-penalti-alvo]');if(!alvo||alvo.disabled||jogoPenalti.fase!=='pronto')return;
+  jogoPenalti.alvo=Number(alvo.dataset.penaltiAlvo);jogoPenalti.mensagem='Alvo: '+ALVOS_PENALTI[jogoPenalti.alvo].nome.toLowerCase()+'. Prepare a cobrança.';
+  renderPenaltis();$('#alvosPenalti [data-penalti-alvo="'+jogoPenalti.alvo+'"]').focus({preventScroll:true});
+});
+$('#desafioPenaltis').addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.code==='Space'&&(jogoPenalti.fase==='carregando'||e.target.closest('[data-penalti-alvo]'))) {e.preventDefault();e.stopPropagation();if(!e.repeat){acaoPenalti();$('#acaoPenalti').focus();}return;}
+  const alvo=e.target.closest('[data-penalti-alvo]');if(!alvo||jogoPenalti.fase!=='pronto')return;
+  let i=jogoPenalti.alvo;
+  if(e.key==='ArrowLeft')i=Math.floor(i/3)*3+(i%3+2)%3;
+  else if(e.key==='ArrowRight')i=Math.floor(i/3)*3+(i%3+1)%3;
+  else if(e.key==='ArrowUp'||e.key==='ArrowDown')i=(i+3)%6;
+  else return;
+  e.preventDefault();jogoPenalti.alvo=i;jogoPenalti.mensagem='Alvo: '+ALVOS_PENALTI[i].nome.toLowerCase()+'. Prepare a cobrança.';renderPenaltis();$('#alvosPenalti [data-penalti-alvo="'+i+'"]').focus({preventScroll:true});
+});
 
 const GRUPOS_OBRAS_ESTADIO = {
   cobertura:{nome:"Cobertura",obras:["cobertura"],posicao:()=>[-16,60,perfilDaArquibancada().altura+5.5],icone:'<path d="M3 13Q12 2 21 13M5 13v7m14-7v7M3 13h18"/>'},
@@ -6822,7 +7093,7 @@ $("#btnVisitarArquibancada").addEventListener("click",()=>abrirVisitaArquibancad
 $("#visitarArquibancadaDaObra").addEventListener("click",()=>abrirVisitaArquibancada());
 $("#fecharVisitaArquibancada").addEventListener("click",()=>$("#visitaArquibancada").close());
 $("#visitaArquibancada").addEventListener("close",()=>{
-  pararCantoVisita();$("#btnVisitarArquibancada").focus({preventScroll:true});
+  pararCantoVisita();pararEfeitoVisita();if(!$("#desafioPenaltis").open)$("#btnVisitarArquibancada").focus({preventScroll:true});
 });
 $("#visitaArquibancada").addEventListener("keydown",e=>{
   if(e.key!=="Tab") return;
@@ -6832,6 +7103,8 @@ $("#visitaArquibancada").addEventListener("keydown",e=>{
   else if(!e.shiftKey&&document.activeElement===ultimo){e.preventDefault();primeiro.focus();}
 });
 $("#visitaArquibancada").addEventListener("click",e=>{
+  const acao=e.target.closest("[data-torcida-acao]");
+  if(acao) {agirTorcidaVisita(acao.dataset.torcidaAcao);if(acao.dataset.torcidaAcao==="canto") testarCantoVisita("geral");return;}
   const setor=e.target.closest("[data-visita-setor]"),bandeira=e.target.closest("[data-visita-bandeirao]"),canto=e.target.closest("[data-visita-canto]");
   if(setor&&salvarArquibancada({...estadoArquibancada,setor:setor.dataset.visitaSetor})) {
     zoomArquibancada=1;renderVisitaArquibancada();
@@ -6841,7 +7114,7 @@ $("#visitaArquibancada").addEventListener("click",e=>{
     if(salvarArquibancada({...estadoArquibancada,bandeiroes:{...estadoArquibancada.bandeiroes,[estadoArquibancada.setor]:modelo}})) {
       renderEstadio();$("#bandeirasVisita [data-visita-bandeirao="+modelo+"]")?.focus();
     }
-  } else if(canto) testarCantoVisita(canto.dataset.visitaCanto);
+  } else if(canto) {agirTorcidaVisita("canto");testarCantoVisita(canto.dataset.visitaCanto);}
 });
 $("#aproximarVisita").addEventListener("click",()=>{zoomArquibancada=Math.min(1.6,zoomArquibancada+0.2);renderVisitaArquibancada();});
 $("#afastarVisita").addEventListener("click",()=>{zoomArquibancada=Math.max(0.8,zoomArquibancada-0.2);renderVisitaArquibancada();});
@@ -6850,7 +7123,7 @@ $("#ativarSomVisita").addEventListener("click",()=>{
   config.mudo=false;if(config.volume<=0) config.volume=0.5;salvarConfig();renderAjustes();
   $("#statusCantoVisita").textContent="Som ativado. Escolha uma prévia.";atualizarSomVisita();
 });
-document.addEventListener("visibilitychange",()=>{if(document.hidden) {pararCantoVisita();pararSomLoja(true);}});
+document.addEventListener("visibilitychange",()=>{if(document.hidden) {pararCantoVisita();pararEfeitoVisita();pararSomLoja(true);pausarPenalti();}});
 $("#btnBaloesEstadio").addEventListener("click",()=>{
   mostrarBaloesEstadio=!mostrarBaloesEstadio;
   $("#btnBaloesEstadio").textContent=mostrarBaloesEstadio?"Ocultar balões":"Mostrar balões";
@@ -7085,13 +7358,13 @@ $("#orfaosDeixar").addEventListener("click", fecharModalOrfaos);
 
 $("#volume").addEventListener("input", (e) => {
   config.volume = Number(e.target.value) / 100;
-  if (config.volume <= 0) {pararSomLoja(); pararCantoVisita();}
+  if (config.volume <= 0) {pararSomLoja(); pararCantoVisita(); pararAudioPenalti();}
   salvarConfig();
 });
 $("#volume").addEventListener("change", bipeCurto);
 $("#mudo").addEventListener("change", (e) => {
   config.mudo = e.target.checked;
-  if (config.mudo) {pararSomLoja(); pararCantoVisita();}
+  if (config.mudo) {pararSomLoja(); pararCantoVisita(); pararAudioPenalti();}
   salvarConfig();
 });
 $("#btnTestarSom").addEventListener("click", () => { acordarAudio(); tocarGol(); });
@@ -7119,7 +7392,7 @@ $("#notifFechar").addEventListener("click", fecharModalNotif);
 document.addEventListener("keydown", (e) => {
   const alvo = e.target;
   const digitando = alvo && (alvo.tagName === "INPUT" || alvo.tagName === "TEXTAREA" || alvo.isContentEditable);
-  if($("#modalObraEstadio").open||$("#visitaArquibancada").open) return;
+  if($("#modalObraEstadio").open||$("#visitaArquibancada").open||$("#desafioPenaltis").open) return;
 
   if (e.key === "Escape") {
     fecharModalFim(); fecharModalNotif(); fecharModalOrfaos();
