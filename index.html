@@ -1690,7 +1690,7 @@ const POSICOES_TIME = [
   {id:"ld",sigla:"LD",nome:"lateral direito",x:87,y:70},
   {id:"vol",sigla:"VOL",nome:"volante",x:50,y:52},
   {id:"mc-e",sigla:"MC",nome:"meia central esquerdo",x:28,y:38},
-  {id:"mc-d",sigla:"MC",nome:"meia central direito",x:72,y:38},
+  {id:"mc-d",sigla:"MC",aceita:["MC","MEI"],nome:"meia central direito",x:72,y:38},
   {id:"pe",sigla:"PE",nome:"ponta esquerda",x:18,y:20},
   {id:"ata",sigla:"ATA",nome:"atacante",x:50,y:13},
   {id:"pd",sigla:"PD",nome:"ponta direita",x:82,y:20}
@@ -1733,13 +1733,20 @@ const JOGADORES_SPFC = [
   {id:"dagoberto",nome:"Dagoberto",posicao:"ATA",posicoes:["ATA","PE"],ovr:88},
   {id:"lugano",nome:"Lugano",posicao:"ZAG",ovr:93},
   {id:"hernanes",nome:"Hernanes",posicao:"MC",ovr:92},
-  {id:"rogerio-ceni",nome:"Rogério Ceni",posicao:"GOL",ovr:100}
+  {id:"rogerio-ceni",nome:"Rogério Ceni",posicao:"GOL",ovr:100},
+  {id:"cauly",nome:"Cauly",posicao:"MEI",ovr:67},
+  {id:"nikao",nome:"Nikão",posicao:"MEI",posicoes:["MEI","PD"],ovr:67}
 ];
 
 // A posição principal mantém a compatibilidade com os elencos já salvos.
 function posicoesDoJogador(j) { return j.posicoes || [j.posicao]; }
 function jogaNaPosicao(j, sigla) { return posicoesDoJogador(j).includes(sigla); }
 function rotuloPosicoes(j) { return posicoesDoJogador(j).join(" / "); }
+function posicoesDaVaga(p) { return p.aceita || [p.sigla]; }
+function rotuloDaVaga(p) { return posicoesDaVaga(p).join(" / "); }
+function posicaoDoJogadorNaVaga(j, p) {
+  return posicoesDaVaga(p).find(sigla=>jogaNaPosicao(j,sigla));
+}
 
 function raridadeDoJogador(j) {
   return RARIDADES_TIME.find(r=>j.ovr>=r.min && j.ovr<=r.max) || null;
@@ -1766,7 +1773,7 @@ let animacaoPacoteTimer=null;
 function normalizarMeuTime(dados) {
   const fonte=dados && typeof dados==="object" ? dados : {};
   const nome=typeof fonte.nome==="string" ? fonte.nome.trim().slice(0,40) : "";
-  const jogadores=[],ids=new Set(),codigos=new Set(POSICOES_TIME.map(p=>p.sigla));
+  const jogadores=[],ids=new Set(),codigos=new Set(POSICOES_TIME.flatMap(posicoesDaVaga));
   if(Array.isArray(fonte.jogadores)) fonte.jogadores.forEach(j=>{
     if(!j || typeof j.id!=="string" || ids.has(j.id)) return;
     const ficha=JOGADORES_SPFC.find(f=>f.id===j.id);
@@ -1778,7 +1785,7 @@ function normalizarMeuTime(dados) {
   POSICOES_TIME.forEach(p=>{
     const id=fonte.escalacao && fonte.escalacao[p.id];
     const j=jogadores.find(j=>j.id===id);
-    if(j && jogaNaPosicao(j,p.sigla) && !usados.has(id)) {escalacao[p.id]=id;usados.add(id);}
+    if(j && posicaoDoJogadorNaVaga(j,p) && !usados.has(id)) {escalacao[p.id]=id;usados.add(id);}
   });
   const ultimoPacote=Array.isArray(fonte.ultimoPacote)?fonte.ultimoPacote.filter(c=>c && ids.has(c.id) &&
     JOGADORES_SPFC.some(j=>j.id===c.id)).slice(0,2).map(c=>({id:c.id,nova:!!c.nova})):[];
@@ -4428,17 +4435,18 @@ function renderMeuTime() {
     const jogador=jogadorDaVaga(p.id);
     return '<button type="button" class="time-posicao'+(jogador?'':' vazia')+'" '+
       'style="--x:'+p.x+'%;--y:'+p.y+'%" data-time-pos="'+p.id+'" '+
-      'aria-pressed="'+(p.id===posicao.id)+'" aria-label="Escolher '+p.nome+
-      (jogador?': '+escapar(jogador.nome):', vaga livre')+'" title="'+p.nome+'">'+
-      '<span class="time-pos-sigla">'+p.sigla+'</span>'+camisaDoTime()+
+      'aria-pressed="'+(p.id===posicao.id)+'" aria-label="Escolher '+p.nome+' ('+rotuloDaVaga(p)+')'+
+      (jogador?': '+escapar(jogador.nome):', vaga livre')+'" title="'+p.nome+' ('+rotuloDaVaga(p)+')">'+
+      '<span class="time-pos-sigla">'+(jogador?posicaoDoJogadorNaVaga(jogador,p):rotuloDaVaga(p))+'</span>'+camisaDoTime()+
       (jogador&&jogador.ovr?'<span class="time-ovr-campo" aria-label="OVR '+jogador.ovr+'">'+jogador.ovr+'</span>':'')+
       (!jogador?'<span class="time-adicionar" aria-hidden="true">+</span>':'')+
       '<span class="time-pos-nome">'+(jogador?escapar(jogador.nome):'Vaga livre')+'</span></button>';
   }).join('');
-  $("#timeEscolhaSigla").textContent=posicao.sigla;
+  $("#timeEscolhaSigla").textContent=rotuloDaVaga(posicao);
   $("#timeEscolhaTitulo").textContent="Escolher "+posicao.nome;
-  $("#timeInstrucao").textContent=posicao.nome.charAt(0).toUpperCase()+posicao.nome.slice(1)+" · escolha no elenco quem joga nesta vaga.";
-  const opcoes=meuTime.jogadores.filter(j=>jogaNaPosicao(j,posicao.sigla)).sort((a,b)=>(b.ovr||0)-(a.ovr||0)||a.nome.localeCompare(b.nome,"pt-BR"));
+  $("#timeInstrucao").textContent=posicao.nome.charAt(0).toUpperCase()+posicao.nome.slice(1)+
+    (posicao.aceita?" · aceita "+posicoesDaVaga(posicao).join(" ou ")+". Escolha no elenco quem joga nesta vaga.":" · escolha no elenco quem joga nesta vaga.");
+  const opcoes=meuTime.jogadores.filter(j=>posicaoDoJogadorNaVaga(j,posicao)).sort((a,b)=>(b.ovr||0)-(a.ovr||0)||a.nome.localeCompare(b.nome,"pt-BR"));
   $("#timeElencoResumo").textContent=meuTime.jogadores.length
     ? meuTime.jogadores.length+(meuTime.jogadores.length===1?' jogador no elenco':' jogadores no elenco')
     : 'Sua coleção ainda está vazia.';
@@ -4496,12 +4504,12 @@ function venderJogadorRepetido(id,quantidadeEsperada) {
 function escalarJogadorNoTime(id) {
   const posicao=POSICOES_TIME.find(p=>p.id===posicaoTimeSelecionada);
   const jogador=meuTime.jogadores.find(j=>j.id===id);
-  if(!posicao || !jogador || !jogaNaPosicao(jogador,posicao.sigla)) return false;
+  if(!posicao || !jogador || !posicaoDoJogadorNaVaga(jogador,posicao)) return false;
   // A mesma carta pode ocupar só uma vaga, inclusive entre os dois ZAG/MC.
   POSICOES_TIME.forEach(p=>{if(meuTime.escalacao[p.id]===id) delete meuTime.escalacao[p.id];});
   meuTime.escalacao[posicao.id]=id;
   salvarMeuTime();renderMeuTime();focarPosicaoTime();
-  mostrarAviso(jogador.nome+" escalado como "+posicao.sigla+".");
+  mostrarAviso(jogador.nome+" escalado como "+posicaoDoJogadorNaVaga(jogador,posicao)+".");
   return true;
 }
 $("#painel-time").addEventListener("click",e=>{
@@ -4623,7 +4631,7 @@ $("#pacoteFechar").addEventListener("click",fecharModalPacote);
 $("#pacoteMeuTime").addEventListener("click",()=>{
   const carta=JOGADORES_SPFC.find(j=>j.id===meuTime.ultimoPacote[0]?.id);
   if(carta) {
-    const vagas=POSICOES_TIME.filter(p=>jogaNaPosicao(carta,p.sigla));
+    const vagas=POSICOES_TIME.filter(p=>posicaoDoJogadorNaVaga(carta,p));
     const vaga=vagas.find(p=>!jogadorDaVaga(p.id)) || vagas[0];
     if(vaga) posicaoTimeSelecionada=vaga.id;
   }
