@@ -1726,8 +1726,17 @@ const JOGADORES_SPFC = [
   {id:"liziero",nome:"Liziero",posicao:"MC",ovr:65},
   {id:"tche-tche",nome:"Tchê Tchê",posicao:"MC",ovr:69},
   {id:"sabino",nome:"Sabino",posicao:"ZAG",ovr:68},
-  {id:"everton-ribeiro",nome:"Everton Ribeiro",posicao:"PE",ovr:67}
+  {id:"everton-ribeiro",nome:"Everton Ribeiro",posicao:"PE",ovr:67},
+  {id:"rafael",nome:"Rafael",posicao:"GOL",ovr:74},
+  {id:"antony",nome:"Antony",posicao:"PD",ovr:83},
+  {id:"calleri",nome:"Calleri",posicao:"ATA",ovr:80},
+  {id:"dagoberto",nome:"Dagoberto",posicao:"ATA",posicoes:["ATA","PE"],ovr:88}
 ];
+
+// A posição principal mantém a compatibilidade com os elencos já salvos.
+function posicoesDoJogador(j) { return j.posicoes || [j.posicao]; }
+function jogaNaPosicao(j, sigla) { return posicoesDoJogador(j).includes(sigla); }
+function rotuloPosicoes(j) { return posicoesDoJogador(j).join(" / "); }
 
 function raridadeDoJogador(j) {
   return RARIDADES_TIME.find(r=>j.ovr>=r.min && j.ovr<=r.max) || null;
@@ -1758,7 +1767,7 @@ function normalizarMeuTime(dados) {
   if(Array.isArray(fonte.jogadores)) fonte.jogadores.forEach(j=>{
     if(!j || typeof j.id!=="string" || ids.has(j.id)) return;
     const ficha=JOGADORES_SPFC.find(f=>f.id===j.id);
-    if(!ficha || !codigos.has(ficha.posicao)) return;
+    if(!ficha || !posicoesDoJogador(ficha).every(p=>codigos.has(p))) return;
     ids.add(j.id);
     jogadores.push({...ficha,quantidade:Number.isSafeInteger(j.quantidade)&&j.quantidade>0?j.quantidade:1});
   });
@@ -1766,7 +1775,7 @@ function normalizarMeuTime(dados) {
   POSICOES_TIME.forEach(p=>{
     const id=fonte.escalacao && fonte.escalacao[p.id];
     const j=jogadores.find(j=>j.id===id);
-    if(j && j.posicao===p.sigla && !usados.has(id)) {escalacao[p.id]=id;usados.add(id);}
+    if(j && jogaNaPosicao(j,p.sigla) && !usados.has(id)) {escalacao[p.id]=id;usados.add(id);}
   });
   const ultimoPacote=Array.isArray(fonte.ultimoPacote)?fonte.ultimoPacote.filter(c=>c && ids.has(c.id) &&
     JOGADORES_SPFC.some(j=>j.id===c.id)).slice(0,2).map(c=>({id:c.id,nova:!!c.nova})):[];
@@ -4426,7 +4435,7 @@ function renderMeuTime() {
   $("#timeEscolhaSigla").textContent=posicao.sigla;
   $("#timeEscolhaTitulo").textContent="Escolher "+posicao.nome;
   $("#timeInstrucao").textContent=posicao.nome.charAt(0).toUpperCase()+posicao.nome.slice(1)+" · escolha no elenco quem joga nesta vaga.";
-  const opcoes=meuTime.jogadores.filter(j=>j.posicao===posicao.sigla).sort((a,b)=>(b.ovr||0)-(a.ovr||0)||a.nome.localeCompare(b.nome,"pt-BR"));
+  const opcoes=meuTime.jogadores.filter(j=>jogaNaPosicao(j,posicao.sigla)).sort((a,b)=>(b.ovr||0)-(a.ovr||0)||a.nome.localeCompare(b.nome,"pt-BR"));
   $("#timeElencoResumo").textContent=meuTime.jogadores.length
     ? meuTime.jogadores.length+(meuTime.jogadores.length===1?' jogador no elenco':' jogadores no elenco')
     : 'Sua coleção ainda está vazia.';
@@ -4442,7 +4451,7 @@ function renderMeuTime() {
       const iniciais=j.nome.split(/\s+/).slice(0,2).map(n=>n[0]).join('').toUpperCase();
       const raridade=raridadeDoJogador(j);
       return '<div class="time-carta raridade-'+(raridade?raridade.id:'comum')+'"><div class="time-carta-topo"><span class="time-iniciais" aria-hidden="true">'+escapar(iniciais)+'</span>'+
-        '<div class="time-carta-nome"><strong>'+escapar(j.nome)+'</strong><span>'+j.posicao+(vaga?' · Em campo':' · Disponível')+'</span></div>'+
+        '<div class="time-carta-nome"><strong>'+escapar(j.nome)+'</strong><span>'+rotuloPosicoes(j)+(vaga?' · Em campo':' · Disponível')+'</span></div>'+
         (j.ovr?'<span class="carta-ovr">'+j.ovr+'<small>OVR</small></span>':'')+'</div>'+
         '<div class="time-carta-metadados"><span class="carta-raridade">'+(raridade?raridade.nome:'Sem OVR')+'</span><span>'+j.quantidade+(j.quantidade===1?' carta':' cópias')+'</span></div>'+
         '<button type="button" class="btn btn-pequeno '+(atual?'':'btn-principal')+'" data-time-escalar="'+escapar(j.id)+'"'+(atual?' disabled':'')+'>'+
@@ -4459,7 +4468,7 @@ function renderRepetidosDoTime() {
   $("#resumoRepetidos").textContent=extras?extras+(extras===1?" cópia extra disponível.":" cópias extras disponíveis."):"Você ainda não tem cartas repetidas. As próximas cópias extras aparecerão aqui.";
   $("#timeRepetidos").innerHTML=repetidos.map(j=>{
     const raridade=raridadeDoJogador(j),valor=precoVendaDoJogador(j),emCampo=Object.values(meuTime.escalacao).includes(j.id);
-    return '<article class="time-carta raridade-'+raridade.id+'"><div class="time-carta-topo"><div class="time-carta-nome"><strong>'+escapar(j.nome)+'</strong><span>'+j.posicao+(emCampo?' · Em campo':'')+'</span></div>'+
+    return '<article class="time-carta raridade-'+raridade.id+'"><div class="time-carta-topo"><div class="time-carta-nome"><strong>'+escapar(j.nome)+'</strong><span>'+rotuloPosicoes(j)+(emCampo?' · Em campo':'')+'</span></div>'+
       '<span class="carta-ovr">'+j.ovr+'<small>OVR</small></span></div><div class="time-carta-metadados"><span class="carta-raridade">'+raridade.nome+'</span><span>'+j.quantidade+' cópias</span></div>'+
       '<p class="time-venda-info">'+(j.quantidade-1)+((j.quantidade-1)===1?' cópia extra.':' cópias extras.')+' Uma carta fica no elenco.</p>'+
       '<button class="btn btn-pequeno btn-preto" type="button" data-time-vender="'+j.id+'" data-time-quantidade="'+j.quantidade+'" aria-label="Vender uma cópia extra de '+escapar(j.nome)+' por '+valor+' moedas">Vender 1 extra · '+valor+' moedas</button></article>';
@@ -4484,7 +4493,7 @@ function venderJogadorRepetido(id,quantidadeEsperada) {
 function escalarJogadorNoTime(id) {
   const posicao=POSICOES_TIME.find(p=>p.id===posicaoTimeSelecionada);
   const jogador=meuTime.jogadores.find(j=>j.id===id);
-  if(!posicao || !jogador || jogador.posicao!==posicao.sigla) return false;
+  if(!posicao || !jogador || !jogaNaPosicao(jogador,posicao.sigla)) return false;
   // A mesma carta pode ocupar só uma vaga, inclusive entre os dois ZAG/MC.
   POSICOES_TIME.forEach(p=>{if(meuTime.escalacao[p.id]===id) delete meuTime.escalacao[p.id];});
   meuTime.escalacao[posicao.id]=id;
@@ -4534,7 +4543,7 @@ function renderPacoteBase() {
   $("#chancesPacote").innerHTML=chancesDoPacote().map(r=>
     '<tr class="raridade-'+r.id+'"><td><span class="carta-raridade">'+r.nome+'</span></td><td>'+r.min+'–'+r.max+'</td><td>'+r.chance.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+'%</td></tr>').join('');
   $("#catalogoPacote").innerHTML=[...JOGADORES_SPFC].sort((a,b)=>b.ovr-a.ovr||a.nome.localeCompare(b.nome,"pt-BR")).map(j=>
-    '<tr class="raridade-'+raridadeDoJogador(j).id+'"><td>'+escapar(j.nome)+'</td><td>'+j.posicao+'</td><td><span class="carta-raridade">'+j.ovr+'</span></td></tr>').join('');
+    '<tr class="raridade-'+raridadeDoJogador(j).id+'"><td>'+escapar(j.nome)+'</td><td>'+rotuloPosicoes(j)+'</td><td><span class="carta-raridade">'+j.ovr+'</span></td></tr>').join('');
 }
 function abrirResultadoPacote(animar=false) {
   if(meuTime.ultimoPacote.length!==2) return;
@@ -4545,7 +4554,7 @@ function abrirResultadoPacote(animar=false) {
     const j=JOGADORES_SPFC.find(j=>j.id===c.id),r=raridadeDoJogador(j);
     const guardado=meuTime.jogadores.find(p=>p.id===j.id);
     return '<article class="carta-revelada raridade-'+r.id+'"><div class="carta-revelada-topo">'+
-      '<span class="carta-ovr">'+j.ovr+'<small>OVR</small></span><span class="carta-pos">'+j.posicao+'</span></div>'+camisaDoTime()+
+      '<span class="carta-ovr">'+j.ovr+'<small>OVR</small></span><span class="carta-pos">'+rotuloPosicoes(j)+'</span></div>'+camisaDoTime()+
       '<span class="carta-raridade">'+r.nome+'</span><h3>'+escapar(j.nome)+'</h3>'+
       '<p class="carta-repetida">'+(c.nova?'Nova carta':'Cópia extra')+' · '+(guardado?guardado.quantidade:1)+' no elenco</p></article>';
   }).join('');
@@ -4611,7 +4620,8 @@ $("#pacoteFechar").addEventListener("click",fecharModalPacote);
 $("#pacoteMeuTime").addEventListener("click",()=>{
   const carta=JOGADORES_SPFC.find(j=>j.id===meuTime.ultimoPacote[0]?.id);
   if(carta) {
-    const vaga=POSICOES_TIME.find(p=>p.sigla===carta.posicao&&!jogadorDaVaga(p.id)) || POSICOES_TIME.find(p=>p.sigla===carta.posicao);
+    const vagas=POSICOES_TIME.filter(p=>jogaNaPosicao(carta,p.sigla));
+    const vaga=vagas.find(p=>!jogadorDaVaga(p.id)) || vagas[0];
     if(vaga) posicaoTimeSelecionada=vaga.id;
   }
   fecharModalPacote();irParaPainel("time");focarPosicaoTime();
