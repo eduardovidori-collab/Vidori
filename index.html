@@ -478,6 +478,38 @@ canvas{display:block; width:100%; height:auto}
 .obra-escolhas [aria-pressed=true]{background:#253E33;border-color:#253E33;color:#FFF}
 .obra-estadio-dialog .item-loja{margin:0;box-shadow:none}.obra-estadio-dialog .item-acoes .btn{width:100%}
 .obra-falta{font-size:12px;color:var(--fraco);margin-top:10px;line-height:1.5}
+.caixa-estadio [data-setor-arquibancada]{cursor:pointer}
+.caixa-estadio [data-setor-arquibancada]:hover{filter:brightness(1.04)}
+.visita-arquibancada{border:0;border-radius:20px;padding:0;width:min(1120px,calc(100% - 28px));max-height:calc(100dvh - 28px);overflow:auto;background:#FBFCF9;color:var(--texto);box-shadow:0 24px 80px #0005}
+.visita-arquibancada::backdrop{background:#101E19B8;backdrop-filter:blur(4px)}
+.visita-corpo{padding:22px}.visita-cabecalho{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+.visita-cabecalho{position:sticky;top:0;z-index:2;background:#FBFCF9;padding-bottom:10px}.visita-cabecalho h2{font-size:23px;margin:0}.visita-cabecalho p{font-size:12px;color:var(--fraco);margin-top:3px}
+.visita-setores{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.visita-setores [aria-pressed=true]{background:#243D31;color:white;border-color:#243D31}
+.visita-grade{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:20px;align-items:start}
+.visita-paisagem{position:relative;overflow:hidden;border:1px solid #D6E0DC;border-radius:16px;background:linear-gradient(160deg,#EBF3F5,#D8E6E9)}
+.visita-paisagem>div:first-child{aspect-ratio:16/10}.visita-paisagem svg{display:block;width:100%;height:100%}
+.visita-camera{position:absolute;inset:auto 12px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;pointer-events:none}
+.visita-camera span{font-size:11px;font-weight:700;padding:8px 11px;border-radius:9px;background:#FFFDF4E8;box-shadow:0 2px 8px #18342D18}
+.visita-camera>div{display:flex;gap:5px;pointer-events:auto}.visita-camera button{width:36px;height:36px;padding:0;background:#FFFDF4}
+.visita-detalhe{font-size:12px;color:var(--fraco);line-height:1.6;margin-top:10px}
+.visita-painel{display:grid;gap:20px}.visita-painel h3{font-size:14px;margin-bottom:4px}.visita-painel .subtexto{font-size:11px;margin-bottom:10px}
+.visita-bandeiras{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.visita-bandeiras button{min-height:76px;padding:9px 7px;border:1px solid #D9E1D8;border-radius:10px;background:#FFF;cursor:pointer;font-size:10px;font-weight:600;text-align:center}
+.visita-bandeiras [aria-pressed=true]{border:2px solid #B82F3A;background:#FFF8F5;padding:8px 6px}
+.bandeira-mini{display:block;width:56px;height:27px;border:1px solid #CBD5CD;border-radius:3px;margin:0 auto 6px;background:#ECEFE8}
+.bandeira-mini.tricolor{background:linear-gradient(#BB3341 0 22%,#F9F7ED 22% 42%,#26362F 42% 65%,#F9F7ED 65% 82%,#BB3341 82%)}
+.bandeira-mini.soberano{background:linear-gradient(120deg,#F8F4E8 0 44%,#B92E3D 44% 56%,#26352F 56%);color:#273B30}
+.bandeira-mini.meu-time{background:linear-gradient(#B92E3D 0 18%,#F8F4E8 18% 82%,#26352F 82%);color:#273B30}
+.bandeira-mini.nenhum{background:repeating-linear-gradient(135deg,#EDF1EA 0 4px,#FFF 4px 8px)}
+.visita-cantos{display:grid;gap:7px}.visita-cantos button{display:flex;align-items:center;gap:9px;text-align:left;font-size:12px;padding:9px 10px}
+.visita-cantos [aria-pressed=true]{border-color:#3E765B;background:#EAF3EB;color:#27523B}
+.visita-play{font-size:11px;width:14px;text-align:center}.visita-cantos small{display:block;color:var(--fraco);font-size:10px;font-weight:400;margin-top:1px}
+.visita-som-status{font-size:11px;line-height:1.5;color:var(--fraco);min-height:32px;margin-top:9px}
+.visita-som-acoes{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}.visita-som-acoes .btn{font-size:11px}
+.visita-som-acoes [hidden],#visitarArquibancadaDaObra[hidden]{display:none}
+.visita-aviso{font-size:12px;color:#9C3038;margin-top:12px;min-height:18px}
+@media(max-width:800px){.visita-grade{grid-template-columns:1fr}.visita-painel{grid-template-columns:1fr 1fr;gap:14px}.visita-corpo{padding:16px}}
+@media(max-width:480px){.visita-painel{grid-template-columns:1fr}.visita-cabecalho{align-items:flex-start}.visita-cabecalho h2{font-size:20px}.visita-cabecalho .btn{font-size:11px;padding:9px}.visita-setores .btn{flex:1;padding:8px;font-size:12px}}
 @media(max-width:1100px){
  .obra-pin{width:30px;height:30px;padding:5px;justify-content:center;border-radius:10px;top:max(38px,var(--pin-y))}
  .obra-pin[data-estadio-grupo=arquibancadas]{left:calc(var(--pin-x) - 18px);top:max(38px,calc(var(--pin-y) - 6px))}
@@ -1006,11 +1038,12 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     <div class="cartao-corpo">
       <div class="estadio-topo"><h3 id="tituloEstadio" tabindex="-1">Estádio</h3>
         <div class="estadio-controles"><span class="estadio-saldo" role="status" aria-live="polite"><b id="saldoEstadio">0</b> moedas</span>
+          <button class="btn btn-pequeno btn-preto" type="button" id="btnVisitarArquibancada" aria-haspopup="dialog">Visitar arquibancada</button>
           <button class="btn btn-pequeno" type="button" id="btnBaloesEstadio" aria-pressed="true" aria-controls="baloesEstadio estadioZonas">Ocultar balões</button></div>
       </div>
       <p class="subtexto" id="legendaEstadio">Terreno limpo, gramado plantado e as quatro
         arquibancadas de pé. O resto vem com o trabalho.</p>
-      <p class="dica">Toque nos balões para escolher uma melhoria e construir aqui mesmo.</p>
+      <p class="dica">Toque nos balões para construir ou entre na arquibancada para escolher seu bandeirão e ouvir a torcida.</p>
       <div class="cena-estadio" id="cenaEstadio"><div class="caixa-estadio" id="caixaEstadio"></div>
         <div class="baloes-estadio" id="baloesEstadio" role="group" aria-label="Melhorias nas partes do estádio"></div>
       </div>
@@ -1287,8 +1320,24 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
   <div class="faixas"></div><div class="obra-dialog-corpo">
     <div class="obra-dialog-topo"><h2 id="tituloObraEstadio">Melhorar estádio</h2><button class="btn btn-pequeno" type="button" id="fecharObraEstadio" aria-label="Fechar melhorias">✕</button></div>
     <p class="obra-dialog-saldo" id="saldoObraEstadio"></p>
+    <button class="btn btn-pequeno" type="button" id="visitarArquibancadaDaObra" style="margin-bottom:14px" hidden>Visitar arquibancada</button>
     <div class="obra-escolhas" id="escolhasObraEstadio" role="group" aria-label="Melhorias deste setor"></div>
     <div id="detalheObraEstadio"></div>
+  </div>
+</dialog>
+
+<!-- ================================================= VISITA À ARQUIBANCADA -->
+<dialog class="visita-arquibancada" id="visitaArquibancada" aria-labelledby="tituloVisitaArquibancada">
+  <div class="faixas"></div><div class="visita-corpo">
+    <div class="visita-cabecalho"><div><h2 id="tituloVisitaArquibancada">Dentro da arquibancada</h2><p>Seu setor, seu bandeirão e a voz da torcida.</p></div><button class="btn btn-pequeno" type="button" id="fecharVisitaArquibancada">Voltar ao estádio</button></div>
+    <div class="visita-setores" id="setoresVisitaArquibancada" role="group" aria-label="Setor da arquibancada"></div>
+    <div class="visita-grade"><div>
+      <div class="visita-paisagem"><div id="cenaVisitaArquibancada"></div><div class="visita-camera"><span id="nomeSetorVisita"></span><div><button class="btn" type="button" id="afastarVisita" aria-label="Afastar visão">−</button><button class="btn" type="button" id="aproximarVisita" aria-label="Aproximar visão">+</button></div></div></div>
+      <p class="visita-detalhe" id="detalheSetorVisita"></p>
+    </div><aside class="visita-painel">
+      <section><h3>Bandeirão deste setor</h3><p class="subtexto">Escolha um modelo. Ele também aparece no seu estádio.</p><div class="visita-bandeiras" id="bandeirasVisita" role="group" aria-label="Modelo do bandeirão"></div></section>
+      <section><h3>Som da torcida</h3><p class="subtexto">Ouça uma prévia curta no volume dos seus ajustes.</p><div class="visita-cantos" id="cantosVisita" role="group" aria-label="Prévias da torcida"></div><p class="visita-som-status" id="statusCantoVisita" role="status" aria-live="polite">Escolha um som para ouvir a torcida.</p><div class="visita-som-acoes"><button class="btn btn-pequeno" type="button" id="pararCantoVisita" disabled>Parar som</button><button class="btn btn-pequeno" type="button" id="ativarSomVisita" hidden>Ativar som</button></div></section>
+    </aside></div><p class="visita-aviso" id="avisoVisitaArquibancada" role="status"></p>
   </div>
 </dialog>
 
@@ -1557,7 +1606,8 @@ const CHAVES = {
   marcos:   "vidori.marcos",
   timer:    "vidori.timer",
   loja:     "vidori.loja",
-  meuTime:  "vidori.meuTime"
+  meuTime:  "vidori.meuTime",
+  arquibancada: "vidori.arquibancada"
 };
 
 /* --------------------------------------------------------------------------
@@ -3954,7 +4004,7 @@ function exportarJSON() {
     app: "vidori",
     versao: 1,
     exportadoEm: new Date().toISOString(),
-    blocos, ciclos, config, recordes, marcos: marcosOk, loja: loja, meuTime
+    blocos, ciclos, config, recordes, marcos: marcosOk, loja: loja, meuTime, arquibancada:estadoArquibancada
   };
   const blob = new Blob([JSON.stringify(pacote, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -3991,6 +4041,10 @@ function importarJSON(arquivo) {
       if (!Array.isArray(loja.comprados)) loja.comprados = [];
     }
     if (dados.meuTime) { meuTime=normalizarMeuTime(dados.meuTime); salvarMeuTime(); }
+    if(dados.arquibancada) {
+      const proximo=normalizarArquibancada(dados.arquibancada);
+      if(Armazem.gravar(CHAVES.arquibancada,proximo)) estadoArquibancada=proximo;
+    }
     marcosOk = null;                 // recalcula sem comemorar tudo de novo
     salvarBlocos(); salvarCiclos(); salvarConfig(); salvarLoja();
     conferirRecordes(true);
@@ -4009,6 +4063,7 @@ function apagarTudo() {
   loja = { gastas: 0, comprados: [], golAtivo: "padrao", apitoAtivo: "padrao" };
   salvarBlocos(); salvarCiclos(); salvarMarcos(); salvarRecordes(); salvarLoja();
   meuTime=normalizarMeuTime(null); salvarMeuTime();
+  estadoArquibancada=normalizarArquibancada(null);Armazem.gravar(CHAVES.arquibancada,estadoArquibancada);
   Armazem.apagar(CHAVES.timer);
   zerarTimer();
   renderTudo();
@@ -4517,7 +4572,7 @@ $("#formNomeTime").addEventListener("submit",e=>{
   e.preventDefault();
   const nome=$("#nomeMeuTime").value.trim().slice(0,40);
   if(!nome) {mostrarAviso("Dê um nome ao seu time.");return;}
-  meuTime.nome=nome;salvarMeuTime();renderMeuTime();
+  meuTime.nome=nome;salvarMeuTime();renderMeuTime();renderEstadio();
   mostrarAviso("Nome do time salvo.");
 });
 $("#btnRemoverTitular").addEventListener("click",()=>{
@@ -4696,6 +4751,118 @@ function comprarNivel(familia,nivelEsperado) {
   return true;
 }
 
+const SETORES_ARQUIBANCADA = {
+  norte:{nome:"Norte",descricao:"Lateral do túnel e dos bancos de reservas.",camera:[0,-48,8]},
+  sul:{nome:"Sul",descricao:"Lateral oposta, com vista para o túnel dos jogadores.",camera:[0,53,10]},
+  leste:{nome:"Leste",descricao:"Arquibancada atrás do gol à direita.",camera:[72,0,10]},
+  oeste:{nome:"Oeste",descricao:"Arquibancada atrás do gol à esquerda.",camera:[-72,0,10]}
+};
+const BANDEIROES_ARQUIBANCADA = {
+  nenhum:"Sem bandeirão",tricolor:"Faixas tricolores",soberano:"Soberano","meu-time":"Meu time"
+};
+function normalizarArquibancada(dados) {
+  const fonte=dados&&typeof dados==="object"?dados:{};
+  const setor=Object.hasOwn(SETORES_ARQUIBANCADA,fonte.setor)?fonte.setor:"norte",bandeiroes={};
+  Object.keys(SETORES_ARQUIBANCADA).forEach(s=>{
+    const modelo=fonte.bandeiroes&&fonte.bandeiroes[s];
+    bandeiroes[s]=Object.hasOwn(BANDEIROES_ARQUIBANCADA,modelo)?modelo:"nenhum";
+  });
+  return {setor,bandeiroes};
+}
+let estadoArquibancada=normalizarArquibancada(Armazem.ler(CHAVES.arquibancada,null));
+let zoomArquibancada=1,audioVisitaArquibancada=null,solicitacaoAudioVisita=0;
+
+function salvarArquibancada(dados) {
+  const proximo=normalizarArquibancada(dados);
+  if(!Armazem.gravar(CHAVES.arquibancada,proximo)) {
+    $("#avisoVisitaArquibancada").textContent="Não consegui salvar a alteração. Tente novamente.";
+    return false;
+  }
+  estadoArquibancada=proximo;$("#avisoVisitaArquibancada").textContent="";return true;
+}
+function abrirVisitaArquibancada(setor) {
+  $("#avisoVisitaArquibancada").textContent="";
+  if(setor&&Object.hasOwn(SETORES_ARQUIBANCADA,setor)&&
+    !salvarArquibancada({...estadoArquibancada,setor})) return;
+  if($("#modalObraEstadio").open) $("#modalObraEstadio").close();
+  zoomArquibancada=1;renderEstadio();
+  if(!$("#visitaArquibancada").open) $("#visitaArquibancada").showModal();
+  renderVisitaArquibancada();$("#fecharVisitaArquibancada").focus();
+}
+function renderVisitaArquibancada() {
+  if(!$("#visitaArquibancada").open) return;
+  const setor=SETORES_ARQUIBANCADA[estadoArquibancada.setor],modelo=estadoArquibancada.bandeiroes[estadoArquibancada.setor];
+  $("#setoresVisitaArquibancada").innerHTML=Object.entries(SETORES_ARQUIBANCADA).map(([id,s])=>
+    '<button class="btn btn-pequeno" type="button" data-visita-setor="'+id+'" aria-pressed="'+(id===estadoArquibancada.setor)+'">'+s.nome+'</button>').join("");
+  // A visita usa o estádio real. Prefixos evitam duplicar os IDs de luzes e torcedores.
+  const original=$("#caixaEstadio svg");
+  if(original) {
+    $("#cenaVisitaArquibancada").innerHTML=original.outerHTML.replace(/id="([^"]+)"/g,'id="visita-$1"')
+      .replace(/url\(#([^\)]+)\)/g,'url(#visita-$1)').replace(/href="#([^"]+)"/g,'href="#visita-$1"');
+    const svg=$("#cenaVisitaArquibancada svg"),centro=iso(...setor.camera),largura=205/zoomArquibancada,altura=largura/1.6;
+    svg.setAttribute("viewBox",[centro.x-largura/2,centro.y-altura/2,largura,altura].join(" "));
+    svg.setAttribute("aria-label","Vista aproximada do setor "+setor.nome+". "+setor.descricao);
+  }
+  $("#nomeSetorVisita").textContent="Setor "+setor.nome;
+  $("#detalheSetorVisita").textContent=setor.descricao+" "+(temAnel()?"Dois anéis conectados.":"Primeiro anel.")+" "+
+    (temPublico()?"Torcida nível "+nivelDaObra("publico")+".":"Os assentos ainda estão vazios.");
+  $("#afastarVisita").disabled=zoomArquibancada<=0.81;
+  $("#aproximarVisita").disabled=zoomArquibancada>=1.59;
+  $("#bandeirasVisita").innerHTML=Object.entries(BANDEIROES_ARQUIBANCADA).map(([id,nome])=>
+    '<button type="button" data-visita-bandeirao="'+id+'" aria-pressed="'+(id===modelo)+'"><span class="bandeira-mini '+id+'" aria-hidden="true"></span>'+nome+'</button>').join("");
+  $("#cantosVisita").innerHTML=Object.entries(CANTOS_ARQUIBANCADA).map(([id,c])=>
+    '<button class="btn" type="button" data-visita-canto="'+id+'" aria-pressed="false"><span class="visita-play" aria-hidden="true">▷</span><span>'+c.nome+'<small>'+c.descricao+'</small></span></button>').join("");
+  atualizarSomVisita();
+}
+
+const CANTOS_ARQUIBANCADA = {
+  geral:{nome:"Grito da torcida",descricao:"A voz da arquibancada",duracao:3.3,montar:montarGolGeral},
+  bateria:{nome:"Bateria tricolor",descricao:"Surdo, caixa e repique",duracao:4.2,montar:montarGolBateria},
+  festa:{nome:"Festa de gol",descricao:"Torcida e buzina",duracao:2.8,montar:montarGol}
+};
+function atualizarSomVisita() {
+  $$("#cantosVisita [data-visita-canto]").forEach(b=>{
+    const tocando=audioVisitaArquibancada?.id===b.dataset.visitaCanto;
+    b.setAttribute("aria-pressed",String(tocando));b.querySelector(".visita-play").textContent=tocando?"■":"▷";
+  });
+  $("#pararCantoVisita").disabled=!audioVisitaArquibancada;
+  $("#ativarSomVisita").hidden=!config.mudo&&config.volume>0;
+}
+function pararCantoVisita(mensagem) {
+  solicitacaoAudioVisita++;
+  const atual=audioVisitaArquibancada;audioVisitaArquibancada=null;
+  if(atual) {
+    clearTimeout(atual.timer);
+    atual.saida.gain.cancelScheduledValues(atual.ctx.currentTime);
+    atual.saida.gain.setTargetAtTime(0,atual.ctx.currentTime,0.01);
+    setTimeout(()=>atual.saida.disconnect(),40);
+  }
+  atualizarSomVisita();
+  $("#statusCantoVisita").textContent=mensagem||"Escolha um som para ouvir a torcida.";
+}
+async function testarCantoVisita(id) {
+  const canto=CANTOS_ARQUIBANCADA[id];
+  if(!canto) return false;
+  if(audioVisitaArquibancada?.id===id) {pararCantoVisita("Prévia interrompida.");return true;}
+  pararCantoVisita();
+  const pedido=solicitacaoAudioVisita;
+  if(config.mudo||config.volume<=0) {
+    $("#statusCantoVisita").textContent="Seu áudio está desativado. Use Ativar som para ouvir a prévia.";
+    atualizarSomVisita();return false;
+  }
+  try {
+    const ctx=acordarAudio();if(!ctx) throw Error("Áudio indisponível");
+    if(ctx.state==="suspended") await ctx.resume();
+    if(!$("#visitaArquibancada").open||pedido!==solicitacaoAudioVisita) return false;
+    const saida=ctx.createGain();saida.gain.value=0.75;saida.connect(ctx.destination);
+    const atual={id,ctx,saida,timer:null};audioVisitaArquibancada=atual;
+    canto.montar(ctx,ctx.currentTime+0.04,config.volume,saida);
+    atual.timer=setTimeout(()=>{if(audioVisitaArquibancada===atual) pararCantoVisita("Prévia encerrada.");},(canto.duracao+0.1)*1000);
+    $("#statusCantoVisita").textContent="Tocando: "+canto.nome+". Você pode parar a qualquer momento.";
+    atualizarSomVisita();return true;
+  } catch(e) {pararCantoVisita("Não foi possível iniciar o som neste navegador.");return false;}
+}
+
 const GRUPOS_OBRAS_ESTADIO = {
   cobertura:{nome:"Cobertura",obras:["cobertura"],posicao:()=>[-16,60,perfilDaArquibancada().altura+5.5],icone:'<path d="M3 13Q12 2 21 13M5 13v7m14-7v7M3 13h18"/>'},
   arquibancadas:{nome:"Arquibancadas",obras:["anel","publico","mosaico","cantos"],posicao:()=>[-61,-9,perfilDaArquibancada().altura+1],icone:'<path d="M3 20v-4h6v-5h6V6h6v14H3Z"/>'},
@@ -4743,6 +4910,7 @@ function abrirObrasEstadio(grupo) {
 function renderDetalheObraEstadio() {
   const g=GRUPOS_OBRAS_ESTADIO[grupoObraAtivo];
   $("#tituloObraEstadio").textContent=g.nome;
+  $("#visitarArquibancadaDaObra").hidden=grupoObraAtivo!=="arquibancadas";
   $("#saldoObraEstadio").textContent="Seu saldo: "+saldoMoedas()+" moedas";
   $("#escolhasObraEstadio").hidden=g.obras.length<2;
   $("#escolhasObraEstadio").innerHTML=g.obras.length<2?"":g.obras.map(f=>
@@ -6046,11 +6214,37 @@ function arquibancada(a) {
                    [h.x1, h.y1, zs], [h.x0, h.y1, zs]], C.sombra);
     s += coberturaDe(a);
   }
+  const setor=a.perto==="y1"?"norte":a.perto==="y0"?"sul":a.perto==="x1"?"oeste":"leste";
+  s+=bandeiraoDoSetor(a,setor);
   // O setor do fundo é desenhado antes dos bancos: a parede não encobre os assentos.
   if(a.aoLongoDeX && a.perto==="y1") {
     s+=bancoDeReservas(-19,true)+tunelDosJogadores()+bancoDeReservas(19,false);
   }
-  return s;
+  return '<g data-setor-arquibancada="'+setor+'">'+s+'</g>';
+}
+
+/** Bandeirão preso à face visível do setor, longe do túnel e abaixo dos assentos. */
+function bandeiraoDoSetor(a,setor) {
+  const modelo=estadoArquibancada.bandeiroes[setor];
+  if(!modelo||modelo==="nenhum") return "";
+  const interno=a.perto==="x1"||a.perto==="y1",centro=setor==="norte"?-35:0;
+  const largura=interno?20:24,topo=interno?5.7:Math.min(10,perfilDaArquibancada().altura-1.3),baixo=topo-(interno?3.2:4.5);
+  const ponto=(t,z)=>a.aoLongoDeX?[t,a.y1+0.07,z]:[a.x1+0.07,t,z];
+  const faixa=(x0,x1,z0,z1,cor)=>poligono([ponto(x0,z0),ponto(x1,z0),ponto(x1,z1),ponto(x0,z1)],cor);
+  const x0=centro-largura/2,x1=centro+largura/2,altura=topo-baixo;
+  let s=faixa(x0-0.25,x1+0.25,baixo-0.15,topo+0.1,"#31443C");
+  s+=faixa(x0,x1,baixo,topo,"#F6F1E2");
+  s+=faixa(x0,x1,topo-altura*0.2,topo,"#BE3040");
+  s+=faixa(x0,x1,baixo,baixo+altura*0.18,"#26372F");
+  if(modelo==="tricolor") {
+    s+=faixa(x0,x1,baixo+altura*0.42,baixo+altura*0.57,"#26372F");
+  } else {
+    const texto=modelo==="meu-time"?meuTime.nome:"SOBERANO",q=iso(...ponto(centro,baixo+altura*0.52));
+    const incl=a.aoLongoDeX?ISO_SEN:-ISO_SEN,tamanho=Math.min(interno?1.6:1.8,largura/(texto.length*0.64));
+    s+='<g transform="matrix('+ISO_COS+' '+incl+' 0 1 '+q.x.toFixed(2)+' '+q.y.toFixed(2)+')"><text text-anchor="middle" dominant-baseline="middle" font-family="Segoe UI,Arial,sans-serif" font-weight="800" font-size="'+tamanho+'" fill="#293D32">'+escapar(texto)+'</text></g>';
+  }
+  s+=traco([ponto(x0,topo),ponto(x1,topo)],"#FFFDF5",0.16);
+  return '<g data-bandeirao-setor="'+setor+'" data-bandeirao-modelo="'+modelo+'">'+s+'</g>';
 }
 
 /** Orienta os painéis para o eixo longo do campo, distribuindo os módulos pelo setor. */
@@ -6408,8 +6602,9 @@ function renderEstadio() {
                      (temBandeiras() ? "b" : "-") + (temPublico() ? "p" : "-") +
                      (temListras() ? "l" : "-") + (temCantos() ? "k" : "-") +
                      nivelDaObra("publico") + ":" + nivelDaObra("arredores") + ":" + nivelDaObra("cobertura") +
+                     ":"+JSON.stringify(estadoArquibancada.bandeiroes)+":"+meuTime.nome+
                      ":" + (temPlacar() ? JSON.stringify([ciclo && ciclo.id,ciclo && ciclo.nome,golsDoPlacar()]) : "-");
-  if (estadioAssinatura === assinatura) {renderBaloesEstadio();return;}
+  if (estadioAssinatura === assinatura) {renderBaloesEstadio();renderVisitaArquibancada();return;}
   caixaEl.innerHTML = desenharEstadio();
   estadioAssinatura = assinatura;
   renderBaloesEstadio();
@@ -6453,6 +6648,7 @@ function renderEstadio() {
     ? (ciclo ? "Ciclo: " + ciclo.nome + ". Cada 60 minutos vinculados a ele valem 1 gol. Um novo ciclo começa com o placar zerado."
              : "Abra um ciclo em Ciclo & Ajustes para marcar gols. Só os estudos vinculados ao ciclo ativo contam no placar.")
     : "Escolha um balão para ver o próximo nível e construir com suas moedas.";
+  renderVisitaArquibancada();
 }
 
 /**
@@ -6624,6 +6820,39 @@ $("#btnZerarSaldo").addEventListener("click", zerarSaldo);
 $("#btnResetarLoja").addEventListener("click", resetarLoja);
 $("#btnResetarTime").addEventListener("click", resetarTime);
 $("#btnVisitarEstadio").addEventListener("click",()=>{irParaPainel("estadio");$("#tituloEstadio").focus();});
+$("#btnVisitarArquibancada").addEventListener("click",()=>abrirVisitaArquibancada());
+$("#visitarArquibancadaDaObra").addEventListener("click",()=>abrirVisitaArquibancada());
+$("#fecharVisitaArquibancada").addEventListener("click",()=>$("#visitaArquibancada").close());
+$("#visitaArquibancada").addEventListener("close",()=>{
+  pararCantoVisita();$("#btnVisitarArquibancada").focus({preventScroll:true});
+});
+$("#visitaArquibancada").addEventListener("keydown",e=>{
+  if(e.key!=="Tab") return;
+  const botoes=Array.from($("#visitaArquibancada").querySelectorAll("button:not([disabled])")).filter(b=>b.getClientRects().length);
+  const primeiro=botoes[0],ultimo=botoes[botoes.length-1];
+  if(e.shiftKey&&document.activeElement===primeiro){e.preventDefault();ultimo.focus();}
+  else if(!e.shiftKey&&document.activeElement===ultimo){e.preventDefault();primeiro.focus();}
+});
+$("#visitaArquibancada").addEventListener("click",e=>{
+  const setor=e.target.closest("[data-visita-setor]"),bandeira=e.target.closest("[data-visita-bandeirao]"),canto=e.target.closest("[data-visita-canto]");
+  if(setor&&salvarArquibancada({...estadoArquibancada,setor:setor.dataset.visitaSetor})) {
+    zoomArquibancada=1;renderVisitaArquibancada();
+    $("#setoresVisitaArquibancada [data-visita-setor="+estadoArquibancada.setor+"]")?.focus();
+  } else if(bandeira) {
+    const modelo=bandeira.dataset.visitaBandeirao;
+    if(salvarArquibancada({...estadoArquibancada,bandeiroes:{...estadoArquibancada.bandeiroes,[estadoArquibancada.setor]:modelo}})) {
+      renderEstadio();$("#bandeirasVisita [data-visita-bandeirao="+modelo+"]")?.focus();
+    }
+  } else if(canto) testarCantoVisita(canto.dataset.visitaCanto);
+});
+$("#aproximarVisita").addEventListener("click",()=>{zoomArquibancada=Math.min(1.6,zoomArquibancada+0.2);renderVisitaArquibancada();});
+$("#afastarVisita").addEventListener("click",()=>{zoomArquibancada=Math.max(0.8,zoomArquibancada-0.2);renderVisitaArquibancada();});
+$("#pararCantoVisita").addEventListener("click",()=>pararCantoVisita("Prévia interrompida."));
+$("#ativarSomVisita").addEventListener("click",()=>{
+  config.mudo=false;if(config.volume<=0) config.volume=0.5;salvarConfig();renderAjustes();
+  $("#statusCantoVisita").textContent="Som ativado. Escolha uma prévia.";atualizarSomVisita();
+});
+document.addEventListener("visibilitychange",()=>{if(document.hidden) pararCantoVisita();});
 $("#btnBaloesEstadio").addEventListener("click",()=>{
   mostrarBaloesEstadio=!mostrarBaloesEstadio;
   $("#btnBaloesEstadio").textContent=mostrarBaloesEstadio?"Ocultar balões":"Mostrar balões";
@@ -6632,7 +6861,9 @@ $("#btnBaloesEstadio").addEventListener("click",()=>{
 });
 $("#painel-estadio").addEventListener("click",e=>{
   const pin=e.target.closest("[data-estadio-grupo]");
-  if(pin) abrirObrasEstadio(pin.dataset.estadioGrupo);
+  if(pin) {abrirObrasEstadio(pin.dataset.estadioGrupo);return;}
+  const setor=e.target.closest("[data-setor-arquibancada]");
+  if(setor&&!e.target.closest("[data-setor]")) abrirVisitaArquibancada(setor.dataset.setorArquibancada);
 });
 $("#fecharObraEstadio").addEventListener("click",()=>$("#modalObraEstadio").close());
 $("#modalObraEstadio").addEventListener("close",()=>{
@@ -6885,7 +7116,7 @@ $("#notifFechar").addEventListener("click", fecharModalNotif);
 document.addEventListener("keydown", (e) => {
   const alvo = e.target;
   const digitando = alvo && (alvo.tagName === "INPUT" || alvo.tagName === "TEXTAREA" || alvo.isContentEditable);
-  if($("#modalObraEstadio").open) return;
+  if($("#modalObraEstadio").open||$("#visitaArquibancada").open) return;
 
   if (e.key === "Escape") {
     fecharModalFim(); fecharModalNotif(); fecharModalOrfaos();
