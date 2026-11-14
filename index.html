@@ -1207,14 +1207,15 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       </div>
       <div>
         <div class="pacote-titulo"><h3>Pacote Base</h3><span class="preco" id="precoPacoteBase">15 moedas</span></div>
-        <p class="pacote-descricao">Dois jogadores diferentes que passaram pelo SPFC. Quanto maior o OVR, mais difícil de tirar.</p>
+        <p class="pacote-descricao">Dois jogadores diferentes que passaram pelo SPFC. O sorteio considera o OVR e dá uma ajuda para completar sua coleção.</p>
         <p class="pacote-nota-teste" id="notaCatalogoTeste" hidden></p>
         <div class="pacote-acoes"><button class="btn btn-principal" type="button" id="btnComprarPacoteBase">Comprar e abrir · 15 moedas</button><button class="btn btn-pequeno" type="button" id="btnUltimoPacote" hidden>Ver último pacote</button></div>
       </div>
     </div>
     <details class="pacote-detalhes"><summary>Raridades e probabilidades</summary>
-      <p>Chances atuais da primeira carta, ajustadas ao seu elenco. Cada pacote contém dois jogadores diferentes. Quanto maior o OVR, mais difícil de tirar.</p>
-      <p>Depois da primeira obtenção, o peso desse jogador no sorteio cai 4%, uma única vez. Novas cópias não acumulam outra redução. As chances são recalculadas em relação aos demais jogadores.</p>
+      <p>Chances atuais da primeira carta, ajustadas ao seu elenco. Cada pacote contém dois jogadores diferentes. As chances base dependem do OVR.</p>
+      <p>Enquanto houver jogadores que você ainda não tem, quem já saiu perde 1 ponto percentual da chance base (ex.: 50% para 49%), uma única vez. Novas cópias não acumulam a redução. A diferença favorece os jogadores que faltam na coleção.</p>
+      <p>Para não excluir cartas do sorteio, a chance mínima é de 0,01%. Ao completar a coleção, voltam a valer as chances base por OVR.</p>
       <table class="pacote-tabela"><thead><tr><th scope="col">Raridade</th><th scope="col">OVR</th><th scope="col">Chance</th></tr></thead><tbody id="chancesPacote"></tbody></table>
       <p>Cartas repetidas em outros pacotes ficam guardadas como cópias extras no elenco.</p>
     </details>
@@ -1755,25 +1756,41 @@ function raridadeDoJogador(j) {
 function precoVendaDoJogador(j) { return j ? (raridadeDoJogador(j)?.venda||0) : 0; }
 // Cada 10 pontos a mais de OVR reduzem pela metade o peso individual.
 function pesoDoJogador(j) { return Math.pow(0.5,(j.ovr-50)/10); }
-const FATOR_JA_OBTIDO = 0.96;
-function pesoNoPacote(j) {
-  // Ter uma ou várias cópias aplica o mesmo fator. A última carta não é vendida,
-  // então o elenco registra a primeira obtenção até o time ser resetado.
-  const jaObtido=meuTime.jogadores.some(c=>c.id===j.id);
-  return pesoDoJogador(j)*(jaObtido?FATOR_JA_OBTIDO:1);
+const REDUCAO_PRIMEIRA_CARTA = 0.01; // Um ponto percentual: 50% passa a 49%.
+const CHANCE_MINIMA_CARTA = 0.0001; // 0,01%: nenhuma carta é eliminada do sorteio.
+function distribuicaoDoPacote() {
+  const total=JOGADORES_SPFC.reduce((s,j)=>s+pesoDoJogador(j),0);
+  if(!total) return [];
+  const obtidos=new Set(meuTime.jogadores.map(j=>j.id));
+  const cartas=JOGADORES_SPFC.map(j=>({jogador:j,chance:pesoDoJogador(j)/total}));
+  const chanceNovos=cartas.filter(c=>!obtidos.has(c.jogador.id)).reduce((s,c)=>s+c.chance,0);
+  // Sem cartas novas para favorecer, o catálogo completo usa a distribuição base.
+  if(!chanceNovos) return cartas;
+  let redistribuir=0;
+  cartas.forEach(c=>{
+    if(!obtidos.has(c.jogador.id)) return;
+    const reduzida=Math.max(c.chance-REDUCAO_PRIMEIRA_CARTA,Math.min(c.chance,CHANCE_MINIMA_CARTA));
+    redistribuir+=c.chance-reduzida;
+    c.chance=reduzida;
+  });
+  cartas.forEach(c=>{
+    if(!obtidos.has(c.jogador.id)) c.chance+=redistribuir*c.chance/chanceNovos;
+  });
+  return cartas;
 }
 function chancesDoPacote() {
-  const total=JOGADORES_SPFC.reduce((s,j)=>s+pesoNoPacote(j),0);
-  return RARIDADES_TIME.map(r=>({...r,chance:JOGADORES_SPFC.filter(j=>j.ovr>=r.min&&j.ovr<=r.max)
-    .reduce((s,j)=>s+pesoNoPacote(j),0)/total*100}));
+  const cartas=distribuicaoDoPacote();
+  return RARIDADES_TIME.map(r=>({...r,chance:cartas.filter(c=>c.jogador.ovr>=r.min&&c.jogador.ovr<=r.max)
+    .reduce((s,c)=>s+c.chance,0)*100}));
 }
 function sortearJogadorDoPacote(excluidos=[]) {
-  const candidatos=JOGADORES_SPFC.filter(j=>!excluidos.includes(j.id)).sort((a,b)=>a.ovr-b.ovr||a.nome.localeCompare(b.nome,"pt-BR"));
-  const total=candidatos.reduce((s,j)=>s+pesoNoPacote(j),0);
+  const candidatos=distribuicaoDoPacote().filter(c=>!excluidos.includes(c.jogador.id))
+    .sort((a,b)=>a.jogador.ovr-b.jogador.ovr||a.jogador.nome.localeCompare(b.jogador.nome,"pt-BR"));
+  const total=candidatos.reduce((s,c)=>s+c.chance,0);
   const aleatorio=crypto.getRandomValues(new Uint32Array(1))[0]/4294967296;
   let ponto=aleatorio*total;
-  for(const j of candidatos) { ponto-=pesoNoPacote(j);if(ponto<0) return j; }
-  return candidatos[candidatos.length-1];
+  for(const c of candidatos) { ponto-=c.chance;if(ponto<0) return c.jogador; }
+  return candidatos[candidatos.length-1]?.jogador;
 }
 let abrindoPacote=false;
 let animacaoPacoteTimer=null;
