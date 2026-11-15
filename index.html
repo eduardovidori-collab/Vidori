@@ -1248,8 +1248,8 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     </div>
     <details class="pacote-detalhes"><summary>Raridades e probabilidades</summary>
       <p>Chances atuais da primeira carta, ajustadas ao seu elenco. Cada pacote contém dois jogadores diferentes. As chances base dependem do OVR.</p>
-      <p>Enquanto houver jogadores que você ainda não tem, quem já saiu perde 1% da própria chance base (ex.: 50% para 49,5%; 1% para 0,99%), uma única vez. Novas cópias não acumulam a redução. A diferença favorece os jogadores que faltam na coleção.</p>
-      <p>Ao completar a coleção, voltam a valer as chances base por OVR.</p>
+      <p>Enquanto faltarem cartas de uma raridade, quem já saiu perde 1% da própria chance base (ex.: 50% para 49,5%; 1% para 0,99%), uma única vez. Novas cópias não acumulam a redução. A diferença favorece apenas jogadores que faltam nessa mesma raridade.</p>
+      <p>O ajuste mantém o peso total de cada raridade: uma comum repetida não aumenta a chance das raridades mais altas. Ao completar uma raridade, suas cartas voltam às chances base por OVR.</p>
       <table class="pacote-tabela"><thead><tr><th scope="col">Raridade</th><th scope="col">OVR</th><th scope="col">Chance</th></tr></thead><tbody id="chancesPacote"></tbody></table>
       <p>Cartas repetidas em outros pacotes ficam guardadas como cópias extras no elenco.</p>
     </details>
@@ -1857,18 +1857,21 @@ function distribuicaoDoPacote() {
   if(!total) return [];
   const obtidos=new Set(meuTime.jogadores.map(j=>j.id));
   const cartas=JOGADORES_SPFC.map(j=>({jogador:j,chance:pesoDoJogador(j)/total}));
-  const chanceNovos=cartas.filter(c=>!obtidos.has(c.jogador.id)).reduce((s,c)=>s+c.chance,0);
-  // Sem cartas novas para favorecer, o catálogo completo usa a distribuição base.
-  if(!chanceNovos) return cartas;
-  let redistribuir=0;
-  cartas.forEach(c=>{
-    if(!obtidos.has(c.jogador.id)) return;
-    const reduzida=c.chance*(1-REDUCAO_PRIMEIRA_CARTA);
-    redistribuir+=c.chance-reduzida;
-    c.chance=reduzida;
-  });
-  cartas.forEach(c=>{
-    if(!obtidos.has(c.jogador.id)) c.chance+=redistribuir*c.chance/chanceNovos;
+  // A redução circula dentro da própria raridade, sem transformar comuns em bônus para lendas.
+  RARIDADES_TIME.forEach(r=>{
+    const grupo=cartas.filter(c=>c.jogador.ovr>=r.min&&c.jogador.ovr<=r.max);
+    const novos=grupo.filter(c=>!obtidos.has(c.jogador.id));
+    const chanceNovos=novos.reduce((s,c)=>s+c.chance,0);
+    // Raridades completas mantêm a distribuição base; não transferem chances para outras.
+    if(!chanceNovos) return;
+    let redistribuir=0;
+    grupo.forEach(c=>{
+      if(!obtidos.has(c.jogador.id)) return;
+      const reduzida=c.chance*(1-REDUCAO_PRIMEIRA_CARTA);
+      redistribuir+=c.chance-reduzida;
+      c.chance=reduzida;
+    });
+    novos.forEach(c=>{c.chance+=redistribuir*c.chance/chanceNovos;});
   });
   return cartas;
 }
