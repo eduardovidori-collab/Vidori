@@ -836,13 +836,20 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 .penaltis-convite{display:flex;align-items:center;gap:18px;margin-top:18px;padding:20px 22px;border:1px solid #D8E1D7;border-radius:14px;background:linear-gradient(120deg,#EEF4E9,#FBFCF9);box-shadow:var(--sombra)}
 .penaltis-convite>svg{width:64px;flex-shrink:0}.penaltis-convite h3{font-size:17px}.penaltis-convite p{font-size:12px;color:var(--fraco);margin-top:5px}.penaltis-convite .btn{margin-left:auto;white-space:nowrap;flex:0 0 auto}
 .penaltis-dialog{border:0;border-radius:20px;padding:0;width:min(1040px,calc(100% - 24px));max-height:calc(100dvh - 24px);overflow:auto;background:#FBFCF9;color:var(--texto);box-shadow:0 24px 80px #0005}.penaltis-dialog::backdrop{background:#101E19C9;backdrop-filter:blur(4px)}
-.penaltis-corpo{padding:22px}.penaltis-cabecalho{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.penaltis-cabecalho h2{font-size:23px}.penaltis-cabecalho p{font-size:12px;color:var(--fraco);margin-top:3px}
-.penaltis-grade{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:20px;align-items:start}#cenaPenalti{height:100%}.penalti-campo{position:relative;isolation:isolate;overflow:hidden;border-radius:15px;border:1px solid #C8D6CE;background:#B9D6DB;aspect-ratio:5/3}.penalti-campo svg{display:block;width:100%;height:100%}
+.penaltis-corpo{padding:22px}.penaltis-cabecalho{position:sticky;top:0;z-index:3;background:#FBFCF9;padding-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.penaltis-cabecalho h2{font-size:23px}.penaltis-cabecalho p{font-size:12px;color:var(--fraco);margin-top:3px}
+.penaltis-grade>div,.penaltis-grade>aside{min-width:0}.penaltis-grade{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:20px;align-items:start}#cenaPenalti{height:100%}.penalti-campo{position:relative;isolation:isolate;overflow:hidden;border-radius:15px;border:1px solid #C8D6CE;background:#B9D6DB;aspect-ratio:5/3}.penalti-campo svg{display:block;width:100%;height:100%}
 .penalti-alvos{position:absolute;left:23%;right:23%;top:25%;bottom:39%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:4px 8px;z-index:1}.penalti-alvos svg{width:24px;height:24px;display:block}.penalti-alvos button{display:grid;place-items:center;border:1px dashed #FFFFFFA0;color:white;background:#173D2825;border-radius:10px;min-width:0;min-height:32px;font-size:21px;cursor:crosshair;text-shadow:0 1px 4px #000A;transition:background .15s}.penalti-alvos button:hover{background:#FFFFFF30}.penalti-alvos [aria-pressed=true]{background:#FFF2B85C;border:2px solid #FFF8D8;box-shadow:0 0 14px #FFF8D850}.penalti-alvos button:focus-visible{outline:3px solid #FFDF66;outline-offset:2px}.penalti-alvos button:disabled{cursor:default;opacity:.55}
 .penalti-campo[data-fase=animando] .penalti-alvos,.penalti-campo[data-fase=final] .penalti-alvos{visibility:hidden}.penalti-placar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;font-size:12px}.penalti-placar strong{font-size:17px;color:#254531}.penalti-tentativas{display:flex;gap:6px}.penalti-tentativas span{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1px solid #CDD8CD;background:white;font-size:12px;font-weight:700}.penalti-tentativas .gol{background:#315E40;color:white;border-color:#315E40}.penalti-tentativas .erro{background:#F8E7E5;color:#A2343C;border-color:#E8C6C2}
 .penalti-painel{padding:17px;border:1px solid #DCE4D9;border-radius:13px;background:#F2F6EF}.penalti-painel h3{font-size:15px}.penalti-painel>p{font-size:12px;line-height:1.6;color:var(--fraco);margin-top:7px}.penalti-timing{margin-top:20px}.penalti-timing label{display:block;font-size:12px;font-weight:700;margin-bottom:11px}.penalti-barra{position:relative;height:15px;border-radius:8px;background:linear-gradient(90deg,#D6DDD0 0 55%,#609260 55% 79%,#D6DDD0 79%);margin:0 3px}.penalti-barra i{position:absolute;left:var(--pos,0%);top:-5px;bottom:-5px;width:5px;border-radius:4px;background:#24392D;transform:translateX(-50%);box-shadow:0 0 0 2px #FFF}.penalti-timing small{display:block;font-size:10px;color:var(--fraco);margin-top:12px}.penalti-painel .btn{width:100%;margin-top:17px}.penalti-mensagem{font-weight:600;color:#274B34!important;min-height:57px}.penalti-recorde{display:flex;justify-content:space-between;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid #DAE3D6;font-size:12px}.penalti-recorde strong{color:#274B34}.penalti-dica{font-size:11px;color:var(--fraco);margin-top:10px;line-height:1.5}.penalti-aviso{font-size:12px;color:#9C3038;min-height:18px;margin-top:10px}
 @media(max-width:760px){.penaltis-grade{grid-template-columns:1fr}.penaltis-corpo{padding:16px}.penalti-painel{padding:15px}.penalti-mensagem{min-height:0}.penaltis-cabecalho h2{font-size:20px}.penaltis-cabecalho .btn{font-size:11px;padding:9px}.penaltis-convite{flex-wrap:wrap;padding:17px;gap:12px}.penaltis-convite>svg{width:46px}.penaltis-convite>div{flex:1}.penaltis-convite .btn{width:100%;margin:0}.visita-convite{align-items:flex-start;flex-direction:column}.visita-convite .btn{width:100%}.penalti-alvos button{font-size:16px;border-radius:7px}.penalti-tentativas span{width:23px;height:23px}}
 @media(prefers-reduced-motion:reduce){.visita-paisagem .torcedor-visita{animation:none!important}.visita-energia i,.cartolina-visita{transition:none}}
+
+#selecaoCobradoresPenalti[hidden],#seriePenaltis[hidden],.penalti-escolha [hidden]{display:none}
+.penalti-escolha h3{font-size:17px}.penalti-escolha .subtexto{font-size:12px;margin-top:5px;line-height:1.6}.penalti-ordem{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;padding:0 0 6px;margin:17px 0;list-style:none;overflow-x:auto}.penalti-ordem li{position:relative;min-width:118px;min-height:120px;padding:11px;border:1px solid #D6E0D2;background:#F0F5EB;border-radius:11px}.penalti-ordem .vaga-livre{background:#F8FAF6;border-style:dashed;color:var(--fraco)}.penalti-ordem .numero-cobrador{display:block;font-size:10px;font-weight:800;color:#426149;margin-bottom:5px}.penalti-ordem strong{display:block;font-size:12px;line-height:1.3;min-height:32px;overflow-wrap:anywhere}.penalti-ordem small{display:block;font-size:10px;color:var(--fraco);margin-top:4px}.penalti-ordem-acoes{display:flex;gap:5px;margin-top:8px}.penalti-ordem-acoes button{display:grid;place-items:center;width:28px;height:26px;border:1px solid #CCD8C7;background:#FFF;border-radius:5px;cursor:pointer}.penalti-ordem-acoes button:disabled{opacity:.35;cursor:default}.penalti-ordem-acoes svg{width:13px;height:13px}.penalti-ordem-acoes [data-cobrador-tirar]{margin-left:auto;color:#A0323E}
+.penalti-busca{display:flex;align-items:center;gap:14px;margin:13px 0 10px}.penalti-busca label{font-size:12px;font-weight:700;white-space:nowrap}.penalti-busca input{width:100%;min-width:0;padding:10px 12px;border:1px solid #D6DFD2;border-radius:8px;background:#FFF;font:inherit;font-size:12px}.penalti-lista-jogadores{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px;max-height:295px;overflow-y:auto;padding:3px 3px 7px}.penalti-jogador{position:relative;display:flex;align-items:center;gap:9px;min-width:0;min-height:77px;padding:11px;border:1px solid #DEE4D8;border-radius:10px;background:#FFF;text-align:left;cursor:pointer}.penalti-jogador>span{min-width:0;flex:1}.penalti-jogador strong{display:block;font-size:12px;overflow-wrap:anywhere}.penalti-jogador small{display:block;font-size:10px;color:var(--fraco);margin-top:4px}.penalti-jogador .carta-ovr{font-size:20px;min-width:35px;min-height:39px;flex-shrink:0}.penalti-jogador[aria-pressed=true]{border:2px solid #43704C;background:#F0F6EA;padding:10px}.penalti-jogador .ordem-selo{position:absolute;right:5px;top:4px;border-radius:50%;width:17px;height:17px;display:grid;place-items:center;background:#365F3D;color:white;font-size:9px;font-weight:800}.penalti-vazio{padding:22px 12px;background:#F3F6F0;border:1px dashed #CDD9C6;border-radius:10px;text-align:center;font-size:12px;color:var(--fraco);grid-column:1/-1}
+.penalti-escolha-rodape{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px;padding-top:14px;border-top:1px solid #DFE6DA}.penalti-escolha-rodape p{font-size:12px;color:var(--fraco)}.penalti-escolha-rodape>div{display:flex;gap:8px}.penalti-escolha-rodape .btn{font-size:12px;flex:0 0 auto}.penalti-escolha-aviso{font-size:12px;color:#9B3540;margin-top:9px;min-height:18px}
+.penalti-cobrador-atual{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:11px;padding:11px 13px;background:#F1F5ED;border:1px solid #DAE4D4;border-radius:10px}.penalti-cobrador-atual>span{min-width:0}.penalti-cobrador-atual strong{overflow-wrap:anywhere;display:block;font-size:14px}.penalti-cobrador-atual small{display:block;font-size:11px;color:var(--fraco);margin-top:3px}.penalti-cobrador-atual>b{padding:6px 8px;border-radius:7px;background:#DFEAD5;color:#31523A;font-size:14px;white-space:nowrap}.penalti-fila-atual{display:flex;gap:6px;list-style:none;padding:0 0 5px;margin:10px 0 0;overflow-x:auto}.penalti-fila-atual li{flex:1;min-width:88px;padding:8px;border:1px solid #DCE4D6;border-radius:8px;background:#FFF;font-size:10px;color:var(--fraco)}.penalti-fila-atual strong{display:block;color:#344E3C;font-size:11px;margin-top:3px}.penalti-fila-atual .cobrando{background:#F3F7EA;border:2px solid #5C7F4D;padding:7px}.penalti-fila-atual .cobrador-gol{border-color:#7CA37F;background:#EEF5EB}.penalti-fila-atual .cobrador-erro{border-color:#D8B9B6;background:#FCF1EF}.penalti-painel .btn-secundario{background:#FFF;border:1px solid #D1DDCC;color:#34523C;margin-top:8px;font-size:11px}.penalti-barra{background:linear-gradient(90deg,#D6DDD0 0 var(--inicio,55%),#609260 var(--inicio,55%) var(--fim,79%),#D6DDD0 var(--fim,79%))}
+@media(max-width:760px){.penalti-ordem{grid-template-columns:repeat(5,118px)}.penalti-lista-jogadores{grid-template-columns:repeat(2,minmax(0,1fr));max-height:275px}.penalti-jogador{padding:9px;min-height:78px;gap:6px}.penalti-jogador[aria-pressed=true]{padding:8px}.penalti-jogador strong{font-size:11px}.penalti-escolha-rodape{flex-direction:column;align-items:stretch;gap:10px}.penalti-escolha-rodape>div{flex-wrap:wrap}.penalti-escolha-rodape .btn{flex:1}.penalti-busca{gap:9px}.penalti-busca label{font-size:11px}.penalti-fila-atual li{min-width:95px}}
 
 </style>
 </head>
@@ -1384,14 +1391,24 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <dialog class="penaltis-dialog" id="desafioPenaltis" aria-labelledby="tituloPenaltis" aria-describedby="descricaoPenaltis">
   <div class="faixas"></div><div class="penaltis-corpo">
     <header class="penaltis-cabecalho"><div><h2 id="tituloPenaltis">Na marca da cal</h2><p id="descricaoPenaltis">Cinco cobranças. Escolha o canto e capriche no tempo do chute.</p></div><button class="btn btn-pequeno" type="button" id="fecharPenaltis">Voltar ao estádio</button></header>
-    <div class="penaltis-grade"><div>
+    <section class="penalti-escolha" id="selecaoCobradoresPenalti" aria-labelledby="tituloEscolhaPenaltis">
+      <h3 id="tituloEscolhaPenaltis" tabindex="-1">Monte sua ordem de cobrança</h3>
+      <p class="subtexto">Escolha cinco jogadores diferentes do seu elenco. Qualquer posição pode cobrar. Use as setas para mudar a ordem.</p>
+      <ol class="penalti-ordem" id="ordemCobradoresPenalti" aria-label="Ordem dos cinco cobradores"></ol>
+      <div class="penalti-busca"><label for="buscaCobradoresPenalti">Seu elenco</label><input id="buscaCobradoresPenalti" type="search" placeholder="Buscar jogador" autocomplete="off"></div>
+      <div class="penalti-lista-jogadores" id="listaCobradoresPenalti" role="group" aria-label="Jogadores disponíveis para cobrar"></div>
+      <p class="penalti-escolha-aviso" id="avisoEscolhaPenalti" role="status" aria-live="polite"></p>
+      <div class="penalti-escolha-rodape"><p id="resumoEscolhaPenalti" role="status">Escolha os cinco cobradores.</p><div><button class="btn" type="button" id="pacotesParaPenaltis" hidden>Conseguir jogadores</button><button class="btn btn-principal" type="button" id="iniciarSeriePenaltis" disabled>Começar série</button></div></div>
+    </section>
+    <div class="penaltis-grade" id="seriePenaltis" hidden><div>
       <div class="penalti-placar"><strong id="placarPenaltis">0 gols</strong><div class="penalti-tentativas" id="tentativasPenaltis" role="img" aria-label="Nenhuma cobrança realizada"></div><span id="rodadaPenaltis">1 de 5</span></div>
       <div class="penalti-campo" id="campoPenalti" data-fase="pronto"><div id="cenaPenalti"></div><div class="penalti-alvos" id="alvosPenalti" role="group" aria-label="Escolha onde chutar"></div></div>
-      <p class="penalti-dica" id="cobradorPenalti"></p>
+      <div class="penalti-cobrador-atual" id="cobradorPenalti"></div><ol class="penalti-fila-atual" id="filaAtualPenaltis" aria-label="Cobradores desta série"></ol>
     </div><aside class="penalti-painel">
-      <h3>Mire. Prepare. Chute.</h3><p>Toque num alvo do gol. Depois, pare o marcador na faixa verde. Um chute preciso no canto pode vencer até a defesa certa.</p>
+      <h3>Mire. Prepare. Chute.</h3><p>Toque num alvo e pare o marcador na faixa verde. Quanto maior o OVR do cobrador, mais larga a faixa e mais lento o marcador. Uma batida precisa no canto pode vencer a defesa.</p>
       <div class="penalti-timing"><label id="rotuloTempoPenalti">Tempo do chute</label><div class="penalti-barra" id="barraTempoPenalti" role="meter" aria-labelledby="rotuloTempoPenalti" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="ponteiroPenalti"></i></div><small>Prepare e aperte novamente para chutar.</small></div>
       <button class="btn btn-principal" type="button" id="acaoPenalti">Preparar cobrança</button>
+      <button class="btn btn-secundario" type="button" id="trocarCobradoresPenaltis">Montar outra série</button>
       <p class="penalti-mensagem" id="mensagemPenalti" role="status" aria-live="polite">Escolha um canto para começar.</p>
       <div class="penalti-recorde"><span>Seu recorde</span><strong id="recordePenaltis">0 de 5</strong></div>
       <p class="penalti-dica">Teclado: use as setas nos alvos e Espaço para preparar e chutar.</p>
@@ -4977,12 +4994,123 @@ const ALVOS_PENALTI=[
 ];
 function normalizarPenaltis(dados) {
   const d=dados&&typeof dados==='object'?dados:{};
-  return {melhor:Number.isInteger(d.melhor)&&d.melhor>=0&&d.melhor<=5?d.melhor:0,
+  const ids=new Set(),cobradores=Array.isArray(d.cobradores)?d.cobradores.filter(id=>{
+    if(typeof id!=='string'||ids.has(id)||!JOGADORES_SPFC.some(j=>j.id===id))return false;ids.add(id);return true;
+  }).slice(0,5):[];
+  return {cobradores,melhor:Number.isInteger(d.melhor)&&d.melhor>=0&&d.melhor<=5?d.melhor:0,
     series:Number.isSafeInteger(d.series)&&d.series>=0?d.series:0};
 }
 let recordePenaltis=normalizarPenaltis(Armazem.ler(CHAVES.penaltis,null));
-const jogoPenalti={fase:'pronto',alvo:0,resultados:[],inicio:0,tempo:0,raf:null,timer:null,versao:0,animacoes:[],mensagem:'Escolha um canto para começar.'};
+const jogoPenalti={fase:'escolha',alvo:0,cobradores:[],resultados:[],inicio:0,tempo:0,raf:null,timer:null,versao:0,animacoes:[],mensagem:'Escolha um canto para começar.'};
 let audioPenalti=null;
+function cobradoresPenaltiDisponiveis() {
+  return [...meuTime.jogadores].sort((a,b)=>b.ovr-a.ovr||a.nome.localeCompare(b.nome,'pt-BR'));
+}
+function escolhaPenaltisValida() {
+  const ids=recordePenaltis.cobradores;
+  return ids.length===5&&new Set(ids).size===5&&ids.every(id=>meuTime.jogadores.some(j=>j.id===id));
+}
+function seriePenaltisValida() {
+  return jogoPenalti.cobradores.length===5&&new Set(jogoPenalti.cobradores.map(j=>j.id)).size===5&&
+    jogoPenalti.cobradores.every(c=>meuTime.jogadores.some(j=>j.id===c.id));
+}
+function guardarEscolhaPenaltis(ids) {
+  const proximo=normalizarPenaltis({...recordePenaltis,cobradores:ids});
+  recordePenaltis=proximo;
+  if(!Armazem.gravar(CHAVES.penaltis,proximo)) {
+    $('#avisoEscolhaPenalti').textContent='Sua escolha vale nesta sessão, mas não consegui salvá-la neste navegador.';
+    return false;
+  }
+  return true;
+}
+function renderListaCobradores() {
+  const normalizar=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const busca=normalizar($('#buscaCobradoresPenalti').value.trim());
+  const jogadores=cobradoresPenaltiDisponiveis().filter(j=>normalizar(j.nome).includes(busca));
+  $('#listaCobradoresPenalti').innerHTML=jogadores.length?jogadores.map(j=>{
+    const ordem=recordePenaltis.cobradores.indexOf(j.id),r=raridadeDoJogador(j);
+    return '<button class="penalti-jogador raridade-'+r.id+'" type="button" data-cobrador-escolher="'+j.id+'" aria-pressed="'+(ordem!==-1)+'" aria-label="'+escapar(j.nome)+', '+rotuloPosicoes(j)+', OVR '+j.ovr+(ordem!==-1?', cobrador '+(ordem+1):'')+'">'+
+      '<span><strong>'+escapar(j.nome)+'</strong><small>'+rotuloPosicoes(j)+'</small></span><b class="carta-ovr">'+j.ovr+'<small>OVR</small></b>'+
+      (ordem!==-1?'<i class="ordem-selo" aria-hidden="true">'+(ordem+1)+'</i>':'')+'</button>';
+  }).join(''):'<p class="penalti-vazio">'+(meuTime.jogadores.length?'Nenhum jogador encontrado.':'Seu elenco ainda está vazio. Abra pacotes para escolher seus cobradores.')+'</p>';
+}
+function renderEscolhaPenaltis() {
+  const selecionados=recordePenaltis.cobradores.map(id=>meuTime.jogadores.find(j=>j.id===id)).filter(Boolean);
+  const icone=d=>'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="'+d+'" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  $('#ordemCobradoresPenalti').innerHTML=Array.from({length:5},(_,i)=>{
+    const j=selecionados[i];
+    return '<li'+(!j?' class="vaga-livre"':'')+'><span class="numero-cobrador">'+(i+1)+'ª COBRANÇA</span><strong>'+(j?escapar(j.nome):'Escolha um jogador')+'</strong>'+
+      (j?'<small>'+rotuloPosicoes(j)+' · OVR '+j.ovr+'</small><div class="penalti-ordem-acoes">'+
+      '<button type="button" data-cobrador-mover="-1" data-cobrador-id="'+j.id+'" aria-label="Adiantar '+escapar(j.nome)+'"'+(i===0?' disabled':'')+'>'+icone('M10 3 5 8l5 5')+'</button>'+
+      '<button type="button" data-cobrador-mover="1" data-cobrador-id="'+j.id+'" aria-label="Adiar '+escapar(j.nome)+'"'+(i===selecionados.length-1?' disabled':'')+'>'+icone('m6 3 5 5-5 5')+'</button>'+
+      '<button type="button" data-cobrador-tirar="'+j.id+'" aria-label="Retirar '+escapar(j.nome)+'">'+icone('m4 4 8 8m0-8-8 8')+'</button></div>':'')+'</li>';
+  }).join('');
+  const faltam=5-selecionados.length;
+  $('#resumoEscolhaPenalti').textContent=faltam?'Escolhidos '+selecionados.length+' de 5. Faltam '+faltam+(faltam===1?' jogador.':' jogadores.'):'Ordem pronta. A primeira cobrança será de '+selecionados[0].nome+'.';
+  $('#iniciarSeriePenaltis').disabled=!escolhaPenaltisValida();
+  $('#iniciarSeriePenaltis').textContent=faltam?'Escolha os cinco cobradores':'Começar série';
+  $('#pacotesParaPenaltis').hidden=meuTime.jogadores.length>=5;
+  renderListaCobradores();
+}
+function editarCobradoresPenalti(id,acao,delta=0) {
+  if(jogoPenalti.fase!=='escolha'||!meuTime.jogadores.some(j=>j.id===id))return false;
+  const ids=[...recordePenaltis.cobradores],i=ids.indexOf(id);
+  $('#avisoEscolhaPenalti').textContent='';
+  if(acao==='mover') {
+    if(i<0||![-1,1].includes(delta)||i+delta<0||i+delta>=ids.length)return false;
+    [ids[i],ids[i+delta]]=[ids[i+delta],ids[i]];
+  } else if(i!==-1)ids.splice(i,1);
+  else {
+    if(acao==='tirar')return false;
+    if(ids.length===5) {$('#avisoEscolhaPenalti').textContent='Os cinco lugares já estão preenchidos. Retire um cobrador para trocar.';return false;}
+    ids.push(id);
+  }
+  guardarEscolhaPenaltis(ids);renderEscolhaPenaltis();return true;
+}
+function montarOutraSeriePenaltis() {
+  pausarPenalti();jogoPenalti.cobradores=[];jogoPenalti.resultados=[];jogoPenalti.fase='escolha';jogoPenalti.tempo=0;
+  $('#avisoPenaltis').textContent='';$('#avisoEscolhaPenalti').textContent='';$('#buscaCobradoresPenalti').value='';
+  renderPenaltis();$('#tituloEscolhaPenaltis').focus({preventScroll:true});
+}
+function iniciarSeriePenaltis() {
+  if(!$('#desafioPenaltis').open||jogoPenalti.fase!=='escolha'||!escolhaPenaltisValida())return false;
+  pausarPenalti();
+  // A escalação e os OVRs ficam fixos durante a série, sem trocar o cobrador no meio do chute.
+  jogoPenalti.cobradores=recordePenaltis.cobradores.map(id=>({...meuTime.jogadores.find(j=>j.id===id)}));
+  jogoPenalti.resultados=[];jogoPenalti.fase='pronto';jogoPenalti.tempo=0;jogoPenalti.alvo=0;
+  jogoPenalti.mensagem='Primeiro cobrador: '+jogoPenalti.cobradores[0].nome+'. Escolha um canto.';
+  $('#cenaPenalti').innerHTML=desenharCenaPenalti();renderPenaltis();$('#acaoPenalti').focus();return true;
+}
+function indiceCobradorPenalti() {
+  return ['entre','final'].includes(jogoPenalti.fase)?Math.max(0,jogoPenalti.resultados.length-1):jogoPenalti.resultados.length;
+}
+function cobradorAtualPenalti() {return jogoPenalti.cobradores[indiceCobradorPenalti()]||null;}
+function dificuldadeCobradorPenalti(ovr) {
+  const nivel=(Math.max(50,Math.min(100,Number.isFinite(ovr)?ovr:50))-50)/50;
+  return {precisao:.045+.075*nivel,limiteFora:.18+.12*nivel,periodo:240+160*nivel};
+}
+function perfilAtualPenalti() {return dificuldadeCobradorPenalti(cobradorAtualPenalti()?.ovr);}
+$('#listaCobradoresPenalti').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-cobrador-escolher]');if(!btn)return;
+  const id=btn.dataset.cobradorEscolher;editarCobradoresPenalti(id,'alternar');
+  $('#listaCobradoresPenalti [data-cobrador-escolher="'+id+'"]').focus({preventScroll:true});
+});
+$('#ordemCobradoresPenalti').addEventListener('click',e=>{
+  const mover=e.target.closest('[data-cobrador-mover]'),tirar=e.target.closest('[data-cobrador-tirar]');
+  if(mover&&!mover.disabled) {
+    editarCobradoresPenalti(mover.dataset.cobradorId,'mover',Number(mover.dataset.cobradorMover));
+    $('#ordemCobradoresPenalti [data-cobrador-tirar="'+mover.dataset.cobradorId+'"]').focus({preventScroll:true});
+  } else if(tirar) {
+    editarCobradoresPenalti(tirar.dataset.cobradorTirar,'tirar');$('#buscaCobradoresPenalti').focus({preventScroll:true});
+  }
+});
+$('#buscaCobradoresPenalti').addEventListener('input',()=>{renderListaCobradores();$('#listaCobradoresPenalti').scrollTop=0;});
+$('#iniciarSeriePenaltis').addEventListener('click',iniciarSeriePenaltis);
+$('#trocarCobradoresPenaltis').addEventListener('click',montarOutraSeriePenaltis);
+$('#pacotesParaPenaltis').addEventListener('click',()=>{
+  $('#desafioPenaltis').close();irParaPainel('loja');$('#pacotesLoja').scrollIntoView({block:'start'});
+});
+
 function desenharCenaPenalti() {
   return `<svg viewBox="0 0 900 540" role="img" aria-label="Vista da marca do pênalti, com o goleiro no centro e seis alvos no gol">${desenharFundoDeJogo('penalti',true)}${golDaCena(205,135,490,190,'penalti')}
   <g id="goleiroPenalti" style="transform:translate(450px,259px)"><ellipse cx="0" cy="58" rx="36" ry="8" fill="#20382D30"/><path d="M-13 27-19 57M13 27 19 57" stroke="#253D36" stroke-width="13" stroke-linecap="round"/><path d="M-13-12-35 8M13-12 35 8" fill="none" stroke="#E6B851" stroke-width="12" stroke-linecap="round"/><path d="M-15-18H15L21 29H-21Z" fill="#E2B64D" stroke="#967A36" stroke-width="1.5"/><path d="M-17 27H17V38H-17Z" fill="#2C4840"/><circle cx="0" cy="-33" r="12" fill="#BB9270"/><path d="M-12-36q1-17 16-10 9 2 8 13l-7-8-16 5" fill="#354338"/><path d="M-37 7l-5-7m78 7 5-7" stroke="#F1F4E5" stroke-width="12" stroke-linecap="round"/></g>
@@ -5020,36 +5148,53 @@ function abrirPenaltis() {
   pararSomLoja(true);pararCantoVisita();pararEfeitoVisita();
   if($('#visitaArquibancada').open)$('#visitaArquibancada').close();
   pausarPenalti();$('#avisoPenaltis').textContent='';$('#cenaPenalti').innerHTML=desenharCenaPenalti();
-  if(!$('#desafioPenaltis').open)$('#desafioPenaltis').showModal();renderPenaltis();$('#acaoPenalti').focus();
+  const validos=recordePenaltis.cobradores.filter(id=>meuTime.jogadores.some(j=>j.id===id));
+  if(validos.length!==recordePenaltis.cobradores.length)guardarEscolhaPenaltis(validos);
+  if(!seriePenaltisValida()||jogoPenalti.cobradores.some((j,i)=>j.id!==recordePenaltis.cobradores[i])) {jogoPenalti.fase='escolha';jogoPenalti.cobradores=[];jogoPenalti.resultados=[];}
+  $('#buscaCobradoresPenalti').value='';
+  if(!$('#desafioPenaltis').open)$('#desafioPenaltis').showModal();renderPenaltis();
+  (jogoPenalti.fase==='escolha'?$('#tituloEscolhaPenaltis'):$('#acaoPenalti')).focus();
 }
 function renderPenaltis() {
+  const escolhendo=jogoPenalti.fase==='escolha'||!seriePenaltisValida();
+  $('#selecaoCobradoresPenalti').hidden=!escolhendo;$('#seriePenaltis').hidden=escolhendo;
+  $('#descricaoPenaltis').textContent=escolhendo?'Escolha cinco cobradores do seu elenco e defina a ordem.':'Cinco cobranças. O OVR de cada jogador muda a dificuldade da batida.';
+  if(escolhendo) {jogoPenalti.fase='escolha';renderEscolhaPenaltis();return;}
   const gols=jogoPenalti.resultados.filter(r=>r==='gol').length;
   $('#placarPenaltis').textContent=gols+(gols===1?' gol':' gols');
-  $('#rodadaPenaltis').textContent=Math.min(5,jogoPenalti.resultados.length+1)+' de 5';
+  $('#rodadaPenaltis').textContent=(indiceCobradorPenalti()+1)+' de 5';
   $('#tentativasPenaltis').innerHTML=Array.from({length:5},(_,i)=>{
     const r=jogoPenalti.resultados[i];return '<span aria-hidden="true" class="'+(r==='gol'?'gol':r?'erro':'')+'">'+(r==='gol'?'✓':r?'×':'·')+'</span>';
   }).join('');
   $('#tentativasPenaltis').setAttribute('aria-label',jogoPenalti.resultados.length+' cobranças realizadas, '+gols+' gols');
   $('#campoPenalti').dataset.fase=jogoPenalti.fase;
   $('#alvosPenalti').innerHTML=ALVOS_PENALTI.map((a,i)=>'<button type="button" data-penalti-alvo="'+i+'" aria-label="'+a.nome+'" aria-pressed="'+(jogoPenalti.alvo===i)+'"'+(jogoPenalti.fase!=='pronto'?' disabled':'')+'><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M14 2v7m0 10v7M2 14h7m10 0h7" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="14" r="2" fill="currentColor"/></svg></button>').join('');
-  const texto={pronto:'Preparar cobrança',carregando:'Chutar!',animando:'Bola em jogo…',entre:'Próxima cobrança',final:'Jogar novamente'};
+  const texto={pronto:'Preparar cobrança',carregando:'Chutar!',animando:'Bola em jogo…',entre:'Próxima cobrança',final:'Escolher próxima série'};
   $('#acaoPenalti').textContent=texto[jogoPenalti.fase];$('#acaoPenalti').disabled=jogoPenalti.fase==='animando';
+  $('#trocarCobradoresPenaltis').disabled=['carregando','animando'].includes(jogoPenalti.fase);
   $('#mensagemPenalti').textContent=jogoPenalti.mensagem;
   $('#recordePenaltis').textContent=recordePenaltis.melhor+' de 5';
   $('#barraTempoPenalti').setAttribute('aria-valuenow',String(Math.round(jogoPenalti.tempo*100)));
   $('#ponteiroPenalti').style.setProperty('--pos',jogoPenalti.tempo*100+'%');
-  const cobrador=jogadorDaVaga('ata');$('#cobradorPenalti').textContent=cobrador?'Na cobrança: '+cobrador.nome+' · '+cobrador.ovr+' OVR':'Treino livre no seu estádio. Mire nos cantos e tente fazer cinco gols.';
+  const cobrador=cobradorAtualPenalti(),perfil=perfilAtualPenalti(),indice=indiceCobradorPenalti();
+  $('#cobradorPenalti').innerHTML='<span><strong>'+escapar(cobrador.nome)+'</strong><small>'+rotuloPosicoes(cobrador)+' · '+(indice+1)+'ª cobrança</small></span><b>OVR '+cobrador.ovr+'</b>';
+  $('#filaAtualPenaltis').innerHTML=jogoPenalti.cobradores.map((j,i)=>{
+    const resultado=jogoPenalti.resultados[i];
+    return '<li class="'+(resultado==='gol'?'cobrador-gol':resultado?'cobrador-erro':i===indice?'cobrando':'')+'"'+(i===indice?' aria-current="step"':'')+'>'+ (i+1)+' · '+(resultado==='gol'?'Gol':resultado==='defesa'?'Defesa':resultado==='fora'?'Fora':'OVR '+j.ovr)+'<strong>'+escapar(j.nome)+'</strong></li>';
+  }).join('');
+  $('#barraTempoPenalti').style.setProperty('--inicio',(.67-perfil.precisao)*100+'%');
+  $('#barraTempoPenalti').style.setProperty('--fim',(.67+perfil.precisao)*100+'%');
 }
-function tempoDoChute(agora) {return (1-Math.cos((agora-jogoPenalti.inicio)/290))/2;}
+function tempoDoChute(agora) {return (1-Math.cos((agora-jogoPenalti.inicio)/perfilAtualPenalti().periodo))/2;}
 function atualizarTempoPenalti(agora) {
   if(jogoPenalti.fase!=='carregando'||!$('#desafioPenaltis').open)return;
   jogoPenalti.tempo=tempoDoChute(agora);$('#ponteiroPenalti').style.setProperty('--pos',jogoPenalti.tempo*100+'%');
   jogoPenalti.raf=requestAnimationFrame(atualizarTempoPenalti);
 }
-function resolverPenalti(alvo,tempo,ladoGoleiro) {
-  const erro=Math.abs(tempo-.67),canto=alvo%3;
-  if(erro>.27)return 'fora';
-  if(canto===ladoGoleiro&&!(canto!==1&&erro<=.065))return 'defesa';
+function resolverPenalti(alvo,tempo,ladoGoleiro,ovr) {
+  const erro=Math.abs(tempo-.67),canto=alvo%3,perfil=dificuldadeCobradorPenalti(ovr);
+  if(erro>perfil.limiteFora)return 'fora';
+  if(canto===ladoGoleiro&&!(canto!==1&&erro<=perfil.precisao))return 'defesa';
   return 'gol';
 }
 function animarChutePenalti(resultado,ladoGoleiro) {
@@ -5076,7 +5221,7 @@ function concluirChutePenalti(resultado) {
   jogoPenalti.mensagem={gol:'Gooool! A bola foi para a rede.',defesa:'O goleiro buscou! Tente outro canto ou uma batida mais precisa.',fora:'Passou para fora. Pare o marcador mais perto do centro da faixa verde.'}[resultado];
   if(resultado==='gol')somPenalti(true);
   if(jogoPenalti.fase==='final') {
-    const proximo=normalizarPenaltis({melhor:Math.max(recordePenaltis.melhor,gols),series:Math.min(Number.MAX_SAFE_INTEGER,recordePenaltis.series+1)});
+    const proximo=normalizarPenaltis({...recordePenaltis,cobradores:jogoPenalti.cobradores.map(j=>j.id),melhor:Math.max(recordePenaltis.melhor,gols),series:Math.min(Number.MAX_SAFE_INTEGER,recordePenaltis.series+1)});
     if(Armazem.gravar(CHAVES.penaltis,proximo))recordePenaltis=proximo;
     else $('#avisoPenaltis').textContent='A série terminou, mas não consegui salvar o recorde. Tente novamente com o armazenamento disponível.';
     jogoPenalti.mensagem=gols===5?'Cinco de cinco! Você fechou a série com perfeição.':'Fim de série: '+gols+' de 5. Que tal tentar superar sua marca?';
@@ -5085,9 +5230,11 @@ function concluirChutePenalti(resultado) {
 }
 function acaoPenalti() {
   if(!$('#desafioPenaltis').open||document.hidden)return false;
-  if(jogoPenalti.fase==='animando')return false;
-  if(['entre','final'].includes(jogoPenalti.fase)) {
-    const reiniciar=jogoPenalti.fase==='final';pausarPenalti();if(reiniciar)jogoPenalti.resultados=[];
+  if(jogoPenalti.fase==='animando'||jogoPenalti.fase==='escolha')return false;
+  if(!seriePenaltisValida()){montarOutraSeriePenaltis();return false;}
+  if(jogoPenalti.fase==='final'){montarOutraSeriePenaltis();return true;}
+  if(jogoPenalti.fase==='entre') {
+    pausarPenalti();
     jogoPenalti.fase='pronto';jogoPenalti.tempo=0;jogoPenalti.mensagem='Escolha o canto da próxima cobrança.';
     $('#cenaPenalti').innerHTML=desenharCenaPenalti();renderPenaltis();return true;
   }
@@ -5097,7 +5244,7 @@ function acaoPenalti() {
   }
   cancelAnimationFrame(jogoPenalti.raf);jogoPenalti.raf=null;jogoPenalti.tempo=tempoDoChute(performance.now());
   const lado=Math.floor(crypto.getRandomValues(new Uint32Array(1))[0]/4294967296*3);
-  const resultado=resolverPenalti(jogoPenalti.alvo,jogoPenalti.tempo,lado);
+  const resultado=resolverPenalti(jogoPenalti.alvo,jogoPenalti.tempo,lado,cobradorAtualPenalti().ovr);
   jogoPenalti.fase='animando';jogoPenalti.mensagem='Bola em jogo…';renderPenaltis();somPenalti();
   const versao=++jogoPenalti.versao,duracao=animarChutePenalti(resultado,lado);
   jogoPenalti.timer=setTimeout(()=>{jogoPenalti.timer=null;if(versao===jogoPenalti.versao&&$('#desafioPenaltis').open)concluirChutePenalti(resultado);},duracao+50);
