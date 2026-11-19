@@ -589,6 +589,14 @@ canvas{display:block; width:100%; height:auto}
  .time-adicionar{right:6px;top:14px;width:13px;height:13px;font-size:11px}.time-instrucao{font-size:11px;padding:10px;min-height:36px}
 }
 
+/* ------------------------------------------------------- dia de jogo */
+.amistoso-convite{position:relative;overflow:hidden;margin-top:18px;padding:24px;border:1px solid #36564A;border-radius:16px;background:radial-gradient(ellipse at 90% 20%,#57745250,transparent 65%),#193A2F;color:#F8F8ED;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center}
+.amistoso-convite:before{content:'';position:absolute;right:12%;top:-60px;width:230px;height:230px;border:1px solid #D2E2BD12;border-radius:50%;pointer-events:none}.amistoso-selo{display:block;color:#BDCEA8;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px}.amistoso-convite h3{font-size:24px;margin:0 0 7px}.amistoso-convite p{font-size:12px;line-height:1.7;color:#D0DED0;max-width:560px}.amistoso-convite .btn{position:relative;background:#EFF2DD;color:#213E30;border-color:#EFF2DD;white-space:nowrap}.amistoso-convite small{display:block;font-size:11px;color:#B8CAA8;margin-top:10px}.amistoso-recente{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.amistoso-recente span{font-size:11px;padding:5px 9px;border-radius:6px;background:#FFFFFF0B;color:#DAE5D6}
+.amistoso-dialog{border:1px solid #D4DECE;border-radius:20px;padding:0;width:min(1140px,calc(100% - 24px));max-height:calc(100dvh - 24px);overflow:auto;color:var(--texto);background:#F5F6EF;box-shadow:0 25px 100px #00190C70}.amistoso-dialog::backdrop{background:#0D201BCD;backdrop-filter:blur(5px)}.amistoso-dialog [hidden]{display:none!important}.amistoso-corpo{padding:24px}.amistoso-cabecalho{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}.amistoso-cabecalho h2{font-size:23px;letter-spacing:-.03em}.amistoso-cabecalho p{font-size:12px;color:var(--fraco);margin-top:5px}.amistoso-cabecalho .btn{flex-shrink:0}.amistoso-grade{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(260px,1fr);gap:20px;align-items:start}.amistoso-grade>div,.amistoso-grade>aside{min-width:0}.amistoso-placar{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;background:#193A2F;color:#F5F5E9;padding:17px 18px;border-radius:13px 13px 0 0}.amistoso-placar>div:last-child{text-align:right}.amistoso-placar strong{display:block;font-size:13px;overflow-wrap:anywhere}.amistoso-placar small{display:block;font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:#BBCCB7;margin-top:5px}.amistoso-placar b{font-size:32px;letter-spacing:.08em;font-variant-numeric:tabular-nums;white-space:nowrap}.amistoso-cena{overflow:hidden;background:#18382E;border-radius:0 0 13px 13px;border:1px solid #2D4A3D}.amistoso-cena svg{display:block;width:100%;height:auto}.amistoso-linha-tempo{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 0;padding:0;list-style:none}.amistoso-linha-tempo li{display:grid;place-items:center;min-width:30px;min-height:32px;border:1px solid #D6DDCE;background:#FFF;color:#6B7B68;border-radius:7px;font-size:10px}.amistoso-linha-tempo .atual{background:#294F3B;color:white;border-color:#294F3B}.amistoso-linha-tempo .gol{background:#E4EFD8;color:#35532B;border-color:#A3BF8C}.amistoso-linha-tempo .sofrido{background:#FAE7E4;color:#A0353D;border-color:#DDB7AF}.amistoso-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:13px 0;color:#60735D;font-size:11px}.amistoso-meta strong{color:#304B35}.amistoso-painel{background:#FFF;border:1px solid #DEE4D6;border-radius:13px;padding:20px}.amistoso-painel h3{font-size:20px;letter-spacing:-.025em;margin-bottom:8px}.amistoso-painel p{font-size:12px;line-height:1.7;color:#667460}.amistoso-adversarios{display:grid;gap:9px;margin-top:16px}.amistoso-adversario{display:grid;grid-template-columns:1fr auto;gap:5px 12px;text-align:left;padding:13px;border:1px solid #DDE3D5;border-radius:10px;background:#FAFBF6;color:#2D4433;cursor:pointer;font:inherit}.amistoso-adversario strong{font-size:13px}.amistoso-adversario span{font-size:10px;grid-column:1;color:#687961;line-height:1.5}.amistoso-adversario b{grid-column:2;grid-row:1/3;align-self:center;font-size:19px}.amistoso-adversario[aria-pressed=true]{border-color:#476546;background:#EDF2E3;box-shadow:inset 3px 0 #476546}.amistoso-adversario:hover{border-color:#71866B}.amistoso-aviso{font-size:12px;line-height:1.7;color:#8F3840;margin-top:12px}.amistoso-painel>.btn{width:100%;margin-top:13px}.amistoso-escolhas{display:grid;gap:8px;margin:15px 0}.amistoso-escolha{position:relative;display:block;width:100%;padding:12px 12px 12px 39px;text-align:left;border:1px solid #DEE4D5;background:#FAFBF7;border-radius:9px;color:#304932;cursor:pointer;font:inherit}.amistoso-escolha:before{content:'';position:absolute;left:13px;top:16px;width:13px;height:13px;border-radius:50%;border:1px solid #A4B29A}.amistoso-escolha[aria-pressed=true]{background:#EDF3E4;border-color:#64815B}.amistoso-escolha[aria-pressed=true]:before{background:#456A3E;box-shadow:inset 0 0 0 3px #EEF4E7}.amistoso-escolha strong{font-size:12px;display:block}.amistoso-escolha small{font-size:10px;color:#708166;display:block;margin-top:4px;line-height:1.5}.amistoso-escolha:disabled{cursor:default;opacity:.7}.amistoso-execucao{padding:13px;background:#F1F4EA;border-radius:9px}.amistoso-execucao label{display:flex;justify-content:space-between;gap:10px;font-size:11px;font-weight:700;color:#42593C}.amistoso-execucao .penalti-barra{margin:18px 3px 14px}.amistoso-execucao small{font-size:10px;line-height:1.5;color:#72806A;display:block}.amistoso-narracao{margin-top:14px;padding:13px;border-left:3px solid #9CAC7C;background:#EFF3E7;border-radius:0 9px 9px 0}.amistoso-narracao strong{display:block;font-size:15px;color:#35532A;margin-bottom:5px}.amistoso-narracao p{font-size:12px}.amistoso-resumo{margin-top:16px}.amistoso-resumo h4{font-size:12px;margin:13px 0 8px}.amistoso-sumula{list-style:none;padding:0;margin:0;display:grid;gap:7px}.amistoso-sumula li{font-size:11px;color:#4C6148;line-height:1.6;padding:8px 10px;background:#F3F5EE;border-radius:7px}.amistoso-sumula strong{color:#2D4834}.amistoso-historico{margin-top:20px;border-top:1px solid #DEE4D5;padding-top:16px}.amistoso-historico h3{font-size:13px}.amistoso-jogos{display:flex;gap:8px;overflow-x:auto;margin-top:10px;padding-bottom:4px}.amistoso-jogos article{flex:0 0 170px;min-width:0;border:1px solid #DEE4D5;background:#FFF;border-radius:9px;padding:11px}.amistoso-jogos strong{font-size:12px;display:block}.amistoso-jogos b{display:block;font-size:20px;color:#2E5035;margin:5px 0}.amistoso-jogos small{font-size:10px;color:#70816C}.amistoso-btns{display:flex;gap:8px;margin-top:12px}.amistoso-btns .btn{flex:1;font-size:12px}.amistoso-painel button:focus-visible{outline:3px solid #B58143;outline-offset:3px}
+@media(max-width:820px){.amistoso-grade{grid-template-columns:1fr}.amistoso-corpo{padding:16px}.amistoso-painel{padding:16px}.amistoso-cabecalho h2{font-size:20px}.amistoso-cabecalho .btn{font-size:11px;padding:9px}.amistoso-cena{max-height:390px}.amistoso-cena svg{max-height:390px}.amistoso-adversarios{grid-template-columns:repeat(3,minmax(0,1fr))}.amistoso-adversario{display:block;padding:10px}.amistoso-adversario strong{font-size:11px;display:block}.amistoso-adversario span{display:block;margin:6px 0}.amistoso-adversario b{font-size:18px}.amistoso-escolhas{grid-template-columns:repeat(3,minmax(0,1fr))}.amistoso-escolha{padding:32px 9px 10px}.amistoso-escolha:before{top:10px;left:10px}.amistoso-convite{padding:20px;grid-template-columns:1fr}.amistoso-convite .btn{justify-self:start}.amistoso-convite h3{font-size:22px}}
+@media(max-width:420px){.amistoso-corpo{padding:12px}.amistoso-placar{padding:12px 10px;gap:7px}.amistoso-placar b{font-size:25px}.amistoso-placar strong{font-size:11px}.amistoso-cabecalho{align-items:center;gap:8px;margin-bottom:14px}.amistoso-cabecalho h2{font-size:17px}.amistoso-cabecalho .amistoso-selo{font-size:8px;margin-bottom:5px}.amistoso-cabecalho p{display:none}.amistoso-cabecalho .btn{padding:9px 8px;font-size:10px}.amistoso-grade{gap:12px}.amistoso-meta{margin:9px 0;font-size:10px}.amistoso-linha-tempo{margin-top:9px}.amistoso-painel{padding:13px}.amistoso-painel h3{font-size:18px}.amistoso-painel .amistoso-selo{font-size:9px}.amistoso-painel p{font-size:11px}.amistoso-escolhas{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:11px 0}.amistoso-escolha{padding:28px 7px 9px;min-height:111px}.amistoso-escolha strong{font-size:11px}.amistoso-escolha small{font-size:10px}.amistoso-execucao{padding:11px}.amistoso-execucao label{font-size:10px}.amistoso-convite .btn{width:100%}}
+@media(prefers-reduced-motion:reduce){.amistoso-dialog *{scroll-behavior:auto!important}}
+
 /* ---------------------------------------------------------- pacotes e cartas */
 .raridade-comum{--carta:#64776B;--carta-fundo:#EDF2ED}
 .raridade-raro{--carta:#286BA0;--carta-fundo:#EAF3FC}
@@ -1119,6 +1127,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <div class="time-marcadores"><span class="time-formacao">4-3-3</span><span class="time-contagem" id="timeContagem" aria-live="polite">0 de 11 escalados</span><span class="estadio-saldo" role="status" aria-live="polite"><b id="saldoMeuTime">0</b> moedas</span><button class="btn btn-pequeno" type="button" id="vestiarioMeuTime" aria-haspopup="dialog">Vestiário</button><button class="btn btn-pequeno" type="button" data-time-repetidos>Ver repetidos</button></div>
     </div>
   </div>
+  <div class="amistoso-convite"><div><span class="amistoso-selo">Dia de jogo · Amistosos</span><h3>Vista a camisa. Entre em campo.</h3><p>Seu 4-3-3, seu estádio e seis lances decisivos. Escolha a jogada, acerte o tempo e construa a vitória.</p><small id="resumoConviteAmistoso">Escale os 11 titulares para jogar.</small><div class="amistoso-recente" id="campanhaAmistoso"></div></div><button class="btn" type="button" id="abrirAmistoso" aria-haspopup="dialog">Jogar amistoso</button></div>
   <div class="grade-time">
     <div class="cartao time-campo-card">
       <div class="time-campo-topo"><h3>Escalação titular</h3><span>Defesa · Meio · Ataque</span></div>
@@ -1407,6 +1416,26 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <section class="vestiario-ficha"><h3 id="vagaVestiario">Armário</h3><div id="titularVestiario"></div><p style="margin-bottom:9px">Escolha quem veste esta camisa.</p><div class="vestiario-opcoes" id="opcoesVestiario"></div><button class="btn btn-pequeno" type="button" id="retirarTitularVestiario" hidden>Deixar a camisa livre</button></section>
       <section class="vestiario-obra" id="obraVestiario"></section>
     </aside></div><p class="vestiario-aviso" id="avisoVestiario" role="status" aria-live="polite"></p>
+  </div>
+</dialog>
+
+<!-- ================================================= AMISTOSO INTERATIVO -->
+<dialog class="amistoso-dialog" id="partidaAmistosa" aria-labelledby="tituloAmistoso" aria-describedby="descricaoAmistoso">
+  <div class="faixas faixas-fina"></div><div class="amistoso-corpo">
+    <header class="amistoso-cabecalho"><div><span class="amistoso-selo" style="color:#71805E">Morumbi · Dia de jogo</span><h2 id="tituloAmistoso">Seu onze entra em campo</h2><p id="descricaoAmistoso">Um amistoso. Seis lances para decidir a história.</p></div><button class="btn btn-pequeno" type="button" id="fecharAmistoso">Voltar ao time</button></header>
+    <div class="amistoso-grade"><div>
+      <div class="amistoso-placar"><div><strong id="nomeCasaAmistoso">Meu Tricolor</strong><small>Casa · 4-3-3</small></div><b id="golsAmistoso" aria-label="Placar">0 : 0</b><div><strong id="nomeVisitanteAmistoso">União do Bairro</strong><small id="relogioAmistoso">Pré-jogo</small></div></div>
+      <div class="amistoso-cena" id="cenaAmistoso"></div>
+      <ol class="amistoso-linha-tempo" id="linhaAmistoso" aria-label="Os seis lances decisivos"></ol>
+      <div class="amistoso-meta"><span id="ovrTimeAmistoso"></span><span>Seu estádio, suas melhorias.</span></div>
+      <div class="amistoso-narracao" id="narracaoAmistoso" role="status" aria-live="polite" hidden></div>
+    </div><aside class="amistoso-painel">
+      <section id="preJogoAmistoso"><span class="amistoso-selo" style="color:#7A8B68">Amistoso em casa</span><h3>Escolha seu adversário</h3><p>Três ataques, três defesas. Leia o espaço, escolha a jogada e pare o marcador na faixa verde.</p><div class="amistoso-adversarios" id="adversariosAmistoso" role="group" aria-label="Dificuldade da partida"></div><p class="amistoso-aviso" id="avisoEscalacaoAmistoso"></p><button class="btn btn-principal" type="button" id="iniciarAmistoso">Apito inicial</button><button class="btn btn-pequeno" type="button" id="revisarEscalacaoAmistoso" hidden>Completar escalação</button><p class="dica" style="margin-top:12px">Partidas gratuitas. As moedas continuam vindo dos estudos e das vendas de repetidos.</p></section>
+      <section id="lanceAmistoso" hidden><span class="amistoso-selo" id="tipoLanceAmistoso" style="color:#7A8B68"></span><h3 id="tituloLanceAmistoso" tabindex="-1"></h3><p id="leituraAmistoso"></p><div class="amistoso-escolhas" id="escolhasAmistoso" role="group" aria-label="Escolha a jogada"></div><div class="amistoso-execucao" id="execucaoAmistoso"><label id="rotuloTempoAmistoso">Execução <span id="executorAmistoso"></span></label><div class="penalti-barra" id="barraAmistoso" role="meter" aria-labelledby="rotuloTempoAmistoso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="ponteiroAmistoso"></i></div><small id="dicaTempoAmistoso">OVR maior amplia a faixa verde e deixa o marcador mais lento.</small></div><button class="btn btn-principal" type="button" id="executarAmistoso">Preparar jogada</button><p class="dica" style="margin-top:10px">A decisão, o tempo e o OVR influenciam o lance. Acertar o verde ajuda, mas o adversário também joga.</p></section>
+      <section id="fimAmistoso" hidden><span class="amistoso-selo" style="color:#7A8B68">Apito final · 90 minutos</span><h3 id="resultadoAmistoso" tabindex="-1"></h3><p id="resumoFinalAmistoso"></p><div class="amistoso-resumo" id="sumulaAmistoso"></div><div class="amistoso-btns"><button class="btn btn-principal" type="button" id="novoAmistoso">Jogar de novo</button><button class="btn" type="button" id="timeAposAmistoso">Meu time</button></div></section>
+      <p class="amistoso-aviso" id="avisoSalvarAmistoso" role="status" aria-live="polite"></p>
+    </aside></div>
+    <section class="amistoso-historico" id="historicoAmistoso" hidden><h3>Últimos amistosos <span class="subtexto">· até 20 partidas</span></h3><div class="amistoso-jogos" id="jogosAmistoso"></div></section>
   </div>
 </dialog>
 
@@ -1932,6 +1961,48 @@ function sortearJogadorDoPacote(excluidos=[]) {
 let abrindoPacote=false;
 let animacaoPacoteTimer=null;
 
+// Amistosos usam um retrato dos titulares. Trocar a escalação depois não muda a partida.
+const ADVERSARIOS_AMISTOSO = [
+  {id:'bairro',nome:'União do Bairro',ovr:60,nivel:'Tranquilo',cor:'#D4AB65',descricao:'Uma boa estreia para conhecer os lances.'},
+  {id:'regional',nome:'Atlético da Serra',ovr:74,nivel:'Equilibrado',cor:'#7EACCE',descricao:'Marcação firme e pouco espaço para errar.'},
+  {id:'elite',nome:'Estrela Nacional',ovr:88,nivel:'Desafiador',cor:'#A69BD2',descricao:'Um teste para seu melhor onze.'}
+];
+const MINUTOS_AMISTOSO = [12,28,41,57,73,88];
+function normalizarAmistosos(dados,jogadores) {
+  const fonte=dados&&typeof dados==='object'?dados:{};
+  function partidaValida(p,completa) {
+    if(!p||typeof p.id!=='string'||!p.id||p.id.length>80||!ADVERSARIOS_AMISTOSO.some(a=>a.id===p.adversario)||
+      !Array.isArray(p.titulares)||p.titulares.length!==11||!Array.isArray(p.contextos)||p.contextos.length!==6||
+      !Array.isArray(p.centros)||p.centros.length!==6||!Array.isArray(p.lances)||
+      (completa?p.lances.length!==6:p.lances.length>5)||
+      !p.contextos.every(n=>Number.isInteger(n)&&n>=0&&n<3)||!p.centros.every(n=>Number.isFinite(n)&&n>=.2&&n<=.8))return null;
+    const ids=new Set(),titulares=[];
+    for(let i=0;i<11;i++) {
+      const t=p.titulares[i],pos=POSICOES_TIME[i],ficha=t&&JOGADORES_SPFC.find(j=>j.id===t.id);
+      if(!ficha||t.vaga!==pos.id||ids.has(t.id)||!posicaoDoJogadorNaVaga(ficha,pos)||!Number.isInteger(t.ovr)||t.ovr<50||t.ovr>100||
+        (!completa&&!jogadores.some(j=>j.id===t.id)))return null;
+      ids.add(t.id);titulares.push({id:t.id,vaga:t.vaga,ovr:t.ovr});
+    }
+    const lances=[];
+    for(let i=0;i<p.lances.length;i++) {
+      const l=p.lances[i];
+      if(!l||!Number.isInteger(l.acao)||l.acao<0||l.acao>2||!['gol','defesa','fora','corte'].includes(l.resultado)||
+        !['perfeito','bom','fora'].includes(l.precisao)||!ids.has(l.autor)||
+        (l.assistente!==null&&(!ids.has(l.assistente)||l.assistente===l.autor)))return null;
+      lances.push({acao:l.acao,resultado:l.resultado,precisao:l.precisao,autor:l.autor,assistente:l.assistente});
+    }
+    const data=typeof p.data==='string'&&!Number.isNaN(Date.parse(p.data))?p.data:new Date(0).toISOString();
+    return {id:p.id,adversario:p.adversario,nomeTime:typeof p.nomeTime==='string'?p.nomeTime.slice(0,40):'Meu Tricolor',
+      data,titulares,contextos:[...p.contextos],centros:[...p.centros],lances,aguarda:p.aguarda===true&&lances.length>0};
+  }
+  const historico=[],ids=new Set();
+  if(Array.isArray(fonte.historico))for(const item of fonte.historico.slice(0,20)) {
+    const p=partidaValida(item,true);if(p&&!ids.has(p.id)){historico.push(p);ids.add(p.id);}
+  }
+  const ativa=partidaValida(fonte.ativa,false);
+  return {historico,ativa:ativa&&!ids.has(ativa.id)?ativa:null};
+}
+
 function normalizarMeuTime(dados) {
   const fonte=dados && typeof dados==="object" ? dados : {};
   const nome=typeof fonte.nome==="string" ? fonte.nome.trim().slice(0,40) : "";
@@ -1958,6 +2029,7 @@ function normalizarMeuTime(dados) {
   const moedasVendas=Number.isSafeInteger(fonte.moedasVendas)&&fonte.moedasVendas>=0?fonte.moedasVendas:0;
   const vendasNesteTime=Number.isSafeInteger(fonte.vendasNesteTime)&&fonte.vendasNesteTime>=0?Math.min(fonte.vendasNesteTime,moedasVendas):0;
   return {nome:nome || "Meu Tricolor",jogadores,escalacao,gastoPacotes,gastoPacotesPerdido,
+    amistosos:normalizarAmistosos(fonte.amistosos,jogadores),
     moedasVendas,vendasNesteTime,
     bonusTesteResgatado:fonte.bonusTesteResgatado===true,
     ultimoPacote:ultimoPacote.length===2&&ultimoPacote[0].id!==ultimoPacote[1].id?ultimoPacote:[]};
@@ -4649,6 +4721,7 @@ function renderMeuTime() {
   }
   $("#btnRemoverTitular").hidden=!jogadorDaVaga(posicao.id);
   renderRepetidosDoTime();
+  renderConviteAmistoso();
 }
 function renderRepetidosDoTime() {
   const repetidos=meuTime.jogadores.filter(j=>j.quantidade>1).sort((a,b)=>b.ovr-a.ovr||a.nome.localeCompare(b.nome,"pt-BR"));
@@ -4722,6 +4795,244 @@ $("#btnRemoverTitular").addEventListener("click",()=>{
   delete meuTime.escalacao[posicaoTimeSelecionada];
   salvarMeuTime();renderMeuTime();focarPosicaoTime();
 });
+
+/* --------------------------------------------------------------------------
+   AMISTOSOS — seis lances, decisões táticas e execução com o time escalado.
+   Cada lance e o resultado final são gravados junto do time, numa única escrita.
+   -------------------------------------------------------------------------- */
+const partidaUI={partida:null,adversario:'bairro',fase:'previa',acao:0,inicio:0,tempo:0,raf:null,timer:null,animacoes:[],retorno:null};
+function sorteAmistoso(){return crypto.getRandomValues(new Uint32Array(1))[0]/4294967296;}
+function placarAmistoso(p){return (p?.lances||[]).reduce((r,l,i)=>{if(l.resultado==='gol')r[i%2?'fora':'casa']++;return r;},{casa:0,fora:0});}
+function titularesAmistoso(){return POSICOES_TIME.map(p=>({vaga:p.id,jogador:jogadorDaVaga(p.id)}));}
+function jogadorAmistoso(p,vaga){const t=p?.titulares.find(j=>j.vaga===vaga);return t?{...JOGADORES_SPFC.find(j=>j.id===t.id),ovr:t.ovr}:null;}
+function ovrAmistoso(p){return Math.round(p.titulares.reduce((s,j)=>s+j.ovr,0)/11);}
+function adversarioAmistoso(p){return ADVERSARIOS_AMISTOSO.find(a=>a.id===(p?.adversario||partidaUI.adversario))||ADVERSARIOS_AMISTOSO[0];}
+function renderConviteAmistoso(){
+  const ativa=meuTime.amistosos.ativa,h=meuTime.amistosos.historico,n=titularesAmistoso().filter(t=>t.jogador).length;
+  $('#abrirAmistoso').textContent=ativa?'Continuar partida':'Jogar amistoso';
+  $('#resumoConviteAmistoso').textContent=ativa?'Partida pausada · '+MINUTOS_AMISTOSO[Math.min(ativa.lances.length,5)]+"′ · continue de onde parou.":
+    n===11?'Onze titulares prontos. Escolha o adversário e dê o apito inicial.':'Escale os 11 titulares para jogar · '+n+' de 11 prontos.';
+  const v=h.filter(p=>{const s=placarAmistoso(p);return s.casa>s.fora;}).length,e=h.filter(p=>{const s=placarAmistoso(p);return s.casa===s.fora;}).length;
+  $('#campanhaAmistoso').innerHTML=h.length?'<span>Últimos '+h.length+' jogos</span><span>'+v+' vitórias · '+e+' empates · '+(h.length-v-e)+' derrotas</span>':'';
+}
+function perfilLanceAmistoso(p,acao=partidaUI.acao){
+  const indice=Math.min(p.lances.length-(p.aguarda?1:0),5),ataque=indice%2===0;
+  const vagas=ataque?[['ata','mc-d'],['pe','le'],['pd','ld']]:[['vol','zag-e'],['le','zag-e'],['ld','zag-d']];
+  const [v1,v2]=vagas[acao],j=jogadorAmistoso(p,v1),apoio=jogadorAmistoso(p,v2),gol=jogadorAmistoso(p,'gol');
+  const meio=(jogadorAmistoso(p,'mc-e').ovr+jogadorAmistoso(p,'mc-d').ovr)/2;
+  const ovr=ataque?Math.round(j.ovr*.7+apoio.ovr*.15+meio*.15):Math.round(j.ovr*.5+apoio.ovr*.25+gol.ovr*.25);
+  const n=(ovr-50)/50;
+  return {ataque,j,apoio,gol,ovr,precisao:.055+n*.075,periodo:1000+n*850,centro:p.centros[indice],leitura:acao===p.contextos[indice]};
+}
+function resolverLanceAmistoso({ataque,ovr,ovrAdversario,leitura,tempo,centro,sorteio}){
+  const n=Math.max(0,Math.min(1,(ovr-50)/50)),largura=.055+n*.075,erro=Math.abs(tempo-centro);
+  const precisao=erro<=largura*.4?'perfeito':erro<=largura?'bom':'fora';
+  const ajusteTempo=precisao==='perfeito'?.22:precisao==='bom'?.13:-.23;
+  const chance=Math.max(.04,Math.min(.94,(ataque?.29:.42)+n*.43+(leitura?.16:-.1)+ajusteTempo-(ovrAdversario-70)*.007));
+  const sucesso=sorteio<chance;
+  const resultado=ataque?(sucesso?'gol':precisao==='fora'&&sorteio>.66?'fora':'defesa'):
+    (sucesso?(sorteio<chance*.72?'corte':'defesa'):'gol');
+  return {resultado,precisao,chance};
+}
+function guardarAmistosos(amistosos){
+  const proximo=normalizarMeuTime({...meuTime,amistosos});
+  if(!Armazem.gravar(CHAVES.meuTime,proximo)){
+    $('#avisoSalvarAmistoso').textContent='Não consegui salvar a partida. Libere espaço ou permita o armazenamento e tente novamente; este lance ainda não foi registrado.';
+    return false;
+  }
+  meuTime=proximo;$('#avisoSalvarAmistoso').textContent='';renderConviteAmistoso();return true;
+}
+function desenharCampoAmistoso(p){
+  const adversario=adversarioAmistoso(p),grama=temGrama(),cor=grama?'#47754D':'#A57E58',listras=temListras();
+  const emLance=p&&p.lances.length<6,perfil=emLance?perfilLanceAmistoso(p):null,ataque=perfil?.ataque??true;
+  let s='<svg viewBox="0 0 900 550" role="img" aria-label="Seu time em campo no Morumbi, com as melhorias do seu estádio"><defs><linearGradient id="am-campo" x2="0" y2="1"><stop stop-color="'+cor+'"/><stop offset="1" stop-color="'+(grama?'#315D3E':'#896544')+'"/></linearGradient><radialGradient id="am-luz"><stop stop-color="#FFF4C3" stop-opacity=".3"/><stop offset="1" stop-color="#FFF4C3" stop-opacity="0"/></radialGradient></defs><rect width="900" height="550" fill="#172E28"/>';
+  const aneis=temTerceiroAnel()?3:temAnel()?2:1;
+  for(let i=aneis;i>0;i--)s+='<rect x="'+(49-i*12)+'" y="'+(76-i*12)+'" width="'+(802+i*24)+'" height="'+(398+i*24)+'" rx="'+(27+i*12)+'" fill="none" stroke="'+(temMosaico()?['#D6D8CF','#9A3B43','#D6D8CF','#293A32'][i]:'#65796B')+'" stroke-width="10"/>';
+  if(temPublico())for(let row=0;row<Math.min(aneis+1,3);row++)for(let x=69;x<842;x+=13){
+    if(nivelDaObra('publico')===1&&Math.floor(x/13)%3)continue;
+    s+='<circle cx="'+x+'" cy="'+(68-row*12)+'" r="2.7" fill="'+['#E5E2D6','#B64D53','#849481'][Math.floor(x/100)%3]+'"/><circle cx="'+x+'" cy="'+(483+row*12)+'" r="2.7" fill="'+['#E5E2D6','#B64D53','#849481'][Math.floor(x/100)%3]+'"/>';
+  }
+  if(temCobertura())s+='<path d="M30 43Q450 -6 870 43L855 59Q450 18 45 59Z" fill="#D2DBD1" opacity=".8"/><path d="M45 58Q450 15 855 58" fill="none" stroke="#AC3845" stroke-width="4"/>';
+  s+='<text x="450" y="30" text-anchor="middle" fill="#D6DCCB" font-size="11" font-weight="700" letter-spacing="7">MORUMBI · COPEIRO</text><rect x="72" y="91" width="756" height="368" rx="5" fill="url(#am-campo)"/>';
+  if(listras)for(let i=0;i<10;i+=2)s+='<path d="M'+(72+i*75.6)+' 91h75.6v368h-75.6Z" fill="#C5DAAA" opacity=".09"/>';
+  s+='<g fill="none" stroke="#E6ECD3" stroke-width="2" opacity=".72"><path d="M90 108H810V442H90ZM450 108V442M90 170H193V380H90M810 170H707V380H810M90 227H130V323H90M810 227H770V323H810"/><circle cx="450" cy="275" r="48"/><path d="M193 238Q229 275 193 312M707 238Q671 275 707 312"/></g><g fill="none" stroke="#EFEFDC" stroke-width="3"><path d="M90 250H70v50h20M810 250h20v50h-20"/></g>';
+  if(temRedes())s+='<path d="M74 250v50m5-50v50m5-50v50m-14-40h20m-20 10h20m-20 10h20m-20 10h20M816 250v50m5-50v50m5-50v50m-16-40h20m-20 10h20m-20 10h20m-20 10h20" stroke="#F5F5DF" stroke-width=".8" opacity=".5"/>';
+  if(temRefletores())[55,845].forEach(x=>{s+='<ellipse cx="'+x+'" cy="270" rx="210" ry="205" fill="url(#am-luz)"/><rect x="'+(x-15)+'" y="83" width="30" height="9" rx="2" fill="#FCF0BC"/>';});
+  if(perfil){const y=[275,170,375][partidaUI.acao];s+='<ellipse cx="'+(ataque?670:220)+'" cy="'+y+'" rx="82" ry="44" fill="#F4E5A2" opacity=".12"/><path d="M'+(ataque?560:330)+' '+y+'Q450 '+(y-40)+' '+(ataque?795:105)+' 275" fill="none" stroke="#EFDF9C" stroke-width="2" stroke-dasharray="6 7" opacity=".55"/>';}
+  const titulares=p?p.titulares:POSICOES_TIME.map(pos=>({vaga:pos.id,id:jogadorDaVaga(pos.id)?.id}));
+  let bola={x:450,y:275};
+  for(let i=0;i<11;i++){
+    const pos=POSICOES_TIME[i],t=titulares[i],j=JOGADORES_SPFC.find(j=>j.id===t.id);
+    let x=120+(100-pos.y)*3.6,y=115+pos.x*3.2;
+    const ativo=perfil&&j?.id===perfil.j.id;
+    if(ativo){x=ataque?640:275;y=[275,170,375][partidaUI.acao];bola={x:x+19,y:y+12};}
+    const ox=900-(120+(100-pos.y)*3.6),oy=115+(100-pos.x)*3.2;
+    s+='<g transform="translate('+ox+','+oy+')"><ellipse cy="13" rx="12" ry="4" fill="#10291C40"/><circle r="10" fill="'+(i===0?'#C4A369':adversario.cor)+'" stroke="#DCE6E0" stroke-width="1.4"/><text text-anchor="middle" y="3" fill="#1D3331" font-size="8" font-weight="700">'+(i+1)+'</text></g>';
+    s+='<g transform="translate('+x+','+y+')" opacity="'+(j?1:.3)+'"><title>'+escapar(j?j.nome+' · '+pos.sigla:'Vaga livre · '+pos.sigla)+'</title><ellipse cy="14" rx="13" ry="4" fill="#10291C50"/>'+(ativo?'<circle r="19" fill="#F5E6A718" stroke="#E3DE9D" stroke-width="1.5"/>':'')+'<path d="M-7-11-15-6-11 2-7-1V12H7V-1l4 3 4-8-8-5-3 3h-8Z" fill="'+(i===0?'#C6AD6B':'#F3F2E8')+'" stroke="#233C2B" stroke-width="1"/>'+(i!==0?'<path d="M-7 0H7v3H-7Z" fill="#AD3543"/><path d="M-7 5H7v3H-7Z" fill="#273832"/>':'')+'<text text-anchor="middle" y="-15" fill="#F4F4DB" font-size="9" font-weight="700">'+pos.sigla+'</text></g>';
+  }
+  s+='<g id="bolaAmistoso" transform="translate('+bola.x+','+bola.y+')"><ellipse cy="5" rx="6" ry="2.5" fill="#172E2860"/><circle r="5" fill="#FFFBE9" stroke="#233C2B" stroke-width="1"/><path d="m0-3 3 2-1 3h-4l-1-3Z" fill="#294237"/></g><text x="450" y="532" text-anchor="middle" fill="#B4C7B4" font-size="10" letter-spacing="3">'+(perfil?(ataque?'ATAQUE →':'← DEFENDA SEU GOL'):'A CASA É SUA')+'</text></svg>';
+  return s;
+}
+function abrirAmistoso(){
+  partidaUI.retorno=document.activeElement;pararSomLoja(true);pararCantoVisita();pararEfeitoVisita();pausarPenalti();
+  partidaUI.partida=meuTime.amistosos.ativa;partidaUI.acao=0;
+  partidaUI.fase=partidaUI.partida?(partidaUI.partida.aguarda?'resultado':'escolha'):'previa';
+  $('#avisoSalvarAmistoso').textContent='';renderPartidaAmistosa();$('#partidaAmistosa').showModal();
+}
+function iniciarAmistoso(){
+  if(partidaUI.fase!=='previa'||meuTime.amistosos.ativa)return false;
+  const lista=titularesAmistoso();if(lista.some(t=>!t.jogador)){renderPartidaAmistosa();return false;}
+  const p={id:crypto.randomUUID(),adversario:partidaUI.adversario,nomeTime:meuTime.nome,data:new Date().toISOString(),
+    titulares:lista.map(t=>({vaga:t.vaga,id:t.jogador.id,ovr:t.jogador.ovr})),
+    contextos:Array.from({length:6},()=>Math.floor(sorteAmistoso()*3)),centros:Array.from({length:6},()=>.2+sorteAmistoso()*.6),lances:[],aguarda:false};
+  if(!guardarAmistosos({...meuTime.amistosos,ativa:p}))return false;
+  partidaUI.partida=meuTime.amistosos.ativa;partidaUI.fase='escolha';partidaUI.acao=0;
+  renderPartidaAmistosa();$('#tituloLanceAmistoso').focus({preventScroll:true});return true;
+}
+function textoLanceAmistoso(p,i){
+  const l=p.lances[i],ataque=i%2===0,nome=JOGADORES_SPFC.find(j=>j.id===l.autor)?.nome||'Seu jogador';
+  const assist=JOGADORES_SPFC.find(j=>j.id===l.assistente)?.nome;
+  if(l.resultado==='gol')return ataque?'Gol de '+nome+(assist?' · assistência de '+assist:'')+'.':'Gol do adversário. A jogada passou pela marcação.';
+  if(l.resultado==='fora')return nome+' tentou a finalização, mas a bola saiu.';
+  if(l.resultado==='corte')return nome+' leu a jogada e cortou o ataque.';
+  return ataque?'O goleiro defendeu a finalização de '+nome+'.':nome+' fez a defesa e segurou o placar.';
+}
+function renderPartidaAmistosa(){
+  const p=partidaUI.partida,a=adversarioAmistoso(p),s=placarAmistoso(p),fase=partidaUI.fase,previa=fase==='previa',fim=fase==='final';
+  const indice=p?Math.min(p.lances.length-(p.aguarda?1:0),5):0,ataque=indice%2===0;
+  $('#preJogoAmistoso').hidden=!previa;$('#lanceAmistoso').hidden=previa||fim;$('#fimAmistoso').hidden=!fim;
+  $('#nomeCasaAmistoso').textContent=p?.nomeTime||meuTime.nome;$('#nomeVisitanteAmistoso').textContent=a.nome;
+  $('#golsAmistoso').textContent=s.casa+' : '+s.fora;$('#golsAmistoso').setAttribute('aria-label',s.casa+' a '+s.fora);
+  const minuto=previa?'Pré-jogo':fim?'Fim de jogo':p.aguarda||fase==='animando'?MINUTOS_AMISTOSO[Math.max(0,p.lances.length-1)]+"′":MINUTOS_AMISTOSO[indice]+"′";
+  $('#relogioAmistoso').textContent=minuto;
+  $('#fecharAmistoso').textContent=p&&!fim?'Pausar e voltar':'Voltar ao time';
+  const onze=titularesAmistoso(),preenchidos=onze.filter(t=>t.jogador).length;
+  $('#ovrTimeAmistoso').innerHTML=p?'Seu time <strong>OVR '+ovrAmistoso(p)+'</strong> · Rival <strong>OVR '+a.ovr+'</strong>':preenchidos===11?'Seu time <strong>OVR '+Math.round(onze.reduce((s,t)=>s+t.jogador.ovr,0)/11)+'</strong>':'<strong>'+preenchidos+' de 11</strong> titulares escalados';
+  $('#cenaAmistoso').innerHTML=desenharCampoAmistoso(p);
+  $('#linhaAmistoso').innerHTML=MINUTOS_AMISTOSO.map((m,i)=>{
+    const l=p?.lances[i],classe=l?.resultado==='gol'?(i%2?'sofrido':'gol'):(!previa&&!fim&&i===indice&&!p?.aguarda?'atual':'');
+    return '<li class="'+classe+'" aria-label="'+m+' minutos'+(l?' · '+escapar(textoLanceAmistoso(p,i)):'')+'">'+(l?.resultado==='gol'?'● ':l?'✓ ':'')+m+'′</li>';
+  }).join('');
+  if(previa){
+    $('#adversariosAmistoso').innerHTML=ADVERSARIOS_AMISTOSO.map(r=>'<button type="button" class="amistoso-adversario" data-adversario-amistoso="'+r.id+'" aria-pressed="'+(a.id===r.id)+'"><strong>'+r.nome+'</strong><span>'+r.nivel+' · '+r.descricao+'</span><b>'+r.ovr+'<small style="display:block;font-size:8px;letter-spacing:.1em">OVR</small></b></button>').join('');
+    const faltam=onze.filter(t=>!t.jogador).map(t=>rotuloDaVaga(POSICOES_TIME.find(pos=>pos.id===t.vaga)));
+    $('#avisoEscalacaoAmistoso').textContent=faltam.length?'Faltam '+faltam.length+' titulares: '+faltam.join(', ')+'. Escolha jogadores nas camisas do seu 4-3-3.':'';
+    $('#iniciarAmistoso').disabled=preenchidos!==11;$('#revisarEscalacaoAmistoso').hidden=preenchidos===11;
+  }
+  if(p&&!previa&&!fim){
+    const resultado=fase==='resultado'||fase==='animando',perfil=perfilLanceAmistoso(p);
+    $('#tipoLanceAmistoso').textContent=MINUTOS_AMISTOSO[indice]+"′ · Lance "+(indice+1)+' de 6 · '+(ataque?'Seu ataque':'Sua defesa');
+    $('#tituloLanceAmistoso').textContent=resultado?'O lance está decidido':ataque?'Encontre o caminho do gol':'Proteja o seu gol';
+    const leituraAtaque=['Os zagueiros abriram pelos lados. Há um corredor pelo meio para o seu centroavante.','O lateral adversário subiu demais pela direita. Seu ponta esquerdo tem espaço nas costas dele.','A marcação adversária se concentrou na esquerda do seu ataque. Há espaço para avançar pela direita.'];
+    const leituraDefesa=['O adversário prepara um passe por dentro, entre seu volante e os zagueiros.','O ponta adversário disparou pelo lado do seu lateral esquerdo. A cobertura precisa chegar.','O adversário abriu a jogada pelo lado do seu lateral direito. Cuidado com o cruzamento.'];
+    $('#leituraAmistoso').textContent=resultado?'Confira o desfecho abaixo do campo e siga para o próximo lance.':(ataque?leituraAtaque:leituraDefesa)[p.contextos[indice]];
+    const nomes=ataque?['Trabalhar pelo meio','Abrir pela esquerda','Atacar pela direita']:['Fechar o meio','Cobrir a esquerda','Proteger a direita'];
+    $('#escolhasAmistoso').hidden=resultado;
+    $('#escolhasAmistoso').innerHTML=nomes.map((n,i)=>{const perf=perfilLanceAmistoso(p,i);return '<button type="button" class="amistoso-escolha" data-jogada-amistoso="'+i+'" aria-pressed="'+(partidaUI.acao===i)+'"'+(fase!=='escolha'?' disabled':'')+'><strong>'+n+'</strong><small>'+escapar(perf.j.nome)+' · OVR '+perf.j.ovr+(ataque?'<br>Apoio: '+escapar(perf.apoio.nome):'<br>Cobertura: '+escapar(perf.apoio.nome))+'</small></button>';}).join('');
+    $('#execucaoAmistoso').hidden=resultado;
+    $('#executorAmistoso').textContent='OVR da jogada '+perfil.ovr;
+    $('#barraAmistoso').style.setProperty('--inicio',(perfil.centro-perfil.precisao)*100+'%');$('#barraAmistoso').style.setProperty('--fim',(perfil.centro+perfil.precisao)*100+'%');
+    $('#ponteiroAmistoso').style.setProperty('--pos',partidaUI.tempo*100+'%');$('#barraAmistoso').setAttribute('aria-valuenow',String(Math.round(partidaUI.tempo*100)));
+    $('#executarAmistoso').disabled=fase==='animando';
+    $('#executarAmistoso').textContent=fase==='tempo'?(ataque?'Finalizar agora':'Intervir agora'):resultado?(p.lances.length===6?'Ver resultado':'Próximo lance'):'Preparar jogada';
+    $('#dicaTempoAmistoso').textContent=fase==='tempo'?'Agora! Pare na faixa verde. Você também pode usar Espaço.':'Escolha uma jogada e prepare. OVR maior amplia a faixa verde e desacelera o marcador.';
+  }
+  const narracao=$('#narracaoAmistoso');narracao.hidden=!(p&&(fase==='resultado'||fase==='animando'||fim));
+  if(!narracao.hidden){const l=p.lances[p.lances.length-1],i=p.lances.length-1,gol=l.resultado==='gol';narracao.innerHTML='<strong>'+(fase==='animando'?'Bola em jogo…':gol?(i%2?'O adversário marcou.':'Gooool! É do seu time!'):'O placar está mantido.')+'</strong><p>'+(fase==='animando'?'':escapar(textoLanceAmistoso(p,i))+' '+(l.precisao==='fora'?'Execução fora da faixa verde.':l.precisao==='perfeito'?'Execução no centro da faixa verde.':'Boa execução na faixa verde.'))+'</p>';}
+  if(fim){
+    $('#resultadoAmistoso').textContent=s.casa>s.fora?'Vitória em casa!':s.casa===s.fora?'Tudo igual no Morumbi.':'Hoje deu o adversário.';
+    $('#novoAmistoso').textContent=meuTime.amistosos.ativa?'Continuar partida':'Jogar de novo';
+    $('#resumoFinalAmistoso').textContent=p.nomeTime+' '+s.casa+' × '+s.fora+' '+a.nome+'. Resultado salvo no seu time.';
+    $('#sumulaAmistoso').innerHTML='<h4>Súmula da partida</h4><ol class="amistoso-sumula">'+p.lances.map((l,i)=>'<li><strong>'+MINUTOS_AMISTOSO[i]+"′</strong> "+escapar(textoLanceAmistoso(p,i))+'</li>').join('')+'</ol>';
+  }
+  const h=meuTime.amistosos.historico;$('#historicoAmistoso').hidden=!h.length;
+  $('#jogosAmistoso').innerHTML=h.map(item=>{const placar=placarAmistoso(item),adv=adversarioAmistoso(item);return '<article><small>'+new Date(item.data).toLocaleDateString('pt-BR')+' · OVR rival '+adv.ovr+'</small><b>'+placar.casa+' × '+placar.fora+'</b><strong>'+escapar(adv.nome)+'</strong><small>'+escapar(item.nomeTime)+'</small><button class="btn btn-pequeno" type="button" style="margin-top:9px;width:100%" data-resumo-amistoso="'+escapar(item.id)+'">Ver súmula</button></article>';}).join('');
+}
+function pararMovimentoAmistoso(){
+  cancelAnimationFrame(partidaUI.raf);partidaUI.raf=null;clearTimeout(partidaUI.timer);partidaUI.timer=null;
+  partidaUI.animacoes.forEach(a=>a.cancel());partidaUI.animacoes=[];
+}
+function pausarAmistoso(){
+  pararMovimentoAmistoso();
+  if(partidaUI.fase==='tempo'){partidaUI.fase='escolha';partidaUI.tempo=0;}
+  if(partidaUI.fase==='animando')partidaUI.fase=partidaUI.partida?.lances.length===6?'final':'resultado';
+  if($('#partidaAmistosa').open)renderPartidaAmistosa();
+}
+function tempoLanceAmistoso(agora){const perfil=perfilLanceAmistoso(partidaUI.partida);return (1-Math.cos((agora-partidaUI.inicio)/perfil.periodo))/2;}
+function moverTempoAmistoso(agora){
+  if(partidaUI.fase!=='tempo'||!$('#partidaAmistosa').open||document.hidden)return;
+  partidaUI.tempo=tempoLanceAmistoso(agora);$('#ponteiroAmistoso').style.setProperty('--pos',partidaUI.tempo*100+'%');
+  $('#barraAmistoso').setAttribute('aria-valuenow',String(Math.round(partidaUI.tempo*100)));
+  partidaUI.raf=requestAnimationFrame(moverTempoAmistoso);
+}
+function executarLanceAmistoso(){
+  if(!$('#partidaAmistosa').open||document.hidden||!partidaUI.partida)return false;
+  const p=partidaUI.partida;
+  if(partidaUI.fase==='resultado'){
+    if(p.lances.length===6){partidaUI.fase='final';renderPartidaAmistosa();$('#resultadoAmistoso').focus({preventScroll:true});return true;}
+    const proximo={...p,aguarda:false};if(!guardarAmistosos({...meuTime.amistosos,ativa:proximo}))return false;
+    partidaUI.partida=meuTime.amistosos.ativa;partidaUI.fase='escolha';partidaUI.acao=0;partidaUI.tempo=0;
+    renderPartidaAmistosa();$('#tituloLanceAmistoso').focus({preventScroll:true});return true;
+  }
+  if(partidaUI.fase==='escolha'){
+    partidaUI.fase='tempo';partidaUI.inicio=performance.now();partidaUI.tempo=0;renderPartidaAmistosa();
+    partidaUI.raf=requestAnimationFrame(moverTempoAmistoso);return true;
+  }
+  if(partidaUI.fase!=='tempo'||!meuTime.amistosos.ativa||meuTime.amistosos.ativa.id!==p.id)return false;
+  cancelAnimationFrame(partidaUI.raf);partidaUI.raf=null;
+  const perfil=perfilLanceAmistoso(p),tempo=tempoLanceAmistoso(performance.now());
+  const r=resolverLanceAmistoso({...perfil,tempo,ovrAdversario:adversarioAmistoso(p).ovr,sorteio:sorteAmistoso()});
+  const lance={acao:partidaUI.acao,resultado:r.resultado,precisao:r.precisao,
+    autor:!perfil.ataque&&r.resultado==='defesa'?perfil.gol.id:perfil.j.id,
+    assistente:perfil.ataque&&r.resultado==='gol'?perfil.apoio.id:null};
+  const proximo={...p,lances:[...p.lances,lance],aguarda:true},fim=proximo.lances.length===6;
+  if(!guardarAmistosos({ativa:fim?null:proximo,historico:fim?[proximo,...meuTime.amistosos.historico].slice(0,20):meuTime.amistosos.historico})){
+    partidaUI.fase='escolha';partidaUI.tempo=0;renderPartidaAmistosa();return false;
+  }
+  partidaUI.partida=fim?meuTime.amistosos.historico[0]:meuTime.amistosos.ativa;
+  partidaUI.fase='animando';renderPartidaAmistosa();
+  const duracao=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:750;
+  const bola=$('#bolaAmistoso');if(bola&&duracao){const destino=perfil.ataque?170:-170;
+    partidaUI.animacoes.push(bola.animate([{translate:'0px 0px'},{translate:destino+'px -12px',offset:.65},{translate:destino+'px 0px'}],{duration:duracao,easing:'ease-out',fill:'forwards'}));}
+  if(r.resultado==='gol'&&perfil.ataque)somPenalti(true);
+  partidaUI.timer=setTimeout(()=>{
+    pararMovimentoAmistoso();partidaUI.fase=fim?'final':'resultado';renderPartidaAmistosa();
+    if(fim)$('#resultadoAmistoso').focus({preventScroll:true});else $('#executarAmistoso').focus({preventScroll:true});
+  },duracao+30);
+  return true;
+}
+$('#abrirAmistoso').addEventListener('click',abrirAmistoso);
+$('#fecharAmistoso').addEventListener('click',()=>{pausarAmistoso();$('#partidaAmistosa').close();});
+$('#partidaAmistosa').addEventListener('close',()=>{pausarAmistoso();renderConviteAmistoso();partidaUI.retorno?.focus({preventScroll:true});});
+$('#iniciarAmistoso').addEventListener('click',iniciarAmistoso);
+$('#executarAmistoso').addEventListener('click',executarLanceAmistoso);
+$('#adversariosAmistoso').addEventListener('click',e=>{
+  const b=e.target.closest('[data-adversario-amistoso]');if(!b||partidaUI.fase!=='previa')return;
+  partidaUI.adversario=b.dataset.adversarioAmistoso;renderPartidaAmistosa();$('#adversariosAmistoso [data-adversario-amistoso="'+partidaUI.adversario+'"]').focus({preventScroll:true});
+});
+$('#escolhasAmistoso').addEventListener('click',e=>{
+  const b=e.target.closest('[data-jogada-amistoso]');if(!b||partidaUI.fase!=='escolha')return;
+  partidaUI.acao=Number(b.dataset.jogadaAmistoso);renderPartidaAmistosa();$('#escolhasAmistoso [data-jogada-amistoso="'+partidaUI.acao+'"]').focus({preventScroll:true});
+});
+$('#revisarEscalacaoAmistoso').addEventListener('click',()=>{
+  const vaga=titularesAmistoso().find(t=>!t.jogador);if(vaga)posicaoTimeSelecionada=vaga.vaga;
+  $('#partidaAmistosa').close();irParaPainel('time');focarPosicaoTime();$('#timePosicoes').scrollIntoView({block:'center',behavior:'smooth'});
+});
+$('#novoAmistoso').addEventListener('click',()=>{
+  pararMovimentoAmistoso();partidaUI.partida=meuTime.amistosos.ativa;partidaUI.acao=0;
+  partidaUI.fase=partidaUI.partida?(partidaUI.partida.aguarda?'resultado':'escolha'):'previa';
+  renderPartidaAmistosa();(partidaUI.partida?$('#executarAmistoso'):$('#iniciarAmistoso')).focus({preventScroll:true});
+});
+$('#jogosAmistoso').addEventListener('click',e=>{
+  const b=e.target.closest('[data-resumo-amistoso]'),p=b&&meuTime.amistosos.historico.find(p=>p.id===b.dataset.resumoAmistoso);
+  if(!p)return;pausarAmistoso();partidaUI.partida=p;partidaUI.fase='final';renderPartidaAmistosa();
+  $('#partidaAmistosa').scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});$('#resultadoAmistoso').focus({preventScroll:true});
+});
+$('#timeAposAmistoso').addEventListener('click',()=>$('#partidaAmistosa').close());
+$('#partidaAmistosa').addEventListener('keydown',e=>{
+  if(e.code==='Space'&&partidaUI.fase==='tempo'){e.preventDefault();e.stopPropagation();if(!e.repeat)executarLanceAmistoso();}
+});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pausarAmistoso();});
 
 /* --------------------------------------------------------------------------
    PACOTE BASE — duas cartas distintas; elenco e débito gravados juntos.
@@ -7863,7 +8174,7 @@ $("#notifFechar").addEventListener("click", fecharModalNotif);
 document.addEventListener("keydown", (e) => {
   const alvo = e.target;
   const digitando = alvo && (alvo.tagName === "INPUT" || alvo.tagName === "TEXTAREA" || alvo.isContentEditable);
-  if($("#modalObraEstadio").open||$("#visitaArquibancada").open||$("#desafioPenaltis").open||$("#vestiarioEstadio").open) return;
+  if($("#modalObraEstadio").open||$("#visitaArquibancada").open||$("#desafioPenaltis").open||$("#vestiarioEstadio").open||$("#partidaAmistosa").open) return;
 
   if (e.key === "Escape") {
     fecharModalFim(); fecharModalNotif(); fecharModalOrfaos();
