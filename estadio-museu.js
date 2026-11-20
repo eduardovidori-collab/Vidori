@@ -30,11 +30,37 @@ function salvarAmbienteEstadio(mudanca){
   if(!Armazem.gravar(CHAVES.config,proximo)){mostrarAviso('Não consegui salvar o ambiente. Tente novamente.');renderControlesAmbiente();return false;}
   config=proximo;renderEstadio();return true;
 }
-function astroFundoJogo(){
-  const a=ambienteEstadioAtual();
-  if(a.clima!=='limpo')return '<g fill="#D7E0DC" opacity=".35"><ellipse cx="730" cy="66" rx="95" ry="24"/><ellipse cx="210" cy="45" rx="120" ry="18"/></g>';
-  return a.periodo==='noite'?'<path d="M750 35a29 29 0 1 0 24 50a25 25 0 0 1-24-50Z" fill="#EDE9C9"/>':'<circle cx="755" cy="68" r="32" fill="'+(a.periodo==='entardecer'?'#FFD19A':'#FFF8D6')+'" opacity=".7"/>';
+function nuvemAmbienteSvg(prefix,cx,cy,largura,altura,indice){
+  // Uma silhueta contínua, com volumes iluminados e sombra na base.
+  const forma='M-112 15C-130 11-131-12-113-19C-108-39-86-46-69-34C-59-63-18-68-1-41C19-57 45-45 50-27C70-43 98-32 103-11C133-13 138 15 115 24C64 35-56 33-112 15Z';
+  return `<g class="nuvem-ambiente" data-nuvem="${indice}" style="--deriva:${largura*.07}px;--duracao:${76+indice*13}s;--atraso-nuvem:-${indice*17}s"><g transform="translate(${cx} ${cy}) scale(${largura/260} ${altura/100})"><path d="${forma}" fill="url(#${prefix}-nuvem)"/><path d="M-110 16Q-49 32 9 22T114 19Q65 39-20 30T-110 16Z" fill="url(#${prefix}-sombra-nuvem)"/><path d="M-108-17Q-88-34-70-26M-60-36Q-32-57-9-36M7-36Q30-46 46-25" fill="none" stroke="url(#${prefix}-borda-nuvem)" stroke-width="3.5" stroke-linecap="round" opacity=".65"/></g></g>`;
 }
+function desenharCeuAmbiente(x,y,w,h,prefix,astroDireita=false){
+  const a=ambienteEstadioAtual(),noite=a.periodo==='noite',tarde=a.periodo==='entardecer',chuva=a.clima==='chuva',limpo=a.clima==='limpo';
+  const paleta=noite?(chuva?['#152435','#324B58','#718390','#3A4B62']:['#101F36','#385167','#A9BDCB','#53667F']):tarde?(chuva?['#697387','#CCAD9F','#E8C7B4','#8C8799']:['#909DBF','#F4C5A0','#FFF1D4','#C99CAB']):(chuva?['#93A7B6','#CCD8D5','#E7EDEA','#9CACB7']:['#9ECADB','#E9F0E5','#FFFFFF','#B2CDD9']);
+  if(!limpo&&!chuva){paleta[0]=noite?'#182A3E':tarde?'#969CB2':'#B1C6CE';paleta[1]=noite?'#3B5263':tarde?'#DDC0AB':'#DEE7DD';}
+  const solX=x+w*(astroDireita?.84:.13),solY=y+h*(tarde?.24:.13),r=w*(noite?.023:tarde?.032:.024);
+  let s=`<defs><linearGradient id="${prefix}-ciel" x2="0" y2="1"><stop stop-color="${paleta[0]}"/><stop offset=".65" stop-color="${paleta[1]}"/><stop offset="1" stop-color="${noite?'#435F62':tarde?'#F3D8B6':'#EDF1DF'}"/></linearGradient><radialGradient id="${prefix}-aureola"><stop stop-color="${noite?'#CEE6E3':'#FFE6AD'}" stop-opacity="${noite?'.14':'.55'}"/><stop offset=".35" stop-color="${tarde?'#F8AE83':'#E8F0DF'}" stop-opacity=".14"/><stop offset="1" stop-color="#FFF6DD" stop-opacity="0"/></radialGradient><linearGradient id="${prefix}-nuvem" x2=".12" y2="1"><stop stop-color="${paleta[2]}" stop-opacity="${noite?'.66':'.96'}"/><stop offset=".48" stop-color="${paleta[2]}" stop-opacity="${noite?'.44':'.85'}"/><stop offset="1" stop-color="${paleta[3]}" stop-opacity="${noite?'.55':'.75'}"/></linearGradient><linearGradient id="${prefix}-sombra-nuvem" x2="0" y2="1"><stop stop-color="${paleta[3]}" stop-opacity="0"/><stop offset="1" stop-color="${paleta[3]}" stop-opacity=".4"/></linearGradient><linearGradient id="${prefix}-borda-nuvem"><stop stop-color="${noite?'#B6D0DA':tarde?'#FFE7BE':'#FFFFFF'}" stop-opacity=".8"/><stop offset="1" stop-color="${paleta[2]}" stop-opacity="0"/></linearGradient></defs><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#${prefix}-ciel)"/><ellipse cx="${solX}" cy="${solY}" rx="${w*.19}" ry="${h*.32}" fill="url(#${prefix}-aureola)"/>`;
+  if(noite){
+    const n=limpo?43:chuva?0:12;
+    for(let i=0;i<n;i++){
+      const sx=x+((i*163+53)%997)/997*w,sy=y+((i*83+9)%193)/997*h,raio=w*(i%9===0?.0014:.0008);
+      s+=`<circle cx="${sx}" cy="${sy}" r="${raio}" fill="#E1EEE9" opacity="${.23+(i%5)*.12}"/>`;
+      if(i%13===0)s+=`<path d="M${sx-raio*2.8} ${sy}h${raio*5.6}M${sx} ${sy-raio*2.8}v${raio*5.6}" stroke="#D6E8E3" stroke-width="${raio*.45}" opacity=".3"/>`;
+    }
+    if(!chuva)s+=`<path d="M${solX} ${solY-r}a${r} ${r} 0 1 0 ${r*.74} ${r*1.79}a${r*.91} ${r*.91} 0 0 1 ${-r*.74} ${-r*1.79}Z" fill="#EEEAD1" opacity="${limpo?.9:.55}"/>`;
+  }else{
+    s+=`<circle cx="${solX}" cy="${solY}" r="${r*1.5}" fill="#FFEAB7" opacity="${limpo?.12:.04}"/><circle cx="${solX}" cy="${solY}" r="${r}" fill="${tarde?'#FFE2A9':'#FFF8DC'}" opacity="${limpo?.92:.27}"/>`;
+    if(tarde)s+=`<path d="M${x} ${y+h*.34}Q${x+w*.5} ${y+h*.24} ${x+w} ${y+h*.36}" stroke="#F9D4B3" stroke-width="${h*.023}" fill="none" opacity=".2"/>`;
+  }
+  // As nuvens ficam atrás do modelo, preservando a leitura das arquibancadas.
+  const masses=limpo?(noite?[[.79,.14,.16,.055],[.28,.24,.12,.04]]:[[.27,.12,.19,.08],[.81,.17,.24,.09],[.08,.29,.13,.04]]):[[.08,.1,.28,.115],[.38,.075,.29,.10],[.76,.115,.34,.13],[.96,.25,.28,.10],[.17,.29,.27,.09]];
+  masses.forEach(([px,py,pw,ph],i)=>{s+=nuvemAmbienteSvg(prefix,x+w*px,y+h*py,w*pw,h*ph,i);});
+  if(chuva)s+=`<path d="M${x} ${y+h*.29}Q${x+w*.25} ${y+h*.22} ${x+w*.47} ${y+h*.28}T${x+w} ${y+h*.26}" fill="none" stroke="#A1B2BE" stroke-width="${h*.065}" opacity=".12"/>`;
+  return `<g data-ceu-ambiente="${a.periodo}" aria-hidden="true" pointer-events="none">${s}</g>`;
+}
+function astroFundoJogo(prefix='jogo'){return desenharCeuAmbiente(0,0,900,540,prefix+'-ceu-ambiente',true);}
+function ceuSvgEstadio(x,y,w,h){return desenharCeuAmbiente(x,y,w,h,'morumbi-ceu');}
 function capacidadeMuseu(){return matchMedia('(max-width:550px)').matches?1:3;}
 function chuvaSvgAmbiente(x,y,w,h,prefix){
   if(ambienteEstadioAtual().clima!=='chuva')return '';
@@ -43,14 +69,6 @@ function chuvaSvgAmbiente(x,y,w,h,prefix){
     linhas+='<path d="M'+px.toFixed(2)+' '+py.toFixed(2)+'l'+(-l*.35).toFixed(2)+' '+l.toFixed(2)+'" style="--atraso:-'+((i%11)/13).toFixed(2)+'s"/>';
   }
   return '<g class="chuva-ambiente" data-chuva="'+prefix+'" stroke="#DBECF3" stroke-width="'+(w*.0008)+'" opacity=".4">'+linhas+'</g>';
-}
-function ceuSvgEstadio(x,y,w,h){
-  const a=ambienteEstadioAtual(),cx=x+w*.14,cy=y+h*.13;
-  if(a.clima!=='limpo')return '<g fill="'+(a.periodo==='noite'?'#819BAE':'#FFFFFF')+'" opacity=".15"><ellipse cx="'+(x+w*.24)+'" cy="'+(y+h*.12)+'" rx="'+w*.14+'" ry="'+h*.055+'"/><ellipse cx="'+(x+w*.74)+'" cy="'+(y+h*.18)+'" rx="'+w*.17+'" ry="'+h*.04+'"/></g>';
-  if(a.periodo!=='noite')return '<circle cx="'+cx+'" cy="'+cy+'" r="'+w*.026+'" fill="'+(a.periodo==='entardecer'?'#FFD18B':'#FFF4C5')+'" opacity=".8"/>';
-  let s='<path d="M'+cx+' '+(cy-w*.025)+'a'+w*.025+' '+w*.025+' 0 1 0 '+w*.018+' '+w*.044+'a'+w*.022+' '+w*.022+' 0 0 1 '+(-w*.018)+' '+(-w*.044)+'Z" fill="#F3EDCF" opacity=".85"/>';
-  for(let i=0;i<26;i++)s+='<circle cx="'+(x+((i*149+80)%997)/997*w)+'" cy="'+(y+((i*79+10)%173)/997*h)+'" r="'+w*.0012+'" fill="#E3E9E7" opacity="'+(.25+(i%4)*.15)+'"/>';
-  return s;
 }
 function pisoMolhadoEstadio(){
   if(ambienteEstadioAtual().clima!=='chuva')return '';
@@ -74,42 +92,100 @@ function linhasPlacaMuseu(texto,limite=23){
   for(const p of palavras){const i=linhas.length-1;if((linhas[i]+' '+p).trim().length>limite&&linhas[i])linhas.push(p);else linhas[i]=(linhas[i]+' '+p).trim();}
   return linhas.slice(0,2).map((l,i)=>l.length>limite?l.slice(0,limite-1)+'…':i===1&&linhas.length>2?l.slice(0,limite-1)+'…':l);
 }
+function defsTacaMuseu(prefix){
+  return `<linearGradient id="${prefix}-ouro"><stop stop-color="#80511B"/><stop offset=".13" stop-color="#C48E32"/><stop offset=".3" stop-color="#FFE9A2"/><stop offset=".43" stop-color="#FFF4C1"/><stop offset=".55" stop-color="#D8AB51"/><stop offset=".76" stop-color="#F1CD77"/><stop offset=".9" stop-color="#B77C29"/><stop offset="1" stop-color="#79501E"/></linearGradient><linearGradient id="${prefix}-metal" x2=".2" y2="1"><stop stop-color="#FFF1B7"/><stop offset=".28" stop-color="#DAB361"/><stop offset=".57" stop-color="#9E6C25"/><stop offset=".76" stop-color="#E7C77B"/><stop offset="1" stop-color="#886024"/></linearGradient><linearGradient id="${prefix}-interior" x2="0" y2="1"><stop stop-color="#674318"/><stop offset="1" stop-color="#C79C4D"/></linearGradient><linearGradient id="${prefix}-pedra"><stop stop-color="#142B29"/><stop offset=".4" stop-color="#3A4B41"/><stop offset=".68" stop-color="#1B302C"/><stop offset="1" stop-color="#0D211F"/></linearGradient>`;
+}
 function tacaTutoriaSvg(prefix){
-  return '<g><path d="M-43-57C-102-83-107-4-64 6L-42-4M43-57C102-83 107-4 64 6L42-4" fill="none" stroke="#76501F" stroke-width="13"/><path d="M-43-59C-97-78-100-8-64 1L-44-9M43-59C97-78 100-8 64 1L44-9" fill="none" stroke="url(#'+prefix+'-ouro)" stroke-width="8"/><path d="M-48-64H48L39-12Q32 17 10 25H-10Q-32 17-39-12Z" fill="url(#'+prefix+'-ouro)" stroke="#966E31" stroke-width="1.5"/><ellipse cy="-64" rx="48" ry="8" fill="#E6C76D" stroke="#FFF0B1" stroke-width="2"/><ellipse cy="-65" rx="40" ry="4" fill="#745221"/><path d="M-28-56-22-19Q-18 3-9 10" fill="none" stroke="#FFF5C8" stroke-width="4" opacity=".7"/><path d="M-9 24H9L7 57H-7Z" fill="url(#'+prefix+'-ouro)"/><ellipse cy="58" rx="27" ry="6" fill="#B58A3F"/><path d="M-31 59H31L38 72H-38Z" fill="url(#'+prefix+'-ouro)"/><ellipse cy="72" rx="38" ry="7" fill="#E0BA60" stroke="#9B7436"/><path d="M-18-36H18V-13L0 1-18-13Z" fill="#F6F2DF" stroke="#B4934D"/><path d="M-15-31H15V-24H-15Z" fill="#313A32"/><path d="M-15-20H-3V-7L-15-15Z" fill="#B73B43"/><path d="M3-20H15V-15L3-7Z" fill="#263C32"/></g>';
+  let s=`<g class="taca-tutoria"><ellipse cy="79" rx="48" ry="3" fill="#13251B" opacity=".24"/>
+    <path d="M-40-90C-86-113-105-69-76-39Q-60-23-36-43M40-90C86-113 105-69 76-39Q60-23 36-43" fill="none" stroke="#78521F" stroke-width="12"/>
+    <path d="M-40-92C-85-110-101-69-74-41Q-61-29-38-45M40-92C85-110 101-69 74-41Q61-29 38-45" fill="none" stroke="url(#${prefix}-metal)" stroke-width="8"/>
+    <path d="M-51-95C-81-101-89-79-81-61M51-95C81-101 89-79 81-61" fill="none" stroke="#FFF1BA" stroke-width="1.7" opacity=".8"/>
+    <path d="M-45-101Q0-92 45-101L38-61Q34-28 11-16H-11Q-34-28-38-61Z" fill="url(#${prefix}-ouro)" stroke="#9C712E" stroke-width="1.1"/>`;
+  for(const d of [-29,-20,20,29])s+=`<path d="M${d}-92Q${d*.85}-39 ${d*.28}-21" fill="none" stroke="${d<0?'#FFF2BF':'#936528'}" stroke-width="${Math.abs(d)===20?1.4:.8}" opacity=".28"/>`;
+  s+=`<ellipse cy="-101" rx="45" ry="8.5" fill="url(#${prefix}-metal)" stroke="#FBE6A0" stroke-width="1.3"/><ellipse cy="-102" rx="37" ry="5" fill="url(#${prefix}-interior)"/><path d="M-31-105Q0-111 31-105" fill="none" stroke="#FFF0B0" stroke-width="1.2" opacity=".8"/>
+    <path d="M-32-91-27-64Q-24-39-14-29" fill="none" stroke="#FFF8D7" stroke-width="3" opacity=".55"/>
+    <path d="M-11-16H11L8-9H-8ZM-6-9H6L5 28H-5Z" fill="url(#${prefix}-ouro)" stroke="#AF853B" stroke-width=".7"/><ellipse cy="-9" rx="12" ry="3.3" fill="url(#${prefix}-metal)"/>
+    <path d="M-5 25Q-10 37-24 41L-29 48H29L24 41Q10 37 5 25Z" fill="url(#${prefix}-ouro)" stroke="#B28A42" stroke-width=".8"/><ellipse cy="47" rx="30" ry="5" fill="url(#${prefix}-metal)"/>
+    <path d="M-34 53-40 59H40L34 53Z" fill="#AB8B4B"/><rect x="-40" y="59" width="80" height="17" rx="2" fill="url(#${prefix}-pedra)" stroke="#172A23"/><path d="M-36 61 7 70 20 65 37 73M-27 74-2 70" fill="none" stroke="#97A699" stroke-width=".6" opacity=".25"/><path d="M-40 59H40M-41 77H41" stroke="url(#${prefix}-metal)" stroke-width="3"/>
+    <rect x="-17" y="63" width="34" height="9" rx="1" fill="#C4A66B"/><text x="0" y="69.5" font-family="Georgia,serif" font-size="4.8" letter-spacing="1.1" text-anchor="middle" fill="#354235">TUTORIA</text>
+    <path d="M-12-74H12V-58L0-47-12-58Z" fill="#F3E4AF" stroke="#B48C42" stroke-width="1.5"/><path d="M-10-71H10V-65H-10Z" fill="#263932"/><path d="M-10-62H-1V-51L-10-59Z" fill="#AA3A42"/><path d="M1-62H10V-59L1-51Z" fill="#2F4036"/>
+    <path d="M-17-48Q-28-59-22-73M17-48Q28-59 22-73" fill="none" stroke="#F8E1A0" stroke-width="1" opacity=".8"/>`;
+  for(const lado of [-1,1])for(let i=0;i<4;i++)s+=`<ellipse cx="${lado*(21+i*.6)}" cy="${-53-i*4.8}" rx="1.6" ry="3.3" transform="rotate(${lado*35} ${lado*(21+i*.6)} ${-53-i*4.8})" fill="#FAE5AB" opacity=".65"/>`;
+  return s+'</g>';
 }
 function desenharSalaMuseu(prefix='sala',interativo=true){
   const luxo=nivelMuseu()===2,lista=ciclosEncerrados(),cap=capacidadeMuseu(),pagina=interativo?estadoMuseu.pagina:0,visiveis=lista.slice(pagina*cap,pagina*cap+cap);
-  const parede=luxo?'#18342D':'#E2DFCF',chao=luxo?'#778B7B':'#BBAE90',texto=luxo?'#DCD6A4':'#6E694E';
-  let s='<svg viewBox="'+(cap===1?'250 100 700 620':'0 0 1200 720')+'" preserveAspectRatio="xMidYMid meet" role="'+(interativo?'group':'img')+'" aria-label="'+nomeNivelMuseu()+', '+lista.length+' Tutorias conquistadas"><defs><linearGradient id="'+prefix+'-parede" x2="0" y2="1"><stop stop-color="'+(luxo?'#29443A':'#F2F0E4')+'"/><stop offset="1" stop-color="'+parede+'"/></linearGradient><linearGradient id="'+prefix+'-piso" x2="0" y2="1"><stop stop-color="'+chao+'"/><stop offset="1" stop-color="'+(luxo?'#283E34':'#DBCCAA')+'"/></linearGradient><linearGradient id="'+prefix+'-ouro"><stop stop-color="#775020"/><stop offset=".2" stop-color="#E5BC5C"/><stop offset=".4" stop-color="#FFF0A8"/><stop offset=".57" stop-color="#C59238"/><stop offset=".8" stop-color="#F2D789"/><stop offset="1" stop-color="#906325"/></linearGradient><linearGradient id="'+prefix+'-vidro" x2="1" y2="1"><stop stop-color="#E6FFFF" stop-opacity=".12"/><stop offset=".48" stop-color="#D0E9E7" stop-opacity=".01"/><stop offset="1" stop-color="#DDEEE7" stop-opacity=".14"/></linearGradient><radialGradient id="'+prefix+'-luz"><stop stop-color="#FFF3BF" stop-opacity=".55"/><stop offset="1" stop-color="#FFF0B7" stop-opacity="0"/></radialGradient><linearGradient id="'+prefix+'-reflexo" x2="0" y2="1"><stop stop-color="white"/><stop offset="1" stop-color="black"/></linearGradient><mask id="'+prefix+'-mascara" maskUnits="userSpaceOnUse" x="0" y="500" width="1200" height="220"><rect x="0" y="500" width="1200" height="220" fill="url(#'+prefix+'-reflexo)"/></mask></defs>';
-  s+='<rect width="1200" height="720" fill="'+parede+'"/><path d="M0 0H1200L1080 105H120Z" fill="'+(luxo?'#102920':'#C9C5B3')+'"/><path d="M0 0 120 105V440L0 530Z" fill="'+(luxo?'#102B25':'#C3C4B2')+'"/><path d="M1200 0 1080 105V440L1200 530Z" fill="'+(luxo?'#142D27':'#C6C8B7')+'"/><path d="M120 105H1080V440H120Z" fill="url(#'+prefix+'-parede)"/><path d="M0 530 120 440H1080L1200 530V720H0Z" fill="url(#'+prefix+'-piso)"/>';
-  if(luxo){
-    for(let i=0;i<8;i++)s+='<path d="M'+(120+i*137)+' 440 '+(-200+i*230)+' 720" stroke="#D4D7B926" stroke-width="2"/>';
-    [497,568,657].forEach(y=>{s+='<path d="M0 '+y+'H1200" stroke="#C8D3B329"/>';});
-    for(const x of [128,360,840,1072])s+='<path d="M'+x+' 110V435" stroke="#B2A064" stroke-width="7"/><path d="M'+(x+9)+' 110V435" stroke="#D6CDA51C" stroke-width="2"/>';
-    s+='<path d="M160 125H1040M160 422H1040" stroke="#C6B271" stroke-width="2"/><path d="M300 45H900M390 62H810" stroke="#E6D8A3" stroke-width="4" opacity=".6"/>';
-  }else{
-    for(let i=0;i<13;i++)s+='<path d="M'+(i*95)+' 440 '+(-220+i*135)+' 720" stroke="#796C4C25" stroke-width="2"/>';
-    for(const y of [490,555,645])s+='<path d="M0 '+y+'H1200" stroke="#F0DAB42D"/>';
-    s+='<path d="M120 430H1080" stroke="#6E6A50" stroke-width="13"/>';
+  const C=luxo?{parede:'#213B35',paredeTopo:'#344A40',teto:'#142A25',lateral:'#182F29',piso:'#D8D9CD',pisoFrente:'#9FAEA2',pedestal:'#263D35',madeira:'#182E29',borda:'#BAA46E',texto:'#E5D6A2',nicho:'#152C26'}:
+    {parede:'#DAD9C8',paredeTopo:'#F3EFDF',teto:'#C6C7B7',lateral:'#BDC5B6',piso:'#BB9E77',pisoFrente:'#E0C8A0',pedestal:'#816448',madeira:'#594C35',borda:'#A58E5C',texto:'#5D6650',nicho:'#B4B8A2'};
+  let s=`<svg viewBox="${cap===1?'250 100 700 620':'0 0 1200 720'}" preserveAspectRatio="${interativo?'xMidYMid meet':'xMidYMid slice'}" role="${interativo?'group':'img'}" aria-label="${nomeNivelMuseu()}, ${lista.length} Tutorias conquistadas"><defs>
+    ${defsTacaMuseu(prefix)}
+    <linearGradient id="${prefix}-parede" x2="0" y2="1"><stop stop-color="${C.paredeTopo}"/><stop offset="1" stop-color="${C.parede}"/></linearGradient>
+    <linearGradient id="${prefix}-piso" x2="0" y2="1"><stop stop-color="${C.piso}"/><stop offset="1" stop-color="${C.pisoFrente}"/></linearGradient>
+    <linearGradient id="${prefix}-pedestal"><stop stop-color="${C.madeira}"/><stop offset=".22" stop-color="${C.pedestal}"/><stop offset=".8" stop-color="${C.pedestal}"/><stop offset="1" stop-color="${C.madeira}"/></linearGradient>
+    <linearGradient id="${prefix}-nicho" x2=".1" y2="1"><stop stop-color="${C.nicho}"/><stop offset="1" stop-color="${luxo?'#314C3E':'#E5DFBD'}"/></linearGradient>
+    <linearGradient id="${prefix}-vidro" x2="1" y2=".5"><stop stop-color="#DEF5EE" stop-opacity=".09"/><stop offset=".25" stop-color="#D8EEE9" stop-opacity=".015"/><stop offset=".72" stop-color="#FFFFFF" stop-opacity=".025"/><stop offset="1" stop-color="#D5EEE7" stop-opacity=".14"/></linearGradient>
+    <radialGradient id="${prefix}-luz"><stop stop-color="#FFF1BC" stop-opacity="${luxo?'.45':'.3'}"/><stop offset=".55" stop-color="#FFF0C3" stop-opacity=".14"/><stop offset="1" stop-color="#FFF0B7" stop-opacity="0"/></radialGradient>
+    <linearGradient id="${prefix}-facho" x2="0" y2="1"><stop stop-color="#FFF0BA" stop-opacity=".16"/><stop offset="1" stop-color="#FFF0BA" stop-opacity="0"/></linearGradient>
+    <linearGradient id="${prefix}-reflexo" x2="0" y2="1"><stop stop-color="white" stop-opacity=".65"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient>
+    <mask id="${prefix}-mascara" maskUnits="userSpaceOnUse" x="0" y="621" width="1200" height="90"><rect y="621" width="1200" height="90" fill="url(#${prefix}-reflexo)"/></mask>
+    <clipPath id="${prefix}-chao"><path d="M0 530 120 450H1080L1200 530V720H0Z"/></clipPath>
+    <pattern id="${prefix}-veios" width="330" height="170" patternUnits="userSpaceOnUse"><path d="M-40 18Q15 49 77 31T201 63L240 80Q280 87 340 61M75 32 103 69 150 77M202 63 231 31" fill="none" stroke="${luxo?'#617668':'#684E32'}" stroke-width="${luxo?1.3:.6}" opacity="${luxo?'.16':'.14'}"/><path d="M-25 23Q20 54 80 37T199 69L246 87Q280 94 340 67" fill="none" stroke="#F7F1D8" stroke-width=".8" opacity=".3"/></pattern>
+    <radialGradient id="${prefix}-vinheta"><stop offset=".45" stop-color="#0C231C" stop-opacity="0"/><stop offset="1" stop-color="#0C231C" stop-opacity=".22"/></radialGradient>
+    </defs><rect width="1200" height="720" fill="${C.lateral}"/>
+    <path d="M0 0H1200L1080 105H120Z" fill="${C.teto}"/><path d="M40 15H1160L1066 90H134Z" fill="#FFF3C9" opacity=".04"/>
+    <path d="M0 0 120 105V450L0 530Z" fill="${C.lateral}"/><path d="M1200 0 1080 105V450L1200 530Z" fill="${luxo?'#102A24':'#B5BFAE'}"/>
+    <path d="M120 105H1080V450H120Z" fill="url(#${prefix}-parede)"/>
+    <path d="M0 530 120 450H1080L1200 530V720H0Z" fill="url(#${prefix}-piso)"/>
+    <g clip-path="url(#${prefix}-chao)"><rect y="450" width="1200" height="270" fill="url(#${prefix}-veios)"/>`;
+  // Juntas convergentes dão escala e profundidade sem competir com as taças.
+  for(let i=0;i<(luxo?8:15);i++){
+    const x=120+i*(luxo?137:69),frente=600+(x-600)*1.9;
+    s+=`<path d="M${x} 450 ${frente} 720" stroke="${luxo?'#697C6B':'#785E3B'}" stroke-width="${luxo?1.2:.9}" opacity="${luxo?'.25':'.22'}"/>`;
   }
-  s+='<text x="600" y="160" text-anchor="middle" font-family="Georgia,serif" font-size="37" letter-spacing="13" fill="'+texto+'">TUTORIAS</text><text x="600" y="190" text-anchor="middle" font-size="10" letter-spacing="5" fill="'+texto+'" opacity=".7">CADA CICLO, UMA CONQUISTA.</text><path d="M450 214H750" stroke="#AF4547" stroke-width="3"/><path d="M480 222H720" stroke="'+(luxo?'#D9D9B5':'#273C32')+'" stroke-width="2"/>';
+  for(const y of luxo?[494,554,644]:[478,517,569,635,711])s+=`<path d="M0 ${y}H1200" stroke="${luxo?'#728470':'#81633F'}" stroke-width="1" opacity=".2"/>`;
+  s+=`<path d="M25 701 145 467H1055L1175 701Z" fill="none" stroke="${luxo?'#AD9E6B':'#F0D7A9'}" stroke-width="2" opacity=".38"/></g>`;
+  // Rodapés, painéis laterais e luz indireta ancoram a sala ao piso.
+  s+=`<path d="M0 521 120 442H1080L1200 521" fill="none" stroke="${luxo?'#112B25':'#50604B'}" stroke-width="15"/><path d="M0 513 120 434H1080L1200 513" fill="none" stroke="${C.borda}" stroke-width="2" opacity=".8"/>
+    <path d="M0 20 120 112H1080L1200 20" fill="none" stroke="${C.borda}" stroke-width="4"/><path d="M124 117H1076" stroke="#FFF1BD" stroke-width="2" opacity=".55"/>
+    <path d="M24 108 91 153V405L24 449ZM1176 108 1109 153V405L1176 449Z" fill="none" stroke="${C.borda}" stroke-width="2" opacity=".4"/>
+    <path d="M150 131V415M1050 131V415" stroke="${C.borda}" stroke-width="${luxo?4:2}" opacity=".6"/>`;
+  if(luxo){
+    for(const x of [172,371,829,1028])s+=`<path d="M${x} 121V427" stroke="#0D241F" stroke-width="15" opacity=".3"/><path d="M${x+5} 121V427" stroke="#C1AB70" stroke-width="1.2" opacity=".6"/>`;
+    s+=`<path d="M285 37H915M340 52H860" stroke="#F0D9A0" stroke-width="3" opacity=".65"/><path d="M260 35H940" stroke="#F3DCA0" stroke-width="13" opacity=".045"/>`;
+  }else{
+    s+=`<path d="M135 122H1065V225H135Z" fill="none" stroke="#FFF8DA" stroke-width="2" opacity=".4"/><path d="M300 45H900" stroke="#FDF4D8" stroke-width="5" opacity=".7"/>`;
+  }
+  s+=`<text x="600" y="162" text-anchor="middle" font-family="Georgia,serif" font-size="35" letter-spacing="12" fill="${C.texto}">TUTORIAS</text><text x="600" y="190" text-anchor="middle" font-size="9" letter-spacing="4.5" fill="${C.texto}" opacity=".75">CADA CICLO, UMA CONQUISTA.</text><path d="M470 211H730" stroke="${C.borda}" stroke-width="1" opacity=".7"/><path d="M563 218H587" stroke="#B3454A" stroke-width="3"/><path d="M591 218H609" stroke="${luxo?'#F2E9CE':'#FAF7E9'}" stroke-width="3"/><path d="M613 218H637" stroke="#263E33" stroke-width="3"/>`;
   const xs=visiveis.length===1?[600]:visiveis.length===2?[390,810]:[285,600,915];
   (visiveis.length?visiveis:[null]).forEach((c,i)=>{
-    const x=c?xs[i]:600,id=prefix+'-taca-'+i,ativo=c&&c.id===estadoMuseu.selecionado,numero=lista.length-(pagina*cap+i);
-    if(luxo){s+='<path d="M'+(x-65)+' 108 '+(x-130)+' 515H'+(x+130)+'L'+(x+65)+' 108Z" fill="url(#'+prefix+'-luz)" opacity=".5"/><ellipse cx="'+x+'" cy="628" rx="130" ry="27" fill="url(#'+prefix+'-luz)"/>';}
-    s+='<ellipse cx="'+(x+8)+'" cy="632" rx="110" ry="20" fill="#0C211930"/>';
-    if(c&&luxo)s+='<g opacity=".12" mask="url(#'+prefix+'-mascara)" aria-hidden="true"><use href="#'+id+'" transform="translate(0 1000) scale(1 -1)"/></g>';
-    const attrs=c&&interativo?' data-tutoria="'+escapar(c.id)+'" role="button" tabindex="0" aria-label="Ver Tutoria: '+escapar(c.nome)+'"':'';
-    s+='<g'+attrs+'>'+(c?'<title>Tutoria · '+escapar(c.nome)+'</title>':'')+'<path d="M'+(x-94)+' 502H'+(x+94)+'V620H'+(x-94)+'Z" fill="'+(luxo?'#243B32':'#74624A')+'"/><path d="M'+(x+94)+' 502l13-10v115l-13 13Z" fill="'+(luxo?'#152A22':'#504934')+'"/><path d="M'+(x-94)+' 502l13-10h188l-13 10Z" fill="'+(luxo?'#94A18B':'#A28C68')+'"/><path d="M'+(x-96)+' 509H'+(x+96)+'M'+(x-96)+' 616H'+(x+96)+'" stroke="'+(luxo?'#C3AC6B':'#8B7857')+'" stroke-width="3"/>';
-    if(c)s+='<g id="'+id+'" transform="translate('+x+' 421) scale(1)">'+tacaTutoriaSvg(prefix)+'</g>';
-    s+='<path class="museu-vidro" d="M'+(x-101)+' 269H'+(x+101)+'V503H'+(x-101)+'Z" fill="url(#'+prefix+'-vidro)" stroke="'+(ativo?'#EED98C':luxo?'#CDDBB28C':'#9CAFA77A')+'" stroke-width="'+(ativo?3:1.4)+'"/><path d="M'+(x-101)+' 269l15-9h200l-13 9M'+(x+101)+' 269l13-9v234l-13 9" fill="none" stroke="#C0D2BB66" stroke-width="1.2"/><path d="M'+(x-86)+' 280v185M'+(x-79)+' 280v60" stroke="#F4FFFF" opacity=".2" stroke-width="3"/>';
-    if(luxo)s+='<path d="M'+(x-87)+' 495H'+(x+87)+'" stroke="#F6E3A2" stroke-width="3"/><path d="M'+(x-88)+' 498H'+(x+88)+'" stroke="#F6E3A2" stroke-width="10" opacity=".12"/>';
-    s+='<rect x="'+(x-76)+'" y="536" width="152" height="59" rx="3" fill="'+(luxo?'#B39A5B':'#C3B68D')+'" stroke="#D4C795" stroke-width="1"/><text x="'+x+'" y="552" text-anchor="middle" font-size="9" letter-spacing="3" font-weight="800" fill="#263B2B">'+(c?'TUTORIA · '+String(numero).padStart(2,'0'):'EM BREVE')+'</text>';
-    const linhas=linhasPlacaMuseu(c?c.nome:'Seu primeiro ciclo');
-    linhas.forEach((l,k)=>{s+='<text x="'+x+'" y="'+(569+k*14)+'" text-anchor="middle" font-size="11" font-weight="600" fill="#243B2C">'+escapar(l)+'</text>';});
+    const x=c?xs[i]:600,id=prefix+'-vitrine-'+i,ativo=!!(c&&c.id===estadoMuseu.selecionado),numero=lista.length-(pagina*cap+i);
+    s+=`<path d="M${x-122} 441V302Q${x-122} 239 ${x} 239Q${x+122} 239 ${x+122} 302V441Z" fill="url(#${prefix}-nicho)" stroke="${C.borda}" stroke-opacity="${luxo?'.45':'.3'}" stroke-width="1.5"/><path d="M${x-118} 439V302Q${x-118} 244 ${x} 244Q${x+118} 244 ${x+118} 302" fill="none" stroke="#071C17" stroke-width="6" opacity=".1"/>
+      <ellipse cx="${x}" cy="343" rx="126" ry="127" fill="url(#${prefix}-luz)"/>
+      <path d="M${x-20} 244 ${x-88} 470H${x+88}L${x+20} 244Z" fill="url(#${prefix}-facho)"/>
+      <rect x="${x-24}" y="237" width="48" height="5" rx="2" fill="${C.borda}"/><path d="M${x-18} 243H${x+18}" stroke="#FFF1C2" stroke-width="2" opacity=".8"/>
+      <ellipse cx="${x+7}" cy="629" rx="125" ry="19" fill="#11251B" opacity=".18"/>`;
+    if(luxo)s+=`<g class="museu-reflexo" opacity=".18" mask="url(#${prefix}-mascara)" aria-hidden="true" pointer-events="none"><use href="#${id}" transform="translate(0 744) scale(1 -.2)"/></g>`;
+    const attrs=c&&interativo?` data-tutoria="${escapar(c.id)}" role="button" tabindex="0" aria-label="Ver Tutoria: ${escapar(c.nome)}" aria-pressed="${ativo}"`:'';
+    s+=`<g id="${id}"${attrs}>${c?'<title>Tutoria · '+escapar(c.nome)+'</title>':''}
+      <path d="M${x-104} 503H${x+104}V621H${x-104}Z" fill="url(#${prefix}-pedestal)"/><path d="M${x+104} 503l14-10v116l-14 12Z" fill="${C.madeira}"/>
+      <path d="M${x-110} 503l14-11h220l-14 11Z" fill="${luxo?'#8E9C86':'#BA9D70'}"/>
+      <path d="M${x-107} 509H${x+107}M${x-107} 618H${x+107}" stroke="${C.borda}" stroke-width="2"/>
+      <path d="M${x-95} 516V608M${x+95} 516V608" stroke="${C.borda}" stroke-width="1" opacity=".5"/>`;
+    if(luxo)s+=`<path d="M${x-100} 526q50 6 81 36t117 27M${x-80} 544l16 27 34 8" stroke="#B6C5AC" stroke-width=".8" opacity=".1" fill="none"/>`;
+    else for(let j=0;j<9;j++)s+=`<path d="M${x-88+j*22} 513q6 44 0 99" stroke="#C1A87B" stroke-width=".6" opacity=".12" fill="none"/>`;
+    s+=`<ellipse cx="${x}" cy="499" rx="56" ry="5" fill="#1E2C21" opacity=".2"/>`;
+    if(c)s+=`<g id="${prefix}-taca-${i}" transform="translate(${x} 421)">${tacaTutoriaSvg(prefix)}</g>`;
+    s+=`<path class="museu-vidro" d="M${x-101} 269H${x+101}V503H${x-101}Z" fill="url(#${prefix}-vidro)" stroke="${ativo?'#DCC78A':luxo?'#C6D9C7':'#9DAF9E'}" stroke-opacity="${ativo?'.9':'.65'}" stroke-width="${ativo?2:1.2}"/>
+      <path d="M${x-101} 269l15-9h200l-13 9M${x+101} 269l13-9v234l-13 9" fill="none" stroke="#D8E9DC" stroke-opacity=".45" stroke-width="1"/>
+      <path d="M${x-96} 278v214M${x-90} 278v58M${x+96} 281v202" stroke="#F2FFFF" opacity=".26" stroke-width="1.7"/>
+      <path d="M${x-93} 278h14l122 214h-14Z" fill="#F5FFF8" opacity=".045"/>`;
+    if(luxo)s+=`<path d="M${x-94} 498H${x+94}" stroke="#FFE5A3" stroke-width="2"/><path d="M${x-94} 499H${x+94}" stroke="#FFE5A3" stroke-width="8" opacity=".09"/>`;
+    s+=`<rect x="${x-78}" y="536" width="156" height="58" rx="3" fill="${luxo?'#CAB77E':'#CCBC92'}" stroke="${luxo?'#E0D3A2':'#E0CCA0'}" stroke-width="1"/><path d="M${x-74} 540H${x+74}" stroke="#F4E9C1" opacity=".5"/>
+      <text x="${x}" y="551" text-anchor="middle" font-size="8.8" letter-spacing="2.6" font-weight="800" fill="#31402E">${c?'TUTORIA · '+String(numero).padStart(2,'0'):'EM BREVE'}</text>`;
+    linhasPlacaMuseu(c?c.nome:'Seu primeiro ciclo').forEach((l,k)=>{s+=`<text x="${x}" y="${568+k*14}" text-anchor="middle" font-size="11" font-weight="600" fill="#293B2B">${escapar(l)}</text>`;});
     s+='</g>';
   });
-  s+='<path d="M0 691H1200" stroke="'+(luxo?'#D4BF7A':'#756B4F')+'" opacity=".35"/><text x="600" y="704" text-anchor="middle" font-size="9" letter-spacing="6" fill="'+(luxo?'#D7DBB8':'#74684B')+'">COPEIRO · '+(luxo?'GALERIA DE HONRA':'SALA DAS TUTORIAS')+'</text></svg>';
+  s+=`<rect width="1200" height="720" fill="url(#${prefix}-vinheta)" pointer-events="none"/><path d="M0 690H1200" stroke="${C.borda}" opacity=".35"/><text x="600" y="705" text-anchor="middle" font-size="8.5" letter-spacing="5" fill="${luxo?'#405C49':'#786548'}">COPEIRO · ${luxo?'GALERIA DE HONRA':'SALA DAS TUTORIAS'}</text></svg>`;
   return s;
 }
 function renderMuseuEstante(){

@@ -5204,7 +5204,7 @@ let energiaVisita=0,efeitoVisitaTimer=null;
 function desenharFundoDeJogo(prefix, penalti=false) {
   const ambiente=ambienteEstadioAtual(),cores=coresAmbienteEstadio();
   const corCampo=temGrama()?(ambiente.periodo==='noite'?"#426F4E":"#527D4C"):"#AA8059",escuro=temGrama()?"#487246":"#A07752";
-  let partes=[`<defs><linearGradient id="${prefix}-ceu" x2="0" y2="1"><stop stop-color="${cores.ceu}"/><stop offset="1" stop-color="${cores.horizonte}"/></linearGradient><linearGradient id="${prefix}-grama" x2="0" y2="1"><stop stop-color="${corCampo}"/><stop offset="1" stop-color="${escuro}"/></linearGradient></defs><rect width="900" height="540" fill="url(#${prefix}-ceu)"/>${astroFundoJogo()}<path d="M0 ${temTerceiroAnel()?118:166}Q450 ${temTerceiroAnel()?0:48} 900 ${temTerceiroAnel()?118:166}V278H0Z" fill="#CBD4CE"/>`];
+  let partes=[`<defs><linearGradient id="${prefix}-grama" x2="0" y2="1"><stop stop-color="${corCampo}"/><stop offset="1" stop-color="${escuro}"/></linearGradient></defs><path d="M0 ${temTerceiroAnel()?118:166}Q450 ${temTerceiroAnel()?0:48} 900 ${temTerceiroAnel()?118:166}V278H0Z" fill="#CBD4CE"/>`];
   for(let row=0;row<(temTerceiroAnel()?16:10);row++) {
     const y=temTerceiroAnel()?105+row*9:153+row*10;
     const cor=temMosaico()?(row<3?"#B9484F":row<6?"#EBEDE5":"#384741"):(row%2?"#ADBDB2":"#C3D0C6");
@@ -5222,7 +5222,7 @@ function desenharFundoDeJogo(prefix, penalti=false) {
   partes.push(`<path d="M0 260Q450 230 900 260V291H0Z" fill="#314B40"/><text x="450" y="272" fill="#F5F3E6" font-size="15" font-weight="700" letter-spacing="7" text-anchor="middle">MORUMBI · COPEIRO</text><path d="M0 293H900L1080 540H-180Z" fill="url(#${prefix}-grama)"/>`);
   if(temListras()||penalti)for(let i=0;i<6;i++)partes.push(`<path d="M0 ${296+i*43}H900v21H0Z" fill="#B3C88A" opacity=".09"/>`);
   partes.push(penalti?'<path d="M235 324 117 475H783L665 324M335 324l-32 64h294l-32-64" fill="none" stroke="#EAF0DA" stroke-width="3" opacity=".8"/><path d="M350 475Q450 522 550 475" fill="none" stroke="#EDF0DE" stroke-width="3"/><ellipse cx="450" cy="463" rx="5" ry="2.5" fill="#F8F8E6"/>':'<path d="M130 315H770L890 488H10ZM450 315V488" fill="none" stroke="#EDF1DB" stroke-width="3"/><ellipse cx="450" cy="392" rx="91" ry="31" fill="none" stroke="#EDF1DB" stroke-width="3"/><ellipse cx="450" cy="392" rx="4" ry="2" fill="#EDF1DB"/>');
-  return '<defs><filter id="'+prefix+'-ambiente" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="'+cores.filtro+'"/></filter></defs><g filter="url(#'+prefix+'-ambiente)">'+partes.join('')+'</g>'+chuvaSvgAmbiente(0,0,900,540,prefix);
+  return astroFundoJogo(prefix)+'<defs><filter id="'+prefix+'-ambiente" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="'+cores.filtro+'"/></filter></defs><g filter="url(#'+prefix+'-ambiente)">'+partes.join('')+'</g>'+chuvaSvgAmbiente(0,0,900,540,prefix);
 }
 function golDaCena(x,y,w,h, prefix) {
   let rede='';for(let i=1;i<16;i++)rede+=`<path d="M${x+i*w/16} ${y}v${h}"/>`;
