@@ -856,6 +856,10 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 @media(max-width:480px){.vestiario-painel{grid-template-columns:1fr}.vestiario-cabecalho{align-items:flex-start}.vestiario-cabecalho h2{font-size:20px}.vestiario-cabecalho .btn{font-size:11px;padding:9px}.vestiario-cena{overflow:hidden;aspect-ratio:16/9}.vestiario-cena>svg{min-width:0;min-height:0}.vestiario-atalhos .btn{flex:1;min-width:45px}}
 
 .vestiario-panorama-topo{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0 13px;font-size:12px;color:var(--fraco)}.vestiario-panorama-topo>span{padding:6px 10px;background:#EAF1E4;border:1px solid #D5E0CC;border-radius:8px;color:#3D5B40}.vestiario-panorama-topo strong{font-size:12px;color:#3D5842}.vestiario-cena [data-vestiario-penaltis]{cursor:pointer}.vestiario-acoes{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+/* Duas carteiras: moedas para cartas; notas verdes para o clube. */
+.carteiras{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.carteira{display:flex;align-items:center;gap:15px;padding:20px;border:1px solid #E8DDC5;border-radius:13px;background:linear-gradient(125deg,#FCF8E9,#FFFEF7);min-width:0}.carteira-dinheiro{border-color:#CFDFCA;background:linear-gradient(125deg,#EAF4E7,#F8FCF3)}.carteira-icone{width:55px;height:40px;flex-shrink:0}.carteira-icone-moeda{width:43px;height:43px;margin:0 6px}.carteira>div{min-width:0}.carteira .carteira-rotulo{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#907343;margin-bottom:6px}.carteira-dinheiro .carteira-rotulo{color:#597B48}.carteira-valor{font-size:32px;font-weight:800;letter-spacing:-.04em;line-height:1.2;color:#775B28;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.carteira-dinheiro .carteira-valor{color:#315F37}.carteira small{display:block;font-size:11px;color:#9B855C;margin-top:5px;line-height:1.5}.carteira-dinheiro small{color:#6D8A5E}.carteira-detalhes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin-top:14px}.carteira-detalhes p{font-size:11px;color:var(--fraco);line-height:1.7}.carteira-regra{margin-top:14px;font-size:11px;color:#78816C;padding-top:12px;border-top:1px solid #E6EADD}.nota-mini{display:inline-block;width:26px;height:18px;vertical-align:middle;flex-shrink:0}.estadio-saldo-dinheiro{background:#EDF5E7;color:#3B683A;border-color:#D1E0C7;gap:7px}.preco.dinheiro{background:#EAF2E3;color:#4C6B39}.preco.dinheiro.pode{background:#375F37;color:#F4F4DF}.carteira-cabecalho{font-size:17px;margin-bottom:16px!important;text-transform:none;letter-spacing:-.02em}.carteira-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.carteira-acoes .btn{font-size:11px}
+@media(max-width:650px){.carteiras,.carteira-detalhes{grid-template-columns:1fr}.carteira{padding:17px}.carteira-valor{font-size:31px}.carteira-detalhes{gap:7px}.carteira-acoes{gap:7px}.carteira-acoes .btn{flex:1 1 42%}}
+
 </style>
 <link rel="stylesheet" href="./futebol.css">
 </head>
@@ -1075,7 +1079,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     <div class="faixas faixas-fina"></div>
     <div class="cartao-corpo">
       <div class="estadio-topo"><h3 id="tituloEstadio" tabindex="-1">Estádio</h3>
-        <div class="estadio-controles"><span class="estadio-saldo" role="status" aria-live="polite"><b id="saldoEstadio">0</b> moedas</span>
+        <div class="estadio-controles"><span class="estadio-saldo estadio-saldo-dinheiro" role="status" aria-live="polite" aria-label="Dinheiro disponível para o estádio"><svg class="nota-mini" viewBox="0 0 40 26" aria-hidden="true"><rect x="1" y="2" width="38" height="22" rx="3" fill="#639258" stroke="#4F7A43"/><rect x="5" y="5" width="30" height="16" rx="4" fill="none" stroke="#B5CF99"/><ellipse cx="20" cy="13" rx="7" ry="8" fill="#AEC997"/><text x="20" y="16" font-size="9" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" fill="#3F6934">R$</text></svg><b id="saldoEstadio">R$ 0</b></span>
           <button class="btn btn-pequeno" type="button" id="btnVestiario" aria-haspopup="dialog">Entrar no vestiário</button>
           <button class="btn btn-pequeno btn-preto" type="button" id="btnVisitarArquibancada" aria-haspopup="dialog">Visitar arquibancada</button>
           <button class="btn btn-pequeno" type="button" id="btnBaloesEstadio" aria-pressed="true" aria-controls="baloesEstadio estadioZonas">Ocultar balões</button></div>
@@ -1190,22 +1194,14 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
   <div class="cartao" style="margin-bottom:18px">
     <div class="faixas faixas-fina"></div>
     <div class="cartao-corpo">
-      <div class="caixa-saldo">
-        <div class="saldo">
-          <div class="valor" id="saldoMoedas">0</div>
-          <div class="rotulo">moedas</div>
-        </div>
-        <div>
-          <p class="subtexto" id="explicaMoeda"></p>
-          <p class="dica">Moeda não expira, não zera e não desconta por dia parado.
-            Ganhe estudando ou vendendo cópias repetidas do seu elenco.</p>
-        </div>
+      <h2 class="carteira-cabecalho">Sua carteira</h2>
+      <div class="carteiras">
+        <div class="carteira" role="status" aria-live="polite"><svg class="carteira-icone carteira-icone-moeda" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="25" r="20" fill="#C49438"/><circle cx="24" cy="22" r="20" fill="#E4C064" stroke="#CDA548" stroke-width="1.5"/><circle cx="24" cy="22" r="15" fill="#F1D58A" stroke="#CFAB50"/><path d="m24 11 3.6 7.3 8 1.2-5.8 5.6 1.4 8-7.2-3.8-7.2 3.8 1.4-8-5.8-5.6 8-1.2Z" fill="#B9892D"/></svg><div><div class="carteira-rotulo">Moedas</div><div class="carteira-valor" id="saldoMoedas">0</div><small>Para seus pacotes de jogadores</small></div></div>
+        <div class="carteira carteira-dinheiro" role="status" aria-live="polite"><svg class="carteira-icone" viewBox="0 0 72 46" aria-hidden="true"><rect x="4" y="7" width="66" height="37" rx="5" fill="#619458" opacity=".3"/><rect x="1" y="2" width="66" height="37" rx="5" fill="#5A8C54" stroke="#47743D"/><path d="M12 6h44a8 8 0 0 0 7 7v15a8 8 0 0 0-7 7H12a8 8 0 0 0-7-7V13a8 8 0 0 0 7-7Z" fill="none" stroke="#BAD4A0"/><ellipse cx="34" cy="20.5" rx="12" ry="13" fill="#A7C58D"/><text x="34" y="25" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="800" fill="#3B6B35">R$</text><path d="M12 17h7m-7 5h7m30-5h7m-7 5h7" stroke="#C0D8AB" stroke-width="1.5"/></svg><div><div class="carteira-rotulo">Dinheiro do clube</div><div class="carteira-valor" id="saldoDinheiro">R$ 0</div><small>Para o estádio e os sons</small></div></div>
       </div>
-      <div class="controles" style="margin-top:16px">
-        <button class="btn btn-pequeno" id="btnZerarSaldo">Zerar saldo</button>
-        <button class="btn btn-pequeno" id="btnResetarLoja">Resetar a loja</button>
-        <button class="btn btn-pequeno" type="button" id="btnResetarTime">Resetar time</button>
-      </div>
+      <div class="carteira-detalhes"><p id="explicaMoeda"></p><p id="explicaDinheiro"></p></div>
+      <p class="carteira-regra">10 minutos de estudo rendem <b>2 moedas e R$ 10</b>. Cada saldo é independente e não expira.</p>
+      <div class="carteira-acoes"><button class="btn btn-pequeno" id="btnZerarSaldo">Zerar moedas</button><button class="btn btn-pequeno" id="btnZerarDinheiro">Zerar dinheiro</button><button class="btn btn-pequeno" id="btnResetarLoja">Resetar estádio e sons</button><button class="btn btn-pequeno" type="button" id="btnResetarTime">Resetar time</button></div>
     </div>
   </div>
 
@@ -1757,42 +1753,35 @@ const DURACOES_FOCO  = [15, 25, 30, 50];
 const DURACOES_PAUSA = [5, 10, 15, 30];
 const MARCOS = [100, 250, 500, 1000, 2000, 5000];
 
-/* Loja: o que já foi gasto, o que foi comprado e o que está em uso. */
-let loja = Object.assign(
-  { gastas: 0, comprados: [], niveis: {}, golAtivo: "padrao", apitoAtivo: "padrao" },
-  Armazem.ler(CHAVES.loja, {})
-);
-if (!Array.isArray(loja.comprados)) loja.comprados = [];
-if (!loja.niveis || typeof loja.niveis !== "object") loja.niveis = {};
-
-/* As obras do estádio eram itens soltos e passaram a ser níveis de uma obra
-   só. Converte o que já estava comprado, sem tirar nada de quem pagou. */
-(function migrarObrasParaNiveis() {
-  const DE_PARA = {
-    "estadio:bandeiras": ["bandeiras", 1], "estadio:redes": ["redes", 1],
-    "estadio:publico": ["publico", 1], "estadio:grama": ["gramado", 1],
-    "estadio:listras": ["gramado", 2], "estadio:mosaico": ["mosaico", 1],
-    "estadio:cobertura": ["cobertura", 1], "estadio:refletores": ["refletores", 1],
-    "estadio:anel": ["anel", 1]
+/** Migração única: compras e saldo de moedas antigos são preservados.
+ * O dinheiro começa com os minutos históricos; só compras novas debitam reais.
+ * Gastos antigos e saldos zerados não viram reembolso ao resetar a outra moeda.
+ */
+function normalizarLoja(dados){
+  const d=dados&&typeof dados==='object'?dados:{},v2=d.economiaVersao===2;
+  const inteiro=v=>Number.isSafeInteger(v)&&v>=0?v:0;
+  const niveis={},DE_PARA={
+    'estadio:bandeiras':['bandeiras',1],'estadio:redes':['redes',1],'estadio:publico':['publico',1],
+    'estadio:grama':['gramado',1],'estadio:listras':['gramado',2],'estadio:mosaico':['mosaico',1],
+    'estadio:cobertura':['cobertura',1],'estadio:refletores':['refletores',1],'estadio:anel':['anel',1]
   };
-  let mudou = false;
-  loja.comprados = loja.comprados.filter((c) => {
-    const alvo = DE_PARA[c];
-    if (!alvo) return true;
-    loja.niveis[alvo[0]] = Math.max(loja.niveis[alvo[0]] || 0, alvo[1]);
-    mudou = true;
-    return false;
-  });
-  if (mudou) Armazem.gravar(CHAVES.loja, loja);
-})();
-
-// os fogos de artifício viraram a virada da bateria: quem já tinha comprado
-// não pode perder o item nem o que gastou nele
-if (loja.comprados.indexOf("gol:fogos") !== -1) {
-  loja.comprados = loja.comprados.map((c) => (c === "gol:fogos" ? "gol:virada" : c));
-  if (loja.golAtivo === "fogos") loja.golAtivo = "virada";
-  Armazem.gravar(CHAVES.loja, loja);
+  if(d.niveis&&typeof d.niveis==='object')for(const [id,n]of Object.entries(d.niveis))if(Number.isSafeInteger(n)&&n>=0)niveis[id]=n;
+  const comprados=[];
+  if(Array.isArray(d.comprados))for(let c of d.comprados){
+    if(typeof c!=='string')continue;
+    const obra=Object.hasOwn(DE_PARA,c)?DE_PARA[c]:null;
+    if(obra){niveis[obra[0]]=Math.max(niveis[obra[0]]||0,obra[1]);continue;}
+    if(c==='gol:fogos')c='gol:virada';if(!comprados.includes(c))comprados.push(c);
+  }
+  return {economiaVersao:2,gastas:v2?inteiro(d.gastas):0,
+    moedasAnteriores:v2?inteiro(d.moedasAnteriores):inteiro(d.gastas),
+    moedasZeradas:v2?inteiro(d.moedasZeradas):0,reaisZerados:v2?inteiro(d.reaisZerados):0,
+    comprados,niveis,golAtivo:d.golAtivo==='fogos'?'virada':typeof d.golAtivo==='string'?d.golAtivo:'padrao',
+    apitoAtivo:typeof d.apitoAtivo==='string'?d.apitoAtivo:'padrao'};
 }
+const lojaSalva=Armazem.ler(CHAVES.loja,null);
+let loja=normalizarLoja(lojaSalva);
+if(lojaSalva&&JSON.stringify(lojaSalva)!==JSON.stringify(loja))Armazem.gravar(CHAVES.loja,loja);
 
 /* A formação é fixa. Os identificadores distinguem as duas vagas de ZAG e MC. */
 const POSICOES_TIME = [
@@ -2060,7 +2049,11 @@ const MIN_POR_MOEDA = 5;
  */
 function moedasGanhas() { return Math.floor(totalMinutos() / MIN_POR_MOEDA); }
 function bonusDeMoedas() { return meuTime.bonusTesteResgatado ? 5 : 0; }
-function totalMoedasGastas() { return (loja.gastas || 0) + meuTime.gastoPacotes; }
+function totalMoedasGastas() { return loja.moedasAnteriores + loja.moedasZeradas + meuTime.gastoPacotes; }
+function dinheiroGanho() { return Math.max(0,Math.floor(totalMinutos())); }
+function saldoDinheiro() { return Math.max(0,dinheiroGanho()-loja.gastas-loja.reaisZerados); }
+const formatoReais=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:0,maximumFractionDigits:0});
+function formatarDinheiro(valor) { return formatoReais.format(valor); }
 function saldoMoedas()  { return Math.max(0, moedasGanhas() + bonusDeMoedas() + meuTime.moedasVendas - totalMoedasGastas()); }
 
 function salvarBlocos()   { Armazem.gravar(CHAVES.blocos, blocos); }
@@ -2608,49 +2601,49 @@ const SONS = {
  */
 const OBRAS_ESTADIO = {
   bandeiras: { nome: "Bandeirinhas de escanteio", niveis: [
-    { desc: "Mastro e flâmula vermelha nos quatro cantos do gramado.", preco: 10 }
+    { desc: "Mastro e flâmula vermelha nos quatro cantos do gramado.", preco: 100 }
   ]},
   redes: { nome: "Redes nos gols", niveis: [
-    { desc: "Malha nas duas balizas: fundo, laterais e teto. Antes eram só as traves.", preco: 15 }
+    { desc: "Malha nas duas balizas: fundo, laterais e teto. Antes eram só as traves.", preco: 150 }
   ]},
   arredores: { nome: "Arredores", niveis: [
-    { desc: "Área externa com árvores afastadas das arquibancadas e um prédio baixo em escala com o estádio.", preco: 25 },
-    { desc: "Praça tricolor com entrada monumental, jardins floridos, bancos e bilheteria conectados por caminhos até o estádio.", preco: 75 },
-    { desc: "Praça da torcida com monumento de taça, pergolado de madeira, bancos e novos jardins, ligada aos caminhos existentes.", preco: 100 },
-    { desc: "A cidade chega ao entorno: ruas com faixas de pedestres, quarteirões de prédios baixos e comércio, carros, ponto de ônibus e calçadas arborizadas.", preco: 120 }
+    { desc: "Área externa com árvores afastadas das arquibancadas e um prédio baixo em escala com o estádio.", preco: 250 },
+    { desc: "Praça tricolor com entrada monumental, jardins floridos, bancos e bilheteria conectados por caminhos até o estádio.", preco: 750 },
+    { desc: "Praça da torcida com monumento de taça, pergolado de madeira, bancos e novos jardins, ligada aos caminhos existentes.", preco: 1000 },
+    { desc: "A cidade chega ao entorno: ruas com faixas de pedestres, quarteirões de prédios baixos e comércio, carros, ponto de ônibus e calçadas arborizadas.", preco: 1200 }
   ]},
   publico: { nome: "Público", niveis: [
-    { desc: "Primeira leva de torcedores espalhados pelos setores. Ainda tem muito lugar vago.", preco: 30 },
-    { desc: "A arquibancada enche: mais que o dobro de gente, com pouco lugar sobrando.", preco: 60 }
+    { desc: "Primeira leva de torcedores espalhados pelos setores. Ainda tem muito lugar vago.", preco: 300 },
+    { desc: "A arquibancada enche: mais que o dobro de gente, com pouco lugar sobrando.", preco: 600 }
   ]},
   gramado: { nome: "Gramado", niveis: [
-    { desc: "Troca a terra batida por grama de verdade, e a cal das marcações fica nítida.", preco: 35 },
-    { desc: "Faixas de corte alternadas, como campo aparado pra dia de decisão.", preco: 40 }
+    { desc: "Troca a terra batida por grama de verdade, e a cal das marcações fica nítida.", preco: 350 },
+    { desc: "Faixas de corte alternadas, como campo aparado pra dia de decisão.", preco: 400 }
   ]},
   mosaico: { nome: "Mosaico tricolor", niveis: [
-    { desc: "Faixas largas de vermelho, branco e preto contornam as arquibancadas, alinhadas nos cantos e em todos os anéis.", preco: 45 }
+    { desc: "Faixas largas de vermelho, branco e preto contornam as arquibancadas, alinhadas nos cantos e em todos os anéis.", preco: 450 }
   ]},
   placar: { nome: "Placar de gols de estudo", niveis: [
-    { desc: "Cada 60 minutos de estudo vinculados ao ciclo ativo valem 1 gol. O placar começa do zero a cada novo ciclo.", preco: 50 }
+    { desc: "Cada 60 minutos de estudo vinculados ao ciclo ativo valem 1 gol. O placar começa do zero a cada novo ciclo.", preco: 500 }
   ]},
   cantos: { nome: "Cantos fechados", niveis: [
-    { desc: "Setores arredondados com assentos, escadas de acesso e refletores na borda externa, unindo as arquibancadas.", preco: 55 }
+    { desc: "Setores arredondados com assentos, escadas de acesso e refletores na borda externa, unindo as arquibancadas.", preco: 550 }
   ]},
   cobertura: { nome: "Cobertura das arquibancadas", niveis: [
-    { desc: "Cobertura leve e curva sobre os quatro setores, com estrutura metálica e acabamento tricolor.", preco: 60 },
-    { desc: "Cobertura ampliada com faixa translúcida, estrutura de sustentação e friso tricolor contínuo. Acompanha os cantos fechados, formando uma cobertura integrada.", preco: 80 }
+    { desc: "Cobertura leve e curva sobre os quatro setores, com estrutura metálica e acabamento tricolor.", preco: 600 },
+    { desc: "Cobertura ampliada com faixa translúcida, estrutura de sustentação e friso tricolor contínuo. Acompanha os cantos fechados, formando uma cobertura integrada.", preco: 800 }
   ]},
   refletores: { nome: "Refletores", niveis: [
-    { desc: "Acende os painéis de seis módulos LED, inclinados para o campo, com luz branca suave no gramado.", preco: 70 }
+    { desc: "Acende os painéis de seis módulos LED, inclinados para o campo, com luz branca suave no gramado.", preco: 700 }
   ]},
   anel: { nome: "Anéis da arquibancada", niveis: [
-    { nome: "Segundo anel", desc: "Segundo anel integrado ao primeiro, com fileiras e escadas contínuas até o alto da arquibancada.", preco: 90 },
-    { nome: "Terceiro anel", desc: "Mais seis fileiras por setor, com três anéis conectados, novos guarda-corpos e cobertura e refletores elevados. O entorno continua livre.", preco: 140 }
+    { nome: "Segundo anel", desc: "Segundo anel integrado ao primeiro, com fileiras e escadas contínuas até o alto da arquibancada.", preco: 900 },
+    { nome: "Terceiro anel", desc: "Mais seis fileiras por setor, com três anéis conectados, novos guarda-corpos e cobertura e refletores elevados. O entorno continua livre.", preco: 1400 }
   ]},
   vestiario: { nome: "Vestiário", niveis: [
     { desc: "Vestiário simples: armários de metal, bancos de madeira e as camisas dos seus titulares.", preco: 0 },
-    { desc: "Madeira nos armários, bancos estofados, piso renovado e iluminação mais acolhedora.", preco: 80 },
-    { desc: "Vestiário de luxo: madeira escura, piso de mármore, detalhes dourados, sofás e iluminação indireta.", preco: 120 }
+    { desc: "Madeira nos armários, bancos estofados, piso renovado e iluminação mais acolhedora.", preco: 800 },
+    { desc: "Vestiário de luxo: madeira escura, piso de mármore, detalhes dourados, sofás e iluminação indireta.", preco: 1200 }
   ]}
 };
 
@@ -4212,8 +4205,7 @@ function importarJSON(arquivo) {
     ciclos = Array.isArray(dados.ciclos) ? dados.ciclos : [];
     if (dados.config) config = Object.assign(config, dados.config);
     if (dados.loja) {
-      loja = Object.assign({ gastas: 0, comprados: [], golAtivo: "padrao", apitoAtivo: "padrao" }, dados.loja);
-      if (!Array.isArray(loja.comprados)) loja.comprados = [];
+      loja = normalizarLoja(dados.loja);
     }
     if (dados.meuTime) { partidaUI.memoria=null;meuTime=normalizarMeuTime(dados.meuTime); salvarMeuTime(); }
     if(dados.arquibancada) {
@@ -4239,7 +4231,7 @@ function apagarTudo() {
   if (!confirm("Apagar TODOS os blocos, ciclos, recordes, compras e o time?\n\nNão tem volta. Exporta o JSON antes se quiser guardar.")) return;
   if (!confirm("Confirma mesmo, " + NOME + "? A estante inteira some.")) return;
   blocos = []; ciclos = []; marcosOk = []; recordes = { dia:0, semana:0, sequencia:0 };
-  loja = { gastas: 0, comprados: [], golAtivo: "padrao", apitoAtivo: "padrao" };
+  loja = normalizarLoja(null);
   salvarBlocos(); salvarCiclos(); salvarMarcos(); salvarRecordes(); salvarLoja();
   partidaUI.memoria=null;meuTime=normalizarMeuTime(null); salvarMeuTime();
   estadoArquibancada=normalizarArquibancada(null);Armazem.gravar(CHAVES.arquibancada,estadoArquibancada);
@@ -5095,7 +5087,7 @@ $("#modalPacote").addEventListener("keydown",e=>{
 
 /* --------------------------------------------------------------------------
    14d. LOJA
-   Sons, obras e pacotes usam moedas derivadas dos estudos.
+   Pacotes usam moedas; sons e obras usam reais. Ambos vêm dos estudos.
    -------------------------------------------------------------------------- */
 function temItem(categoria, id) {
   const item = itemDoCatalogo(categoria, id);
@@ -5107,21 +5099,15 @@ function itemEmUso(categoria, id) {
 }
 
 function comprarItem(categoria, id) {
-  const item = itemDoCatalogo(categoria, id);
-  if (!item || temItem(categoria, id)) return;
-  if (saldoMoedas() < item.preco) {
-    const falta = item.preco - saldoMoedas();
-    mostrarAviso("Faltam " + falta + (falta === 1 ? " moeda" : " moedas") +
-                 " — dá em " + (falta * MIN_POR_MOEDA) + " min de estudo.");
-    return;
-  }
-  loja.gastas = (loja.gastas || 0) + item.preco;
-  loja.comprados.push(categoria + ":" + id);
-  salvarLoja();
-
-  usarItem(categoria, id);                       // som já entra em uso na hora
-  mostrarAviso('"' + item.nome + '" é teu, soberano.', "recorde");
-  tocarSom(categoria, id);
+  const item=itemDoCatalogo(categoria,id);
+  if(!item||temItem(categoria,id))return false;
+  if(saldoDinheiro()<item.preco){mostrarAviso('Faltam '+formatarDinheiro(item.preco-saldoDinheiro())+' para este som. Cada minuto de estudo rende R$ 1.');return false;}
+  const gastas=loja.gastas+item.preco;if(!Number.isSafeInteger(gastas))return false;
+  const campo=categoria==='gol'?'golAtivo':'apitoAtivo';
+  const proximo={...loja,gastas,comprados:[...loja.comprados,categoria+':'+id],[campo]:id};
+  // Débito, propriedade e ativação do som entram na mesma gravação.
+  if(!Armazem.gravar(CHAVES.loja,proximo)){mostrarAviso('Não consegui salvar a compra. Seu dinheiro foi mantido.');return false;}
+  loja=proximo;renderLoja();mostrarAviso('"'+item.nome+'" é teu, soberano.','recorde');tocarSom(categoria,id);return true;
 }
 
 function usarItem(categoria, id) {
@@ -5137,10 +5123,9 @@ function comprarNivel(familia,nivelEsperado) {
   const prox = proximoNivel(familia);
   if (!obra || !prox) return false;
   if(nivelEsperado!==undefined && nivelEsperado!==nivelDaObra(familia)+1) return false;
-  if (saldoMoedas() < prox.preco) {
-    const falta = prox.preco - saldoMoedas();
-    mostrarAviso("Faltam " + falta + (falta === 1 ? " moeda" : " moedas") +
-                 " — dá em " + (falta * MIN_POR_MOEDA) + " min de estudo.");
+  if (saldoDinheiro() < prox.preco) {
+    const falta = prox.preco - saldoDinheiro();
+    mostrarAviso('Faltam '+formatarDinheiro(falta)+' — '+falta+' min de estudo.');
     return false;
   }
   const nivel = nivelDaObra(familia) + 1;
@@ -5795,7 +5780,7 @@ function renderVestiario() {
   $('#retirarTitularVestiario').hidden=!j;
   $('#obraVestiario').dataset.nivel=nivel;
   $('#obraVestiario').innerHTML='<h3>'+nomeNivelVestiario()+'</h3><div class="vestiario-selos">'+[1,2,3].map(n=>'<span class="'+(n<=nivel?'feito':'')+'">Nível '+n+'</span>').join('')+'</div><p>'+OBRAS_ESTADIO.vestiario.niveis[nivel-1].desc+'</p>'+
-    (prox?'<p style="margin-top:10px"><b>Próximo: nível '+(nivel+1)+'</b><br>'+prox.desc+'</p><button class="btn btn-principal" type="button" data-vestiario-comprar="'+(nivel+1)+'"'+(saldoMoedas()<prox.preco?' disabled':'')+'>Melhorar · '+prox.preco+' moedas</button><p>Seu saldo: '+saldoMoedas()+' moedas.'+(saldoMoedas()<prox.preco?' Faltam '+(prox.preco-saldoMoedas())+'.':'')+'</p>':'<p>Seu vestiário chegou ao nível máximo.</p>');
+    (prox?'<p style="margin-top:10px"><b>Próximo: nível '+(nivel+1)+'</b><br>'+prox.desc+'</p><button class="btn btn-principal" type="button" data-vestiario-comprar="'+(nivel+1)+'"'+(saldoDinheiro()<prox.preco?' disabled':'')+'>Melhorar · '+formatarDinheiro(prox.preco)+'</button><p>Seu saldo: '+formatarDinheiro(saldoDinheiro())+'.'+(saldoDinheiro()<prox.preco?' Faltam '+formatarDinheiro(prox.preco-saldoDinheiro())+'.':'')+'</p>':'<p>Seu vestiário chegou ao nível máximo.</p>');
 }
 $('#btnVestiario').addEventListener('click',abrirVestiario);
 $('#vestiarioMeuTime').addEventListener('click',abrirVestiario);
@@ -5843,7 +5828,7 @@ const GRUPOS_OBRAS_ESTADIO = {
 let mostrarBaloesEstadio=true,grupoObraAtivo="cobertura",obraEstadioSelecionada="cobertura";
 
 function renderBaloesEstadio() {
-  $("#saldoEstadio").textContent=saldoMoedas();
+  $("#saldoEstadio").textContent=formatarDinheiro(saldoDinheiro());
   const svg=$("#caixaEstadio svg");
   if(!svg) return;
   const v=svg.viewBox.baseVal,foco=document.activeElement?.dataset.estadioGrupo;
@@ -5854,8 +5839,8 @@ function renderBaloesEstadio() {
     const preco=feita?0:Math.min(...proximas.map(p=>p.preco));
     const p=iso(...g.posicao()),x=(p.x-v.x)/v.width*100,y=(p.y-v.y)/v.height*100;
     const nivel=g.obras.length===1&&OBRAS_ESTADIO[g.obras[0]].niveis.length>1?"Nível "+(nivelDaObra(g.obras[0])+1)+" · ":"";
-    const resumo=feita?"Concluído":(g.obras.length>1?"Desde ":nivel)+preco+" moedas";
-    return '<button type="button" class="obra-pin'+(feita?' concluida':saldoMoedas()<preco?' sem-saldo':'')+'" data-estadio-grupo="'+id+'" '+
+    const resumo=feita?"Concluído":(g.obras.length>1?"Desde ":nivel)+formatarDinheiro(preco);
+    return '<button type="button" class="obra-pin'+(feita?' concluida':saldoDinheiro()<preco?' sem-saldo':'')+'" data-estadio-grupo="'+id+'" '+
       'style="--pin-x:'+x.toFixed(2)+'%;--pin-y:'+y.toFixed(2)+'%" aria-haspopup="dialog" aria-label="'+g.nome+': '+resumo+'">'+
       '<span class="obra-pin-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+g.icone+'</svg></span>'+
       '<span class="obra-pin-texto"><strong>'+g.nome+'</strong><small>'+resumo+'</small></span><span class="obra-pin-sinal" aria-hidden="true">'+(feita?'✓':'+')+'</span></button>';
@@ -5871,7 +5856,7 @@ function abrirObrasEstadio(grupo) {
   const g=GRUPOS_OBRAS_ESTADIO[grupo];
   if(!g) return;
   grupoObraAtivo=grupo;
-  obraEstadioSelecionada=g.obras.find(f=>proximoNivel(f)&&saldoMoedas()>=proximoNivel(f).preco)||g.obras.find(f=>proximoNivel(f))||g.obras[0];
+  obraEstadioSelecionada=g.obras.find(f=>proximoNivel(f)&&saldoDinheiro()>=proximoNivel(f).preco)||g.obras.find(f=>proximoNivel(f))||g.obras[0];
   renderDetalheObraEstadio();
   if(!$("#modalObraEstadio").open) $("#modalObraEstadio").showModal();
   $("#fecharObraEstadio").focus();
@@ -5881,7 +5866,7 @@ function renderDetalheObraEstadio() {
   const g=GRUPOS_OBRAS_ESTADIO[grupoObraAtivo];
   $("#tituloObraEstadio").textContent=g.nome;
   $("#visitarArquibancadaDaObra").hidden=grupoObraAtivo!=="arquibancadas";
-  $("#saldoObraEstadio").textContent="Seu saldo: "+saldoMoedas()+" moedas";
+  $("#saldoObraEstadio").textContent="Seu saldo: "+formatarDinheiro(saldoDinheiro());
   $("#escolhasObraEstadio").hidden=g.obras.length<2;
   $("#escolhasObraEstadio").innerHTML=g.obras.length<2?"":g.obras.map(f=>
     '<button class="btn btn-pequeno" type="button" data-obra-escolher="'+f+'" aria-pressed="'+(f===obraEstadioSelecionada)+'">'+escapar(OBRAS_ESTADIO[f].nome)+'</button>').join('');
@@ -5894,12 +5879,12 @@ function cartaoDeObra(familia) {
   const nivel = nivelDaObra(familia);
   const total = obra.niveis.length;
   const prox = proximoNivel(familia);
-  const pode = prox && saldoMoedas() >= prox.preco;
+  const pode = prox && saldoDinheiro() >= prox.preco;
   const temNiveis = total > 1;
 
   let selo;
   if (!prox) selo = '<span class="selo-uso">' + (temNiveis ? "Nível " + total : "Instalada") + "</span>";
-  else selo = '<span class="preco' + (pode ? " pode" : "") + '">' + prox.preco + " moedas</span>";
+  else selo = '<span class="preco dinheiro' + (pode ? " pode" : "") + '">' + formatarDinheiro(prox.preco) + "</span>";
 
   const escada = temNiveis
     ? '<span class="escada">' +
@@ -5917,21 +5902,21 @@ function cartaoDeObra(familia) {
     '<p class="desc">' + desc + "</p>" +
     (prox ? '<div class="item-acoes">' +
       '<button type="button" class="btn btn-pequeno btn-principal" data-obra-comprar="' + familia +
-      '" data-obra-nivel="'+(nivel+1)+'"' + (pode ? "" : " disabled") + ">Construir · "+prox.preco+" moedas</button></div>"+
-      (pode?"":'<p class="obra-falta">Faltam '+(prox.preco-saldoMoedas())+' moedas para esta melhoria.</p>') : "") +
+      '" data-obra-nivel="'+(nivel+1)+'"' + (pode ? "" : " disabled") + ">Construir · "+formatarDinheiro(prox.preco)+"</button></div>"+
+      (pode?"":'<p class="obra-falta">Faltam '+formatarDinheiro(prox.preco-saldoDinheiro())+' para esta melhoria.</p>') : "") +
     "</div>";
 }
 
 function cartaoDeItem(categoria, id) {
   const item = itemDoCatalogo(categoria, id);
   const tem = temItem(categoria, id);
-  const pode = saldoMoedas() >= item.preco;
+  const pode = saldoDinheiro() >= item.preco;
   const emUso = tem && itemEmUso(categoria, id);
 
   let selo;
   if (emUso) selo = '<span class="selo-uso">Em uso</span>';
   else if (tem) selo = '<span class="selo-tem">Teu</span>';
-  else selo = '<span class="preco' + (pode ? " pode" : "") + '">' + item.preco + " moedas</span>";
+  else selo = '<span class="preco dinheiro' + (pode ? " pode" : "") + '">' + formatarDinheiro(item.preco) + "</span>";
 
   const acao = tem
     ? (emUso ? "" : '<button class="btn btn-pequeno btn-preto" data-loja="usar" ' +
@@ -5949,47 +5934,33 @@ function cartaoDeItem(categoria, id) {
 }
 
 function renderLoja() {
-  const saldo = saldoMoedas();
-  $("#saldoMoedas").textContent = saldo;
-  $("#explicaMoeda").innerHTML =
-    "1 moeda a cada <b>" + MIN_POR_MOEDA + " min</b> de estudo. " +
-    "Já rendeu <b>" + moedasGanhas() + "</b> no total" +
-    (bonusDeMoedas() ? ", mais <b>5</b> moedas de presente" : "") +
-    (meuTime.moedasVendas ? ", mais <b>"+meuTime.moedasVendas+"</b> em vendas de repetidos" : "") +
-    (totalMoedasGastas() ? ", com <b>" + totalMoedasGastas() + "</b> gastas" : "") + ".";
-
-  $("#itensGol").innerHTML = Object.keys(SONS.gol).map((id) => cartaoDeItem("gol", id)).join("");
-  $("#itensApito").innerHTML = Object.keys(SONS.apito).map((id) => cartaoDeItem("apito", id)).join("");
-  renderBaloesEstadio();
-  renderPacoteBase();
-  renderAvisoLoja();
-  renderEstadoPreviaSons();
+  $('#saldoMoedas').textContent=saldoMoedas();$('#saldoDinheiro').textContent=formatarDinheiro(saldoDinheiro());
+  $('#explicaMoeda').innerHTML='Ganhe <b>1 moeda a cada 5 minutos</b> de estudo para comprar pacotes.'+
+    (meuTime.moedasVendas?' Suas vendas de repetidos renderam <b>'+meuTime.moedasVendas+' moedas</b>.':'')+
+    (bonusDeMoedas()?' Você também recebeu <b>5 moedas de presente</b>.':'');
+  $('#explicaDinheiro').innerHTML='Ganhe <b>R$ 1 por minuto</b> de estudo para investir no estádio e nos sons. Seu histórico já rendeu <b>'+formatarDinheiro(dinheiroGanho())+'</b>.';
+  $('#itensGol').innerHTML=Object.keys(SONS.gol).map(id=>cartaoDeItem('gol',id)).join('');
+  $('#itensApito').innerHTML=Object.keys(SONS.apito).map(id=>cartaoDeItem('apito',id)).join('');
+  renderBaloesEstadio();renderPacoteBase();renderAvisoLoja();renderEstadoPreviaSons();
 }
 
-/**
- * Zera o saldo sem tirar nada do que já foi comprado.
- * Como o saldo é ganhas menos gastas, zerar é igualar as gastas às ganhas —
- * o histórico de estudo não é tocado.
- */
-function zerarSaldo() {
-  if (saldoMoedas() === 0) { mostrarAviso("O saldo já está em zero."); return; }
-  if (!confirm("Zerar o saldo?\n\nVocê fica com 0 moedas e mantém tudo que já comprou. " +
-               "O histórico de estudo não muda.\n\nNão tem volta.")) return;
-  loja.gastas = Math.max(0,moedasGanhas()+bonusDeMoedas()+meuTime.moedasVendas-meuTime.gastoPacotes);
-  salvarLoja();
-  renderLoja();
-  mostrarAviso("Saldo zerado, soberano.");
+/** Zerar uma carteira não toca na outra nem nas compras. */
+function zerarSaldo(){
+  if(saldoMoedas()===0){mostrarAviso('O saldo de moedas já está em zero.');return;}
+  if(!confirm('Zerar suas moedas?\n\nVocê fica com 0 moedas e mantém os reais, os jogadores e as compras. Seu histórico de estudo não muda.\n\nNão tem volta.'))return;
+  const proximo={...loja,moedasZeradas:Math.max(0,moedasGanhas()+bonusDeMoedas()+meuTime.moedasVendas-meuTime.gastoPacotes-loja.moedasAnteriores)};
+  if(!Armazem.gravar(CHAVES.loja,proximo))return;loja=proximo;renderLoja();renderMeuTime();mostrarAviso('Saldo de moedas zerado.');
 }
-
-/** Volta a loja ao estado de fábrica: nada comprado, sons no padrão. */
-function resetarLoja() {
-  if (!confirm("Resetar os sons e as obras da loja?\n\nEsses itens voltam a ficar bloqueados e as moedas gastas neles retornam ao saldo. " +
-               "Seu elenco e as moedas gastas em pacotes são mantidos.\n\nNão tem volta.")) return;
-  loja = { gastas: 0, comprados: [], niveis: {}, golAtivo: "padrao", apitoAtivo: "padrao" };
-  salvarLoja();
-  renderEstadio();
-  renderLoja();
-  mostrarAviso("Loja resetada. Saldo de volta em " + saldoMoedas() + ".");
+function zerarDinheiro(){
+  if(saldoDinheiro()===0){mostrarAviso('O saldo em reais já está em zero.');return;}
+  if(!confirm('Zerar seu dinheiro?\n\nVocê fica com R$ 0 e mantém as moedas, o estádio e os sons comprados. Seu histórico de estudo não muda.\n\nNão tem volta.'))return;
+  const proximo={...loja,reaisZerados:Math.max(0,dinheiroGanho()-loja.gastas)};
+  if(!Armazem.gravar(CHAVES.loja,proximo))return;loja=proximo;renderEstadio();renderLoja();mostrarAviso('Saldo em reais zerado.');
+}
+function resetarLoja(){
+  if(!confirm('Resetar o estádio e os sons?\n\nEsses itens voltam a ficar bloqueados. Você recebe de volta '+formatarDinheiro(loja.gastas)+' gastos em reais. Suas moedas, seu elenco e os pacotes são mantidos.\n\nNão tem volta.'))return;
+  const proximo={...loja,gastas:0,comprados:[],niveis:{},golAtivo:'padrao',apitoAtivo:'padrao'};
+  if(!Armazem.gravar(CHAVES.loja,proximo))return;loja=proximo;renderEstadio();renderLoja();mostrarAviso('Estádio e sons resetados. Saldo: '+formatarDinheiro(saldoDinheiro())+'.');
 }
 
 /** Apaga o time e devolve o gasto da coleção que ainda não retornou pelas vendas. */
@@ -6031,13 +6002,13 @@ function resgatarPresente() {
 
 /** Bolinha na aba quando dá pra comprar algo que ele ainda não tem. */
 function renderAvisoLoja() {
-  const saldo = saldoMoedas();
+  const saldo = saldoMoedas(),dinheiro=saldoDinheiro();
   const podeSom = Object.keys(CATALOGO).some((cat) =>
     Object.keys(CATALOGO[cat]).some((id) =>
-      !temItem(cat, id) && saldo >= CATALOGO[cat][id].preco));
+      !temItem(cat, id) && dinheiro >= CATALOGO[cat][id].preco));
   const podeObra = Object.keys(OBRAS_ESTADIO).some((f) => {
     const p = proximoNivel(f);
-    return p && saldo >= p.preco;
+    return p && dinheiro >= p.preco;
   });
   marcarAbaComNovidade("loja",podeSom || saldo>=PACOTE_BASE.preco);
   marcarAbaComNovidade("estadio",podeObra);
@@ -7641,7 +7612,7 @@ function renderEstadio() {
   $("#dicaEstadio").textContent = temPlacar()
     ? (ciclo ? "Ciclo: " + ciclo.nome + ". Cada 60 minutos vinculados a ele valem 1 gol. Um novo ciclo começa com o placar zerado."
              : "Abra um ciclo em Ciclo & Ajustes para marcar gols. Só os estudos vinculados ao ciclo ativo contam no placar.")
-    : "Escolha um balão para ver o próximo nível e construir com suas moedas.";
+    : "Escolha um balão para ver o próximo nível e investir seu dinheiro no estádio.";
   renderVisitaArquibancada();
   renderVestiario();
 }
@@ -7814,6 +7785,7 @@ $("#btnTestarApito").addEventListener("click", () => { acordarAudio(); tocarApit
 
 /* ------------------------------------------------------------ aba da loja */
 $("#btnZerarSaldo").addEventListener("click", zerarSaldo);
+$("#btnZerarDinheiro").addEventListener("click", zerarDinheiro);
 $("#btnResetarLoja").addEventListener("click", resetarLoja);
 $("#btnResetarTime").addEventListener("click", resetarTime);
 $("#btnVisitarEstadio").addEventListener("click",()=>{irParaPainel("estadio");$("#tituloEstadio").focus();});
