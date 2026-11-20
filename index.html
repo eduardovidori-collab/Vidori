@@ -863,6 +863,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 .bonus-dinheiro{padding:15px 17px;border:1px solid #DAE6CE;background:#F4F8EE;border-radius:11px;margin-top:16px}.bonus-dinheiro-topo{display:flex;justify-content:space-between;align-items:center;gap:14px}.bonus-dinheiro-topo strong{display:block;font-size:12px;color:#46673C}.bonus-dinheiro-topo p{font-size:11px;color:#7C8F6A;line-height:1.6;margin-top:3px}.bonus-dinheiro-topo>span{border:1px solid #C7DCB5;background:#E5F0D8;border-radius:8px;padding:7px 11px;color:#476F37;font-size:13px;font-weight:800;white-space:nowrap}.bonus-dinheiro-barra{height:6px;background:#E0E9D5;border-radius:6px;overflow:hidden;margin-top:12px}.bonus-dinheiro-barra i{display:block;height:100%;width:var(--progresso,0%);background:#85A65F;border-radius:6px}.bonus-dinheiro>small{display:block;font-size:10px;color:#7E8F6C;margin-top:7px}.bonus-dinheiro.feito{background:#EEF6E5;border-color:#C8DDB4}.bonus-dinheiro.feito .bonus-dinheiro-barra i{background:#507F3E}
 </style>
 <link rel="stylesheet" href="./futebol.css">
+<link rel="stylesheet" href="./estadio-museu.css">
 </head>
 <body>
 
@@ -1067,10 +1068,8 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 
 <!-- ===================================================== PAINEL: ESTANTE -->
 <section class="painel" id="painel-estante">
-  <div class="cartao" style="margin-bottom:18px"><div class="cartao-corpo">
-    <h3 id="estanteTitulo">Estante de ciclos</h3>
-    <p class="subtexto" id="estanteResumo">Cada ciclo encerrado vira uma taça aqui. Nada some.</p>
-  </div></div>
+  <div class="museu-portal"><div class="museu-portal-topo"><div><span class="museu-kicker">A sua história merece um lugar</span><h2 id="estanteTitulo">Museu das Tutorias</h2><p id="estanteResumo">Cada ciclo encerrado vira uma Tutoria, guardada aqui.</p></div><span class="museu-nivel" id="seloNivelMuseu">Nível 1</span></div><div class="museu-portal-cena" id="previaMuseu" aria-hidden="true"></div><div class="museu-portal-rodape"><p id="resumoEntradaMuseu">Uma sala para celebrar seu esforço.</p><button class="btn" type="button" id="entrarMuseu" aria-haspopup="dialog">Entrar no museu →</button></div></div>
+  <h3 class="museu-arquivo-titulo">Seus ciclos · Arquivo das Tutorias</h3>
   <div class="prateleira" id="prateleira"></div>
 </section>
 
@@ -1088,6 +1087,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <p class="subtexto" id="legendaEstadio">Terreno limpo, gramado plantado e as quatro
         arquibancadas de pé. O resto vem com o trabalho.</p>
       <p class="dica">Melhore seu estádio pelos balões, faça a festa na arquibancada ou desça para uma série de pênaltis.</p>
+      <div class="ambiente-estadio"><div><strong>O Morumbi em cada momento</strong><small id="resumoAmbienteEstadio">Escolha a luz e o clima.</small></div><div class="ambiente-periodos" role="group" aria-label="Iluminação do estádio"><button type="button" data-periodo-estadio="auto" aria-pressed="true">Automático</button><button type="button" data-periodo-estadio="dia" aria-pressed="false">Dia</button><button type="button" data-periodo-estadio="entardecer" aria-pressed="false">Pôr do sol</button><button type="button" data-periodo-estadio="noite" aria-pressed="false">Noite</button></div><label class="ambiente-clima" for="climaEstadio">Clima<select id="climaEstadio"><option value="limpo">Céu limpo</option><option value="nublado">Nublado</option><option value="chuva">Chuva</option></select></label></div>
       <div class="cena-estadio" id="cenaEstadio"><div class="caixa-estadio" id="caixaEstadio"></div>
         <div class="baloes-estadio" id="baloesEstadio" role="group" aria-label="Melhorias nas partes do estádio"></div>
       </div>
@@ -1203,7 +1203,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <div class="carteira-detalhes"><p id="explicaMoeda"></p><p id="explicaDinheiro"></p></div>
       <div class="bonus-dinheiro" id="bonusDiarioDinheiro"><div class="bonus-dinheiro-topo"><div><strong>Bônus de dedicação</strong><p id="estadoBonusDinheiro">Estude 1 hora hoje e ganhe mais R$ 10.</p></div><span>+ R$ 10</span></div><div class="bonus-dinheiro-barra" id="progressoBonusDinheiro" role="progressbar" aria-label="Estudo de hoje para o bônus diário" aria-valuemin="0" aria-valuemax="60" aria-valuenow="0"><i></i></div><small id="resumoBonusDinheiro">0 de 60 minutos hoje</small></div>
       <p class="carteira-regra">1 hora de estudo rende <b>12 moedas e R$ 80</b>. Com o bônus diário, são <b>R$ 90</b>. Cada saldo é independente e não expira. Só os novos estudos geram reais.</p>
-      <div class="carteira-acoes"><button class="btn btn-pequeno" id="btnZerarSaldo">Zerar moedas</button><button class="btn btn-pequeno" id="btnZerarDinheiro">Zerar dinheiro</button><button class="btn btn-pequeno" id="btnResetarLoja">Resetar estádio e sons</button><button class="btn btn-pequeno" type="button" id="btnResetarTime">Resetar time</button></div>
+      <div class="carteira-acoes"><button class="btn btn-pequeno" id="btnZerarSaldo">Zerar moedas</button><button class="btn btn-pequeno" id="btnZerarDinheiro">Zerar dinheiro</button><button class="btn btn-pequeno" id="btnResetarLoja">Resetar melhorias e sons</button><button class="btn btn-pequeno" type="button" id="btnResetarTime">Resetar time</button></div>
     </div>
   </div>
 
@@ -1362,6 +1362,13 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     </div>
   </div>
 </div>
+
+<!-- ================================================= MUSEU DAS TUTORIAS -->
+<dialog class="museu-dialog" id="museuTutorias" aria-labelledby="tituloMuseu">
+ <header class="museu-cabecalho"><div><span class="museu-kicker">Copeiro · A memória do seu esforço</span><h2 id="tituloMuseu">Museu das Tutorias</h2><p id="subtituloMuseu">Uma Tutoria para cada ciclo encerrado.</p></div><button class="btn btn-pequeno" id="fecharMuseu" type="button">Voltar à Estante</button></header>
+ <div class="museu-grade"><div class="museu-sala"><div class="museu-cena" id="cenaMuseu"></div><div class="museu-navegacao"><button class="btn btn-pequeno" type="button" id="museuAnterior" aria-label="Ver Tutorias anteriores">←</button><p id="paginaMuseu" role="status" aria-live="polite"></p><button class="btn btn-pequeno" type="button" id="museuProximo" aria-label="Ver próximas Tutorias">→</button></div></div><aside class="museu-detalhe" id="detalheTutoria" aria-live="polite"></aside></div>
+ <div class="museu-reforma"><div><strong id="nivelMuseuTexto">Nível 1 · Sala das Tutorias</strong><p id="descricaoNivelMuseu">Sua primeira sala de troféus.</p><small id="saldoMuseu"></small></div><button class="btn" id="melhorarMuseu" type="button">Renovar museu · R$ 500</button></div><p class="museu-aviso" id="avisoMuseu" role="status" aria-live="polite"></p>
+</dialog>
 
 <!-- ================================================= MELHORIAS DO ESTÁDIO -->
 <dialog class="obra-estadio-dialog" id="modalObraEstadio" aria-labelledby="tituloObraEstadio">
@@ -1543,6 +1550,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <div id="avisos" aria-live="polite"></div>
 
 <script src="./futebol.js"></script>
+<script src="./estadio-museu.js"></script>
 <script>
 "use strict";
 /* ==========================================================================
@@ -3507,6 +3515,7 @@ function tique() {
 
 /** Chamado quando o tempo chega a zero (em foco ou em pausa). */
 function concluirTempo() {
+  if($("#museuTutorias").open)$("#museuTutorias").close();
   if($("#vestiarioEstadio").open) $("#vestiarioEstadio").close();
   // O fim do foco ou da pausa deve continuar visível durante as atividades do estádio.
   if($("#desafioPenaltis").open) {pausarPenalti();$("#desafioPenaltis").close();}
@@ -4037,14 +4046,9 @@ function desenharComparativo(c, ant, totalDias, diaAtual) {
 }
 
 function renderEstante() {
+  renderMuseuEstante();
   const lista = ciclosEncerrados();
   const alvo = $("#prateleira");
-  const totalHoras = lista.reduce((s, c) => s + (c.congelado ? c.congelado.minutos : 0), 0) / 60;
-
-  $("#estanteResumo").textContent = lista.length
-    ? lista.length + (lista.length === 1 ? " ciclo" : " ciclos") + " na estante · " +
-      totalHoras.toFixed(0) + "h de campanha guardadas. Ninguém tira."
-    : "Cada ciclo encerrado vira uma taça aqui. Nada some.";
 
   if (!lista.length) {
     alvo.innerHTML = '<div class="cartao"><div class="cartao-corpo">' +
@@ -4056,7 +4060,7 @@ function renderEstante() {
   alvo.innerHTML = lista.map((c, i) => {
     const g = c.congelado || { minutos: 0, diasAtivos: 0, maiorSequencia: 0, blocos: 0 };
     return '<article class="trofeu">' +
-      '<span class="selo">' + (lista.length - i) + "º ciclo</span>" +
+      '<span class="selo">Tutoria · ' + (lista.length - i) + "</span>" +
       '<div class="trofeu-topo">' +
         "<h3>" + escapar(c.nome) + "</h3>" +
         '<div class="trofeu-periodo">' + formatarDataLonga(c.inicio) + " → " + formatarDataLonga(c.encerradoEm) + "</div>" +
@@ -4066,7 +4070,7 @@ function renderEstante() {
         '<div><div class="v">' + g.diasAtivos + '</div><div class="r">Dias ativos</div></div>' +
         '<div><div class="v">' + g.maiorSequencia + '</div><div class="r">Sequência</div></div>' +
         '<div><div class="v">' + (g.blocos || 0) + '</div><div class="r">Blocos</div></div>' +
-      "</div></article>";
+      '</div><button class="btn btn-pequeno museu-ver-tutoria" type="button" data-ver-tutoria="'+escapar(c.id)+'">Ver Tutoria no museu</button></article>';
   }).join("");
 }
 
@@ -4853,7 +4857,7 @@ function montarMotorFutebol(p){
  const nomes=['Goleiro','Lateral','Zagueiro','Zagueiro','Lateral','Volante','Meia','Meia','Ponta','Centroavante','Ponta'];
  const motor=new FutebolArcade({canvas:$('#campoFutebol'),home:fichasFutebol(p),away:nomes.map((name,i)=>({id:'rival-'+i,name,ovr:a.ovr+(i%3-1)*2})),difficulty:a.ovr,awayColor:a.cor,state:p?.motor,
   reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,
-  stadium:{grama:temGrama(),listras:temListras(),publico:nivelDaObra('publico'),aneis:temTerceiroAnel()?3:temAnel()?2:1,cobertura:temCobertura(),refletores:temRefletores(),mosaico:temMosaico(),redes:temRedes()},
+  stadium:{periodo:ambienteEstadioAtual().periodo,clima:ambienteEstadioAtual().clima,grama:temGrama(),listras:temListras(),publico:nivelDaObra('publico'),aneis:temTerceiroAnel()?3:temAnel()?2:1,cobertura:temCobertura(),refletores:temRefletores(),mosaico:temMosaico(),redes:temRedes()},
   onHud:atualizarHudFutebol,onEvent:eventoFutebol,onEnd:finalizarFutebol});
  partidaUI.motor=motor;partidaUI.ultimoSave=motor.elapsed;atualizarHudFutebol();return motor;
 }
@@ -5198,8 +5202,9 @@ function salvarArquibancada(dados) {
 }
 let energiaVisita=0,efeitoVisitaTimer=null;
 function desenharFundoDeJogo(prefix, penalti=false) {
-  const corCampo=temGrama()?"#527D4C":"#AA8059",escuro=temGrama()?"#487246":"#A07752";
-  let partes=[`<defs><linearGradient id="${prefix}-ceu" x2="0" y2="1"><stop stop-color="#C3DFE8"/><stop offset="1" stop-color="#F2F0DB"/></linearGradient><linearGradient id="${prefix}-grama" x2="0" y2="1"><stop stop-color="${corCampo}"/><stop offset="1" stop-color="${escuro}"/></linearGradient></defs><rect width="900" height="540" fill="url(#${prefix}-ceu)"/><circle cx="755" cy="68" r="32" fill="#FFF8D6" opacity=".6"/><path d="M0 ${temTerceiroAnel()?118:166}Q450 ${temTerceiroAnel()?0:48} 900 ${temTerceiroAnel()?118:166}V278H0Z" fill="#CBD4CE"/>`];
+  const ambiente=ambienteEstadioAtual(),cores=coresAmbienteEstadio();
+  const corCampo=temGrama()?(ambiente.periodo==='noite'?"#426F4E":"#527D4C"):"#AA8059",escuro=temGrama()?"#487246":"#A07752";
+  let partes=[`<defs><linearGradient id="${prefix}-ceu" x2="0" y2="1"><stop stop-color="${cores.ceu}"/><stop offset="1" stop-color="${cores.horizonte}"/></linearGradient><linearGradient id="${prefix}-grama" x2="0" y2="1"><stop stop-color="${corCampo}"/><stop offset="1" stop-color="${escuro}"/></linearGradient></defs><rect width="900" height="540" fill="url(#${prefix}-ceu)"/>${astroFundoJogo()}<path d="M0 ${temTerceiroAnel()?118:166}Q450 ${temTerceiroAnel()?0:48} 900 ${temTerceiroAnel()?118:166}V278H0Z" fill="#CBD4CE"/>`];
   for(let row=0;row<(temTerceiroAnel()?16:10);row++) {
     const y=temTerceiroAnel()?105+row*9:153+row*10;
     const cor=temMosaico()?(row<3?"#B9484F":row<6?"#EBEDE5":"#384741"):(row%2?"#ADBDB2":"#C3D0C6");
@@ -5213,11 +5218,11 @@ function desenharFundoDeJogo(prefix, penalti=false) {
     partes.push(`<path d="M${x-3} ${y+7}q3-9 6 0" stroke="${roupa}" stroke-width="4"/><circle cx="${x}" cy="${y}" r="2.5" fill="${c%3?'#B58B6D':'#765641'}"/>`);
   }
   if(temCobertura()) partes.push('<g transform="translate(0 '+(temTerceiroAnel()?-43:0)+')"><path d="M-20 130Q450 7 920 130L898 151Q450 63 2 151Z" fill="#F0F1E9" stroke="#9BAEA9" stroke-width="2"/><path d="M0 133Q450 25 900 133" fill="none" stroke="#BA3946" stroke-width="5"/><path d="M45 141 90 116 136 130 184 94 230 112 280 77 330 102 380 65 430 96 480 65 530 101 580 76 630 112 680 94 730 131 780 116 850 143" fill="none" stroke="#AAB8B0" stroke-width="2"/></g>');
-  if(temRefletores()) [95,805].forEach(x=>partes.push(`<path d="M${x} 170V63" stroke="#6D8681" stroke-width="4"/><rect x="${x-24}" y="53" width="48" height="18" rx="3" fill="#586E69"/><path d="M${x-18} 62h36" stroke="#FFFFDF" stroke-width="7" stroke-dasharray="5 2"/>`));
+  if(temRefletores()) [95,805].forEach(x=>partes.push(`<path d="M${x} 170V63" stroke="#6D8681" stroke-width="4"/><rect x="${x-24}" y="53" width="48" height="18" rx="3" fill="#586E69"/><path d="M${x-18} 62h36" stroke="${refletoresAcesos()?'#FFFFDF':'#BFCFC4'}" stroke-width="7" stroke-dasharray="5 2"/>`));
   partes.push(`<path d="M0 260Q450 230 900 260V291H0Z" fill="#314B40"/><text x="450" y="272" fill="#F5F3E6" font-size="15" font-weight="700" letter-spacing="7" text-anchor="middle">MORUMBI · COPEIRO</text><path d="M0 293H900L1080 540H-180Z" fill="url(#${prefix}-grama)"/>`);
   if(temListras()||penalti)for(let i=0;i<6;i++)partes.push(`<path d="M0 ${296+i*43}H900v21H0Z" fill="#B3C88A" opacity=".09"/>`);
   partes.push(penalti?'<path d="M235 324 117 475H783L665 324M335 324l-32 64h294l-32-64" fill="none" stroke="#EAF0DA" stroke-width="3" opacity=".8"/><path d="M350 475Q450 522 550 475" fill="none" stroke="#EDF0DE" stroke-width="3"/><ellipse cx="450" cy="463" rx="5" ry="2.5" fill="#F8F8E6"/>':'<path d="M130 315H770L890 488H10ZM450 315V488" fill="none" stroke="#EDF1DB" stroke-width="3"/><ellipse cx="450" cy="392" rx="91" ry="31" fill="none" stroke="#EDF1DB" stroke-width="3"/><ellipse cx="450" cy="392" rx="4" ry="2" fill="#EDF1DB"/>');
-  return partes.join('');
+  return '<defs><filter id="'+prefix+'-ambiente" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="'+cores.filtro+'"/></filter></defs><g filter="url(#'+prefix+'-ambiente)">'+partes.join('')+'</g>'+chuvaSvgAmbiente(0,0,900,540,prefix);
 }
 function golDaCena(x,y,w,h, prefix) {
   let rede='';for(let i=1;i<16;i++)rede+=`<path d="M${x+i*w/16} ${y}v${h}"/>`;
@@ -5973,7 +5978,7 @@ function renderLoja() {
   $('#explicaMoeda').innerHTML='Ganhe <b>1 moeda a cada 5 minutos</b> de estudo para comprar pacotes.'+
     (meuTime.moedasVendas?' Suas vendas de repetidos renderam <b>'+meuTime.moedasVendas+' moedas</b>.':'')+
     (bonusDeMoedas()?' Você também recebeu <b>5 moedas de presente</b>.':'');
-  $('#explicaDinheiro').innerHTML='Ganhe <b>R$ 1 a cada 45 segundos</b> de estudo para o estádio e os sons. Seus novos estudos renderam <b>'+formatarDinheiro(dinheiroBaseGanho())+'</b>, mais <b>'+formatarDinheiro(bonusDiarioDinheiro())+'</b> em bônus diários. Estudos anteriores à ativação não geram reais.';
+  $('#explicaDinheiro').innerHTML='Ganhe <b>R$ 1 a cada 45 segundos</b> de estudo para o estádio, o museu e os sons. Seus novos estudos renderam <b>'+formatarDinheiro(dinheiroBaseGanho())+'</b>, mais <b>'+formatarDinheiro(bonusDiarioDinheiro())+'</b> em bônus diários. Estudos anteriores à ativação não geram reais.';
   renderBonusDinheiro();
   $('#itensGol').innerHTML=Object.keys(SONS.gol).map(id=>cartaoDeItem('gol',id)).join('');
   $('#itensApito').innerHTML=Object.keys(SONS.apito).map(id=>cartaoDeItem('apito',id)).join('');
@@ -5989,14 +5994,14 @@ function zerarSaldo(){
 }
 function zerarDinheiro(){
   if(saldoDinheiro()===0){mostrarAviso('O saldo em reais já está em zero.');return;}
-  if(!confirm('Zerar seu dinheiro?\n\nVocê fica com R$ 0 e mantém as moedas, o estádio e os sons comprados. Seu histórico de estudo não muda.\n\nNão tem volta.'))return;
+  if(!confirm('Zerar seu dinheiro?\n\nVocê fica com R$ 0 e mantém as moedas, o estádio, o museu e os sons comprados. Seu histórico de estudo não muda.\n\nNão tem volta.'))return;
   const proximo={...loja,reaisZerados:Math.max(0,dinheiroGanho()-loja.gastas)};
   if(!Armazem.gravar(CHAVES.loja,proximo))return;loja=proximo;renderEstadio();renderLoja();mostrarAviso('Saldo em reais zerado.');
 }
 function resetarLoja(){
-  if(!confirm('Resetar o estádio e os sons?\n\nEsses itens voltam a ficar bloqueados. Você recebe de volta '+formatarDinheiro(loja.gastas)+' gastos em reais. Suas moedas, seu elenco e os pacotes são mantidos.\n\nNão tem volta.'))return;
+  if(!confirm('Resetar as melhorias e os sons?\n\nO estádio, o museu e os sons voltam ao nível inicial. Seus títulos são mantidos. Você recebe de volta '+formatarDinheiro(loja.gastas)+' gastos em reais. Suas moedas, seu elenco e os pacotes são mantidos.\n\nNão tem volta.'))return;
   const proximo={...loja,gastas:0,comprados:[],niveis:{},golAtivo:'padrao',apitoAtivo:'padrao'};
-  if(!Armazem.gravar(CHAVES.loja,proximo))return;loja=proximo;renderEstadio();renderLoja();mostrarAviso('Estádio e sons resetados. Saldo: '+formatarDinheiro(saldoDinheiro())+'.');
+  if(!Armazem.gravar(CHAVES.loja,proximo))return;loja=proximo;renderEstante();renderEstadio();renderLoja();mostrarAviso('Melhorias e sons resetados. Saldo: '+formatarDinheiro(saldoDinheiro())+'.');
 }
 
 /** Apaga o time e devolve o gasto da coleção que ainda não retornou pelas vendas. */
@@ -7268,10 +7273,10 @@ function torreDeLuz(cx, cy, indice, zBase) {
   const emissor = centroDoRefletor(cx, cy);
   const [nx, ny] = direcaoDoRefletor(cx, cy);
   const tx = -ny, ty = nx;
-  const ligado = temRefletores();
+  const ligado = refletoresAcesos();
   let s = "";
 
-  if (temRefletores()) {
+  if (ligado) {
     // o feixe aponta para dentro, mas para antes do meio: quatro poças
     // separadas leem melhor que uma clarão só no centro do campo
     const ax = cx * 0.42, ay = cy * 0.42, raio = 30;
@@ -7377,7 +7382,7 @@ function torreDeLuz(cx, cy, indice, zBase) {
 
 /** Gradientes da luz. Só entram no SVG quando os refletores estão acesos. */
 function defsDeLuz() {
-  if (!temRefletores()) return "";
+  if (!refletoresAcesos()) return "";
   let d = '<radialGradient id="brilhoLampada">' +
             '<stop offset="0%" stop-color="#F1FAFF" stop-opacity=".28"/>' +
             '<stop offset="45%" stop-color="#E1F3FF" stop-opacity=".12"/>' +
@@ -7525,6 +7530,7 @@ function desenharEstadio() {
                 temGrama() ? C.campo : C.campoTerra);
   if (temGrama() && temListras()) s += listrasDoGramado();
   s += marcacoes();
+  s += pisoMolhadoEstadio();
 
   // peças em pé, do fundo para a frente: quem tem x+y menor está mais atrás
   const torres = posicoesDasTorres();
@@ -7578,14 +7584,14 @@ function desenharEstadio() {
   const defs = defsDeLuz()+defsDaTorcida();
   const enquadramento = temCidade() ? "-225 -146 490 294" : temArredores() ? "-205 -122 448 268" : "-205 -122 410 248";
   return '<svg viewBox="' + enquadramento + '" preserveAspectRatio="xMidYMid meet" ' +
-         'data-aneis="' + numeroDeAneis() + '" role="img" aria-label="Estádio isométrico do Vidori: campo, quatro arquibancadas e ' +
-         'quatro torres de refletores' + (temRefletores() ? ", acesos" : "") +
+         'data-periodo="'+ambienteEstadioAtual().periodo+'" data-clima="'+ambienteEstadioAtual().clima+'" data-aneis="' + numeroDeAneis() + '" role="img" aria-label="Estádio isométrico do Copeiro: campo, quatro arquibancadas e ' +
+         'quatro torres de refletores' + (refletoresAcesos() ? ", acesos" : "") +
          ". " + numeroDeAneis() + " anéis de arquibancada. Túnel central de acesso ao campo e bancos cobertos de reservas da casa e visitante" +
          (temCoberturaAmpliada() ? ". Cobertura nível 2 ampliada, com faixa translúcida" + (temCantos()?" e cantos integrados":"") : "") +
          (nivelDaObra("arredores")>=3 ? ". Praça da torcida com monumento de taça e pergolado" : "") +
          (temCidade() ? ". Bairro com ruas, faixas de pedestres, prédios, comércio, carros e ponto de ônibus" : "") +
          (temPlacar() ? ". Placar do ciclo: " + golsDoPlacar() + (golsDoPlacar() === 1 ? " gol" : " gols") : "") + '">' +
-         (defs ? "<defs>" + defs + "</defs>" : "") + s + "</svg>";
+         envolverEstadioAmbiente(s,defs,enquadramento) + "</svg>";
 }
 
 /**
@@ -7594,10 +7600,11 @@ function desenharEstadio() {
  */
 let estadioAssinatura = null;
 function renderEstadio() {
+  renderControlesAmbiente();
   const caixaEl = $("#caixaEstadio");
   if (!caixaEl) return;
   const ciclo = temPlacar() ? cicloAtivo() : null;
-  const assinatura = (temGrama() ? "g" : "-") + (temCobertura() ? "c" : "-") +
+  const assinatura = JSON.stringify(ambienteEstadioAtual())+":"+(temGrama() ? "g" : "-") + (temCobertura() ? "c" : "-") +
                      (temMosaico() ? "m" : "-") + nivelDaObra("anel") + ":" + nivelDaObra("vestiario") +
                      (temRefletores() ? "r" : "-") + (temRedes() ? "n" : "-") +
                      (temBandeiras() ? "b" : "-") + (temPublico() ? "p" : "-") +
@@ -7630,7 +7637,7 @@ function renderEstadio() {
   if (refl) {
     refl.querySelector("i").style.background = temRefletores()
       ? CORES_EST.lampadaAcesa : CORES_EST.torre;
-    refl.querySelector("b").textContent = temRefletores() ? "Refletores acesos" : "Refletores";
+    refl.querySelector("b").textContent = refletoresAcesos() ? "Refletores acesos" : "Refletores";
   }
   const leg = $("#legendaCobertura");
   if (leg) {
@@ -7679,7 +7686,7 @@ function fraseDoEstadio() {
   }
   if (temCobertura()) feitas.push(temCoberturaAmpliada()
     ? "cobertura ampliada com faixa translúcida" + (temCantos()?" e cantos integrados":"") : "arquibancada coberta");
-  if (temRefletores()) feitas.push("refletores acesos");
+  if (temRefletores()) feitas.push(refletoresAcesos()?"refletores acesos":"refletores instalados");
 
   if (!feitas.length) {
     return "Campo de terra batida, quatro arquibancadas, túnel dos jogadores e bancos de reservas. " +
@@ -7714,6 +7721,7 @@ function irParaPainel(nome) {
   if (nome === "loja") renderLoja();
   if (nome === "estadio") renderEstadio();
   if (nome === "time") renderMeuTime();
+  if (nome === "estante") renderEstante();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -8133,7 +8141,7 @@ $("#notifFechar").addEventListener("click", fecharModalNotif);
 document.addEventListener("keydown", (e) => {
   const alvo = e.target;
   const digitando = alvo && (alvo.tagName === "INPUT" || alvo.tagName === "TEXTAREA" || alvo.isContentEditable);
-  if($("#modalObraEstadio").open||$("#visitaArquibancada").open||$("#desafioPenaltis").open||$("#vestiarioEstadio").open||$("#partidaAmistosa").open) return;
+  if($("#modalObraEstadio").open||$("#visitaArquibancada").open||$("#desafioPenaltis").open||$("#vestiarioEstadio").open||$("#partidaAmistosa").open||$("#museuTutorias").open) return;
 
   if (e.key === "Escape") {
     fecharModalFim(); fecharModalNotif(); fecharModalOrfaos();
@@ -8227,6 +8235,7 @@ function mensagemDeRetomada() {
 }
 
 function iniciarApp() {
+  iniciarExperiencias();
   // sincroniza recordes e marcos sem comemorar histórico antigo
   conferirRecordes(true);
   conferirMarcos(true);

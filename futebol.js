@@ -303,10 +303,11 @@ class FutebolArcade{
       if(s.publico===1&&Math.floor(x/9)%3)continue;c.fillStyle=['#E4E3D2','#B43A49','#536355'][Math.floor(x/128)%3];c.beginPath();c.arc(x,45-row*9,2.2,0,7);c.fill();c.beginPath();c.arc(x,675+row*9,2.2,0,7);c.fill();
     }
     if(s.cobertura){c.fillStyle='#BFCFC4';c.beginPath();c.moveTo(38,24);c.quadraticCurveTo(550,-12,1062,24);c.lineTo(1047,39);c.quadraticCurveTo(550,8,53,39);c.fill();}
-    c.fillStyle='#7E826A';c.fillRect(75,65,950,590);c.fillStyle=s.grama?'#438251':'#AD875C';c.fillRect(L,T,R-L,B-T);
+    c.fillStyle='#7E826A';c.fillRect(75,65,950,590);c.fillStyle=s.grama?(s.periodo==='noite'?'#315E43':s.periodo==='entardecer'?'#5B7C48':s.clima==='chuva'?'#3E7050':'#438251'):'#AD875C';c.fillRect(L,T,R-L,B-T);
     if(s.listras)for(let i=0;i<12;i+=2){c.fillStyle='#FFFFFF0B';c.fillRect(L+(R-L)*i/12,T,(R-L)/12,B-T);}
     // Textura leve, estável: não consome aleatoriedade da simulação.
     for(let i=0;i<600;i++){c.fillStyle=i%2?'#FFFFFF06':'#0B2B1410';c.fillRect(L+(i*193)%916,T+(i*131)%556,2,2);}
+    if(s.clima==='chuva')for(const [x,y,rx,ry]of [[330,240,50,12],[730,480,60,15],[570,160,32,8]]){c.fillStyle='#AACCC022';c.beginPath();c.ellipse(x,y,rx,ry,0,0,7);c.fill();}
     c.strokeStyle='#F1F0D9B8';c.lineWidth=2.4;c.strokeRect(L,T,R-L,B-T);c.beginPath();c.moveTo(550,T);c.lineTo(550,B);c.stroke();
     c.beginPath();c.arc(550,360,72,0,Math.PI*2);c.stroke();
     c.strokeRect(L,205,130,310);c.strokeRect(R-130,205,130,310);c.strokeRect(L,288,48,144);c.strokeRect(R-48,288,48,144);
@@ -331,6 +332,10 @@ class FutebolArcade{
     }
     for(const p of [...this.players].sort((a,b)=>a.y-b.y))this.drawPlayer(c,p,this.players.indexOf(p)===this.selected);
     const b=this.ball;c.fillStyle='#102B2159';c.beginPath();c.ellipse(b.x+2,b.y+6,7,3.5,0,0,7);c.fill();c.fillStyle='#FFF9E5';c.strokeStyle='#33493B';c.lineWidth=1.2;c.beginPath();c.arc(b.x,b.y-b.z,6,0,7);c.fill();c.stroke();c.fillStyle='#364536';c.fillRect(b.x-2,b.y-b.z-2,4,4);
+    if(this.stadium.clima==='chuva'){
+      c.strokeStyle='#DAECED6B';c.lineWidth=1.2;c.beginPath();const phase=this.reducedMotion?0:this.elapsed*200;
+      for(let i=0;i<90;i++){const x=70+(i*137)%960,y=70+((i*91+phase)%580);c.moveTo(x,y);c.lineTo(x-6,y+15);}c.stroke();
+    }
     for(const p of this.particles){c.globalAlpha=Math.min(1,p.life);c.fillStyle=p.color;c.fillRect(p.x,p.y,5,3);}c.globalAlpha=1;c.restore();
     this.drawPlayerLabel(c,selected);
     if(this.phase==='kickoff'||this.phase==='goal'||this.phase==='end'||(this.paused&&this.phase!=='ready')){
