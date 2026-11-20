@@ -860,6 +860,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 .carteiras{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.carteira{display:flex;align-items:center;gap:15px;padding:20px;border:1px solid #E8DDC5;border-radius:13px;background:linear-gradient(125deg,#FCF8E9,#FFFEF7);min-width:0}.carteira-dinheiro{border-color:#CFDFCA;background:linear-gradient(125deg,#EAF4E7,#F8FCF3)}.carteira-icone{width:55px;height:40px;flex-shrink:0}.carteira-icone-moeda{width:43px;height:43px;margin:0 6px}.carteira>div{min-width:0}.carteira .carteira-rotulo{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#907343;margin-bottom:6px}.carteira-dinheiro .carteira-rotulo{color:#597B48}.carteira-valor{font-size:32px;font-weight:800;letter-spacing:-.04em;line-height:1.2;color:#775B28;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.carteira-dinheiro .carteira-valor{color:#315F37}.carteira small{display:block;font-size:11px;color:#9B855C;margin-top:5px;line-height:1.5}.carteira-dinheiro small{color:#6D8A5E}.carteira-detalhes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin-top:14px}.carteira-detalhes p{font-size:11px;color:var(--fraco);line-height:1.7}.carteira-regra{margin-top:14px;font-size:11px;color:#78816C;padding-top:12px;border-top:1px solid #E6EADD}.nota-mini{display:inline-block;width:26px;height:18px;vertical-align:middle;flex-shrink:0}.estadio-saldo-dinheiro{background:#EDF5E7;color:#3B683A;border-color:#D1E0C7;gap:7px}.preco.dinheiro{background:#EAF2E3;color:#4C6B39}.preco.dinheiro.pode{background:#375F37;color:#F4F4DF}.carteira-cabecalho{font-size:17px;margin-bottom:16px!important;text-transform:none;letter-spacing:-.02em}.carteira-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.carteira-acoes .btn{font-size:11px}
 @media(max-width:650px){.carteiras,.carteira-detalhes{grid-template-columns:1fr}.carteira{padding:17px}.carteira-valor{font-size:31px}.carteira-detalhes{gap:7px}.carteira-acoes{gap:7px}.carteira-acoes .btn{flex:1 1 42%}}
 
+.bonus-dinheiro{padding:15px 17px;border:1px solid #DAE6CE;background:#F4F8EE;border-radius:11px;margin-top:16px}.bonus-dinheiro-topo{display:flex;justify-content:space-between;align-items:center;gap:14px}.bonus-dinheiro-topo strong{display:block;font-size:12px;color:#46673C}.bonus-dinheiro-topo p{font-size:11px;color:#7C8F6A;line-height:1.6;margin-top:3px}.bonus-dinheiro-topo>span{border:1px solid #C7DCB5;background:#E5F0D8;border-radius:8px;padding:7px 11px;color:#476F37;font-size:13px;font-weight:800;white-space:nowrap}.bonus-dinheiro-barra{height:6px;background:#E0E9D5;border-radius:6px;overflow:hidden;margin-top:12px}.bonus-dinheiro-barra i{display:block;height:100%;width:var(--progresso,0%);background:#85A65F;border-radius:6px}.bonus-dinheiro>small{display:block;font-size:10px;color:#7E8F6C;margin-top:7px}.bonus-dinheiro.feito{background:#EEF6E5;border-color:#C8DDB4}.bonus-dinheiro.feito .bonus-dinheiro-barra i{background:#507F3E}
 </style>
 <link rel="stylesheet" href="./futebol.css">
 </head>
@@ -1200,7 +1201,8 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
         <div class="carteira carteira-dinheiro" role="status" aria-live="polite"><svg class="carteira-icone" viewBox="0 0 72 46" aria-hidden="true"><rect x="4" y="7" width="66" height="37" rx="5" fill="#619458" opacity=".3"/><rect x="1" y="2" width="66" height="37" rx="5" fill="#5A8C54" stroke="#47743D"/><path d="M12 6h44a8 8 0 0 0 7 7v15a8 8 0 0 0-7 7H12a8 8 0 0 0-7-7V13a8 8 0 0 0 7-7Z" fill="none" stroke="#BAD4A0"/><ellipse cx="34" cy="20.5" rx="12" ry="13" fill="#A7C58D"/><text x="34" y="25" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="800" fill="#3B6B35">R$</text><path d="M12 17h7m-7 5h7m30-5h7m-7 5h7" stroke="#C0D8AB" stroke-width="1.5"/></svg><div><div class="carteira-rotulo">Dinheiro do clube</div><div class="carteira-valor" id="saldoDinheiro">R$ 0</div><small>Para o estádio e os sons</small></div></div>
       </div>
       <div class="carteira-detalhes"><p id="explicaMoeda"></p><p id="explicaDinheiro"></p></div>
-      <p class="carteira-regra">10 minutos de estudo rendem <b>2 moedas e R$ 10</b>. Cada saldo é independente e não expira.</p>
+      <div class="bonus-dinheiro" id="bonusDiarioDinheiro"><div class="bonus-dinheiro-topo"><div><strong>Bônus de dedicação</strong><p id="estadoBonusDinheiro">Estude 1 hora hoje e ganhe mais R$ 10.</p></div><span>+ R$ 10</span></div><div class="bonus-dinheiro-barra" id="progressoBonusDinheiro" role="progressbar" aria-label="Estudo de hoje para o bônus diário" aria-valuemin="0" aria-valuemax="60" aria-valuenow="0"><i></i></div><small id="resumoBonusDinheiro">0 de 60 minutos hoje</small></div>
+      <p class="carteira-regra">1 hora de estudo rende <b>12 moedas e R$ 80</b>. Com o bônus diário, são <b>R$ 90</b>. Cada saldo é independente e não expira.</p>
       <div class="carteira-acoes"><button class="btn btn-pequeno" id="btnZerarSaldo">Zerar moedas</button><button class="btn btn-pequeno" id="btnZerarDinheiro">Zerar dinheiro</button><button class="btn btn-pequeno" id="btnResetarLoja">Resetar estádio e sons</button><button class="btn btn-pequeno" type="button" id="btnResetarTime">Resetar time</button></div>
     </div>
   </div>
@@ -2042,6 +2044,9 @@ let posicaoTimeSelecionada="gol";
 function salvarMeuTime() { meuTime=normalizarMeuTime(meuTime); return Armazem.gravar(CHAVES.meuTime,meuTime); }
 
 const MIN_POR_MOEDA = 5;
+const SEGUNDOS_POR_REAL = 45;
+const MINUTOS_BONUS_DIARIO = 60;
+const VALOR_BONUS_DIARIO = 10;
 
 /**
  * As moedas de estudo são derivadas do histórico. O presente é um crédito
@@ -2050,7 +2055,11 @@ const MIN_POR_MOEDA = 5;
 function moedasGanhas() { return Math.floor(totalMinutos() / MIN_POR_MOEDA); }
 function bonusDeMoedas() { return meuTime.bonusTesteResgatado ? 5 : 0; }
 function totalMoedasGastas() { return loja.moedasAnteriores + loja.moedasZeradas + meuTime.gastoPacotes; }
-function dinheiroGanho() { return Math.max(0,Math.floor(totalMinutos())); }
+function dinheiroBaseGanho() { return Math.max(0,Math.floor(totalMinutos()*60/SEGUNDOS_POR_REAL)); }
+function diasComBonusDinheiro() { return Object.entries(minutosPorDia()).filter(([,min])=>min>=MINUTOS_BONUS_DIARIO).map(([dia])=>dia); }
+// Derivado do histórico: cada data dá no máximo um bônus, inclusive após F5 e importação.
+function bonusDiarioDinheiro() { return diasComBonusDinheiro().length*VALOR_BONUS_DIARIO; }
+function dinheiroGanho() { return dinheiroBaseGanho()+bonusDiarioDinheiro(); }
 function saldoDinheiro() { return Math.max(0,dinheiroGanho()-loja.gastas-loja.reaisZerados); }
 const formatoReais=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:0,maximumFractionDigits:0});
 function formatarDinheiro(valor) { return formatoReais.format(valor); }
@@ -3182,17 +3191,21 @@ function acumuladoDoCiclo(ciclo, limiteDias) {
    10. HISTÓRICO DE BLOCOS
    -------------------------------------------------------------------------- */
 function registrarBloco(inicioTs, fimTs, assunto, minutos) {
-  const c = cicloAtivo();
+  const c = cicloAtivo(),dia=chaveDia(fimTs),antes=minutosNoDia(dia);
   blocos.push({
     id: "b" + fimTs + Math.random().toString(36).slice(2, 6),
     inicio: inicioTs,
     fim: fimTs,
-    dia: chaveDia(fimTs),
+    dia,
     assunto: assunto || "Sem assunto",
     minutos: Math.round(minutos),
     cicloId: c ? c.id : null
   });
   salvarBlocos();
+  if(antes<MINUTOS_BONUS_DIARIO&&minutosNoDia(dia)>=MINUTOS_BONUS_DIARIO){
+    const quando=dia===chaveDia(new Date())?'hoje':'em '+formatarDataCurta(dia);
+    mostrarAviso('Uma hora de estudo '+quando+'! +'+formatarDinheiro(VALOR_BONUS_DIARIO)+' de bônus diário.','recorde');
+  }
 }
 
 /**
@@ -5101,7 +5114,7 @@ function itemEmUso(categoria, id) {
 function comprarItem(categoria, id) {
   const item=itemDoCatalogo(categoria,id);
   if(!item||temItem(categoria,id))return false;
-  if(saldoDinheiro()<item.preco){mostrarAviso('Faltam '+formatarDinheiro(item.preco-saldoDinheiro())+' para este som. Cada minuto de estudo rende R$ 1.');return false;}
+  if(saldoDinheiro()<item.preco){mostrarAviso('Faltam '+formatarDinheiro(item.preco-saldoDinheiro())+' para este som. Você ganha R$ 1 a cada 45 segundos de estudo.');return false;}
   const gastas=loja.gastas+item.preco;if(!Number.isSafeInteger(gastas))return false;
   const campo=categoria==='gol'?'golAtivo':'apitoAtivo';
   const proximo={...loja,gastas,comprados:[...loja.comprados,categoria+':'+id],[campo]:id};
@@ -5125,7 +5138,7 @@ function comprarNivel(familia,nivelEsperado) {
   if(nivelEsperado!==undefined && nivelEsperado!==nivelDaObra(familia)+1) return false;
   if (saldoDinheiro() < prox.preco) {
     const falta = prox.preco - saldoDinheiro();
-    mostrarAviso('Faltam '+formatarDinheiro(falta)+' — '+falta+' min de estudo.');
+    mostrarAviso('Faltam '+formatarDinheiro(falta)+'. Você ganha R$ 1 a cada 45 segundos de estudo.');
     return false;
   }
   const nivel = nivelDaObra(familia) + 1;
@@ -5933,12 +5946,23 @@ function cartaoDeItem(categoria, id) {
     "</div>";
 }
 
+function renderBonusDinheiro(){
+  const min=Math.max(0,minutosNoDia(chaveDia(new Date()))),feito=min>=MINUTOS_BONUS_DIARIO;
+  $('#bonusDiarioDinheiro').classList.toggle('feito',feito);
+  $('#estadoBonusDinheiro').textContent=feito?'Bônus de hoje garantido. Bons estudos!':'Some 1 hora de estudo hoje e ganhe mais R$ 10.';
+  const progresso=Math.min(min,MINUTOS_BONUS_DIARIO);
+  $('#progressoBonusDinheiro').style.setProperty('--progresso',progresso/MINUTOS_BONUS_DIARIO*100+'%');
+  $('#progressoBonusDinheiro').setAttribute('aria-valuenow',String(progresso));
+  const faltam=Math.ceil(MINUTOS_BONUS_DIARIO-min);
+  $('#resumoBonusDinheiro').textContent=feito?'✓ R$ 10 já incluídos no total ganho · um bônus por dia.':min+' de 60 minutos hoje · '+(faltam===1?'falta 1 minuto.':'faltam '+faltam+' minutos.');
+}
 function renderLoja() {
   $('#saldoMoedas').textContent=saldoMoedas();$('#saldoDinheiro').textContent=formatarDinheiro(saldoDinheiro());
   $('#explicaMoeda').innerHTML='Ganhe <b>1 moeda a cada 5 minutos</b> de estudo para comprar pacotes.'+
     (meuTime.moedasVendas?' Suas vendas de repetidos renderam <b>'+meuTime.moedasVendas+' moedas</b>.':'')+
     (bonusDeMoedas()?' Você também recebeu <b>5 moedas de presente</b>.':'');
-  $('#explicaDinheiro').innerHTML='Ganhe <b>R$ 1 por minuto</b> de estudo para investir no estádio e nos sons. Seu histórico já rendeu <b>'+formatarDinheiro(dinheiroGanho())+'</b>.';
+  $('#explicaDinheiro').innerHTML='Ganhe <b>R$ 1 a cada 45 segundos</b> de estudo para o estádio e os sons. Seu histórico rendeu <b>'+formatarDinheiro(dinheiroBaseGanho())+'</b>, mais <b>'+formatarDinheiro(bonusDiarioDinheiro())+'</b> em bônus diários.';
+  renderBonusDinheiro();
   $('#itensGol').innerHTML=Object.keys(SONS.gol).map(id=>cartaoDeItem('gol',id)).join('');
   $('#itensApito').innerHTML=Object.keys(SONS.apito).map(id=>cartaoDeItem('apito',id)).join('');
   renderBaloesEstadio();renderPacoteBase();renderAvisoLoja();renderEstadoPreviaSons();
