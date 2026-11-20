@@ -1202,7 +1202,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       </div>
       <div class="carteira-detalhes"><p id="explicaMoeda"></p><p id="explicaDinheiro"></p></div>
       <div class="bonus-dinheiro" id="bonusDiarioDinheiro"><div class="bonus-dinheiro-topo"><div><strong>Bônus de dedicação</strong><p id="estadoBonusDinheiro">Estude 1 hora hoje e ganhe mais R$ 10.</p></div><span>+ R$ 10</span></div><div class="bonus-dinheiro-barra" id="progressoBonusDinheiro" role="progressbar" aria-label="Estudo de hoje para o bônus diário" aria-valuemin="0" aria-valuemax="60" aria-valuenow="0"><i></i></div><small id="resumoBonusDinheiro">0 de 60 minutos hoje</small></div>
-      <p class="carteira-regra">1 hora de estudo rende <b>12 moedas e R$ 80</b>. Com o bônus diário, são <b>R$ 90</b>. Cada saldo é independente e não expira.</p>
+      <p class="carteira-regra">1 hora de estudo rende <b>12 moedas e R$ 80</b>. Com o bônus diário, são <b>R$ 90</b>. Cada saldo é independente e não expira. Só os novos estudos geram reais.</p>
       <div class="carteira-acoes"><button class="btn btn-pequeno" id="btnZerarSaldo">Zerar moedas</button><button class="btn btn-pequeno" id="btnZerarDinheiro">Zerar dinheiro</button><button class="btn btn-pequeno" id="btnResetarLoja">Resetar estádio e sons</button><button class="btn btn-pequeno" type="button" id="btnResetarTime">Resetar time</button></div>
     </div>
   </div>
@@ -1756,11 +1756,12 @@ const DURACOES_PAUSA = [5, 10, 15, 30];
 const MARCOS = [100, 250, 500, 1000, 2000, 5000];
 
 /** Migração única: compras e saldo de moedas antigos são preservados.
- * O dinheiro começa com os minutos históricos; só compras novas debitam reais.
+ * O dinheiro começa do zero na ativação; estudos anteriores não geram crédito.
  * Gastos antigos e saldos zerados não viram reembolso ao resetar a outra moeda.
  */
 function normalizarLoja(dados){
-  const d=dados&&typeof dados==='object'?dados:{},v2=d.economiaVersao===2;
+  const d=dados&&typeof dados==='object'?dados:{},v2=d.economiaVersao===2||d.economiaVersao===3;
+  const iniciado=d.economiaVersao===3&&Number.isSafeInteger(d.inicioDinheiro)&&d.inicioDinheiro>0;
   const inteiro=v=>Number.isSafeInteger(v)&&v>=0?v:0;
   const niveis={},DE_PARA={
     'estadio:bandeiras':['bandeiras',1],'estadio:redes':['redes',1],'estadio:publico':['publico',1],
@@ -1775,15 +1776,15 @@ function normalizarLoja(dados){
     if(obra){niveis[obra[0]]=Math.max(niveis[obra[0]]||0,obra[1]);continue;}
     if(c==='gol:fogos')c='gol:virada';if(!comprados.includes(c))comprados.push(c);
   }
-  return {economiaVersao:2,gastas:v2?inteiro(d.gastas):0,
+  return {economiaVersao:3,inicioDinheiro:iniciado?d.inicioDinheiro:Date.now(),gastas:iniciado?inteiro(d.gastas):0,
     moedasAnteriores:v2?inteiro(d.moedasAnteriores):inteiro(d.gastas),
-    moedasZeradas:v2?inteiro(d.moedasZeradas):0,reaisZerados:v2?inteiro(d.reaisZerados):0,
+    moedasZeradas:v2?inteiro(d.moedasZeradas):0,reaisZerados:iniciado?inteiro(d.reaisZerados):0,
     comprados,niveis,golAtivo:d.golAtivo==='fogos'?'virada':typeof d.golAtivo==='string'?d.golAtivo:'padrao',
     apitoAtivo:typeof d.apitoAtivo==='string'?d.apitoAtivo:'padrao'};
 }
 const lojaSalva=Armazem.ler(CHAVES.loja,null);
 let loja=normalizarLoja(lojaSalva);
-if(lojaSalva&&JSON.stringify(lojaSalva)!==JSON.stringify(loja))Armazem.gravar(CHAVES.loja,loja);
+if(!lojaSalva||JSON.stringify(lojaSalva)!==JSON.stringify(loja))Armazem.gravar(CHAVES.loja,loja);
 
 /* A formação é fixa. Os identificadores distinguem as duas vagas de ZAG e MC. */
 const POSICOES_TIME = [
@@ -2055,8 +2056,19 @@ const VALOR_BONUS_DIARIO = 10;
 function moedasGanhas() { return Math.floor(totalMinutos() / MIN_POR_MOEDA); }
 function bonusDeMoedas() { return meuTime.bonusTesteResgatado ? 5 : 0; }
 function totalMoedasGastas() { return loja.moedasAnteriores + loja.moedasZeradas + meuTime.gastoPacotes; }
-function dinheiroBaseGanho() { return Math.max(0,Math.floor(totalMinutos()*60/SEGUNDOS_POR_REAL)); }
-function diasComBonusDinheiro() { return Object.entries(minutosPorDia()).filter(([,min])=>min>=MINUTOS_BONUS_DIARIO).map(([dia])=>dia); }
+function minutosNovosDinheiro(b){
+  if(!Number.isFinite(b.minutos)||b.minutos<=0||!Number.isFinite(b.fim)||b.fim<=loja.inicioDinheiro)return 0;
+  const inicio=Number.isFinite(b.inicio)?b.inicio:b.fim-b.minutos*60000;
+  if(inicio>=loja.inicioDinheiro)return b.minutos;
+  // Em um bloco iniciado antes da ativação, só o trecho posterior pode contar.
+  return Math.min(b.minutos,Math.max(0,(b.fim-loja.inicioDinheiro)/60000));
+}
+function minutosNovosDinheiroPorDia(){
+  const dias=Object.create(null);
+  blocos.forEach(b=>{dias[b.dia]=(dias[b.dia]||0)+minutosNovosDinheiro(b);});return dias;
+}
+function dinheiroBaseGanho() { return Math.max(0,Math.floor(blocos.reduce((s,b)=>s+minutosNovosDinheiro(b),0)*60/SEGUNDOS_POR_REAL)); }
+function diasComBonusDinheiro() { return Object.entries(minutosNovosDinheiroPorDia()).filter(([,min])=>min>=MINUTOS_BONUS_DIARIO).map(([dia])=>dia); }
 // Derivado do histórico: cada data dá no máximo um bônus, inclusive após F5 e importação.
 function bonusDiarioDinheiro() { return diasComBonusDinheiro().length*VALOR_BONUS_DIARIO; }
 function dinheiroGanho() { return dinheiroBaseGanho()+bonusDiarioDinheiro(); }
@@ -3191,7 +3203,7 @@ function acumuladoDoCiclo(ciclo, limiteDias) {
    10. HISTÓRICO DE BLOCOS
    -------------------------------------------------------------------------- */
 function registrarBloco(inicioTs, fimTs, assunto, minutos) {
-  const c = cicloAtivo(),dia=chaveDia(fimTs),antes=minutosNoDia(dia);
+  const c = cicloAtivo(),dia=chaveDia(fimTs),antes=minutosNovosDinheiroPorDia()[dia]||0;
   blocos.push({
     id: "b" + fimTs + Math.random().toString(36).slice(2, 6),
     inicio: inicioTs,
@@ -3202,7 +3214,7 @@ function registrarBloco(inicioTs, fimTs, assunto, minutos) {
     cicloId: c ? c.id : null
   });
   salvarBlocos();
-  if(antes<MINUTOS_BONUS_DIARIO&&minutosNoDia(dia)>=MINUTOS_BONUS_DIARIO){
+  if(antes<MINUTOS_BONUS_DIARIO&&(minutosNovosDinheiroPorDia()[dia]||0)>=MINUTOS_BONUS_DIARIO){
     const quando=dia===chaveDia(new Date())?'hoje':'em '+formatarDataCurta(dia);
     mostrarAviso('Uma hora de estudo '+quando+'! +'+formatarDinheiro(VALOR_BONUS_DIARIO)+' de bônus diário.','recorde');
   }
@@ -5947,21 +5959,21 @@ function cartaoDeItem(categoria, id) {
 }
 
 function renderBonusDinheiro(){
-  const min=Math.max(0,minutosNoDia(chaveDia(new Date()))),feito=min>=MINUTOS_BONUS_DIARIO;
+  const min=Math.max(0,minutosNovosDinheiroPorDia()[chaveDia(new Date())]||0),feito=min>=MINUTOS_BONUS_DIARIO;
   $('#bonusDiarioDinheiro').classList.toggle('feito',feito);
-  $('#estadoBonusDinheiro').textContent=feito?'Bônus de hoje garantido. Bons estudos!':'Some 1 hora de estudo hoje e ganhe mais R$ 10.';
+  $('#estadoBonusDinheiro').textContent=feito?'Bônus de hoje garantido. Bons estudos!':'Some 1 hora de novos estudos hoje e ganhe mais R$ 10.';
   const progresso=Math.min(min,MINUTOS_BONUS_DIARIO);
   $('#progressoBonusDinheiro').style.setProperty('--progresso',progresso/MINUTOS_BONUS_DIARIO*100+'%');
   $('#progressoBonusDinheiro').setAttribute('aria-valuenow',String(progresso));
   const faltam=Math.ceil(MINUTOS_BONUS_DIARIO-min);
-  $('#resumoBonusDinheiro').textContent=feito?'✓ R$ 10 já incluídos no total ganho · um bônus por dia.':min+' de 60 minutos hoje · '+(faltam===1?'falta 1 minuto.':'faltam '+faltam+' minutos.');
+  $('#resumoBonusDinheiro').textContent=feito?'✓ R$ 10 já incluídos no total ganho · um bônus por dia.':humanoMin(min)+' de 60 minutos novos hoje · '+(faltam===1?'falta 1 minuto.':'faltam '+faltam+' minutos.');
 }
 function renderLoja() {
   $('#saldoMoedas').textContent=saldoMoedas();$('#saldoDinheiro').textContent=formatarDinheiro(saldoDinheiro());
   $('#explicaMoeda').innerHTML='Ganhe <b>1 moeda a cada 5 minutos</b> de estudo para comprar pacotes.'+
     (meuTime.moedasVendas?' Suas vendas de repetidos renderam <b>'+meuTime.moedasVendas+' moedas</b>.':'')+
     (bonusDeMoedas()?' Você também recebeu <b>5 moedas de presente</b>.':'');
-  $('#explicaDinheiro').innerHTML='Ganhe <b>R$ 1 a cada 45 segundos</b> de estudo para o estádio e os sons. Seu histórico rendeu <b>'+formatarDinheiro(dinheiroBaseGanho())+'</b>, mais <b>'+formatarDinheiro(bonusDiarioDinheiro())+'</b> em bônus diários.';
+  $('#explicaDinheiro').innerHTML='Ganhe <b>R$ 1 a cada 45 segundos</b> de estudo para o estádio e os sons. Seus novos estudos renderam <b>'+formatarDinheiro(dinheiroBaseGanho())+'</b>, mais <b>'+formatarDinheiro(bonusDiarioDinheiro())+'</b> em bônus diários. Estudos anteriores à ativação não geram reais.';
   renderBonusDinheiro();
   $('#itensGol').innerHTML=Object.keys(SONS.gol).map(id=>cartaoDeItem('gol',id)).join('');
   $('#itensApito').innerHTML=Object.keys(SONS.apito).map(id=>cartaoDeItem('apito',id)).join('');
