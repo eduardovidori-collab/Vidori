@@ -1552,7 +1552,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 
 <script src="./futebol.js"></script>
 <script src="./estadio-museu.js?v=112"></script>
-<script src="./camarotes.js?v=114"></script>
+<script src="./camarotes.js?v=115"></script>
 <script>
 "use strict";
 /* ==========================================================================
@@ -2672,8 +2672,8 @@ const OBRAS_ESTADIO = {
     { nome: "Terceiro anel", desc: "Mais seis fileiras por setor, com três anéis conectados, novos guarda-corpos e cobertura e refletores elevados. O entorno continua livre.", preco: 1400 }
   ]},
   camarotes: { nome: "Camarotes", niveis: [
-    { nome: "Camarotes · nível 1", desc: "Seis salas integradas à fachada sul, com concreto aparente, vidro panorâmico e friso vermelho inspirado no Morumbi.", preco: 1000 },
-    { nome: "Camarotes · nível 2", desc: "Dezesseis salas nas duas laterais, com marquise contínua de concreto, acabamento tricolor discreto, lounges e iluminação acolhedora à noite.", preco: 1250 }
+    { nome: "Camarotes · nível 1", desc: "Três salas amplas integradas à fachada sul, com concreto aparente, vidro panorâmico e friso vermelho inspirado no Morumbi.", preco: 1000 },
+    { nome: "Camarotes · nível 2", desc: "Seis salas amplas, três de cada lado, com marquise contínua de concreto, acabamento tricolor discreto, lounges e iluminação acolhedora à noite.", preco: 1250 }
   ]},
   vestiario: { nome: "Vestiário", niveis: [
     { desc: "Vestiário simples: armários de metal, bancos de madeira e as camisas dos seus titulares.", preco: 0 },
@@ -7602,7 +7602,7 @@ function desenharEstadio() {
          (temCoberturaAmpliada() ? ". Cobertura nível 2 ampliada, com faixa translúcida" + (temCantos()?" e cantos integrados":"") : "") +
          (nivelDaObra("arredores")>=3 ? ". Praça da torcida com monumento de taça e pergolado" : "") +
          (temCidade() ? ". Bairro com ruas, faixas de pedestres, prédios, comércio, carros e ponto de ônibus" : "") +
-         (temCamarotes() ? ". Camarotes nível " + nivelDaObra("camarotes") + ", " + (nivelDaObra("camarotes")===2?"dezesseis salas nas laterais sul e norte":"seis salas na lateral sul") : "") +
+         (temCamarotes() ? ". Camarotes nível " + nivelDaObra("camarotes") + ", " + (nivelDaObra("camarotes")===2?"seis salas, três na lateral sul e três na norte":"três salas na lateral sul") : "") +
          (temPlacar() ? ". Placar do ciclo: " + golsDoPlacar() + (golsDoPlacar() === 1 ? " gol" : " gols") : "") + '">' +
          envolverEstadioAmbiente(s,defs,enquadramento) + "</svg>";
 }

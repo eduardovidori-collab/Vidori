@@ -17,11 +17,11 @@ function camarotesDoSetor(a){
     const y0=borda+sinal*d0,y1=borda+sinal*d1;
     return caixa(x0,Math.min(y0,y1),x1,Math.max(y0,y1),z+h0,z+h1,...cores);
   };
-  const de=amplo?-49:-42,ate=-de,n=amplo?8:6,passo=(ate-de)/n;
+  const de=amplo?-35:-30,ate=-de,n=3,passo=(ate-de)/n;
   const concreto=['#DFE1DA','#BBC2BC','#9FAAA3'],metal='#44585B',vermelho='#AD3440';
   let s=bloco(de-1,ate+1,dentro-.2,fora+.7,-.45,.28,concreto);
   // Consoles curtos ficam ligados à parede, sem ocupar a praça.
-  for(let i=0;i<=n;i+=2){
+  for(let i=0;i<=n;i++){
     const x=de+i*passo;
     s+=poligono([ponto(x-.4,0,-1.5),ponto(x-.4,fora+.5,-.3),ponto(x-.4,0,-.3)],'#96A49C');
     s+=poligono([ponto(x+.4,0,-1.5),ponto(x+.4,fora+.5,-.3),ponto(x-.4,fora+.5,-.3),ponto(x-.4,0,-1.5)],'#AAB5AC');
@@ -62,11 +62,11 @@ function camarotesDoSetor(a){
     salas.push({d:cx,s:'<g data-camarote-sala="'+(i+1)+'">'+sala+'</g>'});
   }
   s+=salas.sort((a,b)=>a.d-b.d).map(s=>s.s).join('');
-  // A pele de vidro é contínua; um caixilho principal reúne cada par de salas.
+  // A pele de vidro é contínua; um caixilho principal delimita cada sala ampla.
   s+=face(de+.15,ate-.15,fora+.04,.65,topo-.2,noite?'#E8BA70':'#71949E',' fill-opacity="'+(noite?'.19':'.40')+'"');
   s+=traco([ponto(de,fora+.07,.66),ponto(ate,fora+.07,.66)],metal,.19);
   s+=traco([ponto(de,fora+.07,topo-.17),ponto(ate,fora+.07,topo-.17)],metal,.18);
-  for(let i=0;i<=n;i+=2){
+  for(let i=0;i<=n;i++){
     const x=de+i*passo;
     s+=traco([ponto(x,fora+.08,.66),ponto(x,fora+.08,topo-.17)],metal,.24);
     if(i<n)s+=traco([ponto(x+1.6,fora+.09,1),ponto(x+4.2,fora+.09,topo-.5)],noite?'#F5D693':'#E8F4F2',.2,.32);
@@ -86,7 +86,7 @@ function camarotesDoSetor(a){
 /** Faixa de concreto e vidro nas vistas do campo e nas cobranças. */
 function camarotesFundoJogo(){
   if(!temCamarotes())return '';
-  const amplo=nivelDaObra('camarotes')>=2,noite=ambienteEstadioAtual().periodo==='noite',n=amplo?8:6;
+  const amplo=nivelDaObra('camarotes')>=2,noite=ambienteEstadioAtual().periodo==='noite',n=3;
   let s='<path d="M45 201Q450 155 855 201V238Q450 194 45 238Z" fill="#B7C2B7" stroke="#DCE1D5" stroke-width="2"/>';
   for(let i=0;i<n;i++){
     const x=52+i*796/n,w=796/n-3,y=207-39*Math.sin(Math.PI*(x+w/2)/900);
