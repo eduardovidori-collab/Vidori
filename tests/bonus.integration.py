@@ -48,9 +48,13 @@ try:
             p.evaluate('(n)=>seedBonus(n?[["2026-11-21",n]]:[])',minutes)
             got=p.evaluate('bonusSnapshot()')
             assert got=={'base':total-bonus,'bonus':bonus,'saldo':total,'coins':coins},(minutes,got)
-            assert p.locator('#progressoBonusProlongado').get_attribute('aria-valuemax')=='150'
-            assert float(p.locator('#progressoBonusProlongado').get_attribute('aria-valuenow'))==min(minutes,150)
-            assert ('feito' in p.locator('#bonusProlongadoDinheiro').get_attribute('class'))==(minutes>=150)
+            assert p.locator('.bonus-dinheiro').count()==1
+            assert p.locator('#bonusDiarioDinheiro [role=progressbar]').count()==1
+            assert p.locator('#progressoBonusDinheiro').get_attribute('aria-valuemax')=='150'
+            assert float(p.locator('#progressoBonusDinheiro').get_attribute('aria-valuenow'))==min(minutes,150)
+            assert ('feito' in p.locator('#bonusDiarioDinheiro').get_attribute('class'))==(minutes>=150)
+            for limit in [60,150]:
+                assert ('feito' in p.locator(f'.bonus-marco[data-bonus-minutos="{limit}"]').get_attribute('class'))==(minutes>=limit)
         # Three separate blocks combine; two separate dates never combine for 150.
         p.evaluate('seedBonus([["2026-11-21",50],["2026-11-21",50],["2026-11-21",50]])')
         assert p.evaluate('bonusSnapshot().saldo')==235
@@ -118,7 +122,7 @@ try:
         assert p.evaluate('saldoDinheiro()')==40
         p.clock.set_fixed_time(datetime(2026,11,23,1,tzinfo=timezone.utc))
         p.evaluate('renderLoja()')
-        assert p.locator('#progressoBonusProlongado').get_attribute('aria-valuenow')=='0'
+        assert p.locator('#progressoBonusDinheiro').get_attribute('aria-valuenow')=='0'
         p.evaluate('registrarBloco(Date.now()-150*60000,Date.now(),"Novo dia",150);renderTudo()')
         assert p.evaluate('saldoDinheiro()')==275
         assert p.evaluate('loja.inicioBonusProlongado')==activation
@@ -126,9 +130,16 @@ try:
         for width in [320,390,768,1300]:
             p.set_viewport_size({'width':width,'height':1000})
             assert p.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
+            bar=p.locator('#progressoBonusDinheiro').bounding_box()
+            for limit in [60,150]:
+                marker=p.locator(f'.bonus-marco[data-bonus-minutos="{limit}"]')
+                point=marker.locator('.bonus-ponto').bounding_box();value=marker.locator('.bonus-valor').bounding_box()
+                assert abs(point['x']+point['width']/2-(bar['x']+bar['width']*limit/150))<1
+                assert value['y']+value['height']<bar['y']
+                assert value['x']>=bar['x'] and value['x']+value['width']<=bar['x']+bar['width']+1
         p.evaluate('navigator.serviceWorker.ready');p.reload(wait_until='networkidle')
         context.set_offline(True);p.reload(wait_until='networkidle');p.locator('[data-painel=loja]').click()
-        assert p.locator('#bonusProlongadoDinheiro').is_visible()
+        assert p.locator('#bonusDiarioDinheiro').is_visible()
         assert p.evaluate('saldoDinheiro()')==275
         assert not errors,errors
         browser.close()
