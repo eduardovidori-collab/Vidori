@@ -130,7 +130,9 @@ try:
    assert p.evaluate('cafeAudio.fontes.length')==(2 if ambiente=='natureza' else 1)
    assert p.evaluate('cafeAudio.fontes.every(f=>f.loop)')
    assert p.evaluate('cafeAudio.fontes[0].buffer.duration')>90
-   if ambiente in ['melodia','guitarra']:assert abs(p.evaluate('cafeAudio.fontes[0].buffer.duration')-150)<.1
+   if ambiente in ['melodia','guitarra']:
+    duracao=150 if ambiente=='melodia' else 320/.95
+    assert abs(p.evaluate('cafeAudio.fontes[0].buffer.duration')-duracao)<.1
    assert p.evaluate('''async()=>{
     const a=cafeAudio,analyser=a.ctx.createAnalyser();a.master.connect(analyser);
     const data=new Float32Array(analyser.fftSize);let tocando=false;
