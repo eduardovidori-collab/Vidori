@@ -123,14 +123,14 @@ try:
   p.evaluate('()=>{window.fetch=fetchCafeOriginal;}');p.locator('#cafeSom').click()
   p.wait_for_function('cafeAudio && !cafeAudio.carregando');p.locator('#cafeSom').click()
   # New long recordings play real audio, preserve the selected environment and never autoplay.
-  assert p.locator('#cafeTipoSom option').count()==5
-  for ambiente in ['natureza','melodia']:
+  assert p.locator('#cafeTipoSom option').count()==6
+  for ambiente in ['natureza','melodia','guitarra']:
    p.locator('#cafeTipoSom').select_option(ambiente)
    p.locator('#cafeSom').click();p.wait_for_function('cafeAudio && !cafeAudio.carregando')
    assert p.evaluate('cafeAudio.fontes.length')==(2 if ambiente=='natureza' else 1)
    assert p.evaluate('cafeAudio.fontes.every(f=>f.loop)')
    assert p.evaluate('cafeAudio.fontes[0].buffer.duration')>90
-   if ambiente=='melodia':assert abs(p.evaluate('cafeAudio.fontes[0].buffer.duration')-150)<.1
+   if ambiente in ['melodia','guitarra']:assert abs(p.evaluate('cafeAudio.fontes[0].buffer.duration')-150)<.1
    assert p.evaluate('''async()=>{
     const a=cafeAudio,analyser=a.ctx.createAnalyser();a.master.connect(analyser);
     const data=new Float32Array(analyser.fftSize);let tocando=false;
@@ -171,7 +171,7 @@ try:
   p.locator('#cafeTipoSom').select_option('misto');p.locator('#cafeSom').click()
   p.wait_for_function('cafeAudio && !cafeAudio.carregando')
   assert p.evaluate('cafeAudio.fontes.length')==2;p.locator('#cafeSom').click()
-  for ambiente in ['natureza','melodia']:
+  for ambiente in ['natureza','melodia','guitarra']:
    p.locator('#cafeTipoSom').select_option(ambiente);p.locator('#cafeSom').click()
    p.wait_for_function('cafeAudio && !cafeAudio.carregando')
    assert p.evaluate('cafeAudio.fontes.length')==(2 if ambiente=='natureza' else 1)
