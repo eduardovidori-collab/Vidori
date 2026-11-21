@@ -865,6 +865,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <link rel="stylesheet" href="./futebol.css">
 <link rel="stylesheet" href="./estadio-museu.css?v=112">
 <link rel="stylesheet" href="./cafe.css?v=120">
+<link rel="stylesheet" href="./album-time.css?v=129">
 </head>
 <body>
 
@@ -1135,6 +1136,11 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <div class="time-marcadores"><span class="time-formacao">4-3-3</span><span class="time-contagem" id="timeContagem" aria-live="polite">0 de 11 escalados</span><span class="estadio-saldo" role="status" aria-live="polite"><b id="saldoMeuTime">0</b> moedas</span><button class="btn btn-pequeno" type="button" id="vestiarioMeuTime" aria-haspopup="dialog">Vestiário</button><button class="btn btn-pequeno" type="button" data-time-repetidos>Ver repetidos</button></div>
     </div>
   </div>
+  <div class="time-visoes" id="timeVisoes" role="tablist" aria-label="Meu time">
+    <button type="button" id="timeAbaEscalacao" data-time-visao="escalacao" role="tab" aria-selected="true" aria-controls="timeEscalacao"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="2" width="18" height="20" rx="2"/><path d="M3 12h18M8 2v5h8V2M8 22v-5h8v5"/><circle cx="12" cy="12" r="3"/></svg>Escalação</button>
+    <button type="button" id="timeAbaAlbum" data-time-visao="album" role="tab" aria-selected="false" aria-controls="timeAlbum" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-3-2-7-2-10-1v16c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 1Zm0 0v16M5 8h4M5 11h4m6-3h4m-4 3h4"/></svg>Álbum<span id="timeAlbumContagem">0/0</span></button>
+  </div>
+  <div id="timeEscalacao" role="tabpanel" aria-labelledby="timeAbaEscalacao">
   <div class="amistoso-convite"><div><span class="amistoso-selo">Dia de jogo · Amistosos</span><h3>Vista a camisa. Entre em campo.</h3><p>Seu time em movimento. Corra, dê o passe e solte o chute para balançar a rede em uma partida de 90 segundos.</p><small id="resumoConviteAmistoso">Escale os 11 titulares para jogar.</small><div class="amistoso-recente" id="campanhaAmistoso"></div></div><button class="btn" type="button" id="abrirAmistoso" aria-haspopup="dialog">Jogar amistoso</button></div>
   <div class="grade-time">
     <div class="cartao time-campo-card">
@@ -1180,6 +1186,24 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     <p class="dica" id="resumoRepetidos" role="status" aria-live="polite"></p>
     <div class="time-repetidos" id="timeRepetidos"></div>
   </div></div>
+  </div>
+  <section id="timeAlbum" class="album-time" role="tabpanel" aria-labelledby="timeAbaAlbum" hidden>
+    <div class="album-intro">
+      <div class="album-capa" aria-hidden="true"><small>COLEÇÃO COPEIRO</small><span class="escudo"></span><strong>ÁLBUM<br>TRICOLOR</strong><i>Meu time</i></div>
+      <div class="album-intro-texto"><span class="album-sobretitulo">Coleção do Meu time</span><h3>Álbum tricolor</h3><p id="albumMensagem">As cartas dos pacotes entram aqui automaticamente.</p><button type="button" class="album-loja" data-time-loja>Ver pacotes na loja →</button></div>
+      <div class="album-resumo"><div class="album-resumo-titulo"><strong id="albumPossuidas">0</strong><span>/ <b id="albumTotal">0</b></span></div><small>figurinhas diferentes conquistadas</small><div class="album-progresso-legenda"><span>Sua coleção</span><b id="albumPorcentagem">0%</b></div><progress id="albumProgresso" value="0" max="1" aria-label="Progresso da coleção">0%</progress><div class="album-resumo-rodape"><span><b id="albumFaltantes">0</b> faltantes</span><span><b id="albumExtras">0</b> cópias extras</span></div></div>
+    </div>
+    <div id="albumRaridades" class="album-raridades" role="group" aria-label="Progresso e filtros por raridade"></div>
+    <div class="album-filtros">
+      <label for="albumBusca">Buscar figurinha<input type="search" id="albumBusca" maxlength="80" placeholder="Nome do jogador" autocomplete="off"></label>
+      <label for="albumPosicao">Posição<select id="albumPosicao"><option value="">Todas as posições</option></select></label>
+      <label for="albumSituacao">Na coleção<select id="albumSituacao"><option value="todas">Todas as cartas</option><option value="obtidas">Conquistadas</option><option value="faltantes">Faltantes</option><option value="repetidas">Com cópias extras</option></select></label>
+      <button class="btn btn-pequeno" type="button" id="albumLimpar" data-album-limpar hidden>Limpar filtros</button>
+    </div>
+    <p id="albumResultados" class="album-resultados" role="status" aria-live="polite"></p>
+    <div id="albumLivro" class="album-livro" tabindex="0" role="group" aria-label="Livro de figurinhas. Use as setas para folhear."></div>
+    <div class="album-paginacao"><button class="btn btn-pequeno" type="button" id="albumAnterior" aria-label="Páginas anteriores">← Anterior</button><div><strong id="albumPaginaStatus" role="status" aria-live="polite"></strong><small>← → para folhear</small></div><button class="btn btn-pequeno" type="button" id="albumProxima" aria-label="Próximas páginas">Próxima →</button></div>
+  </section>
 </section>
 
 <!-- =================================================== PAINEL: HISTÓRICO -->
@@ -1564,6 +1588,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <script src="./camarotes.js?v=115"></script>
 <script src="./cidade.js?v=118"></script>
 <script src="./cafe.js?v=128"></script>
+<script src="./album-time.js?v=129"></script>
 <script>
 "use strict";
 /* ==========================================================================
@@ -4735,6 +4760,7 @@ function jogadorDaVaga(id) {
   return meuTime.jogadores.find(j=>j.id===meuTime.escalacao[id]) || null;
 }
 function focarPosicaoTime() {
+  if(albumDoTimeUI.visao!=="escalacao") selecionarVisaoDoTime("escalacao");
   const botao=$("#timePosicoes").querySelector('[data-time-pos="'+posicaoTimeSelecionada+'"]');
   if(botao) botao.focus({preventScroll:true});
 }
@@ -4787,6 +4813,7 @@ function renderMeuTime() {
   $("#btnRemoverTitular").hidden=!jogadorDaVaga(posicao.id);
   renderRepetidosDoTime();
   renderConviteAmistoso();
+  renderAlbumDoTime();
 }
 function renderRepetidosDoTime() {
   const repetidos=meuTime.jogadores.filter(j=>j.quantidade>1).sort((a,b)=>b.ovr-a.ovr||a.nome.localeCompare(b.nome,"pt-BR"));
@@ -4837,6 +4864,7 @@ function escalarJogadorNoTime(id) {
 }
 $("#painel-time").addEventListener("click",e=>{
   if(e.target.closest("[data-time-repetidos]")) {
+    selecionarVisaoDoTime("escalacao");
     const secao=$("#repetidosMeuTime"),cabecalho=$(".cabecalho").getBoundingClientRect().height;
     window.scrollTo({top:window.scrollY+secao.getBoundingClientRect().top-cabecalho-16,behavior:"smooth"});
     $("#tituloRepetidos").focus({preventScroll:true});return;
@@ -8123,6 +8151,7 @@ function mensagemDeRetomada() {
 function iniciarApp() {
   iniciarExperiencias();
   iniciarCafe();
+  iniciarAlbumDoTime();
   // sincroniza recordes e marcos sem comemorar histórico antigo
   conferirRecordes(true);
   conferirMarcos(true);
