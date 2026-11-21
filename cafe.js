@@ -11,7 +11,7 @@ function normalizarCafe(dados) {
     tarefas: Array.from({length: 3}, (_, i) => ({
       texto: texto(d.tarefas?.[i]?.texto, 180), feita: d.tarefas?.[i]?.feita === true
     })),
-    som: ["cafeteria", "chuva", "misto"].includes(d.som) ? d.som : "cafeteria",
+    som: ["cafeteria", "chuva", "misto", "natureza", "melodia"].includes(d.som) ? d.som : "cafeteria",
     volume: typeof d.volume === "number" && Number.isFinite(d.volume) ? Math.max(0, Math.min(1, d.volume)) : .45
   };
 }
@@ -101,7 +101,7 @@ function iniciarCafe() {
           <div class="cafe-tempo-ajuste"><label for="cafeDuracao">Duração</label><input id="cafeDuracao" type="number" min="1" max="180" step="1" inputmode="numeric"><span>min</span></div>
           <button type="button" id="cafePrincipal">Iniciar foco</button><div class="cafe-relogio-acoes"><button type="button" id="cafeZerar">Zerar</button><button type="button" id="cafeEncerrar">Encerrar e registrar</button></div>
         </div><p class="cafe-registro">O mesmo Pomodoro do Foco. Ao encerrar após 1 minuto, o tempo estudado é registrado.</p>
-        <div class="cafe-som"><div class="cafe-som-titulo"><span>Som ambiente</span><button type="button" id="cafeSom" aria-pressed="false">Ouvir</button></div><label class="cafe-sr" for="cafeTipoSom">Ambiente sonoro</label><select id="cafeTipoSom"><option value="cafeteria">Cafeteria tranquila</option><option value="chuva">Chuva na janela</option><option value="misto">Cafeteria + chuva</option></select><div class="cafe-volume"><label for="cafeVolume">Volume</label><input id="cafeVolume" type="range" min="0" max="100" step="1"><output id="cafeVolumeValor" for="cafeVolume">45%</output></div><p id="cafeSomStatus" role="status">Toque em Ouvir para começar.</p></div>
+        <div class="cafe-som"><div class="cafe-som-titulo"><span>Som ambiente</span><button type="button" id="cafeSom" aria-pressed="false">Ouvir</button></div><label class="cafe-sr" for="cafeTipoSom">Ambiente sonoro</label><select id="cafeTipoSom"><option value="cafeteria">Cafeteria tranquila</option><option value="chuva">Chuva na janela</option><option value="misto">Cafeteria + chuva</option><option value="natureza">Natureza + chuva</option><option value="melodia">Piano tranquilo</option></select><div class="cafe-volume"><label for="cafeVolume">Volume</label><input id="cafeVolume" type="range" min="0" max="100" step="1"><output id="cafeVolumeValor" for="cafeVolume">45%</output></div><p id="cafeSomStatus" role="status">Toque em Ouvir para começar.</p></div>
       </div>
       <div class="cafe-caderno"><div class="cafe-caderno-topo"><span>CADERNO DE MESA</span><span id="cafeTarefasResumo">0/3</span></div><h3>O que vamos estudar?</h3><label for="cafeObjetivo">Objetivo do bloco</label><input type="text" id="cafeObjetivo" maxlength="80" placeholder="Ex.: Revisar os antibióticos" autocomplete="off"><p id="cafeObjetivoAjuda">Um objetivo claro para este bloco.</p>
         <fieldset><legend>Três pequenos passos</legend>${[0,1,2].map(i=>`<div class="cafe-tarefa"><input type="checkbox" id="cafeFeita${i}" aria-label="Concluir tarefa ${i+1}"><label class="cafe-sr" for="cafeTarefa${i}">Tarefa ${i+1}</label><input type="text" id="cafeTarefa${i}" maxlength="180" placeholder="${["Ler e entender","Praticar ou revisar","Anotar o que ficou"][i]}" autocomplete="off"></div>`).join("")}</fieldset>
@@ -195,9 +195,15 @@ function renderAmbienteCafe() {
 
 /* Gravações CC0 tratadas e incluídas no app; créditos em audio/cafe/CREDITOS.md. */
 const cafeBuffers = new Map();
+const GRAVACOES_CAFE = {
+  cafeteria: "./audio/cafe/cafeteria.mp3?v=119",
+  chuva: "./audio/cafe/chuva.mp3?v=119",
+  natureza: "./audio/cafe/natureza.mp3?v=123",
+  melodia: "./audio/cafe/melodia.mp3?v=123"
+};
 async function carregarGravacaoCafe(nome, ctx) {
   if (!cafeBuffers.has(nome)) {
-    const pedido = fetch(new URL(`./audio/cafe/${nome}.mp3?v=119`, document.baseURI))
+    const pedido = fetch(new URL(GRAVACOES_CAFE[nome], document.baseURI))
       .then(r => {if(!r.ok)throw new Error("Áudio indisponível");return r.arrayBuffer();})
       .then(dados => ctx.decodeAudioData(dados))
       .then(buffer => {
@@ -224,7 +230,9 @@ async function iniciarSomCafe() {
   const master=ctx.createGain();master.gain.value=0;master.connect(ctx.destination);
   const audio={ctx,master,fontes:[],nos:[master],carregando:true};cafeAudio=audio;
   const tipo=cafeRascunho.som;
-  const faixas=tipo==="misto"?[["cafeteria",.7],["chuva",.55]]:[[tipo,1]];
+  const faixas=tipo==="misto" ? [["cafeteria",.7],["chuva",.55]]
+    : tipo==="natureza" ? [["natureza",.7],["chuva",.7]]
+    : [[tipo,tipo==="melodia" ? .85 : 1]];
   atualizarSomCafe();
   try {
     const buffers=await Promise.all(faixas.map(([nome])=>carregarGravacaoCafe(nome,ctx)));

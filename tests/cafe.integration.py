@@ -122,6 +122,33 @@ try:
   assert 'tentar novamente' in p.locator('#cafeSomStatus').inner_text()
   p.evaluate('()=>{window.fetch=fetchCafeOriginal;}');p.locator('#cafeSom').click()
   p.wait_for_function('cafeAudio && !cafeAudio.carregando');p.locator('#cafeSom').click()
+  # New long recordings play real audio, preserve the selected environment and never autoplay.
+  assert p.locator('#cafeTipoSom option').count()==5
+  for ambiente in ['natureza','melodia']:
+   p.locator('#cafeTipoSom').select_option(ambiente)
+   p.locator('#cafeSom').click();p.wait_for_function('cafeAudio && !cafeAudio.carregando')
+   assert p.evaluate('cafeAudio.fontes.length')==(2 if ambiente=='natureza' else 1)
+   assert p.evaluate('cafeAudio.fontes.every(f=>f.loop)')
+   assert p.evaluate('cafeAudio.fontes[0].buffer.duration')>90
+   assert p.evaluate('''async()=>{
+    const a=cafeAudio,analyser=a.ctx.createAnalyser();a.master.connect(analyser);
+    const data=new Float32Array(analyser.fftSize);let tocando=false;
+    for(let i=0;i<25&&!tocando;i++){
+     await new Promise(r=>setTimeout(r,100));analyser.getFloatTimeDomainData(data);
+     tocando=data.some(x=>Math.abs(x)>.00001);
+    }
+    a.master.disconnect(analyser);analyser.disconnect();return tocando;
+   }''')
+   p.evaluate('salvarCafe()');p.reload(wait_until='networkidle');p.locator('[data-entrar-cafe]').click()
+   assert p.locator('#cafeTipoSom').input_value()==ambiente
+   assert p.evaluate('cafeAudio===null')
+   assert p.locator('#cafeNotas').input_value()==note
+   with p.expect_download() as dl:p.evaluate('exportarJSON()')
+   ambiente_backup=json.loads(pathlib.Path(dl.value.path()).read_text())
+   assert ambiente_backup['config']['cafe']['som']==ambiente
+   p.evaluate('(d)=>importarJSON(new File([JSON.stringify(d)],"ambiente.json"))',ambiente_backup)
+   p.wait_for_function('(som)=>cafeRascunho.som===som',arg=ambiente)
+   assert p.evaluate('cafeAudio===null')
   # A failed storage write keeps the draft visible and exportable without claiming it was saved.
   p.evaluate('window.originalGravar=Armazem.gravar;Armazem.gravar=()=>false')
   p.locator('#cafeNotas').fill('Rascunho ainda não salvo');p.evaluate('salvarCafe()')
@@ -143,6 +170,11 @@ try:
   p.locator('#cafeTipoSom').select_option('misto');p.locator('#cafeSom').click()
   p.wait_for_function('cafeAudio && !cafeAudio.carregando')
   assert p.evaluate('cafeAudio.fontes.length')==2;p.locator('#cafeSom').click()
+  for ambiente in ['natureza','melodia']:
+   p.locator('#cafeTipoSom').select_option(ambiente);p.locator('#cafeSom').click()
+   p.wait_for_function('cafeAudio && !cafeAudio.carregando')
+   assert p.evaluate('cafeAudio.fontes.length')==(2 if ambiente=='natureza' else 1)
+   p.locator('#cafeSom').click()
   assert not errors,errors
   print('PASS',url,'one shared timer; partial/full registration once; rewards; pause/resume/reload/navigation; notebook/3 tasks/export/import/XSS/write failure; city mouse/keyboard entry; nine atmospheres; six widths; opt-in local audio/mute/navigation; offline')
   b.close()
