@@ -82,36 +82,7 @@ function resumoTitulosMuseu(){
   const principais=ciclosEncerrados().length,secundarios=ciclosDoMuseu().reduce((s,c)=>s+trofeusSecundariosDoCiclo(c).length,0);
   return principais+' '+(principais===1?'Tutoria':'Tutorias')+(secundarios?' · '+secundarios+' '+(secundarios===1?'troféu Clínicas':'troféus Clínicas'):'');
 }
-function tacaClinicasSvg(prefix){
-  // A mesma família de materiais, com uma copa compacta e sem a gravação Tutoria.
-  return `<g class="taca-clinicas"><ellipse cy="79" rx="48" ry="3" fill="#13251B" opacity=".24"/>
-    <path d="M-35-79C-78-97-90-51-64-35L-34-24M35-79C78-97 90-51 64-35L34-24" fill="none" stroke="#795523" stroke-width="11"/>
-    <path d="M-35-81C-76-94-86-53-62-38L-35-28M35-81C76-94 86-53 62-38L35-28" fill="none" stroke="url(#${prefix}-metal)" stroke-width="7"/>
-    <path d="M-43-93H43L35-45Q29-19 8-12H-8Q-29-19-35-45Z" fill="url(#${prefix}-ouro)" stroke="#A07A35" stroke-width="1.2"/>
-    <ellipse cy="-93" rx="43" ry="8" fill="url(#${prefix}-metal)"/><ellipse cy="-94" rx="35" ry="4.5" fill="url(#${prefix}-interior)"/>
-    <path d="M-28-83-22-48Q-19-31-10-24" fill="none" stroke="#FFF2C3" stroke-width="3" opacity=".55"/>
-    <path d="M-7-11H7L5 29H-5Z" fill="url(#${prefix}-ouro)"/><path d="M-5 27Q-11 40-27 44L-32 51H32L27 44Q11 40 5 27Z" fill="url(#${prefix}-ouro)"/><ellipse cy="51" rx="32" ry="5" fill="url(#${prefix}-metal)"/>
-    <rect x="-40" y="60" width="80" height="17" rx="2" fill="url(#${prefix}-pedra)"/><path d="M-38 59H38M-41 77H41" stroke="url(#${prefix}-metal)" stroke-width="3"/>
-    <circle cy="-57" r="17" fill="#EDD697" stroke="#A47E39" stroke-width="1.5"/><path d="m0-69 3.5 7.6 8.3 1-6.2 5.7 1.6 8.2L0-50.6l-7.2 4.1 1.6-8.2-6.2-5.7 8.3-1Z" fill="#967031"/>
-    <rect x="-23" y="63" width="46" height="9" rx="1" fill="#C4A66B"/><text x="0" y="69.5" font-size="5.2" letter-spacing=".9" text-anchor="middle" fill="#354235">CLÍNICAS</text></g>`;
-}
-function vitrineClinicasSvg(prefix,c,x,interativo,luxo){
-  const ativo=estadoMuseu.selecionado===c.id&&estadoMuseu.trofeu==='clinicas';
-  const attrs=interativo?` data-tutoria="${escapar(c.id)}" data-trofeu="clinicas" role="button" tabindex="0" aria-label="Ver troféu Clínicas: ${escapar(c.nome)}" aria-pressed="${ativo}"`:'';
-  return `<g data-vitrine-secundaria="clinicas"${attrs}><title>Clínicas · ${escapar(c.nome)}</title>
-    <path d="M${x-79} 546V397Q${x-79} 355 ${x} 355Q${x+79} 355 ${x+79} 397V546Z" fill="url(#${prefix}-nicho)" stroke="#BDA873" stroke-opacity=".35"/>
-    <ellipse cx="${x}" cy="456" rx="77" ry="101" fill="url(#${prefix}-luz)"/><rect x="${x-17}" y="353" width="34" height="4" rx="2" fill="#C1AB74"/><path d="M${x-12} 358h24" stroke="#FFF0C1" opacity=".6"/>
-    <ellipse cx="${x+5}" cy="628" rx="87" ry="13" fill="#11251B" opacity=".16"/>
-    <path d="M${x-74} 553H${x+74}V621H${x-74}Z" fill="url(#${prefix}-pedestal)"/><path d="M${x+74} 553l10-8v68l-10 8Z" fill="${luxo?'#182E29':'#594C35'}"/><path d="M${x-79} 553l10-8h158l-10 8Z" fill="${luxo?'#8E9C86':'#BA9D70'}"/>
-    <path d="M${x-76} 558H${x+76}M${x-76} 618H${x+76}" stroke="#B9A16B" stroke-width="1.5"/>
-    <g data-taca-secundaria="clinicas" transform="translate(${x} 491) scale(.74)">${tacaClinicasSvg(prefix)}</g>
-    <path class="museu-vidro" d="M${x-69} 376H${x+69}V553H${x-69}Z" fill="url(#${prefix}-vidro)" stroke="${ativo?'#EBD695':'#BCD0BB'}" stroke-opacity="${ativo?'.95':'.6'}" stroke-width="${ativo?2:1.2}"/>
-    <path d="M${x-69} 376l10-7h138l-10 7M${x+69} 376l10-7v177l-10 7M${x-64} 383v163" fill="none" stroke="#E3F3E8" stroke-width="1" opacity=".4"/>
-    ${luxo?`<path d="M${x-63} 550H${x+63}" stroke="#F4DF9F" stroke-width="2"/>`:''}
-    <rect x="${x-61}" y="569" width="122" height="36" rx="2" fill="${luxo?'#CAB77E':'#CCBC92'}" stroke="#DDCCA0"/>
-    <text x="${x}" y="584" text-anchor="middle" font-size="10" letter-spacing="1.8" font-weight="800" fill="#30402E">CLÍNICAS</text><text x="${x}" y="597" text-anchor="middle" font-size="7.8" fill="#405039">PROVA SECUNDÁRIA</text></g>`;
-}
-function capacidadeMuseu(){return matchMedia('(max-width:550px)').matches?1:ciclosDoMuseu().some(c=>trofeusSecundariosDoCiclo(c).length)?2:3;}
+function capacidadeMuseu(){return matchMedia('(max-width:550px)').matches?1:2;}
 function chuvaSvgAmbiente(x,y,w,h,prefix){
   if(ambienteEstadioAtual().clima!=='chuva')return '';
   let linhas='';for(let i=0;i<85;i++){
@@ -136,122 +107,123 @@ function envolverEstadioAmbiente(modelo,defs,enquadramento){
   return '<defs>'+defs+'<filter id="amb-modelo" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="'+c.filtro+'"/></filter><radialGradient id="amb-halo"><stop stop-color="#FFF9CB" stop-opacity=".9"/><stop offset=".2" stop-color="#FFF6C4" stop-opacity=".4"/><stop offset="1" stop-color="#F9F4CA" stop-opacity="0"/></radialGradient></defs>'+ceuSvgEstadio(x,y,w,h)+'<g data-modelo-ambiente="'+a.periodo+'" filter="url(#amb-modelo)">'+modelo+'</g>'+luzes+chuvaSvgAmbiente(x,y,w,h,'morumbi');
 }
 function nivelMuseu(){return loja.niveis?.museu===2?2:1;}
-function nomeNivelMuseu(){return nivelMuseu()===2?'Galeria de Honra':'Sala das Tutorias';}
+function nomeNivelMuseu(){return nivelMuseu()===2?'Armário de Honra':'Armário de Madeira';}
 function linhasPlacaMuseu(texto,limite=23){
   const palavras=String(texto).split(/\s+/),linhas=[''];
   for(const p of palavras){const i=linhas.length-1;if((linhas[i]+' '+p).trim().length>limite&&linhas[i])linhas.push(p);else linhas[i]=(linhas[i]+' '+p).trim();}
   return linhas.slice(0,2).map((l,i)=>l.length>limite?l.slice(0,limite-1)+'…':i===1&&linhas.length>2?l.slice(0,limite-1)+'…':l);
 }
 function defsTacaMuseu(prefix){
-  return `<linearGradient id="${prefix}-ouro"><stop stop-color="#80511B"/><stop offset=".13" stop-color="#C48E32"/><stop offset=".3" stop-color="#FFE9A2"/><stop offset=".43" stop-color="#FFF4C1"/><stop offset=".55" stop-color="#D8AB51"/><stop offset=".76" stop-color="#F1CD77"/><stop offset=".9" stop-color="#B77C29"/><stop offset="1" stop-color="#79501E"/></linearGradient><linearGradient id="${prefix}-metal" x2=".2" y2="1"><stop stop-color="#FFF1B7"/><stop offset=".28" stop-color="#DAB361"/><stop offset=".57" stop-color="#9E6C25"/><stop offset=".76" stop-color="#E7C77B"/><stop offset="1" stop-color="#886024"/></linearGradient><linearGradient id="${prefix}-interior" x2="0" y2="1"><stop stop-color="#674318"/><stop offset="1" stop-color="#C79C4D"/></linearGradient><linearGradient id="${prefix}-pedra"><stop stop-color="#142B29"/><stop offset=".4" stop-color="#3A4B41"/><stop offset=".68" stop-color="#1B302C"/><stop offset="1" stop-color="#0D211F"/></linearGradient>`;
+  return `<linearGradient id="${prefix}-ouro"><stop stop-color="#80511E"/><stop offset=".15" stop-color="#C79A45"/><stop offset=".31" stop-color="#FFF0BA"/><stop offset=".42" stop-color="#FFF8D3"/><stop offset=".54" stop-color="#D7AA50"/><stop offset=".72" stop-color="#F4D888"/><stop offset=".88" stop-color="#BA8431"/><stop offset="1" stop-color="#80551F"/></linearGradient>
+    <linearGradient id="${prefix}-metal" x2=".2" y2="1"><stop stop-color="#FFF1BB"/><stop offset=".25" stop-color="#DAB362"/><stop offset=".53" stop-color="#9E6F2D"/><stop offset=".76" stop-color="#F4D992"/><stop offset="1" stop-color="#987132"/></linearGradient>
+    <linearGradient id="${prefix}-interior" x2="0" y2="1"><stop stop-color="#4F3418"/><stop offset="1" stop-color="#C59A4D"/></linearGradient>
+    <linearGradient id="${prefix}-prata"><stop stop-color="#637583"/><stop offset=".15" stop-color="#A7B9C7"/><stop offset=".32" stop-color="#F3F8FC"/><stop offset=".43" stop-color="#FFFFFF"/><stop offset=".57" stop-color="#A5B4C2"/><stop offset=".76" stop-color="#E5EDF3"/><stop offset=".9" stop-color="#91A3B1"/><stop offset="1" stop-color="#596F7E"/></linearGradient>
+    <linearGradient id="${prefix}-prata-aro" x2=".18" y2="1"><stop stop-color="#FAFCFF"/><stop offset=".35" stop-color="#BAC9D4"/><stop offset=".61" stop-color="#758B9C"/><stop offset="1" stop-color="#DBE5EC"/></linearGradient>
+    <linearGradient id="${prefix}-prata-dentro" x2="0" y2="1"><stop stop-color="#3D5261"/><stop offset="1" stop-color="#B3C6D2"/></linearGradient>
+    <linearGradient id="${prefix}-pedra"><stop stop-color="#142721"/><stop offset=".3" stop-color="#34463C"/><stop offset=".65" stop-color="#172C25"/><stop offset="1" stop-color="#0C211C"/></linearGradient>
+    <linearGradient id="${prefix}-ardosia"><stop stop-color="#172934"/><stop offset=".4" stop-color="#3D505B"/><stop offset=".7" stop-color="#263B47"/><stop offset="1" stop-color="#122630"/></linearGradient>`;
 }
 function tacaTutoriaSvg(prefix){
-  let s=`<g class="taca-tutoria"><ellipse cy="79" rx="48" ry="3" fill="#13251B" opacity=".24"/>
-    <path d="M-40-90C-86-113-105-69-76-39Q-60-23-36-43M40-90C86-113 105-69 76-39Q60-23 36-43" fill="none" stroke="#78521F" stroke-width="12"/>
-    <path d="M-40-92C-85-110-101-69-74-41Q-61-29-38-45M40-92C85-110 101-69 74-41Q61-29 38-45" fill="none" stroke="url(#${prefix}-metal)" stroke-width="8"/>
-    <path d="M-51-95C-81-101-89-79-81-61M51-95C81-101 89-79 81-61" fill="none" stroke="#FFF1BA" stroke-width="1.7" opacity=".8"/>
-    <path d="M-45-101Q0-92 45-101L38-61Q34-28 11-16H-11Q-34-28-38-61Z" fill="url(#${prefix}-ouro)" stroke="#9C712E" stroke-width="1.1"/>`;
-  for(const d of [-29,-20,20,29])s+=`<path d="M${d}-92Q${d*.85}-39 ${d*.28}-21" fill="none" stroke="${d<0?'#FFF2BF':'#936528'}" stroke-width="${Math.abs(d)===20?1.4:.8}" opacity=".28"/>`;
-  s+=`<ellipse cy="-101" rx="45" ry="8.5" fill="url(#${prefix}-metal)" stroke="#FBE6A0" stroke-width="1.3"/><ellipse cy="-102" rx="37" ry="5" fill="url(#${prefix}-interior)"/><path d="M-31-105Q0-111 31-105" fill="none" stroke="#FFF0B0" stroke-width="1.2" opacity=".8"/>
-    <path d="M-32-91-27-64Q-24-39-14-29" fill="none" stroke="#FFF8D7" stroke-width="3" opacity=".55"/>
-    <path d="M-11-16H11L8-9H-8ZM-6-9H6L5 28H-5Z" fill="url(#${prefix}-ouro)" stroke="#AF853B" stroke-width=".7"/><ellipse cy="-9" rx="12" ry="3.3" fill="url(#${prefix}-metal)"/>
-    <path d="M-5 25Q-10 37-24 41L-29 48H29L24 41Q10 37 5 25Z" fill="url(#${prefix}-ouro)" stroke="#B28A42" stroke-width=".8"/><ellipse cy="47" rx="30" ry="5" fill="url(#${prefix}-metal)"/>
-    <path d="M-34 53-40 59H40L34 53Z" fill="#AB8B4B"/><rect x="-40" y="59" width="80" height="17" rx="2" fill="url(#${prefix}-pedra)" stroke="#172A23"/><path d="M-36 61 7 70 20 65 37 73M-27 74-2 70" fill="none" stroke="#97A699" stroke-width=".6" opacity=".25"/><path d="M-40 59H40M-41 77H41" stroke="url(#${prefix}-metal)" stroke-width="3"/>
-    <rect x="-17" y="63" width="34" height="9" rx="1" fill="#C4A66B"/><text x="0" y="69.5" font-family="Georgia,serif" font-size="4.8" letter-spacing="1.1" text-anchor="middle" fill="#354235">TUTORIA</text>
-    <path d="M-12-74H12V-58L0-47-12-58Z" fill="#F3E4AF" stroke="#B48C42" stroke-width="1.5"/><path d="M-10-71H10V-65H-10Z" fill="#263932"/><path d="M-10-62H-1V-51L-10-59Z" fill="#AA3A42"/><path d="M1-62H10V-59L1-51Z" fill="#2F4036"/>
-    <path d="M-17-48Q-28-59-22-73M17-48Q28-59 22-73" fill="none" stroke="#F8E1A0" stroke-width="1" opacity=".8"/>`;
-  for(const lado of [-1,1])for(let i=0;i<4;i++)s+=`<ellipse cx="${lado*(21+i*.6)}" cy="${-53-i*4.8}" rx="1.6" ry="3.3" transform="rotate(${lado*35} ${lado*(21+i*.6)} ${-53-i*4.8})" fill="#FAE5AB" opacity=".65"/>`;
+  let s=`<g class="taca-tutoria" data-material="ouro"><ellipse cy="88" rx="53" ry="3" fill="#10281D" opacity=".18"/>
+    <path d="M-40-120C-87-153-113-116-91-77Q-78-48-39-50M40-120C87-153 113-116 91-77Q78-48 39-50" fill="none" stroke="#77501F" stroke-width="13"/>
+    <path d="M-40-123C-87-150-109-116-88-78Q-75-53-40-54M40-123C87-150 109-116 88-78Q75-53 40-54" fill="none" stroke="url(#${prefix}-metal)" stroke-width="8.5"/>
+    <path d="M-53-129C-85-141-100-122-94-102M53-129C85-141 100-122 94-102" fill="none" stroke="#FFF2BD" stroke-width="1.8" opacity=".8"/>
+    <path d="M-43-139Q0-131 43-139L37-82Q33-43 12-28H-12Q-33-43-37-82Z" fill="url(#${prefix}-ouro)" stroke="#9B712F" stroke-width="1.2"/>
+    <ellipse cy="-139" rx="43" ry="8" fill="url(#${prefix}-metal)" stroke="#F8DFA0"/><ellipse cy="-140" rx="35" ry="4.7" fill="url(#${prefix}-interior)"/>
+    <path d="M-35-129Q0-119 35-129M-34-119Q0-110 34-119" fill="none" stroke="url(#${prefix}-metal)" stroke-width="2.5"/>
+    <path d="M-29-112-24-80Q-20-50-10-40" fill="none" stroke="#FFF6CB" stroke-width="3.5" opacity=".58"/>`;
+  for(const x of [-27,-19,19,27])s+=`<path d="M${x}-112Q${x*.92}-59 ${x*.36}-34" fill="none" stroke="${x<0?'#FFF3C2':'#9F732F'}" stroke-width="1" opacity=".3"/>`;
+  s+=`<path d="M-11-28H11L8-19H-8Z" fill="url(#${prefix}-metal)"/><ellipse cy="-19" rx="12" ry="4" fill="url(#${prefix}-metal)"/>
+    <path d="M-6-17H6L8 9Q8 24 17 30H-17Q-8 24-8 9Z" fill="url(#${prefix}-ouro)"/><path d="M-17 30H17L24 39H-24Z" fill="url(#${prefix}-metal)"/><ellipse cy="40" rx="26" ry="5" fill="url(#${prefix}-ouro)"/>
+    <path d="M-28 45H28L37 53H-37Z" fill="url(#${prefix}-metal)"/><path d="M-39 56H39L45 63V84H-45V63Z" fill="url(#${prefix}-pedra)" stroke="#132A20"/>
+    <path d="M-39 59 2 68 17 65 41 76M-29 81-5 70" fill="none" stroke="#C0CCB8" stroke-width=".7" opacity=".28"/><path d="M-42 62H42M-45 85H45" stroke="url(#${prefix}-metal)" stroke-width="3"/>
+    <rect x="-23" y="69" width="46" height="9" rx="1" fill="#DBC48A"/><text x="0" y="75.5" font-size="4.7" letter-spacing="1.3" text-anchor="middle" fill="#354333">TUTORIAS</text>
+    <path d="M-13-96H13V-77L0-65-13-77Z" fill="#F8EBC2" stroke="#A37E3C" stroke-width="1.2"/><path d="M-11-93H11V-86H-11Z" fill="#293B32"/><text x="0" y="-88" font-size="4" text-anchor="middle" fill="#F9F5DF" letter-spacing=".5">SPFC</text><path d="M-11-83H-1V-69L-11-79Z" fill="#A52F3E"/><path d="M1-83H11V-79L1-69Z" fill="#263A31"/>
+    <path d="M-18-65Q-31-80-24-97M18-65Q31-80 24-97" fill="none" stroke="#F9E4A8" stroke-width="1.2"/>`;
+  for(const l of [-1,1])for(let i=0;i<5;i++)s+=`<ellipse cx="${l*(23.5+i*.35)}" cy="${-70-i*5}" rx="1.8" ry="3.8" transform="rotate(${l*38} ${l*(23.5+i*.35)} ${-70-i*5})" fill="#FBE7AF"/>`;
+  s+='<path d="m0-109 1.8 3.7 4 .6-2.9 2.9.7 4-3.6-1.9-3.6 1.9.7-4-2.9-2.9 4-.6Z" fill="#F8E1A0"/>';
   return s+'</g>';
 }
+function tacaClinicasSvg(prefix){
+  let s=`<g class="taca-clinicas" data-material="prata"><ellipse cy="86" rx="46" ry="3" fill="#132935" opacity=".18"/>
+    <path d="M-44-93Q0-106 44-93L36-51Q29-14 0-5Q-29-14-36-51Z" fill="url(#${prefix}-prata)" stroke="#7B90A0" stroke-width="1.1"/>
+    <ellipse cy="-93" rx="44" ry="8" fill="url(#${prefix}-prata-aro)" stroke="#F6FBFF" stroke-width="1"/><ellipse cy="-94" rx="36" ry="4.8" fill="url(#${prefix}-prata-dentro)"/>
+    <path d="M-30-82-24-55Q-19-29-9-18" fill="none" stroke="#FFFFFF" stroke-width="3" opacity=".6"/>`;
+  for(const x of [-23,-13,13,23])s+=`<path d="M${x}-82Q${x*.85}-29 ${x*.18}-12" fill="none" stroke="${x<0?'#F7FCFF':'#6B8497'}" opacity=".4" stroke-width="1.1"/>`;
+  s+=`<path d="M-27-36Q0-23 27-36" fill="none" stroke="#334A59" stroke-width="2.5"/><path d="M-26-32Q0-19 26-32" fill="none" stroke="#F7FAFC" stroke-width="2"/><path d="M-24-28Q0-17 24-28" fill="none" stroke="#A93D49" stroke-width="1.8"/>
+    <circle cy="-63" r="13" fill="url(#${prefix}-prata-aro)" stroke="#F6FAFD"/><path d="m0-72 2.5 5.1 5.7.8-4.1 4 1 5.6L0-59.1l-5.1 2.6 1-5.6-4.1-4 5.7-.8Z" fill="#5B7487"/><circle cy="-63" r="15.5" fill="none" stroke="#8199AA" stroke-width=".6" stroke-dasharray="1 2"/>
+    <path d="M-5-5H5L7 19Q9 31 22 39H-22Q-9 31-7 19Z" fill="url(#${prefix}-prata)"/><ellipse cy="40" rx="24" ry="4.5" fill="url(#${prefix}-prata-aro)"/><path d="M-26 45H26L34 53H-34Z" fill="url(#${prefix}-prata)"/>
+    <path d="M-36 58H36L42 64V82H-42V64Z" fill="url(#${prefix}-ardosia)" stroke="#1A3443"/><path d="M-39 62H39M-42 83H42" stroke="url(#${prefix}-prata-aro)" stroke-width="2.5"/>
+    <rect x="-23" y="68" width="46" height="9" rx="1" fill="#D5E0E8"/><text x="0" y="74.5" font-size="5" letter-spacing="1" text-anchor="middle" fill="#344E60">CLÍNICAS</text></g>`;
+  return s;
+}
 function desenharSalaMuseu(prefix='sala',interativo=true){
-  const luxo=nivelMuseu()===2,lista=ciclosDoMuseu(),cap=capacidadeMuseu(),pagina=interativo?estadoMuseu.pagina:0,visiveis=lista.slice(pagina*cap,pagina*cap+cap);
-  const C=luxo?{parede:'#213B35',paredeTopo:'#344A40',teto:'#142A25',lateral:'#182F29',piso:'#D8D9CD',pisoFrente:'#9FAEA2',pedestal:'#263D35',madeira:'#182E29',borda:'#BAA46E',texto:'#E5D6A2',nicho:'#152C26'}:
-    {parede:'#DAD9C8',paredeTopo:'#F3EFDF',teto:'#C6C7B7',lateral:'#BDC5B6',piso:'#BB9E77',pisoFrente:'#E0C8A0',pedestal:'#816448',madeira:'#594C35',borda:'#A58E5C',texto:'#5D6650',nicho:'#B4B8A2'};
-  let s=`<svg viewBox="${cap===1?'250 100 700 620':'0 0 1200 720'}" preserveAspectRatio="${interativo?'xMidYMid meet':'xMidYMid slice'}" role="${interativo?'group':'img'}" aria-label="${nomeNivelMuseu()}, ${resumoTitulosMuseu()}"><defs>
-    ${defsTacaMuseu(prefix)}
-    <linearGradient id="${prefix}-parede" x2="0" y2="1"><stop stop-color="${C.paredeTopo}"/><stop offset="1" stop-color="${C.parede}"/></linearGradient>
-    <linearGradient id="${prefix}-piso" x2="0" y2="1"><stop stop-color="${C.piso}"/><stop offset="1" stop-color="${C.pisoFrente}"/></linearGradient>
-    <linearGradient id="${prefix}-pedestal"><stop stop-color="${C.madeira}"/><stop offset=".22" stop-color="${C.pedestal}"/><stop offset=".8" stop-color="${C.pedestal}"/><stop offset="1" stop-color="${C.madeira}"/></linearGradient>
-    <linearGradient id="${prefix}-nicho" x2=".1" y2="1"><stop stop-color="${C.nicho}"/><stop offset="1" stop-color="${luxo?'#314C3E':'#E5DFBD'}"/></linearGradient>
-    <linearGradient id="${prefix}-vidro" x2="1" y2=".5"><stop stop-color="#DEF5EE" stop-opacity=".09"/><stop offset=".25" stop-color="#D8EEE9" stop-opacity=".015"/><stop offset=".72" stop-color="#FFFFFF" stop-opacity=".025"/><stop offset="1" stop-color="#D5EEE7" stop-opacity=".14"/></linearGradient>
-    <radialGradient id="${prefix}-luz"><stop stop-color="#FFF1BC" stop-opacity="${luxo?'.45':'.3'}"/><stop offset=".55" stop-color="#FFF0C3" stop-opacity=".14"/><stop offset="1" stop-color="#FFF0B7" stop-opacity="0"/></radialGradient>
-    <linearGradient id="${prefix}-facho" x2="0" y2="1"><stop stop-color="#FFF0BA" stop-opacity=".16"/><stop offset="1" stop-color="#FFF0BA" stop-opacity="0"/></linearGradient>
-    <linearGradient id="${prefix}-reflexo" x2="0" y2="1"><stop stop-color="white" stop-opacity=".65"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient>
-    <mask id="${prefix}-mascara" maskUnits="userSpaceOnUse" x="0" y="621" width="1200" height="90"><rect y="621" width="1200" height="90" fill="url(#${prefix}-reflexo)"/></mask>
-    <clipPath id="${prefix}-chao"><path d="M0 530 120 450H1080L1200 530V720H0Z"/></clipPath>
-    <pattern id="${prefix}-veios" width="330" height="170" patternUnits="userSpaceOnUse"><path d="M-40 18Q15 49 77 31T201 63L240 80Q280 87 340 61M75 32 103 69 150 77M202 63 231 31" fill="none" stroke="${luxo?'#617668':'#684E32'}" stroke-width="${luxo?1.3:.6}" opacity="${luxo?'.16':'.14'}"/><path d="M-25 23Q20 54 80 37T199 69L246 87Q280 94 340 67" fill="none" stroke="#F7F1D8" stroke-width=".8" opacity=".3"/></pattern>
-    <radialGradient id="${prefix}-vinheta"><stop offset=".45" stop-color="#0C231C" stop-opacity="0"/><stop offset="1" stop-color="#0C231C" stop-opacity=".22"/></radialGradient>
-    </defs><rect width="1200" height="720" fill="${C.lateral}"/>
-    <path d="M0 0H1200L1080 105H120Z" fill="${C.teto}"/><path d="M40 15H1160L1066 90H134Z" fill="#FFF3C9" opacity=".04"/>
-    <path d="M0 0 120 105V450L0 530Z" fill="${C.lateral}"/><path d="M1200 0 1080 105V450L1200 530Z" fill="${luxo?'#102A24':'#B5BFAE'}"/>
-    <path d="M120 105H1080V450H120Z" fill="url(#${prefix}-parede)"/>
-    <path d="M0 530 120 450H1080L1200 530V720H0Z" fill="url(#${prefix}-piso)"/>
-    <g clip-path="url(#${prefix}-chao)"><rect y="450" width="1200" height="270" fill="url(#${prefix}-veios)"/>`;
-  // Juntas convergentes dão escala e profundidade sem competir com as taças.
-  for(let i=0;i<(luxo?8:15);i++){
-    const x=120+i*(luxo?137:69),frente=600+(x-600)*1.9;
-    s+=`<path d="M${x} 450 ${frente} 720" stroke="${luxo?'#697C6B':'#785E3B'}" stroke-width="${luxo?1.2:.9}" opacity="${luxo?'.25':'.22'}"/>`;
-  }
-  for(const y of luxo?[494,554,644]:[478,517,569,635,711])s+=`<path d="M0 ${y}H1200" stroke="${luxo?'#728470':'#81633F'}" stroke-width="1" opacity=".2"/>`;
-  s+=`<path d="M25 701 145 467H1055L1175 701Z" fill="none" stroke="${luxo?'#AD9E6B':'#F0D7A9'}" stroke-width="2" opacity=".38"/></g>`;
-  // Rodapés, painéis laterais e luz indireta ancoram a sala ao piso.
-  s+=`<path d="M0 521 120 442H1080L1200 521" fill="none" stroke="${luxo?'#112B25':'#50604B'}" stroke-width="15"/><path d="M0 513 120 434H1080L1200 513" fill="none" stroke="${C.borda}" stroke-width="2" opacity=".8"/>
-    <path d="M0 20 120 112H1080L1200 20" fill="none" stroke="${C.borda}" stroke-width="4"/><path d="M124 117H1076" stroke="#FFF1BD" stroke-width="2" opacity=".55"/>
-    <path d="M24 108 91 153V405L24 449ZM1176 108 1109 153V405L1176 449Z" fill="none" stroke="${C.borda}" stroke-width="2" opacity=".4"/>
-    <path d="M150 131V415M1050 131V415" stroke="${C.borda}" stroke-width="${luxo?4:2}" opacity=".6"/>`;
-  if(luxo){
-    for(const x of [172,371,829,1028])s+=`<path d="M${x} 121V427" stroke="#0D241F" stroke-width="15" opacity=".3"/><path d="M${x+5} 121V427" stroke="#C1AB70" stroke-width="1.2" opacity=".6"/>`;
-    s+=`<path d="M285 37H915M340 52H860" stroke="#F0D9A0" stroke-width="3" opacity=".65"/><path d="M260 35H940" stroke="#F3DCA0" stroke-width="13" opacity=".045"/>`;
-  }else{
-    s+=`<path d="M135 122H1065V225H135Z" fill="none" stroke="#FFF8DA" stroke-width="2" opacity=".4"/><path d="M300 45H900" stroke="#FDF4D8" stroke-width="5" opacity=".7"/>`;
-  }
-  s+=`<text x="600" y="162" text-anchor="middle" font-family="Georgia,serif" font-size="35" letter-spacing="12" fill="${C.texto}">${lista.some(c=>trofeusSecundariosDoCiclo(c).length)?'CONQUISTAS':'TUTORIAS'}</text><text x="600" y="190" text-anchor="middle" font-size="9" letter-spacing="4.5" fill="${C.texto}" opacity=".75">CADA ESFORÇO, UMA CONQUISTA.</text><path d="M470 211H730" stroke="${C.borda}" stroke-width="1" opacity=".7"/><path d="M563 218H587" stroke="#B3454A" stroke-width="3"/><path d="M591 218H609" stroke="${luxo?'#F2E9CE':'#FAF7E9'}" stroke-width="3"/><path d="M613 218H637" stroke="#263E33" stroke-width="3"/>`;
-  const xs=visiveis.length===1?[600]:visiveis.length===2?[390,810]:[285,600,915];
+  const luxo=nivelMuseu()===2,lista=ciclosDoMuseu(),cap=capacidadeMuseu(),pagina=interativo?estadoMuseu.pagina:0,visiveis=lista.slice(pagina*cap,pagina*cap+cap),mobile=cap===1;
+  const C=luxo?{parede:'#283A33',piso:'#AEB7A5',madeira:'#2A3027',clara:'#55604C',escura:'#17221C',fundo:'#233F34',borda:'#C6B180',texto:'#F1E5C3'}:
+    {parede:'#DEE0D1',piso:'#CEBA96',madeira:'#8B6949',clara:'#B29166',escura:'#574A35',fundo:'#556851',borda:'#C3AA77',texto:'#F6E9CC'};
+  const bx=mobile?308:80,bw=mobile?584:1040,slots=visiveis.length||1,espaco=24,margem=38,largura=(bw-margem*2-espaco*(slots-1))/slots;
+  let s=`<svg viewBox="${mobile?'285 0 630 720':'0 0 1200 720'}" preserveAspectRatio="xMidYMid meet" role="${interativo?'group':'img'}" aria-label="Armário de conquistas dividido por ciclos: ${resumoTitulosMuseu()}"><defs>${defsTacaMuseu(prefix)}
+    <linearGradient id="${prefix}-ambiente" x2="0" y2="1"><stop stop-color="${C.parede}"/><stop offset="1" stop-color="${luxo?'#122A22':'#B8C2AC'}"/></linearGradient>
+    <linearGradient id="${prefix}-madeira"><stop stop-color="${C.escura}"/><stop offset=".18" stop-color="${C.madeira}"/><stop offset=".48" stop-color="${C.clara}"/><stop offset=".66" stop-color="${C.madeira}"/><stop offset="1" stop-color="${C.escura}"/></linearGradient>
+    <linearGradient id="${prefix}-frente" x2="0" y2="1"><stop stop-color="${C.clara}"/><stop offset=".14" stop-color="${C.madeira}"/><stop offset="1" stop-color="${C.escura}"/></linearGradient>
+    <linearGradient id="${prefix}-fundo" x2="0" y2="1"><stop stop-color="${luxo?'#183026':'#44583F'}"/><stop offset=".68" stop-color="${C.fundo}"/><stop offset="1" stop-color="${luxo?'#3B5040':'#6C7B59'}"/></linearGradient>
+    <radialGradient id="${prefix}-luz"><stop stop-color="#FFE6A3" stop-opacity="${luxo?'.27':'.17'}"/><stop offset="1" stop-color="#FFE8AF" stop-opacity="0"/></radialGradient>
+    <linearGradient id="${prefix}-vidro" x2="1" y2=".4"><stop stop-color="#EEFFF3" stop-opacity=".05"/><stop offset=".4" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="1" stop-color="#D9F4E2" stop-opacity=".06"/></linearGradient>
+    <pattern id="${prefix}-grao" width="24" height="110" patternUnits="userSpaceOnUse"><path d="M4 0q9 50 0 110M15 0q-6 70 0 110" fill="none" stroke="#F8E0A8" stroke-width=".7" opacity="${luxo?'.05':'.13'}"/></pattern>
+    </defs><rect width="1200" height="720" fill="url(#${prefix}-ambiente)"/><path d="M0 610H1200V720H0Z" fill="${C.piso}"/>
+    <path d="M0 612H1200" stroke="${C.escura}" stroke-width="5" opacity=".35"/><path d="M130 720 270 610M460 720 510 610M800 720 750 610M1130 720 990 610" stroke="${C.escura}" opacity=".12"/>
+    <ellipse cx="600" cy="689" rx="${bw*.49}" ry="20" fill="#0A2118" opacity=".28"/>
+    <text x="600" y="43" text-anchor="middle" font-size="10" letter-spacing="5" fill="${luxo?'#B7C4A6':'#63735C'}">COPEIRO · MEMÓRIA DO CLUBE</text>
+    <path d="M${bx+20} 650h32v38h-32ZM${bx+bw-52} 650h32v38h-32Z" fill="${C.escura}"/><path d="M${bx+19} 681h34M${bx+bw-53} 681h34" stroke="${C.borda}" stroke-width="2"/>
+    <path d="M${bx+bw} 91l17-13v570l-17 17Z" fill="${C.escura}"/><rect x="${bx}" y="88" width="${bw}" height="576" rx="5" fill="url(#${prefix}-madeira)" stroke="${C.escura}" stroke-width="3"/>
+    <rect x="${bx}" y="88" width="${bw}" height="576" rx="5" fill="url(#${prefix}-grao)" pointer-events="none"/>
+    <path d="M${bx-14} 80l13-12h${bw+28}l-13 12Z" fill="${C.clara}"/><path d="M${bx-14} 80h${bw+28}v16H${bx-14}Z" fill="url(#${prefix}-frente)"/><path d="M${bx-10} 94H${bx+bw+10}" stroke="${C.borda}" stroke-width="2"/>
+    <rect x="${bx+22}" y="108" width="${bw-44}" height="52" rx="2" fill="${C.escura}"/><path d="M${bx+25} 111H${bx+bw-25}M${bx+25} 157H${bx+bw-25}" stroke="${C.borda}" stroke-width=".8" opacity=".65"/>
+    <text x="600" y="142" text-anchor="middle" font-family="Georgia,serif" font-size="${mobile?24:28}" letter-spacing="7" fill="${C.texto}">CONQUISTAS</text>`;
   (visiveis.length?visiveis:[null]).forEach((c,i)=>{
-    const secundaria=c&&trofeusSecundariosDoCiclo(c)[0],x=(c?xs[i]:600)-(secundaria?70:0),id=prefix+'-vitrine-'+i,ativo=!!(c&&c.id===estadoMuseu.selecionado&&estadoMuseu.trofeu==='tutoria'),numero=c?ciclosEncerrados().length-ciclosEncerrados().findIndex(t=>t.id===c.id):0;
-    s+=`<path d="M${x-122} 441V302Q${x-122} 239 ${x} 239Q${x+122} 239 ${x+122} 302V441Z" fill="url(#${prefix}-nicho)" stroke="${C.borda}" stroke-opacity="${luxo?'.45':'.3'}" stroke-width="1.5"/><path d="M${x-118} 439V302Q${x-118} 244 ${x} 244Q${x+118} 244 ${x+118} 302" fill="none" stroke="#071C17" stroke-width="6" opacity=".1"/>
-      <ellipse cx="${x}" cy="343" rx="126" ry="127" fill="url(#${prefix}-luz)"/>
-      <path d="M${x-20} 244 ${x-88} 470H${x+88}L${x+20} 244Z" fill="url(#${prefix}-facho)"/>
-      <rect x="${x-24}" y="237" width="48" height="5" rx="2" fill="${C.borda}"/><path d="M${x-18} 243H${x+18}" stroke="#FFF1C2" stroke-width="2" opacity=".8"/>
-      <ellipse cx="${x+7}" cy="629" rx="125" ry="19" fill="#11251B" opacity=".18"/>`;
-    if(luxo)s+=`<g class="museu-reflexo" opacity=".18" mask="url(#${prefix}-mascara)" aria-hidden="true" pointer-events="none"><use href="#${id}" transform="translate(0 744) scale(1 -.2)"/></g>`;
-    const attrs=c&&interativo?` data-tutoria="${escapar(c.id)}" data-trofeu="tutoria" role="button" tabindex="0" aria-label="Ver ${c.encerradoEm?'Tutoria':'ciclo em andamento'}: ${escapar(c.nome)}" aria-pressed="${ativo}"`:'';
-    s+=`<g id="${id}"${attrs}>${c?'<title>'+ (c.encerradoEm?'Tutoria':'Ciclo em andamento')+' · '+escapar(c.nome)+'</title>':''}
-      <path d="M${x-104} 503H${x+104}V621H${x-104}Z" fill="url(#${prefix}-pedestal)"/><path d="M${x+104} 503l14-10v116l-14 12Z" fill="${C.madeira}"/>
-      <path d="M${x-110} 503l14-11h220l-14 11Z" fill="${luxo?'#8E9C86':'#BA9D70'}"/>
-      <path d="M${x-107} 509H${x+107}M${x-107} 618H${x+107}" stroke="${C.borda}" stroke-width="2"/>
-      <path d="M${x-95} 516V608M${x+95} 516V608" stroke="${C.borda}" stroke-width="1" opacity=".5"/>`;
-    if(luxo)s+=`<path d="M${x-100} 526q50 6 81 36t117 27M${x-80} 544l16 27 34 8" stroke="#B6C5AC" stroke-width=".8" opacity=".1" fill="none"/>`;
-    else for(let j=0;j<9;j++)s+=`<path d="M${x-88+j*22} 513q6 44 0 99" stroke="#C1A87B" stroke-width=".6" opacity=".12" fill="none"/>`;
-    s+=`<ellipse cx="${x}" cy="499" rx="56" ry="5" fill="#1E2C21" opacity=".2"/>`;
-    if(c?.encerradoEm)s+=`<g id="${prefix}-taca-${i}" transform="translate(${x} 421)">${tacaTutoriaSvg(prefix)}</g>`;
-    s+=`<path class="museu-vidro" d="M${x-101} 269H${x+101}V503H${x-101}Z" fill="url(#${prefix}-vidro)" stroke="${ativo?'#DCC78A':luxo?'#C6D9C7':'#9DAF9E'}" stroke-opacity="${ativo?'.9':'.65'}" stroke-width="${ativo?2:1.2}"/>
-      <path d="M${x-101} 269l15-9h200l-13 9M${x+101} 269l13-9v234l-13 9" fill="none" stroke="#D8E9DC" stroke-opacity=".45" stroke-width="1"/>
-      <path d="M${x-96} 278v214M${x-90} 278v58M${x+96} 281v202" stroke="#F2FFFF" opacity=".26" stroke-width="1.7"/>
-      <path d="M${x-93} 278h14l122 214h-14Z" fill="#F5FFF8" opacity=".045"/>`;
-    if(luxo)s+=`<path d="M${x-94} 498H${x+94}" stroke="#FFE5A3" stroke-width="2"/><path d="M${x-94} 499H${x+94}" stroke="#FFE5A3" stroke-width="8" opacity=".09"/>`;
-    s+=`<rect x="${x-78}" y="536" width="156" height="58" rx="3" fill="${luxo?'#CAB77E':'#CCBC92'}" stroke="${luxo?'#E0D3A2':'#E0CCA0'}" stroke-width="1"/><path d="M${x-74} 540H${x+74}" stroke="#F4E9C1" opacity=".5"/>
-      <text x="${x}" y="551" text-anchor="middle" font-size="8.8" letter-spacing="2.6" font-weight="800" fill="#31402E">${c?(c.encerradoEm?'TUTORIA · '+String(numero).padStart(2,'0'):'EM ANDAMENTO'):'EM BREVE'}</text>`;
-    linhasPlacaMuseu(c?c.nome:'Seu primeiro ciclo').forEach((l,k)=>{s+=`<text x="${x}" y="${568+k*14}" text-anchor="middle" font-size="11" font-weight="600" fill="#293B2B">${escapar(l)}</text>`;});
-    s+='</g>';
-    if(secundaria)s+=vitrineClinicasSvg(prefix,c,x+175,interativo,luxo);
+    const x=bx+margem+i*(largura+espaco),cx=x+largura/2,clinicas=c&&trofeusSecundariosDoCiclo(c).length,numero=c?ciclos.slice().sort((a,b)=>String(a.inicio).localeCompare(String(b.inicio))).findIndex(t=>t.id===c.id)+1:1;
+    s+=`<g data-ciclo-armario="${c?escapar(c.id):'vazio'}"><rect x="${x}" y="176" width="${largura}" height="62" rx="2" fill="${C.escura}" stroke="${C.borda}" stroke-opacity=".4"/>
+      <text x="${cx}" y="191" text-anchor="middle" font-size="${mobile?12:9}" letter-spacing="2.5" fill="${C.borda}">${c?'CICLO '+String(numero).padStart(2,'0'):'SUA PRIMEIRA CONQUISTA'}</text>`;
+    linhasPlacaMuseu(c?c.nome:'Cada ciclo terá seu espaço.',mobile?37:32).forEach((l,j)=>{s+=`<text x="${cx}" y="${mobile?209+j*21:211+j*16}" text-anchor="middle" font-family="Georgia,serif" font-size="${mobile?20:15}" fill="${C.texto}">${escapar(l)}</text>`;});
+    s+=`<rect x="${x}" y="249" width="${largura}" height="343" rx="2" fill="url(#${prefix}-fundo)" stroke="${C.escura}" stroke-width="5"/>
+      <ellipse cx="${cx}" cy="377" rx="${largura*.48}" ry="152" fill="url(#${prefix}-luz)"/>
+      <path d="M${x+13} 256H${x+largura-13}" stroke="${luxo?'#FFE4A1':'#E7D6A9'}" stroke-width="${luxo?3:2}" opacity=".8"/>
+      <path d="M${x+12} 258H${x+largura-12}" stroke="#FFDEA1" stroke-width="17" opacity="${luxo?'.06':'.025'}"/>
+      <path d="M${x+2} 546H${x+largura-2}v9H${x+2}Z" fill="url(#${prefix}-madeira)"/><path d="M${x+2} 546H${x+largura-2}" stroke="${C.borda}" stroke-width="1.5"/>`;
+    const trofeus=c?[...(c.encerradoEm?[{id:'tutoria',nome:'Tutorias',tx:clinicas?x+largura*.31:cx}]:[]),...(clinicas?[{id:'clinicas',nome:'Clínicas',tx:c.encerradoEm?x+largura*.76:cx}]:[])]:[];
+    trofeus.forEach(t=>{
+      const principal=t.id==='tutoria',ativo=estadoMuseu.selecionado===c.id&&estadoMuseu.trofeu===t.id,escala=principal?1.04:1,y=principal?449:455;
+      const attrs=interativo?` data-tutoria="${escapar(c.id)}" data-trofeu="${t.id}" role="button" tabindex="0" aria-label="Ver ${t.nome}: ${escapar(c.nome)}" aria-pressed="${ativo}"`:'';
+      s+=`<g${attrs}><title>${t.nome} · ${escapar(c.nome)}</title><rect class="armario-selecao" x="${t.tx-(principal?108:78)}" y="274" width="${principal?216:156}" height="312" rx="5" fill="#FBE6B3" fill-opacity="${ativo?'.045':'0'}" stroke="${ativo?'#EAD08F':'transparent'}" stroke-opacity=".25" pointer-events="all"/>
+        <path d="M${t.tx-54} 539H${t.tx+54}v7H${t.tx-54}Z" fill="${principal?C.escura:'#334B58'}"/><path d="M${t.tx-54} 539H${t.tx+54}" stroke="${principal?C.borda:'#B8CEDB'}" stroke-width="1.2"/>
+        <g id="${prefix}-taca-${principal?i:'clinicas-'+i}" ${principal?'data-taca-principal="tutoria"':'data-taca-secundaria="clinicas"'} transform="translate(${t.tx} ${y}) scale(${escala})">${principal?tacaTutoriaSvg(prefix):tacaClinicasSvg(prefix)}</g>
+        <rect x="${t.tx-65}" y="565" width="130" height="20" rx="2" fill="${principal?'#C8B47D':'#CFDCE3'}" stroke="${principal?'#DDC98E':'#ECF4F7'}" stroke-width=".6"/><text x="${t.tx}" y="579" text-anchor="middle" font-size="${mobile?13:11}" font-weight="700" letter-spacing="1.5" fill="${principal?'#34412E':'#364E5B'}">${t.nome}</text></g>`;
+    });
+    if(!trofeus.length)s+=`<text x="${cx}" y="412" text-anchor="middle" font-family="Georgia,serif" font-size="20" fill="#DFE4C8">Seu espaço está reservado.</text><text x="${cx}" y="440" text-anchor="middle" font-size="11" fill="#BFCBB0">Encerre um ciclo para conquistar Tutorias.</text>`;
+    // Uma única porta de vidro protege a prateleira inteira de cada ciclo.
+    s+=`<rect class="armario-porta" x="${x+4}" y="250" width="${largura-8}" height="341" rx="2" fill="url(#${prefix}-vidro)" stroke="${C.borda}" stroke-width="1.2" stroke-opacity=".55" pointer-events="none"/>
+      <path d="M${x+11} 268v258M${x+18} 268v48" stroke="#EEFFF4" stroke-width="1.4" opacity=".18" pointer-events="none"/>
+      <rect x="${x+largura+5}" y="406" width="4" height="29" rx="2" fill="${C.borda}"/>
+      <rect x="${x}" y="607" width="${largura}" height="36" rx="2" fill="url(#${prefix}-frente)" stroke="${C.escura}" stroke-width="1.5"/><rect x="${cx-18}" y="622" width="36" height="4" rx="2" fill="${C.borda}"/>
+      </g>`;
   });
-  s+=`<rect width="1200" height="720" fill="url(#${prefix}-vinheta)" pointer-events="none"/><path d="M0 690H1200" stroke="${C.borda}" opacity=".35"/><text x="600" y="705" text-anchor="middle" font-size="8.5" letter-spacing="5" fill="${luxo?'#405C49':'#786548'}">COPEIRO · ${luxo?'GALERIA DE HONRA':'SALA DAS TUTORIAS'}</text></svg>`;
+  s+=`<path d="M${bx-5} 650H${bx+bw+5}v16H${bx-5}Z" fill="url(#${prefix}-frente)"/><path d="M${bx} 652H${bx+bw}" stroke="${C.borda}" stroke-width="1.5"/>
+    <text x="600" y="710" text-anchor="middle" font-size="9" letter-spacing="3.8" fill="${luxo?'#344D3D':'#766649'}">${luxo?'ARMÁRIO DE HONRA':'ARMÁRIO DE MADEIRA'}</text></svg>`;
   return s;
 }
 function detalheConquistaMuseu(c){
-  if(!c)return '<span class="museu-kicker">Sua história começa aqui</span><h3>Uma vitrine esperando por você.</h3><p>Encerre um ciclo para conquistar sua primeira Tutoria. Cada ciclo terá a sua própria taça, com o nome e os resultados preservados.</p>';
+  if(!c)return '<span class="museu-kicker">Sua história começa aqui</span><h3>Um compartimento esperando por você.</h3><p>Encerre um ciclo para conquistar sua primeira Tutoria. Cada ciclo terá a sua própria taça, com o nome e os resultados preservados.</p>';
   const secundario=estadoMuseu.trofeu==='clinicas',g=c.congelado;
-  const titulos=[...(c.encerradoEm?[{id:'tutoria',nome:'Tutoria',tipo:'Principal'}]:[]),...trofeusSecundariosDoCiclo(c).map(t=>({...t,tipo:'Secundário'}))];
-  const seletor='<div class="museu-conquistas-ciclo" role="group" aria-label="Conquistas deste ciclo">'+titulos.map(t=>`<button type="button" data-tutoria="${escapar(c.id)}" data-trofeu="${t.id}" aria-pressed="${estadoMuseu.trofeu===t.id}"><strong>${t.nome}</strong><small>${t.tipo}</small></button>`).join('')+'</div>';
+  const titulos=[...(c.encerradoEm?[{id:'tutoria',nome:'Tutorias'}]:[]),...trofeusSecundariosDoCiclo(c)];
+  const seletor='<div class="museu-conquistas-ciclo" role="group" aria-label="Conquistas deste ciclo">'+titulos.map(t=>`<button type="button" data-tutoria="${escapar(c.id)}" data-trofeu="${t.id}" aria-pressed="${estadoMuseu.trofeu===t.id}"><strong>${t.nome}</strong></button>`).join('')+'</div>';
   const numeros=g?'<span class="museu-contexto">Resultados gerais do ciclo</span><div class="museu-metricas">'+[[humanoMin(g.minutos),'De estudo'],[g.blocos||0,'Blocos'],[g.diasAtivos||0,'Dias ativos'],[g.maiorSequencia||0,'Dias em sequência']].map(([v,r])=>'<div><strong>'+v+'</strong><small>'+r+'</small></div>').join('')+'</div>':'';
-  return `<span class="museu-kicker">${secundario?'Clínicas · Troféu secundário':'Tutoria · Conquistada'}</span><h3>${escapar(c.nome)}</h3><p>${formatarDataLonga(c.inicio)}${c.encerradoEm?' → '+formatarDataLonga(c.encerradoEm):' · Ciclo em andamento'}</p>${seletor}<p class="museu-descricao-conquista">${secundario?'Clínicas celebra uma prova secundária deste mesmo ciclo. Uma taça menor, guardada ao lado da conquista principal.':'A Tutoria é a conquista principal deste ciclo encerrado.'}</p>${numeros}<p class="museu-frase">“O esforço passa. A conquista fica.”</p>`;
+  return `<span class="museu-kicker">${secundario?'Clínicas':'Tutorias'}</span><h3>${escapar(c.nome)}</h3><p>${formatarDataLonga(c.inicio)}${c.encerradoEm?' → '+formatarDataLonga(c.encerradoEm):' · Ciclo em andamento'}</p>${seletor}<p class="museu-descricao-conquista">${secundario?'A taça Clínicas registra mais uma conquista deste ciclo.':'A taça Tutorias celebra a conclusão deste ciclo.'}</p>${numeros}<p class="museu-frase">“O esforço passa. A conquista fica.”</p>`;
 }
 function renderMuseuEstante(){
   const lista=ciclosDoMuseu(),horas=lista.reduce((s,c)=>s+(c.congelado?.minutos||0),0);
-  document.getElementById('estanteResumo').textContent=lista.length?resumoTitulosMuseu()+' · '+humanoMin(horas)+' de dedicação guardados.':'Cada ciclo encerrado conquista uma Tutoria. Sua primeira vitrine está esperando.';
+  document.getElementById('estanteResumo').textContent=lista.length?resumoTitulosMuseu()+' · '+humanoMin(horas)+' de dedicação guardados.':'Cada ciclo encerrado conquista uma Tutoria. Seu primeiro compartimento está esperando.';
   document.getElementById('seloNivelMuseu').textContent='Nível '+nivelMuseu()+' de 2';
-  document.getElementById('resumoEntradaMuseu').innerHTML='<strong>'+nomeNivelMuseu()+'</strong> · '+(nivelMuseu()===2?'Mármore, luz cênica e vitrines de honra.':'Uma sala acolhedora para começar sua coleção.');
+  document.getElementById('resumoEntradaMuseu').innerHTML='<strong>'+nomeNivelMuseu()+'</strong> · '+(nivelMuseu()===2?'Madeira escura, detalhes em metal e prateleiras iluminadas.':'Um espaço de madeira para as conquistas de cada ciclo.');
   document.getElementById('previaMuseu').innerHTML=desenharSalaMuseu('previa',false);
   if(document.getElementById('museuTutorias').open)renderSalaMuseu();
 }
@@ -268,7 +240,7 @@ function renderSalaMuseu(){
   document.getElementById('detalheTutoria').innerHTML=detalheConquistaMuseu(c);
   const max=nivelMuseu()===2,saldo=saldoDinheiro();
   document.getElementById('nivelMuseuTexto').textContent='Nível '+nivelMuseu()+' de 2 · '+nomeNivelMuseu();
-  document.getElementById('descricaoNivelMuseu').textContent=max?'Sua Galeria de Honra está completa: piso de mármore, detalhes dourados, luzes cênicas e vitrines iluminadas.':'Renove para a Galeria de Honra: mármore, detalhes dourados e iluminação dedicada para suas Tutorias. Pagamento único de R$ 500.';
+  document.getElementById('descricaoNivelMuseu').textContent=max?'Seu Armário de Honra está completo: madeira escura, ferragens em metal e iluminação para cada compartimento.':'Melhore para o Armário de Honra: madeira escura, detalhes em metal e iluminação nas prateleiras. Pagamento único de R$ 500.';
   document.getElementById('saldoMuseu').textContent='Seu dinheiro: '+formatarDinheiro(saldo)+(!max&&saldo<PRECO_MUSEU?' · faltam '+formatarDinheiro(PRECO_MUSEU-saldo)+'.':'');
   document.getElementById('melhorarMuseu').hidden=max;document.getElementById('melhorarMuseu').disabled=max||saldo<PRECO_MUSEU;
 }
@@ -283,7 +255,7 @@ function melhorarMuseu(){
   const gastas=loja.gastas+PRECO_MUSEU;if(!Number.isSafeInteger(gastas))return false;
   const proximo={...loja,gastas,niveis:{...loja.niveis,museu:2}};
   if(!Armazem.gravar(CHAVES.loja,proximo)){document.getElementById('avisoMuseu').textContent='Não consegui salvar a melhoria. Seu dinheiro foi mantido.';return false;}
-  loja=proximo;document.getElementById('avisoMuseu').textContent='';renderEstante();renderLoja();mostrarAviso('Galeria de Honra inaugurada. Suas Tutorias ganharam uma nova casa!','recorde');return true;
+  loja=proximo;document.getElementById('avisoMuseu').textContent='';renderEstante();renderLoja();mostrarAviso('Armário de Honra pronto. Cada ciclo ganhou seu espaço!','recorde');return true;
 }
 function iniciarExperiencias(){
   prepararTrofeusSecundariosMuseu();

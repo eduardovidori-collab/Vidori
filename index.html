@@ -863,7 +863,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 .bonus-dinheiro{padding:15px 17px;border:1px solid #DAE6CE;background:#F4F8EE;border-radius:11px;margin-top:16px}.bonus-dinheiro-topo{display:flex;justify-content:space-between;align-items:center;gap:14px}.bonus-dinheiro-topo strong{display:block;font-size:12px;color:#46673C}.bonus-dinheiro-topo p{font-size:11px;color:#7C8F6A;line-height:1.6;margin-top:3px}.bonus-dinheiro-topo>span{border:1px solid #C7DCB5;background:#E5F0D8;border-radius:8px;padding:7px 11px;color:#476F37;font-size:13px;font-weight:800;white-space:nowrap}.bonus-dinheiro-barra{height:6px;background:#E0E9D5;border-radius:6px;overflow:hidden;margin-top:12px}.bonus-dinheiro-barra i{display:block;height:100%;width:var(--progresso,0%);background:#85A65F;border-radius:6px}.bonus-dinheiro>small{display:block;font-size:10px;color:#7E8F6C;margin-top:7px}.bonus-dinheiro.feito{background:#EEF6E5;border-color:#C8DDB4}.bonus-dinheiro.feito .bonus-dinheiro-barra i{background:#507F3E}
 </style>
 <link rel="stylesheet" href="./futebol.css">
-<link rel="stylesheet" href="./estadio-museu.css?v=111">
+<link rel="stylesheet" href="./estadio-museu.css?v=112">
 </head>
 <body>
 
@@ -1068,8 +1068,8 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 
 <!-- ===================================================== PAINEL: ESTANTE -->
 <section class="painel" id="painel-estante">
-  <div class="museu-portal"><div class="museu-portal-topo"><div><span class="museu-kicker">A sua história merece um lugar</span><h2 id="estanteTitulo">Museu das Tutorias</h2><p id="estanteResumo">Cada ciclo encerrado vira uma Tutoria, guardada aqui.</p></div><span class="museu-nivel" id="seloNivelMuseu">Nível 1</span></div><div class="museu-portal-cena" id="previaMuseu" aria-hidden="true"></div><div class="museu-portal-rodape"><p id="resumoEntradaMuseu">Uma sala para celebrar seu esforço.</p><button class="btn" type="button" id="entrarMuseu" aria-haspopup="dialog">Entrar no museu →</button></div></div>
-  <h3 class="museu-arquivo-titulo">Seus ciclos · Arquivo das Tutorias</h3>
+  <div class="museu-portal"><div class="museu-portal-topo"><div><span class="museu-kicker">A sua história merece um lugar</span><h2 id="estanteTitulo">Armário de Conquistas</h2><p id="estanteResumo">Cada ciclo encerrado vira uma Tutoria, guardada aqui.</p></div><span class="museu-nivel" id="seloNivelMuseu">Nível 1</span></div><div class="museu-portal-cena" id="previaMuseu" aria-hidden="true"></div><div class="museu-portal-rodape"><p id="resumoEntradaMuseu">Um compartimento para cada ciclo.</p><button class="btn" type="button" id="entrarMuseu" aria-haspopup="dialog">Abrir armário →</button></div></div>
+  <h3 class="museu-arquivo-titulo">Seus ciclos · Arquivo das Conquistas</h3>
   <div class="prateleira" id="prateleira"></div>
 </section>
 
@@ -1365,9 +1365,9 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 
 <!-- ================================================= MUSEU DAS TUTORIAS -->
 <dialog class="museu-dialog" id="museuTutorias" aria-labelledby="tituloMuseu">
- <header class="museu-cabecalho"><div><span class="museu-kicker">Copeiro · A memória do seu esforço</span><h2 id="tituloMuseu">Museu das Tutorias</h2><p id="subtituloMuseu">Uma Tutoria para cada ciclo encerrado.</p></div><button class="btn btn-pequeno" id="fecharMuseu" type="button">Voltar à Estante</button></header>
+ <header class="museu-cabecalho"><div><span class="museu-kicker">Copeiro · A memória do seu esforço</span><h2 id="tituloMuseu">Armário de Conquistas</h2><p id="subtituloMuseu">Uma Tutoria para cada ciclo encerrado.</p></div><button class="btn btn-pequeno" id="fecharMuseu" type="button">Voltar à Estante</button></header>
  <div class="museu-grade"><div class="museu-sala"><div class="museu-cena" id="cenaMuseu"></div><div class="museu-navegacao"><button class="btn btn-pequeno" type="button" id="museuAnterior" aria-label="Ver ciclos anteriores">←</button><p id="paginaMuseu" role="status" aria-live="polite"></p><button class="btn btn-pequeno" type="button" id="museuProximo" aria-label="Ver próximos ciclos">→</button></div></div><aside class="museu-detalhe" id="detalheTutoria" aria-live="polite"></aside></div>
- <div class="museu-reforma"><div><strong id="nivelMuseuTexto">Nível 1 · Sala das Tutorias</strong><p id="descricaoNivelMuseu">Sua primeira sala de troféus.</p><small id="saldoMuseu"></small></div><button class="btn" id="melhorarMuseu" type="button">Renovar museu · R$ 500</button></div><p class="museu-aviso" id="avisoMuseu" role="status" aria-live="polite"></p>
+ <div class="museu-reforma"><div><strong id="nivelMuseuTexto">Nível 1 · Armário de Madeira</strong><p id="descricaoNivelMuseu">Seu primeiro armário de conquistas.</p><small id="saldoMuseu"></small></div><button class="btn" id="melhorarMuseu" type="button">Melhorar armário · R$ 500</button></div><p class="museu-aviso" id="avisoMuseu" role="status" aria-live="polite"></p>
 </dialog>
 
 <!-- ================================================= MELHORIAS DO ESTÁDIO -->
@@ -1550,7 +1550,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <div id="avisos" aria-live="polite"></div>
 
 <script src="./futebol.js"></script>
-<script src="./estadio-museu.js?v=111"></script>
+<script src="./estadio-museu.js?v=112"></script>
 <script>
 "use strict";
 /* ==========================================================================
@@ -4070,7 +4070,7 @@ function renderEstante() {
         '<div><div class="v">' + g.diasAtivos + '</div><div class="r">Dias ativos</div></div>' +
         '<div><div class="v">' + g.maiorSequencia + '</div><div class="r">Sequência</div></div>' +
         '<div><div class="v">' + (g.blocos || 0) + '</div><div class="r">Blocos</div></div>' +
-      '</div>'+ (trofeusSecundariosDoCiclo(c).length?'<span class="museu-selo-secundario">Clínicas · Troféu secundário</span>':'')+'<button class="btn btn-pequeno museu-ver-tutoria" type="button" data-ver-tutoria="'+escapar(c.id)+'">Ver Tutoria no museu</button></article>';
+      '</div>'+ (trofeusSecundariosDoCiclo(c).length?'<span class="museu-selo-secundario">Clínicas</span>':'')+'<button class="btn btn-pequeno museu-ver-tutoria" type="button" data-ver-tutoria="'+escapar(c.id)+'">Ver Tutoria no museu</button></article>';
   }).join("");
 }
 
