@@ -7,7 +7,7 @@
    https://usuario.github.io/Vidori/ e em qualquer outra subpasta.
    ========================================================================== */
 
-const VERSAO = "vidori-v112";
+const VERSAO = "vidori-v113";
 
 /* Tudo que forma o app. Se algum arquivo mudar, é só subir o número da VERSAO. */
 const ARQUIVOS = [
@@ -15,6 +15,7 @@ const ARQUIVOS = [
   "./index.html",
   "./futebol.js",
   "./futebol.css",
+  "./camarotes.js?v=113",
   "./estadio-museu.js?v=112",
   "./estadio-museu.css?v=112",
   "./manifest.webmanifest",
