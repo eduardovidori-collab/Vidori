@@ -1,144 +1,111 @@
-"""Render the cafe's continuous 150-second guitar arrangement (offline only).
+"""Prepare the cafe guitar from the original, warm ambient recording.
 
-Usage: python tools/render-cafe-guitar.py /path/to/EGuitarFSBS-jazz.sf2
-Requires numpy, ffmpeg and libfluidsynth. CC0 sampled instrument:
-https://freepats.zenvoid.org/ElectricGuitar/clean-electric-guitar.html
-Bank version: 2026-08-07, full SF2 bridge variant.
+Usage: python tools/render-cafe-guitar.py /path/to/source-folder
+Requires numpy and ffmpeg with Rubber Band. The folder contains the HQ MP3
+previews 689160 (main), 689161 (air 1), 689162 (air 2), 689159 (delay), all CC0:
+https://freesound.org/people/deadrobotmusic/sounds/689160/
+Sibling IDs have the same author and license. See audio/cafe/CREDITOS.md.
+This offline renderer is never loaded by the app.
 """
 import argparse
-import ctypes as C
-import ctypes.util
 from pathlib import Path
 import subprocess
 import numpy as np
 
-SR, SECONDS, BPM = 32000, 150, 76.8
-BEAT = 60 / BPM
-VOICINGS = {
-    'Em9': [40, 47, 55, 62, 66], 'Em7': [40, 47, 55, 59, 62],
-    'Cmaj7': [48, 55, 59, 64, 67], 'Gmaj7': [43, 50, 55, 59, 66],
-    'Dadd9': [50, 57, 62, 64, 66], 'Am7': [45, 52, 55, 60, 64],
-    'Dsus4': [50, 57, 62, 67, 69], 'D': [50, 57, 62, 66, 69],
-    'Bm7': [47, 54, 57, 62, 66], 'G/B': [47, 50, 55, 59, 67],
-    'Am9': [45, 52, 55, 59, 64], 'C/E': [40, 48, 55, 59, 64],
-    'B7': [47, 54, 57, 63, 66],
-}
-# Three sixteen-bar sections. The final section recalls the opening with new
-# phrasing; no section is a copied audio loop. Picking and melody evolve together.
-SCORE = [
-    ('Em9', [67,66,64]), ('Cmaj7', [64,62,59]), ('Gmaj7', [62,66,67]), ('Dadd9', [69,66,64]),
-    ('Am7', [67,64,60]), ('Cmaj7', [64,67,71]), ('Dsus4', [69,67,64]), ('D', [66,64,62]),
-    ('Em7', [64,67,66]), ('Gmaj7', [67,71,69]), ('Cmaj7', [67,64,62]), ('Bm7', [66,62,59]),
-    ('Am7', [60,64,67]), ('Dadd9', [66,69,64]), ('Gmaj7', [67,66,62]), ('Bm7', [62,59,66]),
-    ('Cmaj7', [71,67,64]), ('G/B', [69,67,62]), ('Am7', [67,64,60]), ('Em7', [62,64,67]),
-    ('Am9', [71,69,64]), ('C/E', [67,64,59]), ('Dsus4', [64,67,69]), ('D', [69,66,62]),
-    ('Cmaj7', [64,67,69]), ('Dadd9', [66,64,69]), ('Bm7', [71,66,62]), ('Em9', [67,66,64]),
-    ('Am7', [69,67,64]), ('Cmaj7', [67,64,71]), ('Bm7', [66,62,64]), ('B7', [66,63,59]),
-    ('Em9', [64,66,67]), ('Cmaj7', [71,69,67]), ('Gmaj7', [67,62,66]), ('Dadd9', [64,66,69]),
-    ('Em7', [67,64,62]), ('Bm7', [62,66,69]), ('Cmaj7', [71,67,64]), ('Am7', [64,60,67]),
-    ('Gmaj7', [71,69,67]), ('Dadd9', [69,64,66]), ('Em9', [66,67,64]), ('Cmaj7', [64,62,67]),
-    ('Am7', [67,64,60]), ('Bm7', [62,59,66]), ('Em9', [67,66,64]), ('Em9', [62,66,64]),
-]
-PATTERNS = [
-    [(0,0),(.55,1),(1.15,2),(1.9,3),(2.6,4),(3.4,2)],
-    [(0,0),(.7,2),(1.4,3),(2.1,1),(2.8,4),(3.55,3)],
-    [(0,0),(.6,1),(1.25,3),(2,4),(2.65,2),(3.35,1)],
-    [(0,0),(.8,3),(1.5,2),(2.2,4),(2.9,1),(3.6,3)],
+SR = 32000
+SOURCES = [689160, 689161, 689162, 689159]
+# Source phrase offset, active duration, and foreground/backing balance.
+# Keep the original lead in the opening; develop the two recorded counterlines
+# in the middle, then return to the lead with a different accompaniment.
+# The harmony remains in A# minor and the original plucking is preserved.
+BLOCKS = [
+    (0, 10, [1,.10,.08,.03]),
+    (10,10, [.95,.16,.10,.05]),
+    (20,10, [.90,.20,.14,.08]),
+    (30,10, [.85,.23,.18,.10]),
+    (20,10, [.35,.78,.18,.08]),
+    (0, 10, [.24,.85,.25,.10]),
+    (30,10, [.30,.74,.35,.12]),
+    (10,10, [.38,.65,.42,.08]),
+    (0, 10, [.30,.20,.82,.10]),
+    (20,10, [.35,.28,.78,.14]),
+    (10,10, [.46,.24,.68,.12]),
+    (30,10, [.75,.18,.42,.16]),
+    (10,10, [.88,.25,.30,.10]),
+    (20,10, [.94,.20,.24,.08]),
+    (37.5,2.5,[.85,.24,.25,.08]),
 ]
 
-def make_events():
-    rng = np.random.default_rng(271127)
-    notes = []
-    def note(t, channel, key, velocity, duration):
-        t = max(0, t + rng.uniform(-.009,.009))
-        notes.append([round(t*SR),round((t+duration)*SR),channel,key,velocity])
-    for bar, (chord, melody) in enumerate(SCORE):
-        start = bar*4*BEAT
-        for j, (offset, index) in enumerate(PATTERNS[bar%4]):
-            note(start+offset*BEAT,0,VOICINGS[chord][index],
-                 int(35+(j==0)*6+rng.integers(-2,3)), (2.5 if j==0 else 1.15)*BEAT)
-        offsets = [[.25,1.65,3.05],[.4,1.9,3.25],[.2,1.55,2.95],[.45,1.8,3.3]][bar%4]
-        for j, (offset,key) in enumerate(zip(offsets,melody)):
-            note(start+offset*BEAT,1,key,int(49+[2,0,-2][j]+rng.integers(-2,3)),1.55*BEAT)
-    # Releasing an earlier strike must not cut a later strike of the same string.
-    previous = {}
-    for entry in sorted(notes):
-        start,end,channel,key,velocity = entry
-        old = previous.get((channel,key))
-        if old is not None: old[1] = min(old[1],start-round(.02*SR))
-        previous[channel,key] = entry
-    return sorted(event for start,end,ch,key,velocity in notes
-                  for event in [(start,1,ch,key,velocity),(end,0,ch,key,0)])
+def ff(args, data=None):
+    return subprocess.run(['ffmpeg','-v','error','-y',*args],input=data,
+                          capture_output=True,check=True).stdout
 
-def render(bank):
-    lib = C.CDLL(ctypes.util.find_library('fluidsynth'))
-    def api(name, result, *args):
-        f=getattr(lib,name); f.restype=result; f.argtypes=args; return f
-    ptr=C.c_void_p
-    settings=api('new_fluid_settings',ptr)()
-    num=api('fluid_settings_setnum',C.c_int,ptr,C.c_char_p,C.c_double)
-    integer=api('fluid_settings_setint',C.c_int,ptr,C.c_char_p,C.c_int)
-    for name,value in [('synth.sample-rate',SR),('synth.gain',.55),
-        ('synth.reverb.room-size',.58),('synth.reverb.damp',.72),
-        ('synth.reverb.width',15),('synth.reverb.level',.16)]:
-        num(settings,name.encode(),value)
-    integer(settings,b'synth.chorus.active',0)
-    integer(settings,b'synth.cpu-cores',1)
-    synth=api('new_fluid_synth',ptr,ptr)(settings)
-    sfid=api('fluid_synth_sfload',C.c_int,ptr,C.c_char_p,C.c_int)(synth,str(bank).encode(),0)
-    assert sfid>=0,'Cannot load the CC0 guitar bank'
-    sf=api('fluid_synth_get_sfont_by_id',ptr,ptr,C.c_int)(synth,sfid)
-    api('fluid_sfont_iteration_start',None,ptr)(sf)
-    preset=api('fluid_sfont_iteration_next',ptr,ptr)(sf)
-    banknum=api('fluid_preset_get_banknum',C.c_int,ptr)(preset)
-    program=api('fluid_preset_get_num',C.c_int,ptr)(preset)
-    select=api('fluid_synth_program_select',C.c_int,ptr,C.c_int,C.c_int,C.c_int,C.c_int)
-    cc=api('fluid_synth_cc',C.c_int,ptr,C.c_int,C.c_int,C.c_int)
-    for channel,pan in [(0,59),(1,69)]:
-        assert select(synth,channel,sfid,banknum,program)==0
-        cc(synth,channel,10,pan)
-    on=api('fluid_synth_noteon',C.c_int,ptr,C.c_int,C.c_int,C.c_int)
-    off=api('fluid_synth_noteoff',C.c_int,ptr,C.c_int,C.c_int)
-    write=api('fluid_synth_write_float',C.c_int,ptr,C.c_int,ptr,C.c_int,C.c_int,ptr,C.c_int,C.c_int)
-    # First pass warms up releases and room tails. The second is exported so
-    # the 150-second boundary keeps the same sustaining guitar as the start.
-    total=SECONDS*SR*2
-    events=make_events()
-    events=sorted((frame+cycle*SECONDS*SR,kind,ch,key,vel)
-                  for cycle in [0,1] for frame,kind,ch,key,vel in events)
-    audio=np.zeros((total,2),dtype=np.float32);cursor=0
-    for frame,kind,ch,key,velocity in events+[(total,-1,0,0,0)]:
-        if frame>=total: frame=total;kind=-1
-        if frame>cursor:
-            block=np.empty((frame-cursor,2),dtype=np.float32)
-            assert write(synth,len(block),block.ctypes.data,0,2,block.ctypes.data,1,2)==0
-            audio[cursor:frame]=block;cursor=frame
-        if kind==1:on(synth,ch,key,velocity)
-        elif kind==0:off(synth,ch,key)
-    api('delete_fluid_synth',None,ptr)(synth)
-    api('delete_fluid_settings',None,ptr)(settings)
-    return audio
+def rms(x):
+    return float(np.sqrt(np.mean(x*x)))
+
+def arrange(folder):
+    stems = []
+    for identifier in SOURCES:
+        raw=ff(['-i',str(folder/f'{identifier}.mp3'),'-ar',str(SR),'-ac','2',
+                '-f','f32le','-'])
+        recorded=np.frombuffer(raw,dtype='<f4').reshape(-1,2).copy()
+        # The files contain 40 seconds of playing plus 7.5 seconds of decay.
+        # Fold the decay into the beginning; never insert the silent tail as
+        # another musical bar, as the first version of the track did.
+        active=recorded[:40*SR].copy()
+        tail=recorded[40*SR:]
+        active[:len(tail)]+=tail
+        active/=max(rms(active),1e-8)
+        stems.append(active)
+    # 142.5 seconds of active playing at 96 BPM become exactly 150 at 91.2 BPM,
+    # the same 95% playback tempo as the originally approved guitar recording.
+    total=round(sum(duration for _,duration,_ in BLOCKS)*SR)
+    audio=np.zeros((total,2),dtype=np.float64)
+    cursor=0
+    overlap=round(.625*SR)  # One beat of compatible harmony, no fade to silence.
+    for offset,duration,gains in BLOCKS:
+        size=round(duration*SR)
+        before=min(overlap,cursor)
+        indices=(round(offset*SR)+np.arange(-before,size))%(40*SR)
+        block=sum(stem[indices]*gain for stem,gain in zip(stems,gains))
+        block/=rms(block[before:])
+        if before:
+            fade=np.linspace(0,1,before)[:,None]
+            audio[cursor-before:cursor]*=1-fade
+            audio[cursor-before:cursor]+=block[:before]*fade
+        audio[cursor:cursor+size]=block[before:]
+        cursor+=size
+    assert total==round(142.5*SR)
+    return audio.astype('<f4')
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('soundfont',type=Path)
+    parser.add_argument('sources',type=Path)
     parser.add_argument('--output',type=Path,default=Path(__file__).resolve().parents[1]/'audio/cafe/guitarra.mp3')
     args=parser.parse_args()
-    audio=render(args.soundfont)
-    # Filter both passes before trimming; filter history also survives the seam.
-    cmd=['ffmpeg','-v','error','-f','f32le','-ar',str(SR),'-ac','2','-i','-',
-         '-af','highpass=f=80,highshelf=f=2400:g=-3,lowpass=f=5600',
-         '-f','f32le','-ar',str(SR),'-ac','2','-']
-    processed=subprocess.run(cmd,input=audio.tobytes(),capture_output=True,check=True).stdout
-    audio=np.frombuffer(processed,dtype='<f4').reshape(-1,2)[SECONDS*SR:].copy()
-    # Constant gain; never amplify silence between notes with dynamic normalizing.
-    audio*=10**(-10.5/20)/abs(audio).max()
-    # A 16ms cyclic interpolation removes any residual waveform discontinuity.
-    n=round(.016*SR);seam=(audio[-1]+audio[0])/2
+    # Keep the input comfortably below full scale throughout the effects chain.
+    raw=arrange(args.sources)*.04
+    # Warm up the time stretcher on preceding music. Starting it directly on a
+    # sustaining reverb tail can create an initialization impulse. Keep playing
+    # after the end as well, so its analysis window never runs into silence.
+    padding=4*SR
+    raw=np.concatenate([raw[-padding:],raw,raw[:padding]])
+    warmup=round(padding/.95)
+    filters=('rubberband=tempo=0.95:pitch=1:transients=mixed:detector=soft:'
+             'phase=laminar:window=long:smoothing=on:channels=together,'
+             'highpass=f=85,highshelf=f=1200:g=-6,lowpass=f=4200,'
+             f'atrim=start_sample={warmup}:end_sample={warmup+150*SR}')
+    processed=ff(['-f','f32le','-ar',str(SR),'-ac','2','-i','-',
+                  '-af',filters,'-ar',str(SR),'-ac','2','-f','f32le','-'],raw.tobytes())
+    audio=np.frombuffer(processed,dtype='<f4').reshape(-1,2).copy()
+    assert len(audio)==150*SR
+    # Constant gain keeps the same discreet average volume as the original.
+    audio*=min(10**(-25.6/20)/rms(audio),10**(-7.8/20)/abs(audio).max())
+    n=round(.025*SR)
+    seam=(audio[-1]+audio[0])/2
     fade=np.linspace(0,1,n)[:,None]
     audio[:n]=seam*(1-fade)+audio[:n]*fade
     audio[-n:]=audio[-n:]*(1-fade)+seam*fade
-    subprocess.run(['ffmpeg','-v','error','-y','-f','f32le','-ar',str(SR),'-ac','2','-i','-',
-        '-codec:a','libmp3lame','-b:a','96k','-map_metadata','-1',str(args.output)],
-        input=audio.astype('<f4').tobytes(),capture_output=True,check=True)
-    print(f'{args.output}: {len(audio)/SR:.3f}s, {len(SCORE)} bars, {BPM} BPM, peak -10.5dBFS')
+    ff(['-f','f32le','-ar',str(SR),'-ac','2','-i','-',
+        '-codec:a','libmp3lame','-b:a','96k','-map_metadata','-1',str(args.output)],audio.astype('<f4').tobytes())
+    print(f'{args.output}: 150 seconds, original recording, 91.2 BPM, pitch unchanged')
