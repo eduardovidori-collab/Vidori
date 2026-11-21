@@ -2,7 +2,7 @@
 
 Requires Playwright and Chromium; never touches an existing browser profile.
 """
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from functools import partial
 from threading import Thread
@@ -89,7 +89,7 @@ try:
         for width in [320,390,650,760,768,900,1440]:
             p.set_viewport_size({'width':width,'height':1000})
             expected=6 if width<=760 else 12
-            assert p.locator('[data-album-jogador]').count()==expected
+            expect(p.locator('[data-album-jogador]')).to_have_count(expected)
             assert p.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
         # Rarity counts are unique players, not copies or positions.
         p.locator('[data-album-raridade=lenda]').click()
