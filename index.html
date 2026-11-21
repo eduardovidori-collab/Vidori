@@ -1553,6 +1553,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <script src="./futebol.js"></script>
 <script src="./estadio-museu.js?v=112"></script>
 <script src="./camarotes.js?v=115"></script>
+<script src="./cidade.js?v=117"></script>
 <script>
 "use strict";
 /* ==========================================================================
@@ -2641,7 +2642,7 @@ const OBRAS_ESTADIO = {
     { desc: "Área externa com árvores afastadas das arquibancadas e um prédio baixo em escala com o estádio.", preco: 250 },
     { desc: "Praça tricolor com entrada monumental, jardins floridos, bancos e bilheteria conectados por caminhos até o estádio.", preco: 750 },
     { desc: "Praça da torcida com monumento de taça, pergolado de madeira, bancos e novos jardins, ligada aos caminhos existentes.", preco: 1000 },
-    { desc: "A cidade chega ao entorno: ruas com faixas de pedestres, quarteirões de prédios baixos e comércio, carros, ponto de ônibus e calçadas arborizadas.", preco: 1200 }
+    { desc: "Bairro ao redor do estádio: sobrados e edifícios variados, comércio com toldos, ruas conectadas, ônibus, pedestres e calçadas arborizadas. Janelas e postes se acendem ao anoitecer.", preco: 1200 }
   ]},
   publico: { nome: "Público", niveis: [
     { desc: "Primeira leva de torcedores espalhados pelos setores. Ainda tem muito lugar vago.", preco: 300 },
@@ -6244,34 +6245,7 @@ function arvore(cx, cy, e) {
 
 /** Prédio de três pavimentos, mais baixo que a arquibancada com segundo anel. */
 function predio(cx, cy) {
-  const C = CORES_EST;
-  const lx = 9, ly = 6.5, base = 0.7, alt = 12.5;
-  let s = sombraNoChao(cx + 1, cy + 1, 11, 8.2);
-  s += caixa(cx - lx - 1.4, cy - ly - 1.4, cx + lx + 1.4, cy + ly + 1.4, 0, base,
-             C.predioBase, C.predioBaseDir, C.predioBaseEsq);
-  s += caixa(cx - lx, cy - ly, cx + lx, cy + ly, base, alt,
-             C.predioTopo, C.predioDir, C.predioEsq);
-
-  // Três pavimentos com vãos espaçados, na mesma escala das estruturas do estádio.
-  for (let piso = 0; piso < 3; piso++) {
-    const z0 = 1.7 + piso * 3.7, z1 = z0 + 2;
-    for (let k = -1; k <= 1; k++) {
-      const ty = k * ly * 0.58, tx = k * lx * 0.6;
-      s += poligono([[cx+lx,cy+ty-0.7,z1],[cx+lx,cy+ty+0.7,z1],
-                     [cx+lx,cy+ty+0.7,z0],[cx+lx,cy+ty-0.7,z0]], C.janela);
-      if (piso === 0 && k === 0) continue;
-      s += poligono([[cx+tx-1,cy+ly,z1],[cx+tx+1,cy+ly,z1],
-                     [cx+tx+1,cy+ly,z0],[cx+tx-1,cy+ly,z0]], C.janela);
-    }
-  }
-  s += poligono([[cx-1.2,cy+ly,3.6],[cx+1.2,cy+ly,3.6],
-                 [cx+1.2,cy+ly,base],[cx-1.2,cy+ly,base]], C.porta);
-  // Marquise discreta sobre a entrada; cobertura sem um volume extra no topo.
-  s += caixa(cx - 2, cy + ly - 0.2, cx + 2, cy + ly + 1.5, 3.8, 4.1,
-             C.parapeito, C.parapeitoDir, C.parapeitoEsq);
-  s += caixa(cx - lx - 0.5, cy - ly - 0.5, cx + lx + 0.5, cy + ly + 0.5, alt, alt + 0.5,
-             C.parapeito, C.parapeitoDir, C.parapeitoEsq);
-  return s;
+  return predioDaCidade(cx,cy,9,6.5,3,['#E7DEC9','#D3C6AB','#B3A68C'],null,{principal:true});
 }
 
 /* Praça externa: as copas e o prédio ficam além do limite do segundo anel.
@@ -6330,14 +6304,7 @@ function bancoDaPraca(cx,cy) {
   return s;
 }
 
-function posteDaPraca(cx,cy) {
-  const C = CORES_EST;
-  let s = caixa(cx-0.6,cy-0.6,cx+0.6,cy+0.6,0,0.6,C.torre,C.torreDir,C.torreEsq);
-  s += caixa(cx-0.22,cy-0.22,cx+0.22,cy+0.22,0.6,7.8,C.torre,C.torreDir,C.torreEsq);
-  s += traco([[cx,cy,7.8],[cx+1.8,cy,8.3]],C.estrutura,0.3);
-  s += caixa(cx+0.8,cy-0.7,cx+2.8,cy+0.7,8,8.3,"#DCE8EC","#B9C9D0","#96ADB8");
-  return s;
-}
+function posteDaPraca(cx,cy) { return posteDaCidade(cx,cy,7.8,true); }
 
 /** Pórtico com vão aberto, pilares duplos e marquise leve com faixa tricolor. */
 function porticoDeEntrada(cx,cy) {
@@ -6482,135 +6449,6 @@ const ARREDORES_NIVEL_3 = [
   {x:103,y:-55,svg:()=>bancoDaPraca(103,-55)},
   {x:129,y:-56,svg:()=>bancoDaPraca(129,-56)},
   {x:96,y:-39,svg:()=>posteDaPraca(96,-39)}
-];
-
-/** O bairro cresce para fora do lote; ruas e edifícios não invadem o estádio. */
-function pisoDaCidade() {
-  const asfalto="#626D70", calcada="#D9DDD6", borda="#BAC4BC";
-  let s=caixa(-143,-133,-94,108,0,0.16,calcada,borda,"#A6B4AA");
-  s+=caixa(-143,-133,164,-92,0,0.16,calcada,borda,"#A6B4AA");
-  s+=caixa(-110,-133,-100,108,0.16,0.19,asfalto,asfalto,asfalto);
-  s+=caixa(-143,-106,164,-96,0.16,0.19,asfalto,asfalto,asfalto);
-  // Faixa central interrompida no cruzamento e nas travessias.
-  for(let y=-128;y<106;y+=11) {
-    if(y>-113&&y<-91 || y>83) continue;
-    s+=traco([[-105,y,0.21],[-105,y+5,0.21]],"#E2DFBC",0.32);
-  }
-  for(let x=-139;x<159;x+=11) {
-    if(x>-117&&x<-91 || x>24&&x<43) continue;
-    s+=traco([[x,-101,0.21],[x+5,-101,0.21]],"#E2DFBC",0.32);
-  }
-  // Meio-fio contínuo, sem guias altas nas faixas de pedestres.
-  [-110,-100].forEach(x=>{
-    s+=traco([[x,-132,0.24],[x,-107,0.24]],"#F1F0E7",0.35);
-    s+=traco([[x,-95,0.24],[x,88,0.24]],"#F1F0E7",0.35);
-    s+=traco([[x,99,0.24],[x,107,0.24]],"#F1F0E7",0.35);
-  });
-  [-106,-96].forEach(y=>{
-    s+=traco([[-142,y,0.24],[-111,y,0.24]],"#F1F0E7",0.35);
-    s+=traco([[-99,y,0.24],[27,y,0.24]],"#F1F0E7",0.35);
-    s+=traco([[40,y,0.24],[163,y,0.24]],"#F1F0E7",0.35);
-  });
-  for(let y=90;y<=97;y+=1.8) s+=caixa(-109.5,y,-100.5,y+0.85,0.2,0.22,"#F5F2E6",borda,borda);
-  for(let x=29;x<=38;x+=1.8) s+=caixa(x,-105.5,x+0.85,-96.5,0.2,0.22,"#F5F2E6",borda,borda);
-  // A calçada da cidade encontra a praça já construída.
-  s+=caixa(-94,90,-56,98,0,0.17,"#DDDCD0",borda,"#A6B4AA");
-  for(let y=-126;y<106;y+=13) {
-    s+=traco([[-116,y,0.18],[-111,y,0.18]],"#BEC8BE",0.18);
-    if(y>-92) s+=traco([[-99,y,0.18],[-94,y,0.18]],"#BEC8BE",0.18);
-  }
-  return '<g data-cidade="ruas">'+s+'</g>';
-}
-
-/** Fachadas de dois a quatro pisos, com lojas e coberturas discretas. */
-function predioDaCidade(cx,cy,lx,ly,pisos,paleta,lojaNome) {
-  const altura=pisos*3.5+1.1, [topo,dir,esq]=paleta;
-  let s=sombraNoChao(cx+1.5,cy+1.5,lx+2.5,ly+2.5);
-  s+=caixa(cx-lx-1,cy-ly-1,cx+lx+1,cy+ly+1,0.17,0.55,"#BEC7BD","#9DAEA1","#889D8D");
-  s+=caixa(cx-lx,cy-ly,cx+lx,cy+ly,0.55,altura,topo,dir,esq);
-  for(let piso=0;piso<pisos;piso++) {
-    const z0=1.5+piso*3.5,z1=z0+1.9;
-    for(let coluna=-1;coluna<=1;coluna++) {
-      const x=cx+coluna*lx*0.62,y=cy+coluna*ly*0.62;
-      if(!(lojaNome&&piso===0)) {
-        s+=poligono([[x-0.9,cy+ly+0.01,z0],[x+0.9,cy+ly+0.01,z0],
-                      [x+0.9,cy+ly+0.01,z1],[x-0.9,cy+ly+0.01,z1]],"#596C73");
-        s+=traco([[x-1.1,cy+ly+0.03,z0-0.15],[x+1.1,cy+ly+0.03,z0-0.15]],"#EBE9DD",0.25);
-      }
-      s+=poligono([[cx+lx+0.01,y-0.85,z0],[cx+lx+0.01,y+0.85,z0],
-                    [cx+lx+0.01,y+0.85,z1],[cx+lx+0.01,y-0.85,z1]],"#657C80");
-    }
-  }
-  if(lojaNome) {
-    s+=poligono([[cx-lx+1,cy+ly+0.03,0.6],[cx+lx-1,cy+ly+0.03,0.6],
-                  [cx+lx-1,cy+ly+0.03,3.1],[cx-lx+1,cy+ly+0.03,3.1]],"#334D51");
-    for(let x=cx-lx+3;x<cx+lx-1;x+=3) s+=traco([[x,cy+ly+0.05,0.6],[x,cy+ly+0.05,3.1]],"#C6D2CD",0.2);
-    s+=caixa(cx-lx-0.4,cy+ly-0.2,cx+lx+0.4,cy+ly+1.7,3.2,3.7,"#668D79","#446B57","#3B5A4B");
-    s+=textoNaFachada(cx,cy+ly+1.73,3.45,lojaNome,0.95,"#FFF9E7");
-  } else {
-    s+=poligono([[cx-1.1,cy+ly+0.03,0.55],[cx+1.1,cy+ly+0.03,0.55],
-                  [cx+1.1,cy+ly+0.03,3],[cx-1.1,cy+ly+0.03,3]],"#4A605E");
-  }
-  s+=caixa(cx-lx-0.5,cy-ly-0.5,cx+lx+0.5,cy+ly+0.5,altura,altura+0.45,"#E9E8DF","#CFD5CA","#B0BDB0");
-  s+=caixa(cx-lx+1.2,cy-ly+1.2,cx+lx-1.2,cy+ly-1.2,altura+0.45,altura+0.47,"#C1C9BE","#C1C9BE","#C1C9BE");
-  s+=caixa(cx+lx*0.15,cy-ly*0.55,cx+lx*0.65,cy-ly*0.1,altura+0.47,altura+1.3,"#DADED4","#ABB8AC","#97A99B");
-  return '<g data-cidade="predio">'+s+'</g>';
-}
-
-/** Veículos pequenos, na escala dos bancos e das faixas da rua. */
-function carroDaCidade(cx,cy,aoLongoDeX,paleta) {
-  const p=(x,y,z)=>aoLongoDeX?[cx+x,cy+y,z]:[cx+y,cy+x,z];
-  const bloco=(x0,y0,x1,y1,z0,z1,cores)=>{
-    const a=p(x0,y0,0),b=p(x1,y1,0);
-    return caixa(a[0],a[1],b[0],b[1],z0,z1,...cores);
-  };
-  let s=sombraNoChao(cx,cy,aoLongoDeX?4.2:2,aoLongoDeX?2:4.2);
-  [-2.25,2.25].forEach(x=>[-1,1].forEach(lado=>{
-    s+=bloco(x-0.65,lado*1.5-0.35,x+0.65,lado*1.5+0.35,0.3,1.2,["#303C3D","#263132","#1F292A"]);
-  }));
-  s+=bloco(-3.6,-1.6,3.6,1.6,0.75,1.8,paleta);
-  s+=bloco(-1.5,-1.35,1.4,1.35,1.8,3,["#C5D8D9","#6B8A93","#517480"]);
-  s+=bloco(-1.5,-1.35,1.4,1.35,2.9,3.15,paleta);
-  [-1,1].forEach(lado=>{
-    s+=traco([p(3.62,lado*0.85-0.35,1.25),p(3.62,lado*0.85+0.35,1.25)],"#F8E8B8",0.55);
-  });
-  return '<g data-cidade="carro">'+s+'</g>';
-}
-
-function pontoDeOnibus(cx,cy) {
-  let s=caixa(cx-2.5,cy-7,cx+2.5,cy+7,0.17,0.5,"#BFCBC2","#9AAD9E","#859C8B");
-  [-5.8,5.8].forEach(dy=>{
-    s+=caixa(cx+1.4,cy+dy-0.3,cx+2,cy+dy+0.3,0.5,6.2,"#7E9391","#5E7875","#4C6461");
-  });
-  s+=poligono([[cx+1.7,cy-5.8,0.6],[cx+1.7,cy+5.8,0.6],
-                [cx+1.7,cy+5.8,5.8],[cx+1.7,cy-5.8,5.8]],"#A7C9C8",' fill-opacity=".6"');
-  s+=caixa(cx-1,cy-4.5,cx+0.6,cy+4.5,1.7,2.1,"#B6AA8B","#92866D","#7A725F");
-  s+=caixa(cx-2.9,cy-7.2,cx+2.9,cy+7.2,6.2,6.7,"#E1E5DC","#B4C4B6","#95AF9D");
-  s+=caixa(cx-2.3,cy+8.2,cx-1.9,cy+8.6,0.3,7.3,"#788E86","#5A7167","#475E55");
-  s+=caixa(cx-2.9,cy+7.8,cx-1.3,cy+9,6,7.8,"#6A9CA2","#417C84","#32656D");
-  return '<g data-cidade="ponto-onibus">'+s+'</g>';
-}
-
-const CIDADE_NIVEL_4 = [
-  {x:-130,y:-70,svg:()=>predioDaCidade(-130,-70,8,10,4,["#E1DFD2","#CBCBBE","#B1B7A7"])},
-  {x:-130,y:-28,svg:()=>predioDaCidade(-130,-28,8,10,3,["#D7DEDD","#B9CCCC","#9BB6B8"])},
-  {x:-130,y:16,svg:()=>predioDaCidade(-130,16,8,10,4,["#E0D5C3","#CCBDA5","#B3A68C"])},
-  {x:-130,y:59,svg:()=>predioDaCidade(-130,59,8,10,2,["#DBD3CE","#CBBAB0","#AF9E94"])},
-  {x:-76,y:-121,svg:()=>predioDaCidade(-76,-121,10,7,3,["#D7DED4","#BBCAB4","#9EBAA1"])},
-  {x:-35,y:-121,svg:()=>predioDaCidade(-35,-121,9,7,4,["#DED9D0","#CFC5B5","#B7AB98"])},
-  {x:8,y:-121,svg:()=>predioDaCidade(8,-121,11,7,2,["#E5D7BE","#D9C59F","#BCA985"],"CAFÉ")},
-  {x:50,y:-121,svg:()=>predioDaCidade(50,-121,11,7,2,["#E5D4CC","#D4B9AB","#B99D90"],"PADARIA")},
-  {x:91,y:-121,svg:()=>predioDaCidade(91,-121,8,7,3,["#D5DFDE","#B8CECC","#97B8B5"])},
-  {x:135,y:-121,svg:()=>predioDaCidade(135,-121,10,7,2,["#DFDCD0","#C9C6B3","#B0AD96"],"MERCADO")},
-  {x:-107.5,y:-51,svg:()=>carroDaCidade(-107.5,-51,false,["#B66B63","#974F49","#80453E"])},
-  {x:-102.5,y:30,svg:()=>carroDaCidade(-102.5,30,false,["#E4E1CF","#C3C5B5","#A8AF9E"])},
-  {x:2,y:-103.5,svg:()=>carroDaCidade(2,-103.5,true,["#718D9A","#526F7E","#405968"])},
-  {x:111,y:-98.5,svg:()=>carroDaCidade(111,-98.5,true,["#C2B896","#A79B79","#8F8466"])},
-  {x:-96.5,y:54,svg:()=>pontoDeOnibus(-96.5,54)},
-  ...[[-96,-38],[-96,5],[-96,80],[-70,-86],[59,-86],[145,-86],[-130,92]].map(([x,y])=>
-    ({x,y,svg:()=>arvore(x,y,0.55)})),
-  ...[[-97,-65],[-97,-10],[-97,86],[-63,-94],[77,-94],[154,-94]].map(([x,y])=>
-    ({x,y,svg:()=>posteDaPraca(x,y)}))
 ];
 
 /** Praça em pedra clara, jardins e caminhos conectados à entrada do estádio. */
