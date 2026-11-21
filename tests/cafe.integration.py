@@ -85,14 +85,43 @@ try:
    p.set_viewport_size({'width':width,'height':900});assert p.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
   # Ambient audio is opt-in, respects mute/volume, switches without accumulating nodes and stops on app navigation.
   p.evaluate('config.mudo=false;config.volume=.6;atualizarSomCafe()');assert p.evaluate('cafeAudio===null')
-  p.locator('#cafeSom').click();assert p.evaluate('!!cafeAudio')
-  p.locator('#cafeTipoSom').select_option('chuva');assert p.evaluate('cafeAudio.fontes.length')==2
-  p.locator('#cafeTipoSom').select_option('misto');assert p.evaluate('cafeAudio.fontes.length')==3
+  p.locator('#cafeSom').click();p.wait_for_function('cafeAudio && !cafeAudio.carregando')
+  assert p.evaluate('cafeAudio.fontes.length')==1
+  assert p.evaluate('cafeAudio.fontes[0].buffer.duration')>80
+  p.locator('#cafeTipoSom').select_option('chuva');p.wait_for_function('cafeAudio && !cafeAudio.carregando')
+  assert p.evaluate('cafeAudio.fontes.length')==1
+  p.locator('#cafeTipoSom').select_option('misto');p.wait_for_function('cafeAudio && !cafeAudio.carregando')
+  assert p.evaluate('cafeAudio.fontes.length')==2
+  # Check actual decoded output, rather than merely the presence of an audio graph.
+  assert p.evaluate('''async()=>{
+   const a=cafeAudio,analyser=a.ctx.createAnalyser();a.master.connect(analyser);
+   await new Promise(r=>setTimeout(r,500));const samples=new Float32Array(analyser.fftSize);
+   analyser.getFloatTimeDomainData(samples);a.master.disconnect(analyser);analyser.disconnect();
+   return samples.some(x=>Math.abs(x)>.0001);
+  }''')
   p.locator('#cafeVolume').fill('30');assert p.locator('#cafeVolumeValor').inner_text()=='30%'
   p.evaluate('config.mudo=true;atualizarSomCafe()');assert p.evaluate('cafeAudio===null')
   p.evaluate('config.mudo=false;atualizarSomCafe()');assert p.evaluate('cafeAudio===null')
   p.locator('#cafeSom').click();p.evaluate('irParaPainel("foco")');assert p.evaluate('cafeAudio===null')
   p.locator('[data-entrar-cafe]').click();assert p.evaluate('cafeAudio===null')
+  # A cancelled pending load cannot start audio after the user has left or silenced it.
+  p.locator('#cafeTipoSom').select_option('cafeteria')
+  p.evaluate('''()=>{
+   cafeBuffers.clear();window.fetchCafeOriginal=window.fetch;
+   window.fetch=(...args)=>String(args[0]).includes('/audio/cafe/')
+    ?new Promise(resolve=>{window.liberarCafe=()=>resolve(fetchCafeOriginal(...args));})
+    :fetchCafeOriginal(...args);
+  }''')
+  p.locator('#cafeSom').click();p.wait_for_function('typeof liberarCafe==="function"')
+  assert p.locator('#cafeSom').inner_text()=='Cancelar';p.locator('#cafeSom').click()
+  p.evaluate('window.fetch=fetchCafeOriginal;liberarCafe()')
+  p.evaluate('async()=>await cafeBuffers.get("cafeteria")');assert p.evaluate('cafeAudio===null')
+  # Failed loads report the problem, leave no player running, and can be retried.
+  p.evaluate('()=>{cafeBuffers.clear();window.fetch=()=>Promise.reject(new Error("offline"));}')
+  p.locator('#cafeSom').click();p.wait_for_function('cafeAudio===null')
+  assert 'tentar novamente' in p.locator('#cafeSomStatus').inner_text()
+  p.evaluate('()=>{window.fetch=fetchCafeOriginal;}');p.locator('#cafeSom').click()
+  p.wait_for_function('cafeAudio && !cafeAudio.carregando');p.locator('#cafeSom').click()
   # A failed storage write keeps the draft visible and exportable without claiming it was saved.
   p.evaluate('window.originalGravar=Armazem.gravar;Armazem.gravar=()=>false')
   p.locator('#cafeNotas').fill('Rascunho ainda não salvo');p.evaluate('salvarCafe()')
@@ -110,6 +139,10 @@ try:
   p.evaluate('async()=>await navigator.serviceWorker.ready');p.reload(wait_until='networkidle')
   c.set_offline(True);p.reload(wait_until='domcontentloaded');p.locator('[data-entrar-cafe]').click();assert p.locator('#cafePrincipal').is_visible()
   assert p.evaluate('typeof iniciarCafe')=='function';assert p.evaluate('cafeAudio===null')
+  p.evaluate('config.mudo=false;config.volume=.6;atualizarSomCafe()')
+  p.locator('#cafeTipoSom').select_option('misto');p.locator('#cafeSom').click()
+  p.wait_for_function('cafeAudio && !cafeAudio.carregando')
+  assert p.evaluate('cafeAudio.fontes.length')==2;p.locator('#cafeSom').click()
   assert not errors,errors
   print('PASS',url,'one shared timer; partial/full registration once; rewards; pause/resume/reload/navigation; notebook/3 tasks/export/import/XSS/write failure; city mouse/keyboard entry; nine atmospheres; six widths; opt-in local audio/mute/navigation; offline')
   b.close()
