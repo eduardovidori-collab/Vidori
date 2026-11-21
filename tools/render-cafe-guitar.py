@@ -1,13 +1,16 @@
-"""Render a quiet 5m37s guitar piece with three newly scored middle sections.
+"""Render a quiet 5m37s piece preserving complete recorded guitar attacks.
 
-Usage: python tools/render-cafe-guitar.py /path/to/source-folder
-Requires numpy, scipy and ffmpeg with Rubber Band. Sources: HQ MP3 previews
+Usage: python tools/render-cafe-guitar.py /path/to/source-folder --soundfont /path/to/FSBS-jazz.sf2
+Requires numpy, scipy, libfluidsynth and ffmpeg with Rubber Band. Sources: HQ MP3 previews
 689160 (main), 689161 (air 1), 689162 (air 2), 689159 (delay), all CC0:
 https://freesound.org/people/deadrobotmusic/sounds/689160/
+The three new sections use the CC0 FreePats FSBS Jazz Guitar 2026-08-07
+sample bank, retaining each note's full recorded spectrum and string attack.
 See audio/cafe/CREDITOS.md. This offline renderer never runs in the app.
 """
 import argparse
-from fractions import Fraction
+import ctypes as C
+import ctypes.util
 from pathlib import Path
 import subprocess
 import numpy as np
@@ -87,46 +90,6 @@ def read_sources(folder):
         for identifier in SOURCES}
 
 
-def extract_note(recording,start,duration,fundamental):
-    """Keep a recorded guitar note's harmonic bands and stereo phase.
-
-    This removes the other simultaneous pitches before the note is resampled
-    into the score. No new oscillator, soundfont, or noise bed is introduced.
-    """
-    padding=.16
-    first=max(0,round((start-padding)*SR))
-    chunk=recording[first:round((start+duration+padding)*SR)]
-    frequencies,_,spectrum=signal.stft(chunk,SR,nperseg=4096,noverlap=3584,axis=0)
-    mask=np.zeros(len(frequencies))
-    for harmonic in range(1,9):
-        centre=fundamental*harmonic
-        width=11+harmonic*1.7
-        mask=np.maximum(mask,np.exp(-.5*((frequencies-centre)/width)**4))
-    mask[frequencies>4000]=0
-    _,audio=signal.istft(spectrum*mask[:,None,None],SR,nperseg=4096,
-                       noverlap=3584,freq_axis=0,time_axis=-1)
-    if audio.shape[0]==2:audio=audio.T
-    offset=round(start*SR)-first
-    audio=audio[offset:offset+round(duration*SR)].copy()
-    edge=min(round(.02*SR),len(audio)//3)
-    audio[:edge]*=np.linspace(0,1,edge)[:,None]
-    audio[-edge:]*=np.linspace(1,0,edge)[:,None]
-    return (audio/max(rms(audio),1e-8)).astype('<f4')
-
-
-def dark_room(audio):
-    # Only delayed guitar signal: no synthetic hiss. Damping keeps the room dark.
-    wet=np.zeros_like(audio)
-    taps=[.047,.071,.113,.157,.227,.313,.419,.557,.719,.911,1.137,1.401]
-    for i,delay in enumerate(taps):
-        for channel in range(2):
-            samples=round((delay+(channel-.5)*(.004 if i%2 else -.004))*SR)
-            gain=.085*np.exp(-delay/.65)
-            wet[samples:,channel]+=audio[:-samples,channel]*gain
-    wet=signal.sosfilt(signal.butter(2,1500,fs=SR,output='sos'),wet,axis=0)
-    return audio+wet
-
-
 def recorded_theme(recordings,returning=False):
     gains=[(1,.10,.08,.03),(.95,.16,.10,.05),(.90,.20,.14,.08),(.85,.23,.18,.10)]
     stems=[]
@@ -147,55 +110,91 @@ def recorded_theme(recordings,returning=False):
     return audio
 
 
-def composed_section(index,samples):
+def composed_section(index,soundfont):
+    """Play the score with intact Fender guitar samples, including their attack."""
     rng=np.random.default_rng(20261121+index)
-    output=np.zeros((82*SR,2),dtype=np.float64)
-    cache={}
-    def play(time,key,gain,voice='body',length=None):
+    notes=[]
+    def note(time,key,velocity,channel,duration):
         assert 42<=key<=MAX_LEAD_MIDI
-        token=(voice,key)
-        if token not in cache:
-            base,frequency=samples[voice]
-            ratio=Fraction(frequency/(440*2**((key-69)/12))).limit_denominator(2048)
-            sound=signal.resample_poly(base,ratio.numerator,ratio.denominator,axis=0)
-            cache[token]=sound.astype('<f4')
-        sound=cache[token]
-        if length and len(sound)>round(length*SR):
-            sound=sound[:round(length*SR)].copy()
-            edge=min(round(.12*SR),len(sound)//3)
-            sound[-edge:]*=np.linspace(1,0,edge)[:,None]
-        start=round(max(0,time+rng.uniform(-.008,.008))*SR)
-        size=min(len(sound),len(output)-start)
-        output[start:start+size]+=sound[:size]*gain*rng.uniform(.96,1.04)
+        start=max(0,time+rng.uniform(-.006,.006))
+        notes.append([round(start*SR),round((start+duration)*SR),channel,key,
+                      int(np.clip(velocity+rng.integers(-2,3),1,127))])
     bars=MELODIES[index]
     assert len(bars)==32
     for bar,row in enumerate(bars):
         start=bar*4*BEAT
-        notes=[midi(n) for n in row.split()]
-        assert max(notes)<=MAX_LEAD_MIDI
+        melody=[midi(n) for n in row.split()]
+        assert max(melody)<=MAX_LEAD_MIDI
         chord=CHORDS[PROGRESSIONS[index][(bar//2)%4]]
-        play(start,chord[0],.145,length=4.1*BEAT)
-        # The central section has fewer plucks and two melody notes per bar.
+        note(start,chord[0],43,0,3.9*BEAT)
         picking=[(.85,1),(2.4,2),(3.35,3)] if index!=1 else [(1.1,1),(2.9,2)]
         for offset,n in picking:
-            play(start+offset*BEAT,chord[n],.061 if index!=1 else .054,length=2.2*BEAT)
-        offsets=[.3,1.8,3.15] if len(notes)==3 else [.45,2.55]
-        for offset,key in zip(offsets,notes):
-            play(start+offset*BEAT,key,.205 if index!=1 else .19,'lead')
-    output=dark_room(output)
+            note(start+offset*BEAT,chord[n],35 if index!=1 else 33,1,1.8*BEAT)
+        offsets=[.3,1.8,3.15] if len(melody)==3 else [.45,2.55]
+        for offset,key in zip(offsets,melody):
+            note(start+offset*BEAT,key,48 if index!=1 else 45,2,1.45*BEAT)
+    # A release from an earlier strike must not truncate a newer one.
+    previous={}
+    for item in sorted(notes):
+        start,end,channel,key,velocity=item
+        old=previous.get((channel,key))
+        if old is not None:old[1]=min(old[1],start-round(.02*SR))
+        previous[channel,key]=item
+    events=sorted(event for start,end,ch,key,vel in notes
+                  for event in [(start,1,ch,key,vel),(end,0,ch,key,0)])
+    lib=C.CDLL(ctypes.util.find_library('fluidsynth'))
+    def api(name,result,*args):
+        f=getattr(lib,name);f.restype=result;f.argtypes=args;return f
+    ptr=C.c_void_p
+    settings=api('new_fluid_settings',ptr)()
+    num=api('fluid_settings_setnum',C.c_int,ptr,C.c_char_p,C.c_double)
+    integer=api('fluid_settings_setint',C.c_int,ptr,C.c_char_p,C.c_int)
+    for name,value in [('synth.sample-rate',SR),('synth.gain',.6),
+        ('synth.reverb.room-size',.45),('synth.reverb.damp',.75),
+        ('synth.reverb.width',10),('synth.reverb.level',.13)]:
+        num(settings,name.encode(),value)
+    integer(settings,b'synth.chorus.active',0)
+    integer(settings,b'synth.cpu-cores',1)
+    synth=api('new_fluid_synth',ptr,ptr)(settings)
+    sfid=api('fluid_synth_sfload',C.c_int,ptr,C.c_char_p,C.c_int)(synth,str(soundfont).encode(),0)
+    assert sfid>=0,'Unable to load the recorded CC0 guitar bank'
+    sf=api('fluid_synth_get_sfont_by_id',ptr,ptr,C.c_int)(synth,sfid)
+    api('fluid_sfont_iteration_start',None,ptr)(sf)
+    preset=api('fluid_sfont_iteration_next',ptr,ptr)(sf)
+    bank=api('fluid_preset_get_banknum',C.c_int,ptr)(preset)
+    program=api('fluid_preset_get_num',C.c_int,ptr)(preset)
+    select=api('fluid_synth_program_select',C.c_int,ptr,C.c_int,C.c_int,C.c_int,C.c_int)
+    cc=api('fluid_synth_cc',C.c_int,ptr,C.c_int,C.c_int,C.c_int)
+    for ch,pan,volume in [(0,64,83),(1,54,73),(2,71,86)]:
+        assert select(synth,ch,sfid,bank,program)==0
+        cc(synth,ch,10,pan);cc(synth,ch,7,volume)
+    on=api('fluid_synth_noteon',C.c_int,ptr,C.c_int,C.c_int,C.c_int)
+    off=api('fluid_synth_noteoff',C.c_int,ptr,C.c_int,C.c_int)
+    write=api('fluid_synth_write_float',C.c_int,ptr,C.c_int,ptr,C.c_int,C.c_int,ptr,C.c_int,C.c_int)
+    total=82*SR;output=np.zeros((total,2),dtype=np.float32);cursor=0
+    for frame,kind,ch,key,velocity in events+[(total,-1,0,0,0)]:
+        frame=min(frame,total)
+        if frame>cursor:
+            block=np.empty((frame-cursor,2),dtype=np.float32)
+            assert write(synth,len(block),block.ctypes.data,0,2,block.ctypes.data,1,2)==0
+            output[cursor:frame]=block;cursor=frame
+        if kind==1:on(synth,ch,key,velocity)
+        elif kind==0:off(synth,ch,key)
+    api('delete_fluid_synth',None,ptr)(synth)
+    api('delete_fluid_settings',None,ptr)(settings)
+    # Quiet, damped guitar echoes retain the dry string transient in front.
+    wet=np.zeros_like(output)
+    for delay,gain in [(BEAT,.10),(2*BEAT,.055)]:
+        shift=round(delay*SR)
+        wet[shift:]+=output[:-shift]*gain
+    wet=signal.sosfilt(signal.butter(2,1600,fs=SR,output='sos'),wet,axis=0)
+    output=output+wet
     output/=rms(output[:80*SR])
     return output
 
-
-def arrange(folder):
+def arrange(folder,soundfont):
     recordings=read_sources(folder)
-    # Lead note from the main guitar, moved down into the middle register;
-    # accompaniment note from the same session's warm delay guitar.
-    samples={
-        'lead':(extract_note(recordings[689160],.625,.285,699.5),699.5),
-        'body':(extract_note(recordings[689159],.012,1.12,277.6),277.6),
-    }
-    sections=[recorded_theme(recordings)]+[composed_section(i,samples) for i in range(3)]+[recorded_theme(recordings,True)]
+    sections=[recorded_theme(recordings)]+[composed_section(i,soundfont) for i in range(3)]+[recorded_theme(recordings,True)]
     durations=[40,80,80,80,40]
     audio=np.zeros(((SOURCE_SECONDS+2)*SR,2),dtype=np.float64)
     cursor=0
@@ -217,15 +216,16 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('sources',type=Path)
     parser.add_argument('--output',type=Path,default=Path(__file__).resolve().parents[1]/'audio/cafe/guitarra.mp3')
+    parser.add_argument('--soundfont',type=Path,required=True,help='CC0 FSBS Jazz Guitar SF2 bank, 2026-08-07')
     args=parser.parse_args()
-    raw=arrange(args.sources)*.04
+    raw=arrange(args.sources,args.soundfont)*.04
     # Warm-up prevents an initialization impulse on the sustaining room tail.
     padding=4*SR
     raw=np.concatenate([raw[-padding:],raw,raw[:padding]])
     warmup=round(padding/TEMPO)
     filters=(f'rubberband=tempo={TEMPO}:pitch=1:transients=mixed:detector=soft:'
              'phase=laminar:window=long:smoothing=on:channels=together,'
-             'highpass=f=75,highshelf=f=1100:g=-6,lowpass=f=2800,'
+             'highpass=f=85,highshelf=f=1200:g=-6,lowpass=f=4200,'
              f'atrim=start_sample={warmup}:end_sample={warmup+OUTPUT_SAMPLES}')
     processed=ff(['-f','f32le','-ar',str(SR),'-ac','2','-i','-',
                   '-af',filters,'-ar',str(SR),'-ac','2','-f','f32le','-'],raw.tobytes())
@@ -239,4 +239,4 @@ if __name__=='__main__':
     audio[-n:]=audio[-n:]*(1-fade)+seam*fade
     ff(['-f','f32le','-ar',str(SR),'-ac','2','-i','-',
         '-codec:a','libmp3lame','-b:a','96k','-map_metadata','-1',str(args.output)],audio.astype('<f4').tobytes())
-    print(f'{args.output}: {len(audio)/SR:.3f}s, original theme + three new scores, 91.2 BPM, new lead <= F4')
+    print(f'{args.output}: {len(audio)/SR:.3f}s, intact recorded guitar samples + original theme, 91.2 BPM, new lead <= F4')
