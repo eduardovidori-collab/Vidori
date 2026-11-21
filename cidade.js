@@ -120,7 +120,8 @@ function predioDaCidade(cx,cy,lx,ly,pisos,paleta,lojaNome,opcoes={}){
       s+=traco([[cx+lx*.5,cy-ly*.4,base],[cx+lx*.5,cy-ly*.4,base+3.2]],'#6D8079',.15);
     }
   }
-  return '<g '+(opcoes.principal?'data-arredores="predio"':'data-cidade="predio"')+' data-pavimentos="'+pisos+'">'+s+'</g>';
+  const entradaCafe=lojaNome==='CAFÉ'?' data-abrir-cafe="true" role="button" tabindex="0" aria-label="Entrar no Café do Morumbi para estudar"':'';
+  return '<g '+(opcoes.principal?'data-arredores="predio"':'data-cidade="predio"')+' data-pavimentos="'+pisos+'"'+entradaCafe+'>'+s+'</g>';
 }
 function carroDaCidade(cx,cy,aoLongoDeX,paleta){
   const p=(x,y,z)=>aoLongoDeX?[cx+x,cy+y,z]:[cx+y,cy+x,z];

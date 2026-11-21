@@ -864,6 +864,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 </style>
 <link rel="stylesheet" href="./futebol.css">
 <link rel="stylesheet" href="./estadio-museu.css?v=112">
+<link rel="stylesheet" href="./cafe.css?v=118">
 </head>
 <body>
 
@@ -949,6 +950,11 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       </div>
     </div>
 
+    <div class="cafe-convite">
+      <div><b>Café do Morumbi</b><p>Uma mesa junto à janela para o seu próximo bloco.</p></div>
+      <button type="button" class="btn" data-entrar-cafe>Estudar no café →</button>
+    </div>
+
     <div class="cartao">
       <div class="cartao-corpo">
         <h2>Pausas</h2>
@@ -986,6 +992,9 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 
   </div>
 </section>
+
+<!-- ======================================================== PAINEL: CAFÉ -->
+<section class="painel" id="painel-cafe" aria-labelledby="cafeTitulo"></section>
 
 <!-- ==================================================== PAINEL: ARQUIVOS -->
 <section class="painel" id="painel-arquivos">
@@ -1553,7 +1562,8 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <script src="./futebol.js"></script>
 <script src="./estadio-museu.js?v=112"></script>
 <script src="./camarotes.js?v=115"></script>
-<script src="./cidade.js?v=117"></script>
+<script src="./cidade.js?v=118"></script>
+<script src="./cafe.js?v=118"></script>
 <script>
 "use strict";
 /* ==========================================================================
@@ -3408,6 +3418,7 @@ function definirDuracao(min) {
 }
 
 function iniciarTimer() {
+  prepararInicioCafe();
   acordarAudio();                                  // libera o som no primeiro clique
   if (T.modo === "foco") {
     const digitado = $("#assunto").value.trim();
@@ -3522,6 +3533,7 @@ function tique() {
 
 /** Chamado quando o tempo chega a zero (em foco ou em pausa). */
 function concluirTempo() {
+  pararSomCafe();
   if($("#museuTutorias").open)$("#museuTutorias").close();
   if($("#vestiarioEstadio").open) $("#vestiarioEstadio").close();
   // O fim do foco ou da pausa deve continuar visível durante as atividades do estádio.
@@ -3634,6 +3646,7 @@ function renderTimer() {
   $("#anel").setAttribute("stroke-dashoffset", (CIRCUNFERENCIA * (1 - fracao)).toFixed(2));
 
   $("#btnPrincipal").textContent = T.rodando ? "Pausar" : (restante < T.alvoMs ? "Retomar" : "Iniciar");
+  renderTimerCafe();
 
   // título da aba/janela: dá pra acompanhar sem trazer o app pra frente
   document.title = T.rodando
@@ -4143,6 +4156,7 @@ function renderAjustes() {
     : "A pausa é livre: entra se tu quiser. Pausa longa desligada — todas são de " +
       config.pausaCurta + " min.";
   renderNotifBotao();
+  atualizarSomCafe();
 }
 
 function renderTudo() {
@@ -4204,11 +4218,12 @@ function fecharModalFim() { $("#modalFim").classList.remove("aberto"); }
    14. EXPORTAR / IMPORTAR
    -------------------------------------------------------------------------- */
 function exportarJSON() {
+  salvarCafe();
   const pacote = {
     app: "vidori",
     versao: 1,
     exportadoEm: new Date().toISOString(),
-    blocos, ciclos, config, recordes, marcos: marcosOk, loja: loja, meuTime, arquibancada:estadoArquibancada, penaltis:recordePenaltis
+    blocos, ciclos, config: {...config, cafe: dadosCafeParaBackup()}, recordes, marcos: marcosOk, loja: loja, meuTime, arquibancada:estadoArquibancada, penaltis:recordePenaltis
   };
   const blob = new Blob([JSON.stringify(pacote, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -4240,6 +4255,8 @@ function importarJSON(arquivo) {
     blocos = dados.blocos.filter((b) => b && b.dia && typeof b.minutos === "number");
     ciclos = Array.isArray(dados.ciclos) ? dados.ciclos : [];
     if (dados.config) config = Object.assign(config, dados.config);
+    if (!dados.config || !Object.hasOwn(dados.config, "cafe")) delete config.cafe;
+    recarregarCafe();
     if(!dados.config||!Object.hasOwn(dados.config,'trofeusSecundariosMuseu'))delete config.trofeusSecundariosMuseu;
     prepararTrofeusSecundariosMuseu();
     estadoMuseu.pagina=0;estadoMuseu.selecionado=null;
@@ -4270,6 +4287,7 @@ function apagarTudo() {
   if (!confirm("Apagar TODOS os blocos, ciclos, recordes, compras e o time?\n\nNão tem volta. Exporta o JSON antes se quiser guardar.")) return;
   if (!confirm("Confirma mesmo, " + NOME + "? A estante inteira some.")) return;
   blocos = []; ciclos = []; marcosOk = []; recordes = { dia:0, semana:0, sequencia:0 };
+  delete config.cafe; recarregarCafe(); salvarConfig();
   loja = normalizarLoja(null);
   salvarBlocos(); salvarCiclos(); salvarMarcos(); salvarRecordes(); salvarLoja();
   partidaUI.memoria=null;meuTime=normalizarMeuTime(null); salvarMeuTime();
@@ -7455,6 +7473,7 @@ function desenharEstadio() {
 let estadioAssinatura = null;
 function renderEstadio() {
   renderControlesAmbiente();
+  renderAmbienteCafe();
   const caixaEl = $("#caixaEstadio");
   if (!caixaEl) return;
   const ciclo = temPlacar() ? cicloAtivo() : null;
@@ -7567,10 +7586,12 @@ function fraseDoEstadio() {
    15. NAVEGAÇÃO ENTRE PAINÉIS
    -------------------------------------------------------------------------- */
 function irParaPainel(nome) {
+  salvarCafe();
+  if (nome !== "cafe") pararSomCafe();
   if (nome !== "loja") pararSomLoja(true);
   $$(".painel").forEach((p) => p.classList.toggle("ativo", p.id === "painel-" + nome));
   $$(".aba-btn").forEach((b) => {
-    const ativa=b.dataset.painel===nome;
+    const ativa=b.dataset.painel===(nome === "cafe" ? "foco" : nome);
     b.classList.toggle("ativa",ativa);b.setAttribute("aria-selected",String(ativa));
   });
   if (nome === "progresso") { renderCalor(); renderComparativo(); }
@@ -7579,6 +7600,7 @@ function irParaPainel(nome) {
   if (nome === "estadio") renderEstadio();
   if (nome === "time") renderMeuTime();
   if (nome === "estante") renderEstante();
+  if (nome === "cafe") renderTimerCafe();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -7966,12 +7988,14 @@ $("#volume").addEventListener("input", (e) => {
   config.volume = Number(e.target.value) / 100;
   if (config.volume <= 0) {pararSomLoja(); pararCantoVisita(); pararAudioPenalti();}
   salvarConfig();
+  atualizarSomCafe();
 });
 $("#volume").addEventListener("change", bipeCurto);
 $("#mudo").addEventListener("change", (e) => {
   config.mudo = e.target.checked;
   if (config.mudo) {pararSomLoja(); pararCantoVisita(); pararAudioPenalti();}
   salvarConfig();
+  atualizarSomCafe();
 });
 $("#btnTestarSom").addEventListener("click", () => { acordarAudio(); tocarGol(); });
 $("#btnNotif").addEventListener("click", () => {
@@ -8093,6 +8117,7 @@ function mensagemDeRetomada() {
 
 function iniciarApp() {
   iniciarExperiencias();
+  iniciarCafe();
   // sincroniza recordes e marcos sem comemorar histórico antigo
   conferirRecordes(true);
   conferirMarcos(true);
