@@ -20,7 +20,7 @@ TAKES = {
     688075: (87, 8), 688071: (100, 8),
 }
 ORDER = [689160, 688077, 688072, 688074, 688073, 688076,
-         688075, 688071, 688072, 688077, 689160]
+         688075, 688071, 688072, 689160, 688077]
 
 
 def ff(args, data=None):
@@ -77,6 +77,7 @@ if __name__ == '__main__':
         prepared[identifier] = prepare(folder / f'{identifier}.mp3', bpm, bars, pitch)
     bars_total = sum(TAKES[i][1] for i in ORDER)
     assert bars_total == 128
+    assert all(a != b for a, b in zip(ORDER, ORDER[1:] + ORDER[:1]))
     total = round(bars_total * BAR * SR)
     audio = np.zeros((total + 2 * SR, 2), dtype=np.float64)
     bar = 0
