@@ -200,7 +200,7 @@ const GRAVACOES_CAFE = {
   chuva: "./audio/cafe/chuva.mp3?v=119",
   natureza: "./audio/cafe/natureza.mp3?v=123",
   melodia: "./audio/cafe/melodia.mp3?v=126",
-  guitarra: "./audio/cafe/guitarra.mp3?v=134"
+  guitarra: "./audio/cafe/guitarra.mp3?v=135"
 };
 async function carregarGravacaoCafe(nome, ctx) {
   if (!cafeBuffers.has(nome)) {

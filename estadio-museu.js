@@ -82,7 +82,8 @@ function resumoTitulosMuseu(){
   const principais=ciclosEncerrados().length,secundarios=ciclosDoMuseu().reduce((s,c)=>s+trofeusSecundariosDoCiclo(c).length,0);
   return principais+' '+(principais===1?'Tutoria':'Tutorias')+(secundarios?' · '+secundarios+' '+(secundarios===1?'troféu Clínicas':'troféus Clínicas'):'');
 }
-function capacidadeMuseu(){return matchMedia('(max-width:550px)').matches?1:2;}
+function colunasMuseu(){return matchMedia('(max-width:700px)').matches?1:matchMedia('(max-width:1250px)').matches?2:3;}
+function capacidadeMuseu(){return colunasMuseu()*2;}
 function chuvaSvgAmbiente(x,y,w,h,prefix){
   if(ambienteEstadioAtual().clima!=='chuva')return '';
   let linhas='';for(let i=0;i<85;i++){
@@ -157,12 +158,14 @@ function tacaClinicasSvg(prefix){
     <rect x="-23" y="68" width="46" height="9" rx="1" fill="#D5E0E8"/><text x="0" y="74.5" font-size="5" letter-spacing="1" text-anchor="middle" fill="#344E60">CLÍNICAS</text></g>`;
   return s;
 }
-function desenharSalaMuseu(prefix='sala',interativo=true){
-  const luxo=nivelMuseu()===2,lista=ciclosDoMuseu(),cap=capacidadeMuseu(),pagina=interativo?estadoMuseu.pagina:0,visiveis=lista.slice(pagina*cap,pagina*cap+cap),mobile=cap===1;
+function desenharSalaMuseu(prefix='sala',interativo=true,cicloExibido){
+  const individual=cicloExibido!==undefined;
+  const luxo=nivelMuseu()===2,lista=ciclosDoMuseu(),cap=individual||matchMedia('(max-width:550px)').matches?1:2;
+  const pagina=interativo?estadoMuseu.pagina:0,visiveis=individual?(cicloExibido?[cicloExibido]:[]):lista.slice(pagina*cap,pagina*cap+cap),mobile=cap===1;
   const C=luxo?{parede:'#283A33',piso:'#AEB7A5',madeira:'#2A3027',clara:'#55604C',escura:'#17221C',fundo:'#233F34',borda:'#C6B180',texto:'#F1E5C3'}:
     {parede:'#DEE0D1',piso:'#CEBA96',madeira:'#8B6949',clara:'#B29166',escura:'#574A35',fundo:'#556851',borda:'#C3AA77',texto:'#F6E9CC'};
   const bx=mobile?308:80,bw=mobile?584:1040,slots=visiveis.length||1,espaco=24,margem=38,largura=(bw-margem*2-espaco*(slots-1))/slots;
-  let s=`<svg viewBox="${mobile?'285 0 630 720':'0 0 1200 720'}" preserveAspectRatio="xMidYMid meet" role="${interativo?'group':'img'}" aria-label="Armário de conquistas dividido por ciclos: ${resumoTitulosMuseu()}"><defs>${defsTacaMuseu(prefix)}
+  let s=`<svg viewBox="${mobile?'285 0 630 720':'0 0 1200 720'}" preserveAspectRatio="xMidYMid meet" role="${interativo?'group':'img'}" aria-label="${individual&&cicloExibido?'Conquistas de '+escapar(cicloExibido.nome):'Armário de conquistas dividido por ciclos: '+resumoTitulosMuseu()}"><defs>${defsTacaMuseu(prefix)}
     <linearGradient id="${prefix}-ambiente" x2="0" y2="1"><stop stop-color="${C.parede}"/><stop offset="1" stop-color="${luxo?'#122A22':'#B8C2AC'}"/></linearGradient>
     <linearGradient id="${prefix}-madeira"><stop stop-color="${C.escura}"/><stop offset=".18" stop-color="${C.madeira}"/><stop offset=".48" stop-color="${C.clara}"/><stop offset=".66" stop-color="${C.madeira}"/><stop offset="1" stop-color="${C.escura}"/></linearGradient>
     <linearGradient id="${prefix}-frente" x2="0" y2="1"><stop stop-color="${C.clara}"/><stop offset=".14" stop-color="${C.madeira}"/><stop offset="1" stop-color="${C.escura}"/></linearGradient>
@@ -230,10 +233,18 @@ function renderMuseuEstante(){
 function renderSalaMuseu(){
   const lista=ciclosDoMuseu(),cap=capacidadeMuseu();estadoMuseu.pagina=Math.max(0,Math.min(estadoMuseu.pagina,Math.max(0,Math.ceil(lista.length/cap)-1)));
   if(!lista.some(c=>c.id===estadoMuseu.selecionado))estadoMuseu.selecionado=lista[estadoMuseu.pagina*cap]?.id||null;
+  const indice=lista.findIndex(c=>c.id===estadoMuseu.selecionado);
+  if(indice>=0&&(indice<estadoMuseu.pagina*cap||indice>=(estadoMuseu.pagina+1)*cap))estadoMuseu.pagina=Math.floor(indice/cap);
   const c=lista.find(c=>c.id===estadoMuseu.selecionado);
   if(c&&!c.encerradoEm)estadoMuseu.trofeu='clinicas';
   else if(c&&estadoMuseu.trofeu==='clinicas'&&!trofeusSecundariosDoCiclo(c).length)estadoMuseu.trofeu='tutoria';
-  document.getElementById('cenaMuseu').innerHTML=desenharSalaMuseu('sala',true);
+  const visiveis=lista.slice(estadoMuseu.pagina*cap,(estadoMuseu.pagina+1)*cap);
+  const colunas=Math.min(colunasMuseu(),visiveis.length||1);
+  document.getElementById('cenaMuseu').innerHTML='<div class="museu-galeria" data-nivel="'+nivelMuseu()+'" role="group" aria-label="Armários de conquistas por ciclo" style="--colunas:'+colunas+';max-width:'+(colunas*520+(colunas-1)*16)+'px">'+
+    (visiveis.length?visiveis:[null]).map((c,i)=>'<div class="museu-modulo">'+desenharSalaMuseu('sala-'+i,true,c)+'</div>').join('')+'</div>';
+  const seletor=document.getElementById('irCicloMuseu');
+  seletor.innerHTML=lista.length?lista.map(c=>'<option value="'+escapar(c.id)+'">'+escapar(c.nome)+'</option>').join(''):'<option value="">Seu primeiro ciclo</option>';
+  seletor.disabled=!lista.length;seletor.value=c?.id||'';
   document.getElementById('subtituloMuseu').textContent=nomeNivelMuseu()+' · '+resumoTitulosMuseu();
   document.getElementById('museuAnterior').disabled=estadoMuseu.pagina===0;document.getElementById('museuProximo').disabled=(estadoMuseu.pagina+1)*cap>=lista.length;
   document.getElementById('paginaMuseu').textContent=lista.length?(estadoMuseu.pagina*cap+1)+'–'+Math.min(lista.length,(estadoMuseu.pagina+1)*cap)+' de '+lista.length+' ciclos':'A primeira Tutoria virá com seu próximo ciclo encerrado.';
@@ -264,6 +275,14 @@ function iniciarExperiencias(){
   document.getElementById('museuTutorias').addEventListener('close',()=>{if(estadoMuseu.retorno?.isConnected)estadoMuseu.retorno.focus({preventScroll:true});});
   document.getElementById('prateleira').addEventListener('click',e=>{const b=e.target.closest('[data-ver-tutoria]');if(b)abrirMuseu(b.dataset.verTutoria);});
   document.getElementById('melhorarMuseu').addEventListener('click',melhorarMuseu);
+  document.getElementById('irCicloMuseu').addEventListener('change',e=>{
+    const lista=ciclosDoMuseu(),index=lista.findIndex(c=>c.id===e.target.value);
+    if(index<0)return;
+    estadoMuseu.pagina=Math.floor(index/capacidadeMuseu());estadoMuseu.selecionado=lista[index].id;
+    estadoMuseu.trofeu=lista[index].encerradoEm?'tutoria':'clinicas';renderSalaMuseu();
+    const alvo=document.querySelector('#cenaMuseu [data-tutoria="'+CSS.escape(estadoMuseu.selecionado)+'"][data-trofeu="'+estadoMuseu.trofeu+'"]');
+    if(alvo){alvo.focus({preventScroll:true});alvo.closest('.museu-modulo').scrollIntoView({block:'nearest',behavior:'auto'});}
+  });
   for(const [id,d]of [['museuAnterior',-1],['museuProximo',1]])document.getElementById(id).addEventListener('click',()=>{estadoMuseu.pagina+=d;estadoMuseu.selecionado=ciclosDoMuseu()[estadoMuseu.pagina*capacidadeMuseu()]?.id||null;estadoMuseu.trofeu='tutoria';renderSalaMuseu();});
   const selecionar=e=>{const alvo=e.target.closest('[data-tutoria]');if(!alvo)return;const painel=!!alvo.closest('#detalheTutoria');estadoMuseu.selecionado=alvo.dataset.tutoria;estadoMuseu.trofeu=alvo.dataset.trofeu||'tutoria';renderSalaMuseu();document.querySelector((painel?'#detalheTutoria':'#cenaMuseu')+' [data-tutoria="'+CSS.escape(estadoMuseu.selecionado)+'"][data-trofeu="'+estadoMuseu.trofeu+'"]').focus({preventScroll:true});};
   document.getElementById('cenaMuseu').addEventListener('click',selecionar);
