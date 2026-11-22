@@ -3,6 +3,39 @@
 let cafeRascunho = null, cafeGravacao = null, cafeSujo = false;
 let cafeAudio = null, cafeAmbienteAssinatura = "";
 
+function cafeDisponivel(){return temArredores() && nivelDaObra('cafeteria')>=1;}
+function abrirProjetoCafe(){
+  if(!temArredores()){
+    irParaPainel('estadio');
+    mostrarAviso('Evolua os arredores para o nível 1 para liberar o canteiro da cafeteria.');
+    abrirObrasEstadio('arredores');
+  }else{
+    if(!document.querySelector('#painel-cafe.ativo'))irParaPainel('estadio');
+    abrirObrasEstadio('cafeteria');
+  }
+}
+function apresentacaoObraCafe(){
+  const n=nivelDaObra('cafeteria');
+  return `<div class="cafe-projeto"><svg viewBox="-27 -23 54 46" role="img" aria-label="${n?'Cafeteria nível '+n:'Canteiro de obras da cafeteria'}">${cafeteriaDoBairro(0,0,n,false)}</svg><div><span class="cafe-sobretitulo">UM CAFÉ QUE CRESCE COM VOCÊ</span><h3>${n?'Portas abertas para o próximo bloco':'Seu futuro cantinho de estudo'}</h3><p>${n?'A mesa, o caderno e todos os sons estão disponíveis. As próximas obras deixam o espaço mais acolhedor.':'O canteiro está pronto. Construa a cafeteria para entrar, estudar junto à janela e ouvir seus ambientes sonoros.'}</p>${n?'<button type="button" class="btn btn-principal" data-entrar-cafe>Entrar para estudar →</button>':''}</div></div>`;
+}
+function renderAcessoCafe(){
+  const aberto=cafeDisponivel(),n=nivelDaObra('cafeteria');
+  const convite=document.querySelector('.cafe-convite'),sala=document.querySelector('.cafe-sala');
+  if(convite){
+    convite.dataset.cafeAberto=String(aberto);
+    convite.querySelector('p').textContent=aberto?'Sua mesa junto à janela está pronta. Cafeteria nível '+n+'.':temArredores()?'A cafeteria está em obras. Construa por R$ 200 para estudar aqui.':'Evolua os arredores para o nível 1 e descubra a cafeteria.';
+    convite.querySelector('[data-entrar-cafe]').textContent=aberto?'Estudar no café →':temArredores()?'Ver construção · R$ 200':'Conhecer o projeto →';
+  }
+  if(sala){
+    sala.dataset.nivel=String(n);
+    document.querySelector('#cafeNivel').textContent='Cafeteria · nível '+n;
+  }
+  if(!aberto){
+    pararSomCafe();
+    if(document.querySelector('#painel-cafe.ativo'))irParaPainel('foco');
+  }
+}
+
 function normalizarCafe(dados) {
   const d = dados && typeof dados === "object" ? dados : {};
   const texto = (v, max) => typeof v === "string" ? v.slice(0, max) : "";
@@ -89,12 +122,13 @@ function canecaDoCafe() {
 }
 function iniciarCafe() {
   const painel = document.querySelector("#painel-cafe");
-  painel.innerHTML = `<div class="cafe-cabecalho"><div><span class="cafe-sobretitulo">SEU CANTINHO DE ESTUDO</span><h2 id="cafeTitulo" tabindex="-1">Café do Morumbi</h2><p>A cidade lá fora. Um objetivo de cada vez aqui dentro.</p></div><button type="button" class="btn" id="cafeSair">← Voltar ao Foco</button></div>
-    <div class="cafe-sala" data-periodo="dia" data-clima="limpo">
+  painel.innerHTML = `<div class="cafe-cabecalho"><div><span class="cafe-sobretitulo">SEU CANTINHO DE ESTUDO</span><h2 id="cafeTitulo" tabindex="-1">Café do Morumbi</h2><p>A cidade lá fora. Um objetivo de cada vez aqui dentro.</p></div><div class="cafe-cabecalho-acoes"><span id="cafeNivel"></span><button type="button" class="btn" data-projeto-cafe>Ver melhorias</button><button type="button" class="btn" id="cafeSair">← Voltar ao Foco</button></div></div>
+    <div class="cafe-sala" data-nivel="0" data-periodo="dia" data-clima="limpo">
       <div class="cafe-parede"><div class="cafe-quadro" aria-hidden="true"><span>CAFÉ</span><b>do Morumbi</b><i>desde o primeiro bloco</i><div class="cafe-tricolor"></div></div>
         <div class="cafe-janela">${ruaDoCafe()}<div class="cafe-caixilho" aria-hidden="true"><i></i><i></i></div></div><span id="cafeAmbiente" class="cafe-etiqueta"></span>
         <div class="cafe-planta" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><b></b></div>
         <div class="cafe-luminaria" aria-hidden="true"><i></i><b></b></div>
+        <div class="cafe-estante-parede" aria-hidden="true"><div><i></i><i></i><i></i><i></i><span class="cafe-vasinho"><b></b></span></div><small>PAUSA PARA RESPIRAR</small></div><div class="cafe-boiserie" aria-hidden="true"></div>
       </div>
       <div class="cafe-mesa"><div class="cafe-estudo">
         <div class="cafe-relogio"><div class="cafe-relogio-topo"><span>COPEIRO</span><span id="cafeModo">FOCO</span></div><div id="cafeTempo" role="timer" aria-live="off">30:00</div><div class="cafe-progresso"><i id="cafeProgresso"></i></div><p id="cafeAssunto">Sua mesa está pronta.</p>
@@ -134,14 +168,19 @@ function iniciarCafe() {
     if(cafeAudio) {pararSomCafe();iniciarSomCafe();}
   });
   document.querySelector("#cafeVolume").addEventListener("input", e => {cafeRascunho.volume=Number(e.target.value)/100;agendarCafe();atualizarSomCafe();});
-  document.addEventListener("click", e => {if(e.target.closest("[data-entrar-cafe], [data-abrir-cafe]")) abrirCafe();});
+  document.addEventListener("click", e => {
+    if(e.target.closest("[data-projeto-cafe]"))abrirProjetoCafe();
+    else if(e.target.closest("[data-entrar-cafe], [data-abrir-cafe]"))abrirCafe();
+  });
   document.querySelector("#caixaEstadio").addEventListener("keydown", e => {
-    if ((e.key === "Enter" || e.code === "Space") && e.target.closest("[data-abrir-cafe]")) {e.preventDefault();e.stopPropagation();abrirCafe();}
+    if ((e.key === "Enter" || e.code === "Space") && e.target.closest("[data-abrir-cafe], [data-projeto-cafe]")) {e.preventDefault();e.stopPropagation();if(e.target.closest('[data-projeto-cafe]'))abrirProjetoCafe();else abrirCafe();}
   });
   window.addEventListener("beforeunload", salvarCafe);
   window.addEventListener("pagehide", () => {salvarCafe();pararSomCafe();});
 }
 function abrirCafe() {
+  if(!cafeDisponivel()){abrirProjetoCafe();return;}
+  const modal=document.querySelector('#modalObraEstadio');if(modal.open)modal.close();
   const temBloco = T.modo === "foco" && !!T.inicioBloco;
   const assunto = temBloco ? T.assunto : T.modo === "foco" ? document.querySelector("#assunto").value.trim() : "";
   if (assunto && assunto !== "Sem assunto" && cafeRascunho.objetivo !== assunto) {cafeRascunho.objetivo=assunto;agendarCafe();}
@@ -226,6 +265,7 @@ async function carregarGravacaoCafe(nome, ctx) {
   return cafeBuffers.get(nome);
 }
 async function iniciarSomCafe() {
+  if(!cafeDisponivel())return;
   if (cafeAudio) return;
   if(config.mudo || config.volume<=0) {atualizarSomCafe();mostrarAviso("Ative o som em Ciclo & Ajustes para ouvir o café.");return;}
   const ctx=acordarAudio();if(!ctx){mostrarAviso("Este navegador não oferece áudio ambiente.");return;}

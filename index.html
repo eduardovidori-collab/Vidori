@@ -871,7 +871,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 </style>
 <link rel="stylesheet" href="./futebol.css">
 <link rel="stylesheet" href="./estadio-museu.css?v=135">
-<link rel="stylesheet" href="./cafe.css?v=120">
+<link rel="stylesheet" href="./cafe.css?v=138">
 <link rel="stylesheet" href="./album-time.css?v=129">
 </head>
 <body>
@@ -1604,8 +1604,8 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <script src="./futebol.js"></script>
 <script src="./estadio-museu.js?v=135"></script>
 <script src="./camarotes.js?v=115"></script>
-<script src="./cidade.js?v=118"></script>
-<script src="./cafe.js?v=137"></script>
+<script src="./cidade.js?v=138"></script>
+<script src="./cafe.js?v=138"></script>
 <script src="./album-time.js?v=129"></script>
 <script>
 "use strict";
@@ -2709,10 +2709,14 @@ const OBRAS_ESTADIO = {
     { desc: "Malha nas duas balizas: fundo, laterais e teto. Antes eram só as traves.", preco: 150 }
   ]},
   arredores: { nome: "Arredores", niveis: [
-    { desc: "Área externa com árvores afastadas das arquibancadas e um prédio baixo em escala com o estádio.", preco: 250 },
+    { desc: "Área externa com árvores afastadas das arquibancadas e o canteiro de obras do Café do Morumbi. Libera a construção da cafeteria por R$ 200.", preco: 250 },
     { desc: "Praça tricolor com entrada monumental, jardins floridos, bancos e bilheteria conectados por caminhos até o estádio.", preco: 750 },
     { desc: "Praça da torcida com monumento de taça, pergolado de madeira, bancos e novos jardins, ligada aos caminhos existentes.", preco: 1000 },
     { desc: "Bairro ao redor do estádio: sobrados e edifícios variados, comércio com toldos, ruas conectadas, ônibus, pedestres e calçadas arborizadas. Janelas e postes se acendem ao anoitecer.", preco: 1200 }
+  ]},
+  cafeteria: { nome: "Café do Morumbi", niveis: [
+    { nome: "Construir cafeteria · nível 1", desc: "Um café simples e acolhedor: fachada verde, janela, mesa de madeira e os ambientes sonoros para estudar. Requer arredores nível 1.", preco: 200 },
+    { nome: "Cafeteria · nível 2", desc: "Toldo listrado, floreiras e uma mesinha na calçada. Por dentro, madeira renovada, janela em arco, luminária e estante com livros e plantas. Ainda há espaço para o café crescer.", preco: 400 }
   ]},
   publico: { nome: "Público", niveis: [
     { desc: "Primeira leva de torcedores espalhados pelos setores. Ainda tem muito lugar vago.", preco: 300 },
@@ -2756,6 +2760,7 @@ const OBRAS_ESTADIO = {
 /** Nível já entregue de uma obra. Zero é o estádio como ele nasce. */
 function nivelDaObra(f) {
   const n=(loja.niveis && loja.niveis[f]) || 0;
+  if(f === "cafeteria") return Number.isInteger(n) ? Math.max(0,Math.min(OBRAS_ESTADIO.cafeteria.niveis.length,n)) : 0;
   return f === "vestiario" ? (Number.isInteger(n)&&n>=1?Math.min(3,n):1) : n;
 }
 function proximoNivel(f) {
@@ -5246,6 +5251,7 @@ function comprarNivel(familia,nivelEsperado) {
   const obra = OBRAS_ESTADIO[familia];
   const prox = proximoNivel(familia);
   if (!obra || !prox) return false;
+  if(familia === "cafeteria" && !temArredores()) {mostrarAviso("Evolua os arredores para o nível 1 antes de construir a cafeteria.");return false;}
   if(nivelEsperado!==undefined && nivelEsperado!==nivelDaObra(familia)+1) return false;
   if (saldoDinheiro() < prox.preco) {
     const falta = prox.preco - saldoDinheiro();
@@ -5950,6 +5956,7 @@ const GRUPOS_OBRAS_ESTADIO = {
   campo:{nome:"Campo",obras:["gramado","redes","bandeiras"],posicao:()=>[8,6,1],icone:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 5v14"/><circle cx="12" cy="12" r="3"/>'},
   refletores:{nome:"Refletores",obras:["refletores"],posicao:()=>[-72,-53,33],icone:'<path d="M5 3h14v8H5zM8 3v8m4-8v8m4-8v8M5 7h14m-7 4v10m-4 0h8"/>'},
   placar:{nome:"Placar",obras:["placar"],posicao:()=>[-12,-87,28+elevacaoPlacarCamarotes()],icone:'<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M7 17v4m10-4v4M7 8h3v5H7zm7 0h3v5h-3z"/>'},
+  cafeteria:{nome:"Café do Morumbi",obras:["cafeteria"],posicao:()=>[143,-12,11],icone:'<path d="M4 8h12v7a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zm12 1h2a3 3 0 0 1 0 6h-2M7 3v2m4-2v2M2 22h18"/>'},
   arredores:{nome:"Arredores",obras:["arredores"],posicao:()=>[132,24,10],icone:'<path d="M3 21V9h7v12m0-16h10v16M6 12v1m0 3v1m8-9v1m3-1v1m-3 3v1m3-1v1m-3 3v1m3-1v1M2 21h20"/>'}
 };
 let mostrarBaloesEstadio=true,grupoObraAtivo="cobertura",obraEstadioSelecionada="cobertura";
@@ -5961,18 +5968,18 @@ function renderBaloesEstadio() {
   const v=svg.viewBox.baseVal,foco=document.activeElement?.dataset.estadioGrupo;
   $("#baloesEstadio").hidden=!mostrarBaloesEstadio;
   $("#estadioZonas").hidden=!mostrarBaloesEstadio;
-  $("#baloesEstadio").innerHTML=Object.entries(GRUPOS_OBRAS_ESTADIO).map(([id,g])=>{
+  $("#baloesEstadio").innerHTML=Object.entries(GRUPOS_OBRAS_ESTADIO).filter(([id])=>id!=="cafeteria"||temArredores()).map(([id,g])=>{
     const proximas=g.obras.map(proximoNivel).filter(Boolean),feita=proximas.length===0;
     const preco=feita?0:Math.min(...proximas.map(p=>p.preco));
     const p=iso(...g.posicao()),x=(p.x-v.x)/v.width*100,y=(p.y-v.y)/v.height*100;
     const nivel=g.obras.length===1&&OBRAS_ESTADIO[g.obras[0]].niveis.length>1?"Nível "+(nivelDaObra(g.obras[0])+1)+" · ":"";
-    const resumo=feita?"Concluído":(g.obras.length>1?"Desde ":nivel)+formatarDinheiro(preco);
+    const resumo=feita?(id==="cafeteria"?"Aberto · nível "+nivelDaObra("cafeteria"):"Concluído"):(g.obras.length>1?"Desde ":nivel)+formatarDinheiro(preco);
     return '<button type="button" class="obra-pin'+(feita?' concluida':saldoDinheiro()<preco?' sem-saldo':'')+'" data-estadio-grupo="'+id+'" '+
       'style="--pin-x:'+x.toFixed(2)+'%;--pin-y:'+y.toFixed(2)+'%" aria-haspopup="dialog" aria-label="'+g.nome+': '+resumo+'">'+
       '<span class="obra-pin-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+g.icone+'</svg></span>'+
       '<span class="obra-pin-texto"><strong>'+g.nome+'</strong><small>'+resumo+'</small></span><span class="obra-pin-sinal" aria-hidden="true">'+(feita?'✓':'+')+'</span></button>';
   }).join('');
-  $("#estadioZonas").innerHTML=Object.entries(GRUPOS_OBRAS_ESTADIO).map(([id,g])=>
+  $("#estadioZonas").innerHTML=Object.entries(GRUPOS_OBRAS_ESTADIO).filter(([id])=>id!=="cafeteria"||temArredores()).map(([id,g])=>
     '<button class="btn btn-pequeno" type="button" data-estadio-grupo="'+id+'" aria-haspopup="dialog">'+g.nome+'</button>').join('');
   if(foco&&!$("#modalObraEstadio").open) $("#baloesEstadio [data-estadio-grupo="+foco+"]")?.focus({preventScroll:true});
   if($("#modalObraEstadio").open) renderDetalheObraEstadio();
@@ -5980,6 +5987,7 @@ function renderBaloesEstadio() {
 
 function abrirObrasEstadio(grupo) {
   if(grupo==="vestiario") {abrirVestiario();return;}
+  if(grupo==="cafeteria"&&!temArredores())grupo="arredores";
   const g=GRUPOS_OBRAS_ESTADIO[grupo];
   if(!g) return;
   grupoObraAtivo=grupo;
@@ -5997,7 +6005,7 @@ function renderDetalheObraEstadio() {
   $("#escolhasObraEstadio").hidden=g.obras.length<2;
   $("#escolhasObraEstadio").innerHTML=g.obras.length<2?"":g.obras.map(f=>
     '<button class="btn btn-pequeno" type="button" data-obra-escolher="'+f+'" aria-pressed="'+(f===obraEstadioSelecionada)+'">'+escapar(OBRAS_ESTADIO[f].nome)+'</button>').join('');
-  $("#detalheObraEstadio").innerHTML=cartaoDeObra(obraEstadioSelecionada);
+  $("#detalheObraEstadio").innerHTML=(grupoObraAtivo==="cafeteria"?apresentacaoObraCafe():"")+cartaoDeObra(obraEstadioSelecionada);
 }
 
 /** Um cartão por obra, mostrando o nível atual e o que vem a seguir. */
@@ -6006,7 +6014,8 @@ function cartaoDeObra(familia) {
   const nivel = nivelDaObra(familia);
   const total = obra.niveis.length;
   const prox = proximoNivel(familia);
-  const pode = prox && saldoDinheiro() >= prox.preco;
+  const requisito = familia!=="cafeteria" || temArredores();
+  const pode = prox && requisito && saldoDinheiro() >= prox.preco;
   const temNiveis = total > 1;
 
   let selo;
@@ -6029,8 +6038,8 @@ function cartaoDeObra(familia) {
     '<p class="desc">' + desc + "</p>" +
     (prox ? '<div class="item-acoes">' +
       '<button type="button" class="btn btn-pequeno btn-principal" data-obra-comprar="' + familia +
-      '" data-obra-nivel="'+(nivel+1)+'"' + (pode ? "" : " disabled") + ">Construir · "+formatarDinheiro(prox.preco)+"</button></div>"+
-      (pode?"":'<p class="obra-falta">Faltam '+formatarDinheiro(prox.preco-saldoDinheiro())+' para esta melhoria.</p>') : "") +
+      '" data-obra-nivel="'+(nivel+1)+'"' + (pode ? "" : " disabled") + ">"+(familia==="cafeteria"&&nivel>0?"Melhorar":"Construir")+" · "+formatarDinheiro(prox.preco)+"</button></div>"+
+      (pode?"":'<p class="obra-falta">'+(!requisito?"Construa os arredores nível 1 primeiro.":"Faltam "+formatarDinheiro(prox.preco-saldoDinheiro())+" para esta melhoria.")+'</p>') : "") +
     "</div>";
 }
 
@@ -6163,7 +6172,7 @@ function renderAvisoLoja() {
       !temItem(cat, id) && dinheiro >= CATALOGO[cat][id].preco));
   const podeObra = Object.keys(OBRAS_ESTADIO).some((f) => {
     const p = proximoNivel(f);
-    return p && dinheiro >= p.preco;
+    return p && (f!=="cafeteria"||temArredores()) && dinheiro >= p.preco;
   });
   marcarAbaComNovidade("loja",podeSom || saldo>=PACOTE_BASE.preco);
   marcarAbaComNovidade("estadio",podeObra);
@@ -6345,18 +6354,13 @@ function arvore(cx, cy, e) {
   return s;
 }
 
-/** Prédio de três pavimentos, mais baixo que a arquibancada com segundo anel. */
-function predio(cx, cy) {
-  return predioDaCidade(cx,cy,9,6.5,3,['#E7DEC9','#D3C6AB','#B3A68C'],null,{principal:true});
-}
-
-/* Praça externa: as copas e o prédio ficam além do limite do segundo anel.
+/* Praça externa: as copas e a cafeteria ficam além do limite do segundo anel.
    No lado próximo da cena, as árvores permanecem visíveis com todas as obras. */
-const LOTE_PREDIO = { x:143, y:-12, meioX:13, meioY:12 };
+const LOTE_CAFE = { x:143, y:-12, meioX:13, meioY:12 };
 const ARREDORES = [
   { x: -38, y: 94, svg: () => arvore(-38, 94, 0.78) },
   { x:  -6, y: 94, svg: () => arvore(-6, 94, 0.68) },
-  { x:LOTE_PREDIO.x, y:LOTE_PREDIO.y, svg:() => predio(LOTE_PREDIO.x,LOTE_PREDIO.y) }
+  { x:LOTE_CAFE.x, y:LOTE_CAFE.y, svg:() => cafeteriaDoBairro(LOTE_CAFE.x,LOTE_CAFE.y) }
 ];
 
 /** Texto no plano vertical da fachada, acompanhando a projeção do estádio. */
@@ -6555,19 +6559,19 @@ const ARREDORES_NIVEL_3 = [
 
 /** Praça em pedra clara, jardins e caminhos conectados à entrada do estádio. */
 function pisoDosArredores() {
-  const lote=LOTE_PREDIO;
-  const pisoDoPredio=caixa(lote.x-lote.meioX,lote.y-lote.meioY,lote.x+lote.meioX,lote.y+lote.meioY,
+  const lote=LOTE_CAFE;
+  const pisoDoCafe=caixa(lote.x-lote.meioX,lote.y-lote.meioY,lote.x+lote.meioX,lote.y+lote.meioY,
                           0,0.14,"#CDD5D0","#ADBDB1","#94AA9A");
   if(nivelDaObra("arredores")<2) {
     return caixa(-51,85,5,103,0,0.14,"#DADDD5","#BDC4BB","#ACB6AB") +
       traco([[-49,89,0.16],[3,89,0.16]],"#BCC5BA",0.4) +
-      pisoDoPredio;
+      pisoDoCafe;
   }
   const z=0.17, pedra="#DDDCD0";
   let s=poligono([[-56,83,z],[-50,78,z],[67,78,z],[76,85,z],[76,100,z],[70,105,z],[-50,105,z],[-56,100,z]],pedra);
   s+=poligono([[64,91,z],[74,104,z],[115,80,z],[104,63,z]],pedra);
   s+=caixa(90,20,116,78,0,0.14,pedra,"#BEC6B6","#A8B69F");
-  s+=pisoDoPredio;
+  s+=pisoDoCafe;
   // Juntas discretas dão escala ao pavimento.
   for(let x=-44;x<70;x+=10) s+=traco([[x,80,z+0.01],[x,103,z+0.01]],"#BAC4B1",0.18,0.6);
   [86,96].forEach(y=>{s+=traco([[-53,y,z+0.01],[73,y,z+0.01]],"#BAC4B1",0.18,0.6);});
@@ -7545,6 +7549,7 @@ function desenharEstadio() {
          (temCoberturaAmpliada() ? ". Cobertura nível 2 ampliada, com faixa translúcida" + (temCantos()?" e cantos integrados":"") : "") +
          (nivelDaObra("arredores")>=3 ? ". Praça da torcida com monumento de taça e pergolado" : "") +
          (temCidade() ? ". Bairro com ruas, faixas de pedestres, prédios, comércio, carros e ponto de ônibus" : "") +
+         (temArredores() ? (cafeDisponivel()?". Café do Morumbi nível "+nivelDaObra("cafeteria")+", aberto para estudar":". Canteiro de obras da cafeteria") : "") +
          (temCamarotes() ? ". Camarotes nível " + nivelDaObra("camarotes") + ", " + (nivelDaObra("camarotes")===2?"seis salas, três na lateral sul e três na norte":"três salas na lateral sul") : "") +
          (temPlacar() ? ". Placar do ciclo: " + golsDoPlacar() + (golsDoPlacar() === 1 ? " gol" : " gols") : "") + '">' +
          envolverEstadioAmbiente(s,defs,enquadramento) + "</svg>";
@@ -7558,6 +7563,7 @@ let estadioAssinatura = null;
 function renderEstadio() {
   renderControlesAmbiente();
   renderAmbienteCafe();
+  renderAcessoCafe();
   const caixaEl = $("#caixaEstadio");
   if (!caixaEl) return;
   const ciclo = temPlacar() ? cicloAtivo() : null;
@@ -7566,7 +7572,7 @@ function renderEstadio() {
                      (temRefletores() ? "r" : "-") + (temRedes() ? "n" : "-") +
                      (temBandeiras() ? "b" : "-") + (temPublico() ? "p" : "-") +
                      (temListras() ? "l" : "-") + (temCantos() ? "k" : "-") +
-                     nivelDaObra("camarotes") + ":" + nivelDaObra("publico") + ":" + nivelDaObra("arredores") + ":" + nivelDaObra("cobertura") +
+                     nivelDaObra("camarotes") + ":" + nivelDaObra("publico") + ":" + nivelDaObra("arredores") + ":" + nivelDaObra("cafeteria") + ":" + nivelDaObra("cobertura") +
                      ":"+JSON.stringify(estadoArquibancada.bandeiroes)+":"+meuTime.nome+
                      ":" + (temPlacar() ? JSON.stringify([ciclo && ciclo.id,ciclo && ciclo.nome,golsDoPlacar()]) : "-");
   if (estadioAssinatura === assinatura) {renderBaloesEstadio();renderVisitaArquibancada();renderVestiario();return;}
@@ -7639,7 +7645,7 @@ function fraseDoEstadio() {
   if (temArredores()) feitas.push(temCidade()
     ? "bairro ao redor com ruas, comércio, prédios e ponto de ônibus, junto às praças existentes"
     : nivelDaObra("arredores") >= 3 ? "praça da torcida com monumento, pergolado e jardins"
-    : nivelDaObra("arredores") >= 2 ? "praça tricolor com jardins, entrada e bilheteria" : "árvores e prédio no entorno");
+    : nivelDaObra("arredores") >= 2 ? "praça tricolor com jardins, entrada e bilheteria" : "árvores no entorno");
   if (temPlacar()) {
     const gols = golsDoPlacar();
     feitas.push("placar com " + gols.toLocaleString("pt-BR") + (gols === 1 ? " gol" : " gols"));
@@ -7647,6 +7653,7 @@ function fraseDoEstadio() {
   if (temCobertura()) feitas.push(temCoberturaAmpliada()
     ? "cobertura ampliada com faixa translúcida" + (temCantos()?" e cantos integrados":"") : "arquibancada coberta");
   if (temRefletores()) feitas.push(refletoresAcesos()?"refletores acesos":"refletores instalados");
+  if(cafeDisponivel()) feitas.push("cafeteria nível "+nivelDaObra("cafeteria")+" aberta para estudar");
 
   if (!feitas.length) {
     return "Campo de terra batida, quatro arquibancadas, túnel dos jogadores e bancos de reservas. " +
@@ -7670,6 +7677,7 @@ function fraseDoEstadio() {
    15. NAVEGAÇÃO ENTRE PAINÉIS
    -------------------------------------------------------------------------- */
 function irParaPainel(nome) {
+  if(nome==="cafe"&&!cafeDisponivel()) {abrirProjetoCafe();return;}
   salvarCafe();
   if (nome !== "cafe") pararSomCafe();
   if (nome !== "loja") pararSomLoja(true);
@@ -7684,7 +7692,7 @@ function irParaPainel(nome) {
   if (nome === "estadio") renderEstadio();
   if (nome === "time") renderMeuTime();
   if (nome === "estante") renderEstante();
-  if (nome === "cafe") renderTimerCafe();
+  if (nome === "cafe") {renderAcessoCafe();renderTimerCafe();}
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 

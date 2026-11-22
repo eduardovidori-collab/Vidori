@@ -21,6 +21,8 @@ try:
   c=b.new_context(viewport={'width':1440,'height':1000},timezone_id='America/Sao_Paulo',accept_downloads=True)
   p=c.new_page();errors=[];p.on('pageerror',lambda e:errors.append(str(e)));p.on('dialog',lambda d:d.accept())
   p.goto(url,wait_until='networkidle');p.evaluate('config.mudo=true;config.notificar=false;salvarConfig()')
+  # Ownership is a fixture here; real purchases and locking are tested separately.
+  p.evaluate('loja.niveis.arredores=1;loja.niveis.cafeteria=1;salvarLoja();renderEstadio()')
   money=p.evaluate('JSON.stringify(loja)');cards=p.evaluate('JSON.stringify(meuTime)')
   p.locator('[data-entrar-cafe]').click();assert p.locator('#painel-cafe').is_visible()
   assert p.locator('#abas .ativa').get_attribute('data-painel')=='foco'
@@ -68,8 +70,8 @@ try:
   assert p.evaluate('blocos.length')==2;assert p.evaluate('blocos[1].minutos')==1
   p.evaluate('tique()');assert p.evaluate('blocos.length')==2;p.evaluate('fecharModalFim()')
   assert p.evaluate('JSON.stringify(meuTime)')==cards
-  # Unowned city stays unowned, but cafe is freely reachable. With City 4, its building is a keyboard entry.
-  p.evaluate('irParaPainel("estadio")');assert p.locator('[data-abrir-cafe]').count()==0
+  # The owned cafe is already reachable at Surroundings 1; City 4 never duplicates it.
+  p.evaluate('irParaPainel("estadio")');assert p.locator('[data-abrir-cafe]').count()==1
   p.evaluate('loja.niveis.arredores=4;renderEstadio()')
   cafe=p.locator('[data-abrir-cafe]');assert cafe.count()==1;cafe.focus();cafe.press('Enter')
   assert p.locator('#painel-cafe').is_visible()

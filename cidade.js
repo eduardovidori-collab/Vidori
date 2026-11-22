@@ -120,8 +120,87 @@ function predioDaCidade(cx,cy,lx,ly,pisos,paleta,lojaNome,opcoes={}){
       s+=traco([[cx+lx*.5,cy-ly*.4,base],[cx+lx*.5,cy-ly*.4,base+3.2]],'#6D8079',.15);
     }
   }
-  const entradaCafe=lojaNome==='CAFÉ'?' data-abrir-cafe="true" role="button" tabindex="0" aria-label="Entrar no Café do Morumbi para estudar"':'';
-  return '<g '+(opcoes.principal?'data-arredores="predio"':'data-cidade="predio"')+' data-pavimentos="'+pisos+'"'+entradaCafe+'>'+s+'</g>';
+  return '<g '+(opcoes.principal?'data-arredores="predio"':'data-cidade="predio"')+' data-pavimentos="'+pisos+'">'+s+'</g>';
+}
+
+/** Um único café, no lote dos arredores 1; os acabamentos crescem com a obra. */
+function cafeteriaDoBairro(cx,cy,nivel=nivelDaObra('cafeteria'),interativo=true){
+  const p=(x,y,z)=>[cx+x,cy+y,z];
+  const bloco=(x0,y0,x1,y1,z0,z1,cores)=>caixa(cx+x0,cy+y0,cx+x1,cy+y1,z0,z1,...cores);
+  const face=(a,b,z0,z1,cor,d=6.55)=>poligono([p(a,d,z0),p(b,d,z0),p(b,d,z1),p(a,d,z1)],cor);
+  let s=sombraNoChao(cx+1,cy+1,10.3,8);
+  s+=bloco(-10,-7.5,10,11,.16,.42,['#D9D4C3','#B6B9A7','#A1AA97']);
+  if(!nivel){
+    s+=bloco(-9,-6.5,9,6.5,.42,.8,['#C7C3B4','#A6AB9F','#929F91']);
+    s+=bloco(-9,-6.5,9,-5.7,.8,2.9,['#D6AB8B','#B98C6E','#A27A5F']);
+    s+=bloco(-9,-5.7,-8.2,6.5,.8,2.1,['#D6AB8B','#B98C6E','#A27A5F']);
+    for(const x of [-8.5,8.5])for(const y of [-6,6])s+=bloco(x-.3,y-.3,x+.3,y+.3,.8,6.5,['#C7C8BA','#A6B4A8','#8F9F95']);
+    s+=traco([p(-8.5,-6,6.4),p(8.5,-6,6.4),p(8.5,6,6.4)],'#697D70',.35);
+    // Andaime preso ao chão, com tábuas, contraventamentos e guarda-corpo.
+    for(const x of [-10,0,10])s+=traco([p(x,7,.42),p(x,7,6.8)],'#8D9A8A',.17);
+    s+=bloco(-10.5,6.6,10.5,7.8,3.2,3.45,['#BEA078','#9F825D','#866E4F']);
+    s+=traco([p(-10,7,5),p(10,7,5)],'#8D9A8A',.16);
+    s+=traco([p(-10,7,.5),p(0,7,5),p(10,7,.5)],'#879587',.13);
+    for(let x=-8;x<7;x+=3)s+=bloco(x,1.5,x+2,3,.8,1.6,['#DBC9A5','#B9A780','#9F9476']);
+    for(let k=0;k<3;k++)s+=bloco(2,-3+k*.9,7,-2.5+k*.9,.8,1,['#BA9470','#9D7E5C','#8B6D4E']);
+    s+=bloco(-11,9,11,9.3,.42,2.5,['#A0AA97','#84927E','#74846F']);
+    for(let x=-10;x<11;x+=2)s+=face(x,x+1,.6,1,'#E4C374',9.35);
+    s+=face(-6,6,1.25,2.4,'#435B4C',9.4);
+    s+=textoNaFaceCidade(cx,cy+9.45,1.85,'CAFÉ · EM OBRAS',.91,'#F9ECCD');
+    s+=bloco(-11,6.2,-10,7.2,.42,.6,['#D9B270','#B99250','#A07E42']);
+    s+=poligono([p(-11,6.2,.6),p(-10,6.2,.6),p(-10.5,6.7,2.2)],'#C88A53');
+  }else{
+    const melhor=nivel>=2,h=melhor?7:6.2,aceso=cidadeIluminada();
+    s+=bloco(-9,-6.5,9,6.5,.42,h,['#E7DECA','#D4C5A6','#C0AD8C']);
+    s+=face(-9,9,.42,1.2,'#8D8770');
+    s+=face(-7.8,-1.3,1.5,4.8,aceso?'#D6B77E':'#547A78');
+    s+=face(2.4,7.8,1.5,4.8,aceso?'#D6B77E':'#547A78');
+    s+=face(-.65,1.8,.5,4.8,'#3A5849',6.62);
+    s+=face(-.35,1.5,1.35,4.5,aceso?'#C4AD76':'#6A8980',6.65);
+    s+=face(1.1,1.23,1.7,2.25,'#DECDA0',6.68);
+    s+=poligono([p(9.04,-4.8,1.5),p(9.04,1.5,1.5),p(9.04,1.5,4.6),p(9.04,-4.8,4.6)],'#3D5D4D');
+    s+=poligono([p(9.08,-4.5,1.75),p(9.08,1.2,1.75),p(9.08,1.2,4.35),p(9.08,-4.5,4.35)],aceso?'#C7AE7D':'#6B8C86');
+    s+=traco([p(9.1,-1.6,1.7),p(9.1,-1.6,4.4)],'#D1C8A8',.13);
+    s+=traco([p(9.11,-4.4,3.9),p(9.11,-2.7,2)],'#C5D4BE',.12,.4);
+    for(const x of [-7.9,-4.55,-1.25,2.35,5.1,7.85])s+=face(x-.07,x+.07,1.4,4.9,'#345347',6.65);
+    s+=face(-8,7.95,1.35,1.55,'#D8CAAA',6.7);
+    s+=face(-8.7,8.7,melhor?6:5.05,melhor?6.8:5.85,'#3E5A49',6.68);
+    s+=textoNaFaceCidade(cx,cy+6.72,melhor?6.4:5.45,'CAFÉ DO MORUMBI',.98,'#F5E8C8');
+    s+=bloco(-9.6,-7,9.6,7,h,h+.35,['#B5B7A1','#60745B','#4D654E']);
+    if(melhor){
+      s+=poligono([p(-9.6,-7,h+.35),p(9.6,-7,h+.35),p(9.6,0,h+2.1),p(-9.6,0,h+2.1)],'#70856C');
+      s+=poligono([p(-9.6,0,h+2.1),p(9.6,0,h+2.1),p(9.6,7,h+.35),p(-9.6,7,h+.35)],'#8A997D');
+      for(let x=-8.5;x<9.5;x+=2.4)s+=traco([p(x,-7,h+.38),p(x,0,h+2.13),p(x,7,h+.38)],'#61785B',.1,.65);
+      s+=traco([p(-9.7,0,h+2.14),p(9.7,0,h+2.14)],'#A6B092',.22);
+    }else{
+      for(let x=-8;x<9;x+=4)s+=traco([p(x,-6.5,h+.36),p(x,6.5,h+.36)],'#9EA58D',.11,.65);
+      s+=bloco(-6,-4,-3,-1.5,h+.35,h+.7,['#D3D2BD','#A5AD98','#86967E']);
+    }
+    s+=face(-9,9,h-.15,h,'#A94942',6.7);
+    // Uma pequena marquise no nível 1; toldo e espaço de calçada no nível 2.
+    if(melhor){
+      for(let i=0;i<12;i++){
+        const a=-9.4+i*18.8/12,b=a+18.8/12;
+        s+=poligono([p(a,6.8,5.9),p(b,6.8,5.9),p(b,9,5.3),p(a,9,5.3)],i%2?'#E9DDC2':'#5D7961');
+        s+=face(a,b,5,5.3,i%2?'#E9DDC2':'#5D7961',9);
+      }
+      for(let x=-9;x<10;x+=3)s+=traco([p(x,7,.44),p(x,10.8,.44)],'#B8B69F',.12);
+      for(const x of [-8.5,8.5]){
+        s+=bloco(x-.9,9.7,x+.9,10.8,.42,1.5,['#AD8060','#906A4D','#785B43']);
+        s+=bloco(x-.85,9.75,x+.85,10.75,1.5,2,['#8AA17B','#6D8C60','#55764A']);
+      }
+      s+=mobiliarioDaCidade(cx+4.5,cy+10,'mesa');
+      const q=iso(cx+6.8,cy+10,1.55);s+='<ellipse cx="'+q.x+'" cy="'+q.y+'" rx=".45" ry=".2" fill="#F4E8CC"/>';
+      if(aceso)s+=face(-7.6,7.6,4.75,4.9,'#F6D499',6.8);
+    }else{
+      s+=poligono([p(-9.3,6.7,6),p(9.3,6.7,6),p(9.3,7.6,5.7),p(-9.3,7.6,5.7)],'#6A7D61');
+      s+=bloco(-8.5,9,-6.8,10.5,.42,1.35,['#AF8462','#946D4D','#795A40']);
+      s+=bloco(-8.4,9.1,-6.9,10.4,1.35,1.8,['#89A17A','#6F8B62','#56774C']);
+    }
+  }
+  const acao=nivel?'data-abrir-cafe':'data-projeto-cafe';
+  const atributos=interativo?' '+acao+' role="button" tabindex="0" aria-label="'+(nivel?'Entrar no Café do Morumbi · nível '+nivel:'Cafeteria em construção · construir por R$ 200')+'"':'';
+  return '<g data-arredores="cafeteria" data-cafe-nivel="'+nivel+'"'+atributos+'>'+s+'</g>';
 }
 function carroDaCidade(cx,cy,aoLongoDeX,paleta){
   const p=(x,y,z)=>aoLongoDeX?[cx+x,cy+y,z]:[cx+y,cy+x,z];
@@ -209,7 +288,7 @@ const LOTES_CIDADE = [
   {x:-55,y:-123,lx:10,ly:8,p:4,c:['#CFDAD9','#A7C1C0','#8AA7A8']},
   {x:-27,y:-123,lx:11,ly:8,p:2,c:['#E2C8AA','#C6A27F','#A48967'],loja:'PADARIA',o:{tipo:'sobrado',toldo:'#A25845'}},
   {x:3,y:-123,lx:9,ly:8,p:3,c:['#DCDCCF','#C0C5B2','#A2B098']},
-  {x:29,y:-123,lx:10,ly:8,p:2,c:['#E6D7BC','#CFB994','#AF9F7C'],loja:'CAFÉ',o:{tipo:'sobrado',toldo:'#7F4B4A'}},
+  {x:29,y:-123,lx:10,ly:8,p:2,c:['#E6D7BC','#CFB994','#AF9F7C'],loja:'EMPÓRIO',o:{tipo:'sobrado',toldo:'#7F4B4A'}},
   {x:56,y:-123,lx:10,ly:8,p:3,c:['#D9C7BC','#BDA69A','#A28E81']},
   {x:84,y:-123,lx:9,ly:8,p:2,c:['#DDDCC6','#C0C4A5','#A1AF88'],loja:'MERCADO',o:{toldo:'#63806A'}},
   {x:110,y:-123,lx:9,ly:8,p:4,c:['#D2DADD','#AEC4CA','#91ABB4']},
