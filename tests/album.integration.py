@@ -61,7 +61,7 @@ try:
         assert p.locator('#albumPossuidas').inner_text()=='7'
         assert p.locator('#albumExtras').inner_text()=='3'
         assert p.locator('#albumFaltantes').inner_text()==str(total-7)
-        assert p.locator('#timeAlbum img').count()==0
+        assert p.locator('#timeAlbum img:not([data-foto-jogador])').count()==0
         assert p.evaluate('typeof window.albumXss')=='undefined'
         p.locator('#albumBusca').fill('ROGERIO')
         assert p.locator('[data-album-jogador]').count()==1

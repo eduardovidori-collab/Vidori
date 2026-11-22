@@ -58,3 +58,32 @@
 .cafe-sala[data-periodo=entardecer] .cafe-parede{background:radial-gradient(ellipse at 61% 43%,#f7d29c99,transparent 65%),linear-gradient(100deg,#b3a28a,#ddc5a4 60%,#c1a685)}
 .cafe-sala[data-periodo=noite] .cafe-janela{box-shadow:0 0 0 3px #a18a66,0 0 0 7px #bbab89,0 8px 0 7px #756045,0 16px 0 10px #a18964,0 22px 18px #3e3d3338}
 @media(max-width:650px){.cafe-caixilho:after{border-radius:39px 39px 0 0}.cafe-caixilho i{width:5px;height:17px;left:calc(50% - 12px)}.cafe-caixilho i:nth-child(2){left:calc(50% + 9px)}.cafe-sala[data-periodo=noite] .cafe-janela{box-shadow:0 0 0 2px #a18a66,0 7px 0 4px #756045,0 14px 0 7px #a18964,0 19px 15px #3e3d3338}}
+
+/* Nível 3: biblioteca de bairro e banco sob a janela; a mesa segue funcional. */
+.cafe-estante-parede>.cafe-prateleira-extra,.cafe-banco-janela,.cafe-luz-indireta,.cafe-bandeja{display:none}
+.cafe-sala[data-nivel="3"] .cafe-parede{height:386px;background:radial-gradient(ellipse at 57% 18%,#fff2ce70,transparent 65%),linear-gradient(110deg,#c2b493,#e2d5b6 60%,#cab794);border-bottom-color:#735d43}
+.cafe-sala[data-nivel="3"][data-periodo=entardecer] .cafe-parede{background:radial-gradient(ellipse at 65% 30%,#ffd9a15c,transparent 65%),linear-gradient(110deg,#baa083,#ddc09a 60%,#bda381)}
+.cafe-sala[data-nivel="3"][data-periodo=noite] .cafe-parede{background:radial-gradient(ellipse at 65% 28%,#ffe3ac40,transparent 60%),linear-gradient(110deg,#8c8c71,#aaa68a 60%,#8f8d72)}
+.cafe-sala[data-nivel="3"] .cafe-quadro{top:31px;height:157px;transform:none;border-color:#705a40;box-shadow:2px 5px 0 #524632,4px 10px 15px #4b3d2426}
+.cafe-sala[data-nivel="3"] .cafe-janela{bottom:69px;border-color:#69573f}
+.cafe-sala[data-nivel="3"] .cafe-estante-parede{top:215px;height:127px;padding:7px 7px 9px;background:linear-gradient(90deg,#6e593f,#8b7050 50%,#6c563e);border:5px solid #987c57;box-shadow:2px 4px 0 #5c4d38,3px 8px 9px #51432c30}
+.cafe-sala[data-nivel="3"] .cafe-estante-parede>div{height:43px;padding-left:4px;background:linear-gradient(#59483255,transparent);border-bottom-color:#b19569;box-shadow:0 2px 0 #51432f}
+.cafe-sala[data-nivel="3"] .cafe-estante-parede>div:after{display:none}
+.cafe-sala[data-nivel="3"] .cafe-prateleira-extra{display:flex;margin-top:11px;gap:5px}
+.cafe-sala[data-nivel="3"] .cafe-estante-parede small{display:none}
+.cafe-sala[data-nivel="3"] .cafe-estante-parede .cafe-vasinho{right:7px}
+.cafe-sala[data-nivel="3"] .cafe-boiserie{height:42px;border-top-color:#948161;background:repeating-linear-gradient(90deg,transparent 0 89px,#8c785c 90px 92px),linear-gradient(#ac9976,#bdab87)}
+.cafe-sala[data-nivel="3"] .cafe-banco-janela{display:block;position:absolute;left:26%;right:10%;bottom:0;height:43px;z-index:1;background:linear-gradient(#718365 0 15px,#9b825e 16px 19px,#b19a74 20px);border:1px solid #7d785b;border-bottom:8px solid #796447;border-radius:5px 5px 0 0;box-shadow:0 -2px 0 #d0b788,0 4px 5px #5a4b3333}
+.cafe-banco-janela>i{position:absolute;left:12%;top:-15px;width:59px;height:29px;border-radius:8px;background:linear-gradient(135deg,#a9b28b,#879671);border:2px solid #b9bf9b;transform:rotate(-6deg);box-shadow:1px 3px 4px #364b3933}
+.cafe-banco-janela>i:nth-child(2){left:auto;right:12%;background:linear-gradient(135deg,#b98d73,#a3745f);border-color:#d1aa88;transform:rotate(5deg)}
+.cafe-sala[data-nivel="3"] .cafe-planta{left:21%;bottom:37px;transform:scale(.85);transform-origin:bottom}
+.cafe-sala[data-nivel="3"] .cafe-luz-indireta{display:block;position:absolute;left:0;right:0;top:0;height:3px;background:#e4d1a1;box-shadow:0 8px 26px 4px #ffe4a940}
+.cafe-sala[data-nivel="3"] .cafe-mesa{background:repeating-linear-gradient(2deg,transparent 0 37px,#382b1f12 38px 39px,transparent 40px 82px),linear-gradient(105deg,#916b4d,#a57d57 55%,#936b49);border-bottom-color:#6f5239;box-shadow:inset 0 2px 0 #ccb084,inset 0 12px 22px #4d3a2626}
+.cafe-sala[data-nivel="3"] .cafe-registro{color:#fff0ce}
+.cafe-sala[data-nivel="3"] .cafe-relogio{border-color:#a69b70;box-shadow:0 7px 0 #26392c,5px 16px 20px #392b3530}
+.cafe-sala[data-nivel="3"] .cafe-bandeja{display:block;position:absolute;right:9px;top:310px;width:69px;height:86px;border-radius:50%;background:linear-gradient(100deg,#8f724b,#c6a36f 60%,#9c7c53);border:2px solid #dcc08c;box-shadow:2px 5px 7px #422e2530}
+.cafe-bandeja i{position:absolute;left:10px;bottom:12px;width:22px;height:36px;border:2px solid #dfdfc7;border-top:0;border-radius:2px 2px 6px 6px;background:linear-gradient(transparent 20%,#b4c8b388 21%);box-shadow:inset 3px 0 0 #f9eedc70}
+.cafe-bandeja b{position:absolute;right:8px;bottom:19px;width:23px;height:53px;border-radius:4px 4px 9px 9px;background:linear-gradient(90deg,#b0ba9b,#d0d5b9 55%,#a4b08e);border-top:5px solid #6d7e61}
+.cafe-bandeja span{position:absolute;left:25px;bottom:2px;width:28px;height:13px;border:1px solid #d1b681;border-radius:50%;background:#b08c5f}
+@media(max-width:900px){.cafe-sala[data-nivel="3"] .cafe-banco-janela{left:27%;right:10%}.cafe-sala[data-nivel="3"] .cafe-bandeja{width:49px;right:0;transform:scale(.8);transform-origin:right}.cafe-sala[data-nivel="3"] .cafe-estante-parede{padding-left:4px;padding-right:4px}}
+@media(max-width:650px){.cafe-sala[data-nivel="3"] .cafe-parede{height:270px}.cafe-sala[data-nivel="3"] .cafe-janela{bottom:52px}.cafe-sala[data-nivel="3"] .cafe-banco-janela{left:10%;right:10%;height:32px;border-bottom-width:5px}.cafe-banco-janela>i{width:40px;height:23px;top:-12px}.cafe-sala[data-nivel="3"] .cafe-planta{left:2%;bottom:28px;transform:scale(.55)}.cafe-sala[data-nivel="3"] .cafe-estante-parede{display:none}.cafe-sala[data-nivel="3"] .cafe-boiserie{height:29px}.cafe-sala[data-nivel="3"] .cafe-bandeja{top:auto;bottom:14px;left:27px;right:auto;transform:scale(.8);transform-origin:bottom left;width:69px}.cafe-sala[data-nivel="3"] .cafe-lapis{left:105px;bottom:29px;height:100px;transform:rotate(28deg)}}

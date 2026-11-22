@@ -189,13 +189,44 @@ function cafeteriaDoBairro(cx,cy,nivel=nivelDaObra('cafeteria'),interativo=true)
         s+=bloco(x-.9,9.7,x+.9,10.8,.42,1.5,['#AD8060','#906A4D','#785B43']);
         s+=bloco(x-.85,9.75,x+.85,10.75,1.5,2,['#8AA17B','#6D8C60','#55764A']);
       }
-      s+=mobiliarioDaCidade(cx+4.5,cy+10,'mesa');
-      const q=iso(cx+6.8,cy+10,1.55);s+='<ellipse cx="'+q.x+'" cy="'+q.y+'" rx=".45" ry=".2" fill="#F4E8CC"/>';
+      if(nivel<3){
+        s+=mobiliarioDaCidade(cx+4.5,cy+10,'mesa');
+        const q=iso(cx+6.8,cy+10,1.55);s+='<ellipse cx="'+q.x+'" cy="'+q.y+'" rx=".45" ry=".2" fill="#F4E8CC"/>';
+      }
       if(aceso)s+=face(-7.6,7.6,4.75,4.9,'#F6D499',6.8);
     }else{
       s+=poligono([p(-9.3,6.7,6),p(9.3,6.7,6),p(9.3,7.6,5.7),p(-9.3,7.6,5.7)],'#6A7D61');
       s+=bloco(-8.5,9,-6.8,10.5,.42,1.35,['#AF8462','#946D4D','#795A40']);
       s+=bloco(-8.4,9.1,-6.9,10.4,1.35,1.8,['#89A17A','#6F8B62','#56774C']);
+    }
+    if(nivel>=3){
+      // O terceiro nível reaproveita o lote: varanda baixa, sem invadir a rua.
+      s+=bloco(-9.6,7.8,9.6,11.6,.43,.56,['#AD8A62','#896A4C','#74583F']);
+      for(let x=-9;x<9.6;x+=1.3)s+=traco([p(x,7.8,.57),p(x,11.5,.57)],'#806347',.07,.7);
+      for(const x of [-8.7,8.7]){
+        s+=bloco(x-.24,6.7,x+.24,7,3.8,4.65,['#BDA674','#8F7D55','#796A4B']);
+        s+=face(x-.16,x+.16,3.95,4.5,aceso?'#FFE4A0':'#D2C8A5',7.04);
+        if(aceso){
+          const q=iso(cx+x,cy+7.1,4.2);
+          s+='<circle cx="'+q.x+'" cy="'+q.y+'" r="1.15" fill="#FFDC92" opacity=".15"/>';
+        }
+      }
+      // Duas mesas pequenas deixam a porta central livre.
+      s+=mobiliarioDaCidade(cx-3.8,cy+10,'mesa');
+      s+=mobiliarioDaCidade(cx+4.5,cy+10,'mesa');
+      for(const x of [-3.8,4.5]){
+        const q=iso(cx+x,cy+10,1.6);
+        s+='<ellipse cx="'+q.x+'" cy="'+q.y+'" rx=".37" ry=".19" fill="#F3E8D1"/>';
+      }
+      for(const x of [-8.5,8.5]){
+        s+=bloco(x-.9,9.7,x+.9,10.8,.56,1.5,['#BD956F','#9D7855','#805E43']);
+        s+=bloco(x-.85,9.75,x+.85,10.75,1.5,2,['#8EA579','#708F5F','#55774B']);
+        for(const dx of [-.4,.35]){
+          const q=iso(cx+x+dx,cy+10.2,2.04);
+          s+='<circle cx="'+q.x+'" cy="'+q.y+'" r=".23" fill="#C98971"/>';
+        }
+      }
+      s+=traco([p(-9.7,0,h+2.18),p(9.7,0,h+2.18)],'#C6B082',.25);
     }
   }
   const acao=nivel?'data-abrir-cafe':'data-projeto-cafe';

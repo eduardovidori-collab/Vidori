@@ -36,11 +36,11 @@ function cartasFiltradasDoAlbum() {
       b.j.ovr-a.j.ovr||a.j.nome.localeCompare(b.j.nome,"pt-BR"));
 }
 function figurinhaDoAlbum({j,numero,quantidade}) {
-  const r=raridadeDoJogador(j),obtida=quantidade>0;
+  const r=raridadeDoJogador(j),obtida=quantidade>0,foto=obtida?fotoDoJogador(j):"";
   const iniciais=j.nome.split(/\s+/).slice(0,2).map(n=>n[0]).join("").toUpperCase();
-  return '<article class="album-figurinha raridade-'+r.id+(obtida?' obtida':' faltante')+'" data-album-jogador="'+j.id+'" data-obtida="'+obtida+'" aria-labelledby="albumNome-'+j.id+'">'+
+  return '<article class="album-figurinha raridade-'+r.id+(obtida?' obtida':' faltante')+(foto?' com-foto':'')+'" data-album-jogador="'+j.id+'" data-obtida="'+obtida+'" aria-labelledby="albumNome-'+j.id+'">'+
     '<div class="album-figurinha-topo"><span class="album-ovr">'+j.ovr+'<small>OVR</small></span><span class="album-numero">Nº '+String(numero).padStart(3,"0")+'</span></div>'+
-    '<div class="album-arte" aria-hidden="true"><span class="album-halo"></span>'+camisaDoTime()+
+    '<div class="album-arte" aria-hidden="true"><span class="album-halo"></span>'+(foto||camisaDoTime())+
     '<span class="album-iniciais">'+(obtida?escapar(iniciais):'?')+'</span>'+
     (quantidade>1?'<span class="album-copias">+'+(quantidade-1)+' extra'+(quantidade>2?'s':'')+'</span>':'')+'</div>'+
     '<span class="album-posicao">'+escapar(rotuloPosicoes(j))+'</span><h5 id="albumNome-'+j.id+'">'+escapar(j.nome)+'</h5>'+

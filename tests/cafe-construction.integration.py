@@ -32,8 +32,8 @@ try:
   assert not p.locator('#painel-cafe').is_visible()
   p.locator('#fecharObraEstadio').click()
   # Simulated study credits exist only in this isolated browser profile.
-  p.evaluate("""()=>{const fim=Date.now();loja.inicioDinheiro=fim-90000000;
-   blocos=[{id:'cafe-test',dia:chaveDia(new Date()),minutos:1000,inicio:fim-60000000,fim,assunto:'Teste'}];
+  p.evaluate("""()=>{const fim=Date.now();loja.inicioDinheiro=fim-180000000;
+   blocos=[{id:'cafe-test',dia:chaveDia(new Date()),minutos:2000,inicio:fim-120000000,fim,assunto:'Teste'}];
    salvarBlocos();salvarLoja();renderTudo();}""")
   coins=p.evaluate('saldoMoedas()');cash=p.evaluate('saldoDinheiro()')
   assert not p.evaluate('comprarNivel("cafeteria",2)')
@@ -79,9 +79,28 @@ try:
   assert p.evaluate('saldoMoedas()')==coins
   assert p.locator('.cafe-sala').get_attribute('data-nivel')=='2'
   assert p.locator('.cafe-estante-parede').is_visible()
+  assert not p.locator('.cafe-prateleira-extra').is_visible()
+  assert p.locator('#caixaEstadio [data-cafe-nivel="2"] [data-cidade="mesa"]').count()==1
   assert p.locator('#cafeNotas').input_value()=='Minha cafeteria — preservar caderno'
   assert p.evaluate('T.fimAlvo')==timer
+  p.locator('#painel-cafe [data-projeto-cafe]').click()
+  assert '600' in p.locator('[data-obra-comprar="cafeteria"]').inner_text()
+  p.evaluate('window.reservaCafe=loja.reaisZerados;loja.reaisZerados=saldoDinheiro()-599;renderDetalheObraEstadio()')
+  assert p.locator('[data-obra-comprar="cafeteria"]').is_disabled()
   assert not p.evaluate('comprarNivel("cafeteria",3)')
+  assert p.evaluate('saldoDinheiro()')==599
+  p.evaluate('loja.reaisZerados=reservaCafe;renderDetalheObraEstadio()')
+  p.locator('[data-obra-comprar="cafeteria"]').click()
+  assert p.evaluate('saldoDinheiro()')==cash-1450
+  assert p.evaluate('saldoMoedas()')==coins
+  assert p.locator('.cafe-sala').get_attribute('data-nivel')=='3'
+  assert p.locator('.cafe-banco-janela').is_visible()
+  assert p.locator('.cafe-prateleira-extra').is_visible()
+  assert p.locator('#caixaEstadio [data-cafe-nivel="3"] [data-cidade="mesa"]').count()==2
+  assert p.evaluate('T.fimAlvo')==timer
+  assert p.locator('#cafeNotas').input_value()=='Minha cafeteria — preservar caderno'
+  assert not p.evaluate('comprarNivel("cafeteria",3)')
+  assert not p.evaluate('comprarNivel("cafeteria",4)')
   # All surroundings tiers and lighting keep one cafe on the original lot.
   for tier in [1,2,3,4]:
    p.evaluate('(n)=>{loja.niveis.arredores=n;renderEstadio()}',tier)
@@ -90,7 +109,7 @@ try:
    assert p.locator('[data-arredores="predio"]').count()==0
   p.evaluate('document.querySelector("#avisos").replaceChildren()')
   artifacts=pathlib.Path('/workspace/artifacts');artifacts.mkdir(exist_ok=True)
-  for tier in [1,2]:
+  for tier in [1,2,3]:
    p.evaluate('(n)=>{loja.niveis.cafeteria=n;renderEstadio()}',tier)
    for width in [320,390,650,900,1440]:
     p.set_viewport_size({'width':width,'height':1000})
@@ -98,7 +117,7 @@ try:
    p.set_viewport_size({'width':1440,'height':1600})
    p.locator('.cafe-sala').screenshot(path=str(artifacts/f'cafeteria-interior-nivel-{tier}.png'))
   p.evaluate('irParaPainel("estadio");mostrarBaloesEstadio=false;renderBaloesEstadio()')
-  for tier in [0,1,2]:
+  for tier in [0,1,2,3]:
    p.evaluate('(n)=>{loja.niveis.cafeteria=n;loja.niveis.arredores=1;renderEstadio()}',tier)
    p.locator('#caixaEstadio').screenshot(path=str(artifacts/f'cafeteria-estadio-nivel-{tier}.png'))
    p.evaluate('abrirObrasEstadio("cafeteria")')
@@ -108,13 +127,13 @@ try:
     assert p.locator('#modalObraEstadio').evaluate('(el)=>el.scrollWidth<=el.clientWidth+1')
    p.locator('#modalObraEstadio').screenshot(path=str(artifacts/f'cafeteria-projeto-nivel-{tier}.png'))
    p.locator('#fecharObraEstadio').click()
-  p.evaluate('loja.niveis.cafeteria=2;salvarLoja();renderEstadio();irParaPainel("foco")')
+  p.evaluate('loja.niveis.cafeteria=3;salvarLoja();renderEstadio();irParaPainel("foco")')
   p.locator('.cafe-convite [data-entrar-cafe]').click()
   with p.expect_download() as dl:p.evaluate('exportarJSON()')
   backup=json.loads(pathlib.Path(dl.value.path()).read_text())
-  assert backup['loja']['niveis']['cafeteria']==2
+  assert backup['loja']['niveis']['cafeteria']==3
   p.reload(wait_until='networkidle');p.locator('.cafe-convite [data-entrar-cafe]').click()
-  assert p.locator('.cafe-sala').get_attribute('data-nivel')=='2'
+  assert p.locator('.cafe-sala').get_attribute('data-nivel')=='3'
   assert p.locator('#cafeNotas').input_value()=='Minha cafeteria — preservar caderno'
   p.evaluate('async()=>await navigator.serviceWorker.ready');p.reload(wait_until='networkidle')
   c.set_offline(True);p.reload(wait_until='domcontentloaded');p.locator('.cafe-convite [data-entrar-cafe]').click()
@@ -134,11 +153,11 @@ try:
   p.evaluate('(d)=>importarJSON(new File([JSON.stringify(d)],"cafe.json"))',backup)
   p.wait_for_function('cafeDisponivel()')
   p.locator('#caixaEstadio [data-abrir-cafe]').click()
-  assert p.locator('.cafe-sala').get_attribute('data-nivel')=='2'
-  assert p.evaluate('loja.gastas')==850
+  assert p.locator('.cafe-sala').get_attribute('data-nivel')=='3'
+  assert p.evaluate('loja.gastas')==1450
   assert p.locator('#cafeNotas').input_value()=='Minha cafeteria — preservar caderno'
   assert not errors,errors
-  print('PASS',url,'cafe prerequisite; construction; atomic R$200/R$400 purchases; no repeated charge; one building; both interiors; responsive; shared timer; persistence/backup/import/reset; offline')
+  print('PASS',url,'cafe prerequisite; construction; atomic R$200/R$400/R$600 purchases; no repeated charge; one building; three interiors; responsive; shared timer; persistence/backup/import/reset; offline')
   b.close()
 finally:
  if server:server.shutdown();server.server_close()

@@ -128,7 +128,7 @@ function iniciarCafe() {
         <div class="cafe-janela">${ruaDoCafe()}<div class="cafe-caixilho" aria-hidden="true"><i></i><i></i></div></div><span id="cafeAmbiente" class="cafe-etiqueta"></span>
         <div class="cafe-planta" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><b></b></div>
         <div class="cafe-luminaria" aria-hidden="true"><i></i><b></b></div>
-        <div class="cafe-estante-parede" aria-hidden="true"><div><i></i><i></i><i></i><i></i><span class="cafe-vasinho"><b></b></span></div><small>PAUSA PARA RESPIRAR</small></div><div class="cafe-boiserie" aria-hidden="true"></div>
+        <div class="cafe-estante-parede" aria-hidden="true"><div><i></i><i></i><i></i><i></i><span class="cafe-vasinho"><b></b></span></div><div class="cafe-prateleira-extra"><i></i><i></i><i></i><i></i><i></i></div><small>PAUSA PARA RESPIRAR</small></div><div class="cafe-boiserie" aria-hidden="true"></div><div class="cafe-banco-janela" aria-hidden="true"><i></i><i></i></div><div class="cafe-luz-indireta" aria-hidden="true"></div>
       </div>
       <div class="cafe-mesa"><div class="cafe-estudo">
         <div class="cafe-relogio"><div class="cafe-relogio-topo"><span>COPEIRO</span><span id="cafeModo">FOCO</span></div><div id="cafeTempo" role="timer" aria-live="off">30:00</div><div class="cafe-progresso"><i id="cafeProgresso"></i></div><p id="cafeAssunto">Sua mesa está pronta.</p>
@@ -140,7 +140,7 @@ function iniciarCafe() {
       <div class="cafe-caderno"><div class="cafe-caderno-topo"><span>CADERNO DE MESA</span><span id="cafeTarefasResumo">0/3</span></div><h3>O que vamos estudar?</h3><label for="cafeObjetivo">Objetivo do bloco</label><input type="text" id="cafeObjetivo" maxlength="80" placeholder="Ex.: Revisar os antibióticos" autocomplete="off"><p id="cafeObjetivoAjuda">Um objetivo claro para este bloco.</p>
         <fieldset><legend>Três pequenos passos</legend>${[0,1,2].map(i=>`<div class="cafe-tarefa"><input type="checkbox" id="cafeFeita${i}" aria-label="Concluir tarefa ${i+1}"><label class="cafe-sr" for="cafeTarefa${i}">Tarefa ${i+1}</label><input type="text" id="cafeTarefa${i}" maxlength="180" placeholder="${["Ler e entender","Praticar ou revisar","Anotar o que ficou"][i]}" autocomplete="off"></div>`).join("")}</fieldset>
         <label for="cafeNotas">Anotações</label><textarea id="cafeNotas" maxlength="4000" rows="4" placeholder="Uma dúvida, uma ideia, o que lembrar depois…"></textarea><p id="cafeSalvo" role="status">Caderno salvo neste navegador</p>
-      </div><div class="cafe-caneca" aria-hidden="true">${canecaDoCafe()}</div><div class="cafe-lapis" aria-hidden="true"></div></div>
+      </div><div class="cafe-caneca" aria-hidden="true">${canecaDoCafe()}</div><div class="cafe-lapis" aria-hidden="true"></div><div class="cafe-bandeja" aria-hidden="true"><i></i><b></b><span></span></div></div>
     </div><p class="cafe-rodape">Sua mesa é livre. Estude com ou sem ciclo aberto; moedas e reais seguem o tempo registrado.</p>`;
   recarregarCafe();
   document.querySelector("#cafeSair").addEventListener("click", () => { irParaPainel("foco"); document.querySelector("[data-entrar-cafe]")?.focus({preventScroll:true}); });

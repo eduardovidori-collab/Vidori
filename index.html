@@ -871,8 +871,9 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 </style>
 <link rel="stylesheet" href="./futebol.css">
 <link rel="stylesheet" href="./estadio-museu.css?v=135">
-<link rel="stylesheet" href="./cafe.css?v=138">
+<link rel="stylesheet" href="./cafe.css?v=139">
 <link rel="stylesheet" href="./album-time.css?v=129">
+<link rel="stylesheet" href="./jogadores-fotos.css?v=139">
 </head>
 <body>
 
@@ -1197,7 +1198,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
   <section id="timeAlbum" class="album-time" role="tabpanel" aria-labelledby="timeAbaAlbum" hidden>
     <div class="album-intro">
       <div class="album-capa" aria-hidden="true"><small>COLEÇÃO COPEIRO</small><span class="escudo"></span><strong>ÁLBUM<br>TRICOLOR</strong><i>Meu time</i></div>
-      <div class="album-intro-texto"><span class="album-sobretitulo">Coleção do Meu time</span><h3>Álbum tricolor</h3><p id="albumMensagem">As cartas dos pacotes entram aqui automaticamente.</p><button type="button" class="album-loja" data-time-loja>Ver pacotes na loja →</button></div>
+      <div class="album-intro-texto"><span class="album-sobretitulo">Coleção do Meu time</span><h3>Álbum tricolor</h3><p id="albumMensagem">As cartas dos pacotes entram aqui automaticamente.</p><button type="button" class="album-loja" data-time-loja>Ver pacotes na loja →</button><br><a class="album-fotos-creditos" href="./imagens/jogadores/CREDITOS.html" target="_blank" rel="noopener">Créditos das fotos</a></div>
       <div class="album-resumo"><div class="album-resumo-titulo"><strong id="albumPossuidas">0</strong><span>/ <b id="albumTotal">0</b></span></div><small>figurinhas diferentes conquistadas</small><div class="album-progresso-legenda"><span>Sua coleção</span><b id="albumPorcentagem">0%</b></div><progress id="albumProgresso" value="0" max="1" aria-label="Progresso da coleção">0%</progress><div class="album-resumo-rodape"><span><b id="albumFaltantes">0</b> faltantes</span><span><b id="albumExtras">0</b> cópias extras</span></div></div>
     </div>
     <div id="albumRaridades" class="album-raridades" role="group" aria-label="Progresso e filtros por raridade"></div>
@@ -1604,9 +1605,10 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <script src="./futebol.js"></script>
 <script src="./estadio-museu.js?v=135"></script>
 <script src="./camarotes.js?v=115"></script>
-<script src="./cidade.js?v=138"></script>
-<script src="./cafe.js?v=138"></script>
-<script src="./album-time.js?v=129"></script>
+<script src="./cidade.js?v=139"></script>
+<script src="./cafe.js?v=139"></script>
+<script src="./jogadores-fotos.js?v=139"></script>
+<script src="./album-time.js?v=139"></script>
 <script>
 "use strict";
 /* ==========================================================================
@@ -1958,7 +1960,10 @@ const JOGADORES_SPFC = [
   {id:"waldir-peres",nome:"Waldir Peres",posicao:"GOL",ovr:88},
   {id:"fabio-aurelio",nome:"Fábio Aurélio",posicao:"LE",ovr:80},
   {id:"miranda",nome:"Miranda",posicao:"ZAG",ovr:89},
-  {id:"muller",nome:"Müller",posicao:"PD",ovr:92}
+  {id:"muller",nome:"Müller",posicao:"PD",ovr:92},
+  {id:"denilson-show",nome:"Denílson",posicao:"PE",ovr:91},
+  {id:"aloisio-chulapa",nome:"Aloísio Chulapa",posicao:"ATA",ovr:83},
+  {id:"serginho-chulapa",nome:"Serginho Chulapa",posicao:"ATA",ovr:95}
 ];
 
 // A posição principal mantém a compatibilidade com os elencos já salvos.
@@ -2716,7 +2721,8 @@ const OBRAS_ESTADIO = {
   ]},
   cafeteria: { nome: "Café do Morumbi", niveis: [
     { nome: "Construir cafeteria · nível 1", desc: "Um café simples e acolhedor: fachada verde, janela, mesa de madeira e os ambientes sonoros para estudar. Requer arredores nível 1.", preco: 200 },
-    { nome: "Cafeteria · nível 2", desc: "Toldo listrado, floreiras e uma mesinha na calçada. Por dentro, madeira renovada, janela em arco, luminária e estante com livros e plantas. Ainda há espaço para o café crescer.", preco: 400 }
+    { nome: "Cafeteria · nível 2", desc: "Toldo listrado, floreiras e uma mesinha na calçada. Por dentro, madeira renovada, janela em arco, luminária e estante com livros e plantas. Ainda há espaço para o café crescer.", preco: 400 },
+    { nome: "Cafeteria · nível 3", desc: "Varanda em madeira com duas mesas, luminárias e acabamento renovado. Dentro, um banco sob a janela, estante de leitura, iluminação quente e uma mesa de estudo mais aconchegante.", preco: 600 }
   ]},
   publico: { nome: "Público", niveis: [
     { desc: "Primeira leva de torcedores espalhados pelos setores. Ainda tem muito lugar vago.", preco: 300 },
@@ -4817,7 +4823,7 @@ function renderMeuTime() {
       'style="--x:'+p.x+'%;--y:'+p.y+'%" data-time-pos="'+p.id+'" '+
       'aria-pressed="'+(p.id===posicao.id)+'" aria-label="Escolher '+p.nome+' ('+rotuloDaVaga(p)+')'+
       (jogador?': '+escapar(jogador.nome):', vaga livre')+'" title="'+p.nome+' ('+rotuloDaVaga(p)+')">'+
-      '<span class="time-pos-sigla">'+(jogador?posicaoDoJogadorNaVaga(jogador,p):rotuloDaVaga(p))+'</span>'+camisaDoTime()+
+      '<span class="time-pos-sigla">'+(jogador?posicaoDoJogadorNaVaga(jogador,p):rotuloDaVaga(p))+'</span>'+(fotoDoJogador(jogador)||camisaDoTime())+
       (jogador&&jogador.ovr?'<span class="time-ovr-campo" aria-label="OVR '+jogador.ovr+'">'+jogador.ovr+'</span>':'')+
       (!jogador?'<span class="time-adicionar" aria-hidden="true">+</span>':'')+
       '<span class="time-pos-nome">'+(jogador?escapar(jogador.nome):'Vaga livre')+'</span></button>';
@@ -4841,7 +4847,7 @@ function renderMeuTime() {
       const atual=vaga && vaga.id===posicao.id;
       const iniciais=j.nome.split(/\s+/).slice(0,2).map(n=>n[0]).join('').toUpperCase();
       const raridade=raridadeDoJogador(j);
-      return '<div class="time-carta raridade-'+(raridade?raridade.id:'comum')+'"><div class="time-carta-topo"><span class="time-iniciais" aria-hidden="true">'+escapar(iniciais)+'</span>'+
+      return '<div class="time-carta raridade-'+(raridade?raridade.id:'comum')+'"><div class="time-carta-topo">'+(fotoDoJogador(j)||'<span class="time-iniciais" aria-hidden="true">'+escapar(iniciais)+'</span>')+
         '<div class="time-carta-nome"><strong>'+escapar(j.nome)+'</strong><span>'+rotuloPosicoes(j)+(vaga?' · Em campo':' · Disponível')+'</span></div>'+
         (j.ovr?'<span class="carta-ovr">'+j.ovr+'<small>OVR</small></span>':'')+'</div>'+
         '<div class="time-carta-metadados"><span class="carta-raridade">'+(raridade?raridade.nome:'Sem OVR')+'</span><span>'+j.quantidade+(j.quantidade===1?' carta':' cópias')+'</span></div>'+
@@ -4861,7 +4867,7 @@ function renderRepetidosDoTime() {
   $("#resumoRepetidos").textContent=extras?extras+(extras===1?" cópia extra disponível.":" cópias extras disponíveis."):"Você ainda não tem cartas repetidas. As próximas cópias extras aparecerão aqui.";
   $("#timeRepetidos").innerHTML=repetidos.map(j=>{
     const raridade=raridadeDoJogador(j),valor=precoVendaDoJogador(j),emCampo=Object.values(meuTime.escalacao).includes(j.id);
-    return '<article class="time-carta raridade-'+raridade.id+'"><div class="time-carta-topo"><div class="time-carta-nome"><strong>'+escapar(j.nome)+'</strong><span>'+rotuloPosicoes(j)+(emCampo?' · Em campo':'')+'</span></div>'+
+    return '<article class="time-carta raridade-'+raridade.id+'"><div class="time-carta-topo">'+fotoDoJogador(j)+'<div class="time-carta-nome"><strong>'+escapar(j.nome)+'</strong><span>'+rotuloPosicoes(j)+(emCampo?' · Em campo':'')+'</span></div>'+
       '<span class="carta-ovr">'+j.ovr+'<small>OVR</small></span></div><div class="time-carta-metadados"><span class="carta-raridade">'+raridade.nome+'</span><span>'+j.quantidade+' cópias</span></div>'+
       '<p class="time-venda-info">'+(j.quantidade-1)+((j.quantidade-1)===1?' cópia extra.':' cópias extras.')+' Uma carta fica no elenco.</p>'+
       '<button class="btn btn-pequeno btn-preto" type="button" data-time-vender="'+j.id+'" data-time-quantidade="'+j.quantidade+'" aria-label="Vender uma cópia extra de '+escapar(j.nome)+' por '+valor+' moedas">Vender 1 extra · '+valor+' moedas</button></article>';
@@ -5122,7 +5128,7 @@ function renderPacoteBase() {
   $("#chancesPacote").innerHTML=chancesDoPacote().map(r=>
     '<tr class="raridade-'+r.id+'"><td><span class="carta-raridade">'+r.nome+'</span></td><td>'+r.min+'–'+r.max+'</td><td>'+r.chance.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+'%</td></tr>').join('');
   $("#catalogoPacote").innerHTML=[...JOGADORES_SPFC].sort((a,b)=>b.ovr-a.ovr||a.nome.localeCompare(b.nome,"pt-BR")).map(j=>
-    '<tr class="raridade-'+raridadeDoJogador(j).id+'"><td>'+escapar(j.nome)+'</td><td>'+rotuloPosicoes(j)+'</td><td><span class="carta-raridade">'+j.ovr+'</span></td></tr>').join('');
+    '<tr class="raridade-'+raridadeDoJogador(j).id+'"><td>'+fotoDoJogador(j,'catalogo-foto')+escapar(j.nome)+'</td><td>'+rotuloPosicoes(j)+'</td><td><span class="carta-raridade">'+j.ovr+'</span></td></tr>').join('');
 }
 function abrirResultadoPacote(animar=false) {
   if(meuTime.ultimoPacote.length!==2) return;
@@ -5133,7 +5139,7 @@ function abrirResultadoPacote(animar=false) {
     const j=JOGADORES_SPFC.find(j=>j.id===c.id),r=raridadeDoJogador(j);
     const guardado=meuTime.jogadores.find(p=>p.id===j.id);
     return '<article class="carta-revelada raridade-'+r.id+'"><div class="carta-revelada-topo">'+
-      '<span class="carta-ovr">'+j.ovr+'<small>OVR</small></span><span class="carta-pos">'+rotuloPosicoes(j)+'</span></div>'+camisaDoTime()+
+      '<span class="carta-ovr">'+j.ovr+'<small>OVR</small></span><span class="carta-pos">'+rotuloPosicoes(j)+'</span></div>'+(fotoDoJogador(j)||camisaDoTime())+
       '<span class="carta-raridade">'+r.nome+'</span><h3>'+escapar(j.nome)+'</h3>'+
       '<p class="carta-repetida">'+(c.nova?'Nova carta':'Cópia extra')+' · '+(guardado?guardado.quantidade:1)+' no elenco</p></article>';
   }).join('');
