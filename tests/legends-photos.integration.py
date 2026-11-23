@@ -27,13 +27,14 @@ try:
   chances=p.evaluate('chancesDoPacote().map(r=>r.chance)')
   assert all(abs(a-b)<.000001 for a,b in zip(chances,[88,9,2.4,.5,.1]))
   legends=p.evaluate('JOGADORES_SPFC.filter(j=>raridadeDoJogador(j).id==="lenda").map(j=>j.id).sort()')
-  assert len(legends)==5 and legends==p.evaluate('Object.keys(FOTOS_JOGADORES).sort()')
+  assert len(legends)==5
+  assert p.evaluate("JOGADORES_SPFC.every(j=>FOTOS_JOGADORES[j.id])&&Object.keys(FOTOS_JOGADORES).length===86")
   assert p.evaluate('distribuicaoDoPacote().filter(c=>["denilson-show","aloisio-chulapa","serginho-chulapa"].includes(c.jogador.id)).every(c=>c.chance>0)')
   p.evaluate('irParaPainel("time");selecionarVisaoDoTime("album")')
   assert p.locator('#timeAlbum [data-foto-jogador]').count()==0
   # Owned cards are a fixture; looking at photos must not award cards or money.
   p.evaluate('''()=>{
-   const ids=[...Object.keys(FOTOS_JOGADORES),'denilson-show','aloisio-chulapa'];
+   const ids=['rogerio-ceni','rai','kaka','cafu','serginho-chulapa','denilson-show','aloisio-chulapa'];
    meuTime=normalizarMeuTime({jogadores:ids.map(id=>({id,quantidade:id==='rogerio-ceni'?2:1})),
     escalacao:{gol:'rogerio-ceni',ld:'cafu','mc-d':'rai',ata:'serginho-chulapa',pe:'denilson-show'}});
    salvarMeuTime();renderMeuTime();
@@ -70,7 +71,7 @@ try:
   p.evaluate('renderAlbumDoTime()')
   p.wait_for_function('Array.from(document.querySelectorAll("#timeAlbum img")).every(img=>img.complete&&img.naturalWidth>0)')
   p.locator('#timeAbaEscalacao').click()
-  assert p.locator('#timePosicoes [data-foto-jogador]').count()==4
+  assert p.locator('#timePosicoes [data-foto-jogador]').count()==5
   p.locator('[data-time-pos=gol]').click()
   assert p.locator('#timeOpcoes [data-foto-jogador=rogerio-ceni]').count()==1
   p.locator('.time-campo-card').screenshot(path=str(artifacts/'atualizacao-time-fotos.png'))
@@ -89,20 +90,20 @@ try:
   }''')
   p.locator('#previaAtualizacao').screenshot(path=str(artifacts/'atualizacao-tres-cartas.png'))
   p.evaluate('document.querySelector("#previaAtualizacao").remove();irParaPainel("loja")')
-  assert p.locator('#catalogoPacote [data-foto-jogador]').count()==5
+  assert p.locator('#catalogoPacote [data-foto-jogador]').count()==86
   p.evaluate('async()=>await navigator.serviceWorker.ready');p.reload(wait_until='networkidle')
   # Reading a separate page online must not replace the cached app entry.
   credit_online=c.new_page();credit_online.goto(url+'imagens/jogadores/CREDITOS.html',wait_until='networkidle')
-  assert credit_online.locator('article').count()==5
+  assert credit_online.locator('article').count()==86
   credit_online.close()
   c.set_offline(True);p.reload(wait_until='domcontentloaded')
   p.evaluate('irParaPainel("time");selecionarVisaoDoTime("album")')
   p.locator('[data-album-raridade=lenda]').click()
   p.wait_for_function('document.querySelectorAll("#timeAlbum img").length===5&&Array.from(document.querySelectorAll("#timeAlbum img")).every(img=>img.complete&&img.naturalWidth>0)')
   credit=c.new_page();credit.goto(url+'imagens/jogadores/CREDITOS.html',wait_until='domcontentloaded')
-  assert credit.locator('article').count()==5
+  assert credit.locator('article').count()==86
   assert not errors,errors
-  print('PASS',url,'three new cards; unchanged rarity odds; five local portraits; missing/owned states; roster/lineup/pack/catalog; responsive; fallback; offline photos and credits')
+  print('PASS',url,'three new cards; unchanged rarity odds; 86 catalog portraits; five legend portraits; missing/owned states; roster/lineup/pack/catalog; responsive; fallback; offline photos and credits')
   b.close()
 finally:
  if server:server.shutdown();server.server_close()

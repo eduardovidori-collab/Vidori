@@ -39,13 +39,14 @@ function escudoDaCarta(){
   return '<svg class="carta-futebol-escudo" viewBox="0 0 42 47" aria-hidden="true"><path d="M1 1h40v25L21 46 1 26Z" fill="#FDFBF1" stroke="var(--metal-sombra)" stroke-width="1"/><path d="M4 4h34v13H4Z" fill="#252424"/><text x="21" y="14" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="900" fill="#FFF">SPFC</text><path d="M4 20h15v20L4 25Z" fill="#B92F37"/><path d="M23 20h15v5L23 40Z" fill="#242323"/></svg>';
 }
 function cartaDoJogador(j,opcoes={}){
-  const {modo='album',numero=0,quantidade=1,obtida=true,nota=''}=opcoes;
+  const {modo='album',numero=0,quantidade=1,obtida=true,nota='',venda=null}=opcoes;
   const r=raridadeDoJogador(j),album=modo==='album';
   const foto=obtida?fotoDoJogador(j):'';
   const nomeId=(album?'albumNome-':'pacoteNome-')+j.id;
   const atributos=atributosDoJogador(j);
   const dados=[0,3,1,4,2,5].map(i=>atributos[i]).filter(Boolean);
-  const meta=album?`<div class="carta-futebol-colecao"><span class="album-numero">Nº ${String(numero).padStart(3,'0')}</span>${quantidade>1?`<span class="album-copias">+${quantidade-1} extra${quantidade>2?'s':''}</span>`:''}<span class="album-selo">${obtida?'✓ No álbum':'A conquistar'}</span></div>`:`<p class="carta-repetida">${escapar(nota)}</p>`;
+  const acaoVenda=venda?(venda.vendida?'<p class="carta-venda-concluida" role="status">✓ Repetido vendido</p>':`<button type="button" class="btn carta-venda-pacote" data-pacote-vender="${j.id}" data-pacote-quantidade="${quantidade}" aria-label="Vender a cópia repetida de ${escapar(j.nome)} por ${venda.valor} moedas">Vender repetido · +${venda.valor} moedas</button>`):'';
+  const meta=album?`<div class="carta-futebol-colecao"><span class="album-numero">Nº ${String(numero).padStart(3,'0')}</span>${quantidade>1?`<span class="album-copias">+${quantidade-1} extra${quantidade>2?'s':''}</span>`:''}<span class="album-selo">${obtida?'✓ No álbum':'A conquistar'}</span></div>`:`<p class="carta-repetida">${escapar(nota)}</p>${acaoVenda}`;
   return `<article class="carta-futebol ${album?'album-figurinha':'carta-revelada'} raridade-${r.id} ${obtida?'obtida':'faltante'}${foto?' com-foto':''}" ${album?`data-album-jogador="${j.id}" data-obtida="${obtida}"`:''} aria-labelledby="${nomeId}">
     <div class="carta-futebol-corpo">${molduraDaCarta()}
       <div class="carta-futebol-nota"><b>${j.ovr}</b><span>${escapar(j.posicao)}</span></div>

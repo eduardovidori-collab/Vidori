@@ -873,8 +873,8 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <link rel="stylesheet" href="./estadio-museu.css?v=135">
 <link rel="stylesheet" href="./cafe.css?v=139">
 <link rel="stylesheet" href="./album-time.css?v=129">
-<link rel="stylesheet" href="./jogadores-fotos.css?v=140">
-<link rel="stylesheet" href="./cartas-time.css?v=141">
+<link rel="stylesheet" href="./jogadores-fotos.css?v=142">
+<link rel="stylesheet" href="./cartas-time.css?v=142">
 </head>
 <body>
 
@@ -1529,6 +1529,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
   <div class="modal-caixa"><div class="faixas"></div><div class="modal-corpo">
     <div class="frase" id="tituloPacote">Seu Pacote Base</div>
     <p class="subtexto" id="resumoPacote" aria-live="polite">Duas cartas adicionadas ao seu elenco.</p>
+    <p class="pacote-saldo" id="saldoPacoteMoedas" role="status"></p>
     <div class="pacote-abertura" id="animacaoPacote" aria-hidden="true" hidden></div>
     <div class="pacote-revelacao" id="cartasDoPacote"></div>
     <div class="modal-botoes"><button class="btn btn-principal" type="button" id="pacoteMeuTime">Ir para Meu time</button><button class="btn" type="button" id="pacoteFechar">Fechar</button></div>
@@ -1609,9 +1610,10 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <script src="./camarotes.js?v=115"></script>
 <script src="./cidade.js?v=139"></script>
 <script src="./cafe.js?v=139"></script>
-<script src="./jogadores-fotos.js?v=140"></script>
+<script src="./fotos-elenco.js?v=142"></script>
+<script src="./jogadores-fotos.js?v=142"></script>
 <script src="./atributos-jogadores.js?v=141"></script>
-<script src="./cartas-time.js?v=141"></script>
+<script src="./cartas-time.js?v=142"></script>
 <script src="./album-time.js?v=141"></script>
 <script>
 "use strict";
@@ -2103,7 +2105,7 @@ function normalizarMeuTime(dados) {
     if(j && posicaoDoJogadorNaVaga(j,p) && !usados.has(id)) {escalacao[p.id]=id;usados.add(id);}
   });
   const ultimoPacote=Array.isArray(fonte.ultimoPacote)?fonte.ultimoPacote.filter(c=>c && ids.has(c.id) &&
-    JOGADORES_SPFC.some(j=>j.id===c.id)).slice(0,2).map(c=>({id:c.id,nova:!!c.nova})):[];
+    JOGADORES_SPFC.some(j=>j.id===c.id)).slice(0,2).map(c=>({id:c.id,nova:!!c.nova,...(c.vendida?{vendida:true}:{})})):[];
   const gastoPacotes=Number.isSafeInteger(fonte.gastoPacotes)&&fonte.gastoPacotes>=0?fonte.gastoPacotes:0;
   // Um elenco vazio do reset antigo mantém o gasto perdido, sem reembolso retroativo.
   const gastoPacotesPerdido=Number.isSafeInteger(fonte.gastoPacotesPerdido)&&fonte.gastoPacotesPerdido>=0
@@ -4877,19 +4879,28 @@ function renderRepetidosDoTime() {
       '<button class="btn btn-pequeno btn-preto" type="button" data-time-vender="'+j.id+'" data-time-quantidade="'+j.quantidade+'" aria-label="Vender uma cópia extra de '+escapar(j.nome)+' por '+valor+' moedas">Vender 1 extra · '+valor+' moedas</button></article>';
   }).join("");
 }
-function venderJogadorRepetido(id,quantidadeEsperada) {
+function venderJogadorRepetido(id,quantidadeEsperada,origem='elenco') {
+  if(origem!=='elenco'&&origem!=='pacote')return false;
+  const noPacote=origem==='pacote',cartaPacote=noPacote&&meuTime.ultimoPacote.find(c=>c.id===id);
+  if(noPacote&&(!$('#modalPacote').classList.contains('aberto')||animacaoPacoteTimer!==null||$('#cartasDoPacote').hidden||!cartaPacote||cartaPacote.nova||cartaPacote.vendida))return false;
   const jogador=meuTime.jogadores.find(j=>j.id===id),valor=precoVendaDoJogador(jogador);
-  if(!jogador||jogador.quantidade<=1||!valor||abrindoPacote) return false;
+  if(!jogador||jogador.quantidade<=1||!valor||(abrindoPacote&&!noPacote)) return false;
   if(quantidadeEsperada!==undefined&&quantidadeEsperada!==jogador.quantidade) return false;
   const moedasVendas=meuTime.moedasVendas+valor,vendasNesteTime=meuTime.vendasNesteTime+valor;
   if(!Number.isSafeInteger(moedasVendas)||!Number.isSafeInteger(vendasNesteTime)) return false;
   const jogadores=meuTime.jogadores.map(j=>j.id===id?{...j,quantidade:j.quantidade-1}:{...j});
-  const proximo=normalizarMeuTime({...meuTime,jogadores,moedasVendas,vendasNesteTime});
+  const ultimoPacote=noPacote?meuTime.ultimoPacote.map(c=>c.id===id?{...c,vendida:true}:c):meuTime.ultimoPacote;
+  const proximo=normalizarMeuTime({...meuTime,jogadores,moedasVendas,vendasNesteTime,ultimoPacote});
   // A retirada da cópia e o crédito ficam na mesma gravação.
   if(!Armazem.gravar(CHAVES.meuTime,proximo)) return false;
   meuTime=proximo;renderMeuTime();renderLoja();
-  const foco=$("#timeRepetidos [data-time-vender="+id+"]")||$("#timeRepetidos [data-time-vender]")||$("#tituloRepetidos");
-  foco.focus({preventScroll:true});
+  if(noPacote){
+    renderCartasResultadoPacote();
+    ($('#cartasDoPacote [data-pacote-vender]')||$('#pacoteFechar')).focus({preventScroll:true});
+  }else{
+    const foco=$('#timeRepetidos [data-time-vender='+id+']')||$('#timeRepetidos [data-time-vender]')||$('#tituloRepetidos');
+    foco.focus({preventScroll:true});
+  }
   mostrarAviso("Cópia extra de "+jogador.nome+" vendida. +"+valor+" moedas.");
   return true;
 }
@@ -5134,17 +5145,22 @@ function renderPacoteBase() {
   $("#catalogoPacote").innerHTML=[...JOGADORES_SPFC].sort((a,b)=>b.ovr-a.ovr||a.nome.localeCompare(b.nome,"pt-BR")).map(j=>
     '<tr class="raridade-'+raridadeDoJogador(j).id+'"><td>'+fotoDoJogador(j,'catalogo-foto')+escapar(j.nome)+'</td><td>'+rotuloPosicoes(j)+'</td><td><span class="carta-raridade">'+j.ovr+'</span></td></tr>').join('');
 }
+function renderCartasResultadoPacote() {
+  $('#saldoPacoteMoedas').textContent='Seu saldo: '+saldoMoedas()+' moedas';
+  $("#cartasDoPacote").innerHTML=meuTime.ultimoPacote.map(c=>{
+    const j=JOGADORES_SPFC.find(j=>j.id===c.id);
+    const guardado=meuTime.jogadores.find(p=>p.id===j.id);
+    return cartaDoJogador(j,{modo:'pacote',quantidade:guardado?guardado.quantidade:1,
+      nota:(c.vendida?'Cópia do pacote vendida':c.nova?'Nova carta':'Cópia extra')+' · '+(guardado?guardado.quantidade:1)+' no elenco',
+      venda:!c.nova&&(c.vendida||(guardado&&guardado.quantidade>1))?{vendida:!!c.vendida,valor:precoVendaDoJogador(j)}:null});
+  }).join('');
+}
 function abrirResultadoPacote(animar=false) {
   if(meuTime.ultimoPacote.length!==2) return;
   clearTimeout(animacaoPacoteTimer);
   animacaoPacoteTimer=null;
   abrindoPacote=true;
-  $("#cartasDoPacote").innerHTML=meuTime.ultimoPacote.map(c=>{
-    const j=JOGADORES_SPFC.find(j=>j.id===c.id);
-    const guardado=meuTime.jogadores.find(p=>p.id===j.id);
-    return cartaDoJogador(j,{modo:'pacote',quantidade:guardado?guardado.quantidade:1,
-      nota:(c.nova?'Nova carta':'Cópia extra')+' · '+(guardado?guardado.quantidade:1)+' no elenco'});
-  }).join('');
+  renderCartasResultadoPacote();
   const animando=animar && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   $("#animacaoPacote").hidden=!animando;
   $("#cartasDoPacote").hidden=animando;
@@ -5213,10 +5229,15 @@ $("#pacoteMeuTime").addEventListener("click",()=>{
   }
   fecharModalPacote();irParaPainel("time");focarPosicaoTime();
 });
-$("#modalPacote").addEventListener("click",e=>{if(e.target.id==="modalPacote") fecharModalPacote();});
+$('#modalPacote').addEventListener('click',e=>{
+  const venda=e.target.closest('[data-pacote-vender]');
+  if(venda&&!venda.disabled){
+    if(!venderJogadorRepetido(venda.dataset.pacoteVender,Number(venda.dataset.pacoteQuantidade),'pacote'))mostrarAviso('Não consegui vender esta cópia. Seu elenco e suas moedas foram mantidos.');
+  }else if(e.target.id==='modalPacote')fecharModalPacote();
+});
 $("#modalPacote").addEventListener("keydown",e=>{
   if(e.key!=="Tab") return;
-  const botoes=Array.from($("#modalPacote").querySelectorAll("button")).filter(b=>!b.disabled&&!b.hidden);
+  const botoes=Array.from($("#modalPacote").querySelectorAll("button")).filter(b=>!b.disabled&&!b.hidden&&b.getClientRects().length);
   const primeiro=botoes[0],ultimo=botoes[botoes.length-1];
   if(e.shiftKey&&document.activeElement===primeiro){e.preventDefault();ultimo.focus();}
   else if(!e.shiftKey&&document.activeElement===ultimo){e.preventDefault();primeiro.focus();}

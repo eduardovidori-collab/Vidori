@@ -1,7 +1,7 @@
 .jogador-retrato{position:relative;display:inline-grid;place-items:center;isolation:isolate;overflow:hidden;width:50px;height:50px;flex-shrink:0;vertical-align:middle}
 .jogador-foto-reserva{display:grid;place-items:center;width:85%;height:85%;border-radius:50%;background:linear-gradient(135deg,#b52d42,#7a2638);font-size:16px;font-weight:800;letter-spacing:.05em;color:#fff4de}
 .jogador-retrato.foto-pronta .jogador-foto-reserva{visibility:hidden}
-.jogador-retrato img{position:absolute;left:var(--foto-x);top:var(--foto-y);display:block;width:300%;height:200%;max-width:none;object-fit:fill;filter:drop-shadow(0 1px 1px #34221d26)}
+.jogador-retrato img{position:absolute;left:var(--foto-x);top:var(--foto-y);display:block;width:var(--foto-largura,300%);height:var(--foto-altura,200%);max-width:none;object-fit:fill;filter:drop-shadow(0 1px 1px #34221d26)}
 .jogador-retrato img[hidden]{display:none}
 .time-posicao .jogador-retrato{display:block;width:51px;height:51px;margin:0 auto 2px}
 .time-carta-topo>.jogador-retrato{width:44px;height:44px}

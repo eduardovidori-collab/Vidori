@@ -45,3 +45,5 @@
 @media(max-width:480px){.carta-futebol-colecao{padding-left:2px;padding-right:2px}.carta-futebol.carta-revelada .carta-repetida{font-size:10px}.album-grade{gap:17px 11px}.pacote-revelacao{grid-template-columns:minmax(0,1fr);gap:20px}.carta-futebol.carta-revelada{max-width:285px}}
 
 .album-atributos-ajuda{font-size:11px;color:#65715f;margin:0 0 14px;line-height:1.65}.album-atributos-ajuda summary{width:fit-content;cursor:pointer;font-weight:650;color:#52634c;text-underline-offset:3px}.album-atributos-ajuda p{margin:7px 0;max-width:780px}.album-atributos-ajuda summary:focus-visible{outline:3px solid #b53c4b;outline-offset:4px}
+
+.pacote-saldo{font-size:12px;font-weight:650;color:#516348;margin-top:9px}.carta-futebol .carta-venda-pacote{width:100%;margin-top:9px;padding:10px 5px;background:#304d3b;border-color:#304d3b;color:#fff9e9;font-size:clamp(10px,4.5cqw,12px);font-weight:700;line-height:1.35}.carta-venda-concluida{margin:10px 0 0;color:#3d704d;font-size:12px;font-weight:650}
