@@ -1,0 +1,47 @@
+/* Escudos em relevo, com conteúdo real em HTML e acabamento por raridade. */
+.carta-futebol{
+  --metal:#91a39b;--metal-sombra:#50645d;--metal-luz:#eff4e5;
+  --papel:#e5e9df;--papel-luz:#fbfbf2;--papel-baixo:#cfd7c9;
+  --borda-interna:#687b70;--selo-fundo:#3e5549;--tinta:#292d26;
+  --faixa-vermelha:#ac4245;--faixa-escura:#30372f;
+  position:relative;min-width:0;container-type:inline-size;text-align:center;
+}
+.carta-futebol.raridade-raro{--metal:#799cac;--metal-sombra:#3b6174;--metal-luz:#e6f2ee;--papel:#e1ebee;--papel-luz:#f8fbf4;--papel-baixo:#c5d6db;--borda-interna:#3f6375;--selo-fundo:#31586b}
+.carta-futebol.raridade-epico{--metal:#b198bc;--metal-sombra:#6d4b7a;--metal-luz:#f5e7e4;--papel:#ece4ee;--papel-luz:#fff8ef;--papel-baixo:#d4c6db;--borda-interna:#79547b;--selo-fundo:#65426e}
+.carta-futebol.raridade-idolo{--metal:#c69a48;--metal-sombra:#89602b;--metal-luz:#fff1b7;--papel:#f2e4c3;--papel-luz:#fff9e5;--papel-baixo:#d9bf83;--borda-interna:#a17b3e;--selo-fundo:#694c26}
+.carta-futebol.raridade-lenda{--metal:#c99b47;--metal-sombra:#805024;--metal-luz:#fff4c4;--papel:#f1e6ce;--papel-luz:#fffaf0;--papel-baixo:#e4cfaa;--borda-interna:#9a2f38;--selo-fundo:#3e2a21;--faixa-vermelha:#b52835;--faixa-escura:#292524}
+.carta-futebol.album-figurinha.obtida,.carta-futebol.album-figurinha.faltante,.carta-futebol.carta-revelada{padding:0;border:0;border-radius:0;outline:0;background:transparent;box-shadow:none;overflow:visible;color:var(--tinta)}
+.carta-futebol-corpo{position:relative;isolation:isolate;width:100%;aspect-ratio:300/430;filter:drop-shadow(0 3px 2px #352c2426)}
+.carta-futebol-moldura{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.carta-futebol-nota{position:absolute;left:11.5%;top:11.5%;width:29%;z-index:2;color:var(--tinta);line-height:1;text-shadow:.3px .6px 0 var(--metal-luz)}
+.carta-futebol-nota>b{display:block;font-size:16cqw;font-weight:900;letter-spacing:-.065em;font-variant-numeric:tabular-nums}
+.carta-futebol-nota>span{display:block;font-size:7.2cqw;font-weight:800;letter-spacing:-.025em;margin-top:2%}
+.carta-futebol-nota:after{content:"";display:block;height:1px;background:var(--metal);width:75%;margin:9% auto 0;box-shadow:0 1px 0 var(--metal-luz)}
+.carta-futebol-bandeira{position:absolute;left:17%;top:34%;width:12%;height:6%;filter:drop-shadow(0 1px 0 #6c54372b)}
+.carta-futebol-escudo{position:absolute;left:16%;top:42%;width:14%;height:12%}
+.carta-futebol-retrato{position:absolute;left:31%;top:15%;width:64%;aspect-ratio:1;z-index:1;overflow:hidden;mask-image:linear-gradient(#000 0 91%,transparent 100%)}
+.carta-futebol .carta-futebol-retrato .jogador-retrato{display:block;width:100%;height:100%;margin:0;border:0;border-radius:0;background:none;box-shadow:none}
+.carta-futebol-camisa{height:100%;display:grid;place-items:center;position:relative}
+.carta-futebol .carta-futebol-camisa .camisa-time{width:68%;height:auto;margin:0;filter:drop-shadow(0 3px 2px #3e342323)}
+.carta-futebol-camisa>span{position:absolute;inset:0;display:grid;place-items:center;font:italic 17cqw Georgia,serif;color:#7b877c;transform:translateY(-1%)}
+.carta-futebol .carta-futebol-nome{position:absolute;top:57%;left:8%;width:84%;height:9.4%;min-height:0;display:flex;align-items:center;justify-content:center;z-index:3;margin:0;padding:0;color:var(--tinta);font-size:var(--nome-tamanho,6.7cqw);line-height:1.05;letter-spacing:-.03em;font-weight:850;text-transform:uppercase;overflow-wrap:anywhere;text-shadow:0 1px 0 var(--papel-luz)}
+.carta-futebol-outras-posicoes{position:absolute;left:10%;top:54%;width:25%;font-size:3.5cqw;line-height:1;font-weight:750;color:var(--tinta)}
+.carta-futebol-atributos{position:absolute;left:12%;top:69%;width:76%;height:14%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));column-gap:7%;color:var(--tinta)}
+.carta-futebol-atributos>span{display:flex;align-items:center;justify-content:center;gap:5%;min-width:0;line-height:1}
+.carta-futebol-atributos b{font-size:6.3cqw;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:-.04em;min-width:3.1ch;text-align:right}
+.carta-futebol-atributos abbr{font-size:4.8cqw;font-weight:650;text-decoration:none;min-width:3.1ch;text-align:left;cursor:help}
+.carta-futebol-raridade{position:absolute;left:31%;top:86.7%;width:38%;font:750 4.6cqw/1.1 Georgia,serif;text-transform:uppercase;letter-spacing:.06em;color:var(--metal-luz);text-shadow:0 1px 0 #0009}
+.carta-futebol-marca{position:absolute;left:25%;top:93.1%;width:50%;font-size:3.1cqw;line-height:1;font-weight:850;letter-spacing:.16em;color:var(--tinta)}
+.carta-futebol-colecao{display:flex;align-items:center;justify-content:space-between;gap:4px;flex-wrap:wrap;padding:4px 5px 1px;line-height:1.3;min-height:19px}
+.carta-futebol .carta-futebol-colecao .album-numero{padding:0;font-size:clamp(8px,3.6cqw,10px);color:#797d6e;white-space:nowrap}
+.carta-futebol .carta-futebol-colecao .album-selo{width:auto;padding:0;border:0;background:none;font-size:clamp(8px,3.7cqw,10px);letter-spacing:0;text-transform:none;color:#506149}
+.carta-futebol .carta-futebol-colecao .album-copias{position:static;display:inline-block;font-size:clamp(8px,3.7cqw,10px);padding:1px 3px;border-radius:3px;white-space:nowrap}
+.carta-futebol.faltante .carta-futebol-moldura{filter:grayscale(1);opacity:.62}
+.carta-futebol.faltante .carta-futebol-retrato{filter:grayscale(1);opacity:.45}
+.carta-futebol.faltante .carta-futebol-nota,.carta-futebol.faltante .carta-futebol-nome,.carta-futebol.faltante .carta-futebol-atributos{color:#687062}
+.carta-futebol.faltante .carta-futebol-bandeira,.carta-futebol.faltante .carta-futebol-escudo{filter:grayscale(1);opacity:.6}
+.carta-futebol.carta-revelada{width:100%;max-width:300px;justify-self:center;align-self:start}
+.carta-futebol.carta-revelada .carta-repetida{margin:7px 0 0;font-size:11px;line-height:1.4;color:#6e7468;min-height:1.4em}
+@media(max-width:480px){.carta-futebol-colecao{padding-left:2px;padding-right:2px}.carta-futebol.carta-revelada .carta-repetida{font-size:10px}.album-grade{gap:17px 11px}.pacote-revelacao{grid-template-columns:minmax(0,1fr);gap:20px}.carta-futebol.carta-revelada{max-width:285px}}
+
+.album-atributos-ajuda{font-size:11px;color:#65715f;margin:0 0 14px;line-height:1.65}.album-atributos-ajuda summary{width:fit-content;cursor:pointer;font-weight:650;color:#52634c;text-underline-offset:3px}.album-atributos-ajuda p{margin:7px 0;max-width:780px}.album-atributos-ajuda summary:focus-visible{outline:3px solid #b53c4b;outline-offset:4px}

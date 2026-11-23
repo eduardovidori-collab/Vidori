@@ -84,7 +84,7 @@ try:
    const cards=['serginho-chulapa','denilson-show','aloisio-chulapa'].map(id=>JOGADORES_SPFC.find(j=>j.id===id));
    const section=document.createElement('section');section.id='previaAtualizacao';
    section.style='display:flex;gap:20px;padding:35px;background:#f7f2e6;max-width:950px;margin:30px auto';
-   section.innerHTML=cards.map(j=>'<article class="carta-revelada raridade-'+raridadeDoJogador(j).id+'" style="width:260px"><div class="carta-revelada-topo"><span class="carta-ovr">'+j.ovr+'<small>OVR</small></span><span class="carta-pos">'+j.posicao+'</span></div>'+(fotoDoJogador(j)||camisaDoTime())+'<span class="carta-raridade">'+raridadeDoJogador(j).nome+'</span><h3>'+j.nome+'</h3></article>').join('');
+   section.innerHTML=cards.map(j=>cartaDoJogador(j,{modo:'pacote'})).join('');
    document.body.append(section);
   }''')
   p.locator('#previaAtualizacao').screenshot(path=str(artifacts/'atualizacao-tres-cartas.png'))

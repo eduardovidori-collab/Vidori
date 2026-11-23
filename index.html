@@ -874,6 +874,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <link rel="stylesheet" href="./cafe.css?v=139">
 <link rel="stylesheet" href="./album-time.css?v=129">
 <link rel="stylesheet" href="./jogadores-fotos.css?v=140">
+<link rel="stylesheet" href="./cartas-time.css?v=141">
 </head>
 <body>
 
@@ -1208,6 +1209,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <label for="albumSituacao">Na coleção<select id="albumSituacao"><option value="todas">Todas as cartas</option><option value="obtidas">Conquistadas</option><option value="faltantes">Faltantes</option><option value="repetidas">Com cópias extras</option></select></label>
       <button class="btn btn-pequeno" type="button" id="albumLimpar" data-album-limpar hidden>Limpar filtros</button>
     </div>
+    <details class="album-atributos-ajuda"><summary role="button">Entenda os atributos das cartas</summary><p><b>Jogadores de linha:</b> RIT · ritmo; FIN · finalização; PAS · passe; DRI · drible; DEF · defesa; FIS · físico.</p><p><b>Goleiros:</b> ELA · elasticidade; MAN · manejo; REP · reposição; REF · reflexos; VEL · velocidade; POS · posicionamento.</p><p>As notas foram definidas para o Copeiro, considerando a posição e o perfil de cada jogador. O OVR continua sendo a referência de desempenho nas partidas.</p></details>
     <p id="albumResultados" class="album-resultados" role="status" aria-live="polite"></p>
     <div id="albumLivro" class="album-livro" tabindex="0" role="group" aria-label="Livro de figurinhas. Use as setas para folhear."></div>
     <div class="album-paginacao"><button class="btn btn-pequeno" type="button" id="albumAnterior" aria-label="Páginas anteriores">← Anterior</button><div><strong id="albumPaginaStatus" role="status" aria-live="polite"></strong><small>← → para folhear</small></div><button class="btn btn-pequeno" type="button" id="albumProxima" aria-label="Próximas páginas">Próxima →</button></div>
@@ -1608,7 +1610,9 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <script src="./cidade.js?v=139"></script>
 <script src="./cafe.js?v=139"></script>
 <script src="./jogadores-fotos.js?v=140"></script>
-<script src="./album-time.js?v=139"></script>
+<script src="./atributos-jogadores.js?v=141"></script>
+<script src="./cartas-time.js?v=141"></script>
+<script src="./album-time.js?v=141"></script>
 <script>
 "use strict";
 /* ==========================================================================
@@ -5136,12 +5140,10 @@ function abrirResultadoPacote(animar=false) {
   animacaoPacoteTimer=null;
   abrindoPacote=true;
   $("#cartasDoPacote").innerHTML=meuTime.ultimoPacote.map(c=>{
-    const j=JOGADORES_SPFC.find(j=>j.id===c.id),r=raridadeDoJogador(j);
+    const j=JOGADORES_SPFC.find(j=>j.id===c.id);
     const guardado=meuTime.jogadores.find(p=>p.id===j.id);
-    return '<article class="carta-revelada raridade-'+r.id+'"><div class="carta-revelada-topo">'+
-      '<span class="carta-ovr">'+j.ovr+'<small>OVR</small></span><span class="carta-pos">'+rotuloPosicoes(j)+'</span></div>'+(fotoDoJogador(j)||camisaDoTime())+
-      '<span class="carta-raridade">'+r.nome+'</span><h3>'+escapar(j.nome)+'</h3>'+
-      '<p class="carta-repetida">'+(c.nova?'Nova carta':'Cópia extra')+' · '+(guardado?guardado.quantidade:1)+' no elenco</p></article>';
+    return cartaDoJogador(j,{modo:'pacote',quantidade:guardado?guardado.quantidade:1,
+      nota:(c.nova?'Nova carta':'Cópia extra')+' · '+(guardado?guardado.quantidade:1)+' no elenco'});
   }).join('');
   const animando=animar && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   $("#animacaoPacote").hidden=!animando;
