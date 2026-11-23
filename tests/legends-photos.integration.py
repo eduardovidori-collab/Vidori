@@ -42,6 +42,20 @@ try:
   p.locator('[data-album-raridade=lenda]').click()
   assert p.locator('#timeAlbum [data-foto-jogador]').count()==5
   p.wait_for_function('Array.from(document.querySelectorAll("#timeAlbum img")).every(img=>img.complete&&img.naturalWidth>0)')
+  # Five headshots have real alpha; an opaque rectangle cannot pass this check.
+  assert p.evaluate('''async()=>{
+   const src=document.querySelector('#timeAlbum img').src;
+   const bitmap=await createImageBitmap(await (await fetch(src)).blob());
+   const side=bitmap.width/3;
+   if(bitmap.height!==side*2)return false;
+   const canvas=document.createElement('canvas');canvas.width=bitmap.width;canvas.height=bitmap.height;
+   const ctx=canvas.getContext('2d');ctx.drawImage(bitmap,0,0);
+   const alpha=(x,y)=>ctx.getImageData(Math.round(x),Math.round(y),1,1).data[3];
+   const ok=[[0,0],[1,0],[2,0],[0,1],[1,1]].every(([col,row])=>
+    alpha(col*side+side/2,row*side+side/2)>200&&
+    alpha(col*side+4,row*side+4)<6&&alpha((col+1)*side-5,row*side+4)<6);
+   bitmap.close();return ok;
+  }''')
   artifacts=Path('/workspace/artifacts');artifacts.mkdir(exist_ok=True)
   p.locator('#timeAlbum').screenshot(path=str(artifacts/'atualizacao-lendas-album.png'))
   for width in [320,390,760,900,1440]:
@@ -77,6 +91,10 @@ try:
   p.evaluate('document.querySelector("#previaAtualizacao").remove();irParaPainel("loja")')
   assert p.locator('#catalogoPacote [data-foto-jogador]').count()==5
   p.evaluate('async()=>await navigator.serviceWorker.ready');p.reload(wait_until='networkidle')
+  # Reading a separate page online must not replace the cached app entry.
+  credit_online=c.new_page();credit_online.goto(url+'imagens/jogadores/CREDITOS.html',wait_until='networkidle')
+  assert credit_online.locator('article').count()==5
+  credit_online.close()
   c.set_offline(True);p.reload(wait_until='domcontentloaded')
   p.evaluate('irParaPainel("time");selecionarVisaoDoTime("album")')
   p.locator('[data-album-raridade=lenda]').click()

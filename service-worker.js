@@ -7,7 +7,7 @@
    https://usuario.github.io/Vidori/ e em qualquer outra subpasta.
    ========================================================================== */
 
-const VERSAO = "vidori-v139";
+const VERSAO = "vidori-v140";
 
 /* Tudo que forma o app. Se algum arquivo mudar, é só subir o número da VERSAO. */
 const ARQUIVOS = [
@@ -17,13 +17,14 @@ const ARQUIVOS = [
   "./futebol.css",
   "./album-time.js?v=139",
   "./album-time.css?v=129",
-  "./jogadores-fotos.js?v=139",
-  "./jogadores-fotos.css?v=139",
+  "./jogadores-fotos.js?v=140",
+  "./jogadores-fotos.css?v=140",
   "./imagens/jogadores/CREDITOS.html",
+  "./imagens/jogadores/lendas-retratos.png?v=140",
   "./imagens/jogadores/rogerio-ceni.jpg?v=139",
-  "./imagens/jogadores/rai.jpg?v=139",
+  "./imagens/jogadores/rai.jpg?v=140",
   "./imagens/jogadores/kaka.jpg?v=139",
-  "./imagens/jogadores/cafu.jpg?v=139",
+  "./imagens/jogadores/cafu.jpg?v=140",
   "./imagens/jogadores/serginho-chulapa.jpg?v=139",
 
   "./camarotes.js?v=115",
@@ -78,18 +79,23 @@ self.addEventListener("fetch", (evento) => {
   if (req.method !== "GET") return;
   if (new URL(req.url).origin !== self.location.origin) return;
 
-  // Navegação (abrir o app): tenta a rede, mas cai pro index.html do cache.
+  // Cada página preserva sua própria cópia. Abrir os créditos das fotos não
+  // pode substituir a entrada do app nem devolver o app no lugar dos créditos.
   if (req.mode === "navigate") {
     evento.respondWith((async () => {
+      const raiz = new URL("./", self.location.href).pathname;
+      const caminho = new URL(req.url).pathname;
+      const entradaApp = caminho === raiz || caminho === raiz + "index.html";
+      const chave = entradaApp ? "./index.html" : req;
       try {
         const daRede = await fetch(req);
         const cache = await caches.open(VERSAO);
-        cache.put("./index.html", daRede.clone());
+        if (daRede.ok) await cache.put(chave, daRede.clone());
         return daRede;
       } catch (e) {
         const cache = await caches.open(VERSAO);
-        return (await cache.match("./index.html")) ||
-               (await cache.match("./")) ||
+        return (await cache.match(chave)) ||
+               (entradaApp && await cache.match("./")) ||
                Response.error();
       }
     })());

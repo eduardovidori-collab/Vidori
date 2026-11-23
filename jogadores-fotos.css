@@ -1,15 +1,16 @@
-.jogador-retrato{position:relative;display:inline-grid;place-items:center;isolation:isolate;overflow:hidden;width:46px;height:50px;flex-shrink:0;border-radius:9px;border:1px solid #d2b6b4;background:linear-gradient(135deg,#e0cba3,#b52d42);box-shadow:0 3px 7px #51243624;vertical-align:middle}
-.jogador-foto-reserva{font-size:18px;font-weight:800;letter-spacing:.05em;color:#fff4de}
-.jogador-retrato img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:var(--foto-foco,50% 15%);transform:scale(var(--foto-zoom,1));transform-origin:50% 14%}
+.jogador-retrato{position:relative;display:inline-grid;place-items:center;isolation:isolate;overflow:hidden;width:50px;height:50px;flex-shrink:0;vertical-align:middle}
+.jogador-foto-reserva{display:grid;place-items:center;width:85%;height:85%;border-radius:50%;background:linear-gradient(135deg,#b52d42,#7a2638);font-size:16px;font-weight:800;letter-spacing:.05em;color:#fff4de}
+.jogador-retrato.foto-pronta .jogador-foto-reserva{visibility:hidden}
+.jogador-retrato img{position:absolute;left:var(--foto-x);top:var(--foto-y);display:block;width:300%;height:200%;max-width:none;object-fit:fill;filter:drop-shadow(0 1px 1px #34221d26)}
 .jogador-retrato img[hidden]{display:none}
-.jogador-retrato:after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px #fff4d43b;pointer-events:none}
-.time-posicao .jogador-retrato{display:block;width:47px;height:49px;margin:0 auto 2px;border-radius:9px;border:2px solid #f1e6c6}
-.time-carta-topo>.jogador-retrato{width:40px;height:44px}
-.carta-revelada>.jogador-retrato{display:flex;width:120px;height:137px;margin:13px auto 10px;border-radius:12px;border:2px solid #d7b990;box-shadow:0 5px 15px #732f4226}
-.catalogo-foto{width:30px;height:33px;margin-right:9px;border-radius:5px;box-shadow:none}
+.time-posicao .jogador-retrato{display:block;width:51px;height:51px;margin:0 auto 2px}
+.time-carta-topo>.jogador-retrato{width:44px;height:44px}
+.carta-revelada>.jogador-retrato{display:flex;width:137px;height:137px;margin:13px auto 10px}
+.catalogo-foto{width:33px;height:33px;margin-right:9px}
 .catalogo-foto .jogador-foto-reserva{font-size:11px}
-.album-arte .jogador-retrato{width:66px;height:66px;border-radius:8px;box-shadow:0 4px 7px #51243626}
+.album-figurinha.com-foto .album-arte{height:80px}
+.album-arte .jogador-retrato{width:80px;height:80px}
 .album-figurinha.com-foto .album-iniciais{display:none}
 .album-fotos-creditos{display:inline-block;margin:12px 0 0;font-size:10px;color:#6a7162;text-underline-offset:3px}
-@media(min-width:1600px){.album-arte .jogador-retrato{width:77px;height:77px}}
-@media(max-width:650px){.time-posicao .jogador-retrato{width:38px;height:40px}.carta-revelada>.jogador-retrato{width:95px;height:113px}.catalogo-foto{width:23px;height:27px;margin-right:5px}}
+@media(min-width:1600px){.album-arte .jogador-retrato{width:88px;height:88px}.album-figurinha.com-foto .album-arte{height:88px}}
+@media(max-width:650px){.time-posicao .jogador-retrato{width:43px;height:43px}.carta-revelada>.jogador-retrato{width:113px;height:113px}.catalogo-foto{width:27px;height:27px;margin-right:5px}}
