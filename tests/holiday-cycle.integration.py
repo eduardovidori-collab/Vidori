@@ -41,8 +41,13 @@ try:
   assert p.evaluate('cicloAtivo()') is None
   p.locator('#cicloNome').fill('Férias — livros e projetos')
   p.locator('#cicloInicio').fill('2026-11-24')
-  assert not p.locator('#campoCicloFim').is_visible()
-  assert p.locator('#cicloFim').is_disabled()
+  assert p.locator('#campoCicloFim').is_visible()
+  assert p.locator('#cicloFim').is_enabled()
+  p.locator('#cicloFim').fill('')
+  assert not p.evaluate('salvarCicloDoFormulario()')
+  p.locator('#cicloFim').fill('2026-11-23')
+  assert not p.evaluate('salvarCicloDoFormulario()')
+  p.locator('#cicloFim').fill('2026-12-31')
   assert p.locator('#btnSalvarCiclo').inner_text()=='Abrir ciclo de férias'
   for width in [320,390,1440]:
    p.set_viewport_size({'width':width,'height':1100})
@@ -54,10 +59,11 @@ try:
   p.locator('#btnSalvarCiclo').click()
   holiday=p.evaluate('cicloAtivo().id')
   assert p.evaluate('cicloAtivo().tipo')=='ferias'
-  assert p.evaluate('cicloAtivo().fimPrevisto') is None
+  assert p.evaluate('cicloAtivo().fimPrevisto')=='2026-12-31'
   assert p.evaluate('JSON.stringify(ciclos[0])')==old
   assert p.locator('body').get_attribute('class')=='em-ferias'
   assert 'No seu ritmo' in p.locator('#chipCiclo').inner_text()
+  assert '31 dez 2026' in p.locator('#cicloAtualBox').inner_text()
   assert 'dia ' not in p.locator('#chipCiclo').inner_text()
   assert p.locator('#linhaComparativa').count()==0
   assert p.locator('#telaComparativo').count()==0
@@ -82,14 +88,24 @@ try:
   assert '2h 30' in p.locator('#cicloAtualBox').inner_text() or '2h30' in p.locator('#cicloAtualBox').inner_text()
   assert p.locator('#listaCompleta .ferias-historico').count()==2
   p.locator('#painel-foco').screenshot(path=str(artifacts/'ciclo-ferias-foco.png'))
-  # Name changes, reload and JSON backups retain the type and optional end date.
+  assert p.locator('#feriasHorasAcumuladas').inner_text()=='2h30'
+  # Older holiday cycles without an end date remain readable and can be updated.
+  p.evaluate('cicloAtivo().fimPrevisto=null;salvarCiclos();renderTudo()')
+  p.reload(wait_until='networkidle')
+  assert p.evaluate('cicloAtivo().id')==holiday
+  assert p.locator('#feriasHorasAcumuladas').inner_text()=='2h30'
+  assert 'Defina o fim previsto' in p.locator('#cicloAtualBox').inner_text()
+  # Name/date changes, reload and JSON backups retain the type, hours and end date.
   p.evaluate('irParaPainel("ciclo")')
-  p.locator('#cicloNome').fill('Férias tranquilas');p.locator('#btnSalvarCiclo').click()
+  p.locator('#cicloNome').fill('Férias tranquilas');p.locator('#cicloFim').fill('2027-01-10');p.locator('#btnSalvarCiclo').click()
   assert p.evaluate('cicloAtivo().nome')=='Férias tranquilas'
   p.reload(wait_until='networkidle')
   assert p.evaluate('cicloAtivo().tipo')=='ferias'
+  assert p.evaluate('cicloAtivo().fimPrevisto')=='2027-01-10'
+  assert p.locator('#feriasHorasAcumuladas').inner_text()=='2h30'
   with p.expect_download() as info:p.evaluate('exportarJSON()')
-  backup=json.loads(Path(info.value.path()).read_text());assert next(c for c in backup['ciclos'] if c['id']==holiday)['tipo']=='ferias'
+  backup=json.loads(Path(info.value.path()).read_text());saved=next(c for c in backup['ciclos'] if c['id']==holiday)
+  assert saved['tipo']=='ferias' and saved['fimPrevisto']=='2027-01-10'
   p.evaluate('ciclos=[];salvarCiclos();renderTudo()')
   p.locator('#arquivoImport').set_input_files({'name':'ferias.json','mimeType':'application/json','buffer':json.dumps(backup).encode()})
   p.wait_for_function('cicloAtivo()?.tipo==="ferias"')
@@ -143,9 +159,11 @@ try:
   ctx.set_offline(True);p.reload(wait_until='domcontentloaded')
   assert p.evaluate('cicloAtivo().tipo')=='ferias'
   assert p.locator('#cicloAtualBox').get_attribute('class')=='ciclo-ferias-atual'
+  assert p.locator('#feriasHorasAcumuladas').inner_text()=='2h30'
+  assert p.evaluate('cicloAtivo().fimPrevisto')=='2027-01-10'
   assert p.locator('#chipCiclo').evaluate('(el)=>getComputedStyle(el).backgroundColor')=='rgb(237, 247, 239)'
   assert not errors,errors
-  print('PASS',url,'optional holiday opening; legacy preservation; single active cycle; no deadline/comparison; real timer; same rewards/bonuses; atomic saves; backup; academic archive/numbering; no trophies; offline green theme')
+  print('PASS',url,'optional holiday opening; legacy preservation; single active cycle; start/end date validation and editing; accumulated hours; legacy date-free cycles; no comparison; real timer; same rewards/bonuses; atomic saves; backup; academic archive/numbering; no trophies; offline green theme')
   browser.close()
 finally:
  if server:server.shutdown();server.server_close()

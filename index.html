@@ -3087,9 +3087,9 @@ function salvarCicloDoFormulario() {
   const ferias = tipo === 'ferias';
   const nome = $('#cicloNome').value.trim();
   const ini = $('#cicloInicio').value;
-  const fim = ferias ? null : $('#cicloFim').value;
+  const fim = $('#cicloFim').value;
   if (!nome) { mostrarAviso('Dê um nome para o ciclo.'); $('#cicloNome').focus(); return false; }
-  if (!ini || (!ferias && !fim)) { mostrarAviso(ferias ? 'Escolha a data de início.' : 'Preenche início e fim previsto.'); return false; }
+  if (!ini || !fim) { mostrarAviso('Preenche início e fim previsto.'); return false; }
   if (fim && fim < ini) { mostrarAviso('O fim não pode vir antes do início.'); return false; }
   const proximo = atual
     ? ciclos.map(c => c.id === atual.id ? {...c,nome,inicio:ini,fimPrevisto:fim} : c)
@@ -3949,8 +3949,8 @@ function renderCicloAtual() {
 
   if (cicloDeFerias(c)) {
     alvo.innerHTML='<span class="ferias-etiqueta">Ciclo de férias</span><h3>'+escapar(c.nome)+'</h3>'+
-      '<p class="ferias-ritmo">No seu ritmo.</p><p class="subtexto">Desde '+formatarDataLonga(c.inicio)+'. Encerre quando quiser.</p>'+
-      '<div class="numeros"><div class="numero destaque"><div class="valor">'+humanoMin(min)+'</div><div class="rotulo">Tempo para você</div></div>'+
+      '<p class="ferias-ritmo">No seu ritmo.</p><p class="subtexto">'+formatarDataLonga(c.inicio)+(c.fimPrevisto?' → '+formatarDataLonga(c.fimPrevisto):' · Defina o fim previsto em Ciclo &amp; Ajustes.')+'</p>'+
+      '<div class="numeros"><div class="numero destaque"><div class="valor" id="feriasHorasAcumuladas">'+humanoMin(min)+'</div><div class="rotulo">Horas acumuladas</div></div>'+
       '<div class="numero"><div class="valor">'+meus.length+'</div><div class="rotulo">Blocos registrados</div></div></div>'+
       '<p class="ferias-leve">Leitura, cursos e projetos também têm seu espaço. Descansar faz parte.</p>';
     return;
@@ -4240,9 +4240,9 @@ function atualizarTipoCicloFormulario() {
   const atual=cicloAtivo(),ferias=atual ? cicloDeFerias(atual) : tipoCicloDoFormulario()==='ferias';
   $('#formCicloBox').classList.toggle('form-ferias',ferias);
   $('#tituloFormCiclo').textContent=atual ? (ferias ? 'Férias em andamento' : 'Ciclo em andamento') : 'Abrir um ciclo';
-  $('#campoCicloFim').hidden=ferias; $('#cicloFim').disabled=ferias;
+  $('#campoCicloFim').hidden=false; $('#cicloFim').disabled=false;
   $('#cicloNome').placeholder=ferias ? 'Ex.: Minhas férias — leituras e projetos' : 'Ex.: Ciclo 4 — Cardio e Respiratório';
-  $('#ajudaTipoCiclo').textContent=(atual ? 'Para escolher outro tipo, encerre o ciclo atual. ' : '')+(ferias ? 'Sem prazo, sem comparação com provas. Moedas e dinheiro continuam no mesmo ritmo: 1 moeda a cada 5 min e R$ 1 a cada 45 s, com os bônus habituais.' : 'Defina o período das provas e acompanhe sua campanha.');
+  $('#ajudaTipoCiclo').textContent=(atual ? 'Para escolher outro tipo, encerre o ciclo atual. ' : '')+(ferias ? 'Escolha o início e o fim das férias e acompanhe as horas acumuladas no seu ritmo. Moedas e dinheiro continuam no mesmo ritmo: 1 moeda a cada 5 min e R$ 1 a cada 45 s, com os bônus habituais.' : 'Defina o período das provas e acompanhe sua campanha.');
   $('#btnSalvarCiclo').textContent=atual ? (ferias ? 'Atualizar férias' : 'Atualizar ciclo') : (ferias ? 'Abrir ciclo de férias' : 'Abrir ciclo');
   $('#btnEncerrarCiclo').textContent=ferias ? 'Encerrar férias' : 'Levantar a taça';
   $('#dicaEncerrarCiclo').textContent=ferias ? 'Ao encerrar, as férias ficam no histórico com seu tempo registrado, sem contar como ciclo acadêmico ou gerar troféus.' : 'Encerrar congela as estatísticas e manda o ciclo para a Estante. A faculdade não volta atrás — o app também não.';
