@@ -1,4 +1,4 @@
-"""Daily cash milestones, migration and persistence in isolated browser storage.
+"""Daily cash and coin milestones, migration and persistence in isolated browser storage.
 
 Run: python tests/bonus.integration.py [optional deployed URL]
 Requires Playwright and Chromium. No real browser profile is used.
@@ -44,7 +44,7 @@ try:
           };
           window.bonusSnapshot=()=>({base:dinheiroBaseGanho(),bonus:bonusDiarioDinheiro(),saldo:saldoDinheiro(),coins:saldoMoedas()});
         }''')
-        for minutes,bonus,total,coins in [(0,0,0,0),(59,0,78,11),(60,10,90,12),(149,10,208,29),(150,35,235,30),(180,35,275,36),(300,35,435,60)]:
+        for minutes,bonus,total,coins in [(0,0,0,0),(59,0,78,11),(60,15,95,13),(149,15,213,30),(150,50,250,33),(180,50,290,39),(300,50,450,63)]:
             p.evaluate('(n)=>seedBonus(n?[["2026-11-21",n]]:[])',minutes)
             got=p.evaluate('bonusSnapshot()')
             assert got=={'base':total-bonus,'bonus':bonus,'saldo':total,'coins':coins},(minutes,got)
@@ -57,19 +57,19 @@ try:
                 assert ('feito' in p.locator(f'.bonus-marco[data-bonus-minutos="{limit}"]').get_attribute('class'))==(minutes>=limit)
         # Three separate blocks combine; two separate dates never combine for 150.
         p.evaluate('seedBonus([["2026-11-21",50],["2026-11-21",50],["2026-11-21",50]])')
-        assert p.evaluate('bonusSnapshot().saldo')==235
+        assert p.evaluate('bonusSnapshot().saldo')==250
         p.evaluate('seedBonus([["2026-11-20",90],["2026-11-21",60]])')
-        assert p.evaluate('bonusSnapshot().bonus')==20
+        assert p.evaluate('bonusSnapshot().bonus')==25
         p.evaluate('seedBonus([["2026-11-20",150],["2026-11-21",150]])')
-        assert p.evaluate('bonusSnapshot().bonus')==45  # Old date keeps only its existing R$10.
+        assert p.evaluate('bonusSnapshot().bonus')==60  # Old date keeps only its existing R$10.
         p.evaluate('seedBonus([["2026-11-20",150],["2026-11-21",150]],"2026-11-20")')
-        assert p.evaluate('bonusSnapshot().bonus')==70
+        assert p.evaluate('bonusSnapshot().bonus')==85
         # Only the eligible portion of a block spanning cash activation counts.
         p.evaluate('''()=>{
           seedBonus([]);const day=diaDeChave('2026-11-21').getTime();loja.inicioDinheiro=day+14*3600000;
           blocos=[{id:'overlap',dia:'2026-11-21',minutos:150,inicio:day+12.5*3600000,fim:day+15*3600000}];renderLoja();
         }''')
-        assert p.evaluate('bonusSnapshot().base')==80 and p.evaluate('bonusSnapshot().bonus')==10
+        assert p.evaluate('bonusSnapshot().base')==80 and p.evaluate('bonusSnapshot().bonus')==15
         # Crossing each milestone announces once. A long block awards both together.
         p.evaluate('''()=>{
           seedBonus([['2026-11-21',59]]);window.bonusNotices=[];
@@ -80,42 +80,50 @@ try:
           registrarBloco(Date.now()-30*60000,Date.now(),'Sem ciclo',30);
         }''')
         notices=[s.replace('\xa0',' ') for s in p.evaluate('bonusNotices')]
-        assert len(notices)==2 and 'R$ 10' in notices[0] and 'R$ 25' in notices[1],notices
+        assert len(notices)==2 and 'R$ 15' in notices[0] and '1 moeda' in notices[0] and 'R$ 35' in notices[1] and '2 moedas' in notices[1],notices
         assert p.evaluate('blocos.every(b=>b.cicloId===null)')
         p.evaluate('seedBonus([]);bonusNotices=[];registrarBloco(Date.now()-150*60000,Date.now(),"Sem ciclo",150);renderLoja()')
         notices=[s.replace('\xa0',' ') for s in p.evaluate('bonusNotices')]
-        assert len(notices)==1 and 'R$ 35' in notices[0],notices
-        assert p.evaluate('bonusSnapshot().saldo')==235
+        assert len(notices)==1 and 'R$ 50' in notices[0] and '3 moedas' in notices[0],notices
+        assert p.evaluate('bonusSnapshot().saldo')==250
         for _ in range(3):p.evaluate('renderLoja();renderTudo()')
-        assert p.evaluate('bonusSnapshot().saldo')==235
+        assert p.evaluate('bonusSnapshot().saldo')==250
         p.evaluate('mostrarAviso=originalBonusNotice')
         # An existing v3 wallet migrates once, preserving its old cash and purchases.
         p.evaluate('''()=>{
           seedBonus([['2026-11-18',180],['2026-11-20',150]]);
           const legacy={...loja,gastas:120,niveis:{vestiario:1},comprados:['gol:virada']};
-          delete legacy.inicioBonusProlongado;Armazem.gravar(CHAVES.loja,legacy);
+          delete legacy.inicioBonusProlongado;delete legacy.inicioBonusReforcado;Armazem.gravar(CHAVES.loja,legacy);
         }''')
         p.reload(wait_until='networkidle')
         assert p.evaluate('bonusDiarioDinheiro()')==20
         assert p.evaluate('saldoDinheiro()')==340  # R$440 base + R$20 old bonuses - R$120 spent.
         assert p.evaluate('loja.niveis.vestiario')==1
         assert p.evaluate('loja.comprados.includes("gol:virada")')
+        assert p.evaluate('bonusDiarioMoedas()')==0
         activation=p.evaluate('loja.inicioBonusProlongado')
+        reward_activation=p.evaluate('loja.inicioBonusReforcado')
+        assert p.evaluate('chaveDia(loja.inicioBonusReforcado)')=='2026-11-21'
         assert p.evaluate('chaveDia(loja.inicioBonusProlongado)')=='2026-11-21'
         p.reload(wait_until='networkidle');assert p.evaluate('loja.inicioBonusProlongado')==activation
         # Add today's 150 minutes, then preserve the earned amount across reload/export/import.
         p.evaluate('registrarBloco(Date.now()-150*60000,Date.now(),"Teste isolado",150);renderTudo()')
-        assert p.evaluate('bonusDiarioDinheiro()')==55
+        assert p.evaluate('bonusDiarioDinheiro()')==70
         with p.expect_download() as dl:p.evaluate('exportarJSON()')
         backup=json.loads(Path(dl.value.path()).read_text())
         assert backup['loja']['inicioBonusProlongado']==activation
+        assert backup['loja']['inicioBonusReforcado']==reward_activation
+        assert p.evaluate('bonusDiarioMoedas()')==3
+        expected_coins=p.evaluate('saldoMoedas()')
         expected=p.evaluate('saldoDinheiro()')
         p.reload(wait_until='networkidle');assert p.evaluate('saldoDinheiro()')==expected
         p.evaluate('blocos=[];salvarBlocos();renderTudo()')
         p.locator('#arquivoImport').set_input_files({'name':'bonus-backup.json','mimeType':'application/json','buffer':json.dumps(backup).encode()})
         p.wait_for_function('(n)=>blocos.length===n',arg=len(backup['blocos']))
-        assert p.evaluate('saldoDinheiro()')==expected and p.evaluate('bonusDiarioDinheiro()')==55
+        assert p.evaluate('saldoDinheiro()')==expected and p.evaluate('bonusDiarioDinheiro()')==70
         assert p.evaluate('JSON.stringify(meuTime)')==roster
+        assert p.evaluate('saldoMoedas()')==expected_coins
+        assert p.evaluate('loja.inicioBonusReforcado')==reward_activation
         # Zeroing cash does not claim completed bonuses again; the next date earns its own.
         p.evaluate('zerarDinheiro();renderLoja()');assert p.evaluate('saldoDinheiro()')==0
         p.evaluate('registrarBloco(Date.now()-30*60000,Date.now(),"Outro bloco",30);renderTudo()')
@@ -124,8 +132,10 @@ try:
         p.evaluate('renderLoja()')
         assert p.locator('#progressoBonusDinheiro').get_attribute('aria-valuenow')=='0'
         p.evaluate('registrarBloco(Date.now()-150*60000,Date.now(),"Novo dia",150);renderTudo()')
-        assert p.evaluate('saldoDinheiro()')==275
+        assert p.evaluate('saldoDinheiro()')==290
         assert p.evaluate('loja.inicioBonusProlongado')==activation
+        assert p.evaluate('loja.inicioBonusReforcado')==reward_activation
+        assert p.evaluate('bonusDiarioMoedas()')==6
         p.locator('[data-painel=loja]').click()
         for width in [320,390,768,1300]:
             p.set_viewport_size({'width':width,'height':1000})
@@ -137,12 +147,26 @@ try:
                 assert abs(point['x']+point['width']/2-(bar['x']+bar['width']*limit/150))<1
                 assert value['y']+value['height']<bar['y']
                 assert value['x']>=bar['x'] and value['x']+value['width']<=bar['x']+bar['width']+1
+            first=p.locator('.bonus-marco[data-bonus-minutos="60"] .bonus-valor').bounding_box()
+            last=p.locator('.bonus-marco[data-bonus-minutos="150"] .bonus-valor').bounding_box()
+            assert first['x']+first['width']+5<=last['x'],width
+            assert '+ 1 moeda' in p.locator('.bonus-marco[data-bonus-minutos="60"]').inner_text()
+            assert '+ 2 moedas' in p.locator('.bonus-marco[data-bonus-minutos="150"]').inner_text()
+        p.locator('#painel-loja .cartao').first.screenshot(path='/workspace/artifacts/bonus-diarios-moedas-reais.png')
         p.evaluate('navigator.serviceWorker.ready');p.reload(wait_until='networkidle')
         context.set_offline(True);p.reload(wait_until='networkidle');p.locator('[data-painel=loja]').click()
         assert p.locator('#bonusDiarioDinheiro').is_visible()
-        assert p.evaluate('saldoDinheiro()')==275
+        assert p.evaluate('saldoDinheiro()')==290
+        # Coin reset includes the new bonuses; re-render/reload cannot recover them.
+        assert p.evaluate('bonusDiarioMoedas()')==6
+        p.evaluate('zerarSaldo();renderTudo()')
+        assert p.evaluate('saldoMoedas()')==0 and p.evaluate('saldoDinheiro()')==290
+        p.reload(wait_until='networkidle')
+        assert p.evaluate('saldoMoedas()')==0
+        p.evaluate('registrarBloco(Date.now()-5*60000,Date.now(),"Mais cinco minutos",5);renderTudo()')
+        assert p.evaluate('saldoMoedas()')==1 and p.evaluate('bonusDiarioMoedas()')==6
         assert not errors,errors
         browser.close()
-        print('PASS',url,'daily bonuses: 60/150 thresholds; stacking; one award per day; split blocks/dates; activation overlap; no retroactive credits; notifications; migration; reload/backup/import; zeroing; next day; Sao Paulo timezone; responsive/offline')
+        print('PASS',url,'daily cash/coin bonuses: 60/150 thresholds; stacking; one award per day; split blocks/dates; activation overlap; no retroactive credits; notifications; migration; reload/backup/import; zeroing; next day; Sao Paulo timezone; responsive/offline')
 finally:
     if server:server.shutdown()

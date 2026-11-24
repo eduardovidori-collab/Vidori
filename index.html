@@ -862,9 +862,9 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 
 .bonus-dinheiro{padding:16px 18px;border:1px solid #DAE6CE;background:#F4F8EE;border-radius:11px;margin-top:16px}
 .bonus-dinheiro-topo strong{display:block;font-size:12px;color:#46673C}.bonus-dinheiro-topo p{font-size:11px;color:#657A56;line-height:1.6;margin-top:4px}
-.bonus-linha{position:relative;height:82px;margin-top:17px}.bonus-dinheiro-barra{position:absolute;left:0;right:0;top:43px;height:6px;background:#DEE8D3;border-radius:6px;overflow:hidden}.bonus-dinheiro-barra i{display:block;height:100%;width:var(--progresso,0%);background:#85A65F;border-radius:6px}
-.bonus-marcadores{position:absolute;inset:0}.bonus-marco{position:absolute;left:var(--marco);top:0;height:100%;width:0}.bonus-valor{position:absolute;top:0;left:0;transform:translateX(-50%);border:1px solid #CCDDBB;border-radius:7px;padding:5px 8px;background:#EAF2DE;color:#557242;font-size:12px;line-height:17px;font-weight:800;white-space:nowrap}.bonus-marco-final .bonus-valor{transform:translateX(-100%)}
-.bonus-ponto{position:absolute;left:-7px;top:39px;width:14px;height:14px;border:2px solid #A4B88E;border-radius:50%;background:#F4F8EE;box-shadow:0 0 0 3px #F4F8EE}.bonus-ponto:before{content:"";position:absolute;left:4px;bottom:15px;width:1px;height:8px;background:#BBCBAA}.bonus-tempo{position:absolute;top:63px;left:0;transform:translateX(-50%);font-size:10px;line-height:14px;font-weight:700;color:#6E805F;white-space:nowrap}.bonus-marco-final .bonus-tempo{transform:translateX(-100%)}.bonus-inicio{position:absolute;left:0;top:63px;font-size:10px;color:#849176;line-height:14px}
+.bonus-linha{position:relative;height:98px;margin-top:17px}.bonus-dinheiro-barra{position:absolute;left:0;right:0;top:59px;height:6px;background:#DEE8D3;border-radius:6px;overflow:hidden}.bonus-dinheiro-barra i{display:block;height:100%;width:var(--progresso,0%);background:#85A65F;border-radius:6px}
+.bonus-marcadores{position:absolute;inset:0}.bonus-marco{position:absolute;left:var(--marco);top:0;height:100%;width:0}.bonus-valor{display:grid;text-align:center;position:absolute;top:0;left:0;transform:translateX(-50%);border:1px solid #CCDDBB;border-radius:7px;padding:5px 8px;background:#EAF2DE;color:#557242;font-size:12px;line-height:17px;font-weight:800;white-space:nowrap}.bonus-moedas{font-size:10px;line-height:16px;font-weight:600}.bonus-marco-final .bonus-valor{transform:translateX(-100%)}
+.bonus-ponto{position:absolute;left:-7px;top:55px;width:14px;height:14px;border:2px solid #A4B88E;border-radius:50%;background:#F4F8EE;box-shadow:0 0 0 3px #F4F8EE}.bonus-ponto:before{content:"";position:absolute;left:4px;bottom:15px;width:1px;height:8px;background:#BBCBAA}.bonus-tempo{position:absolute;top:79px;left:0;transform:translateX(-50%);font-size:10px;line-height:14px;font-weight:700;color:#6E805F;white-space:nowrap}.bonus-marco-final .bonus-tempo{transform:translateX(-100%)}.bonus-inicio{position:absolute;left:0;top:79px;font-size:10px;color:#849176;line-height:14px}
 .bonus-marco.feito .bonus-valor{background:#466E3D;border-color:#466E3D;color:#FFF}.bonus-marco.feito .bonus-ponto{background:#466E3D;border-color:#466E3D}.bonus-marco.feito .bonus-ponto:after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;font:800 8px/1 system-ui;color:#FFF}.bonus-marco.feito .bonus-tempo{color:#3E6035}
 .bonus-dinheiro>small{display:block;font-size:10px;color:#657A56;line-height:1.6;margin-top:8px}.bonus-dinheiro.feito{background:#EEF6E5;border-color:#C8DDB4}.bonus-dinheiro.feito .bonus-dinheiro-barra i{background:#507F3E}.bonus-dinheiro.feito .bonus-ponto{box-shadow:0 0 0 3px #EEF6E5}
 
@@ -1252,13 +1252,13 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
           <div class="bonus-dinheiro-barra" id="progressoBonusDinheiro" role="progressbar" aria-label="Estudo de hoje para os bônus diários" aria-valuemin="0" aria-valuemax="150" aria-valuenow="0"><i></i></div>
           <span class="bonus-inicio" aria-hidden="true">0 min</span>
           <div class="bonus-marcadores" role="list" aria-label="Marcos dos bônus diários">
-            <div class="bonus-marco" data-bonus-minutos="60" role="listitem" style="--marco:40%"><span class="bonus-valor">+ R$ 10</span><span class="bonus-ponto" aria-hidden="true"></span><span class="bonus-tempo">1h</span></div>
-            <div class="bonus-marco bonus-marco-final" data-bonus-minutos="150" role="listitem" style="--marco:100%"><span class="bonus-valor">+ R$ 25</span><span class="bonus-ponto" aria-hidden="true"></span><span class="bonus-tempo">2h30</span></div>
+            <div class="bonus-marco" data-bonus-minutos="60" role="listitem" style="--marco:40%"><span class="bonus-valor"><span class="bonus-reais">+ R$ 15</span><span class="bonus-moedas">+ 1 moeda</span></span><span class="bonus-ponto" aria-hidden="true"></span><span class="bonus-tempo">1h</span></div>
+            <div class="bonus-marco bonus-marco-final" data-bonus-minutos="150" role="listitem" style="--marco:100%"><span class="bonus-valor"><span class="bonus-reais">+ R$ 35</span><span class="bonus-moedas">+ 2 moedas</span></span><span class="bonus-ponto" aria-hidden="true"></span><span class="bonus-tempo">2h30</span></div>
           </div>
         </div>
         <small id="resumoBonusDinheiro">0 min de 2h30 hoje</small>
       </div>
-      <p class="carteira-regra">1 hora de estudo rende <b>12 moedas e R$ 80</b>. Com o bônus diário, são <b>R$ 90</b>. Com 2h30, você ganha <b>30 moedas e R$ 235</b>, incluindo os dois bônus. Cada saldo é independente e não expira. Só os novos estudos geram reais.</p>
+      <p class="carteira-regra">1 hora de estudo rende <b>12 moedas e R$ 80</b>. Com o bônus diário, são <b>13 moedas e R$ 95</b>. Com 2h30, você ganha <b>33 moedas e R$ 250</b>, incluindo os dois bônus. Cada saldo é independente e não expira. Só os novos estudos geram reais.</p>
       <div class="carteira-acoes"><button class="btn btn-pequeno" id="btnZerarSaldo">Zerar moedas</button><button class="btn btn-pequeno" id="btnZerarDinheiro">Zerar dinheiro</button><button class="btn btn-pequeno" id="btnResetarLoja">Resetar melhorias e sons</button><button class="btn btn-pequeno" type="button" id="btnResetarTime">Resetar time</button></div>
     </div>
   </div>
@@ -1857,6 +1857,7 @@ function normalizarLoja(dados){
   }
   return {economiaVersao:3,inicioDinheiro:iniciado?d.inicioDinheiro:Date.now(),gastas:iniciado?inteiro(d.gastas):0,
     inicioBonusProlongado:iniciado&&Number.isSafeInteger(d.inicioBonusProlongado)&&d.inicioBonusProlongado>0?d.inicioBonusProlongado:Date.now(),
+    inicioBonusReforcado:iniciado&&Number.isSafeInteger(d.inicioBonusReforcado)&&d.inicioBonusReforcado>0?d.inicioBonusReforcado:Date.now(),
     moedasAnteriores:v2?inteiro(d.moedasAnteriores):inteiro(d.gastas),
     moedasZeradas:v2?inteiro(d.moedasZeradas):0,reaisZerados:iniciado?inteiro(d.reaisZerados):0,
     comprados,niveis,golAtivo:d.golAtivo==='fogos'?'virada':typeof d.golAtivo==='string'?d.golAtivo:'padrao',
@@ -2135,10 +2136,10 @@ function salvarMeuTime() { meuTime=normalizarMeuTime(meuTime); return Armazem.gr
 const MIN_POR_MOEDA = 5;
 const SEGUNDOS_POR_REAL = 45;
 const MINUTOS_BONUS_DIARIO = 60;
-const VALOR_BONUS_DIARIO = 10;
+const VALOR_BONUS_DIARIO = 15;
 const METAS_BONUS_DINHEIRO = [
-  {minutos:MINUTOS_BONUS_DIARIO,valor:VALOR_BONUS_DIARIO,rotulo:"1 hora"},
-  {minutos:150,valor:25,rotulo:"2h30",prolongado:true}
+  {minutos:MINUTOS_BONUS_DIARIO,valor:VALOR_BONUS_DIARIO,moedas:1,valorAnterior:10,rotulo:"1 hora"},
+  {minutos:150,valor:35,moedas:2,valorAnterior:25,rotulo:"2h30",prolongado:true}
 ];
 
 /**
@@ -2164,17 +2165,28 @@ function inicioDaMetaBonusDinheiro(meta) { return meta.prolongado?chaveDia(loja.
 function diasComBonusDinheiro(minimo=MINUTOS_BONUS_DIARIO,desde="") {
   return Object.entries(minutosNovosDinheiroPorDia()).filter(([dia,min])=>min>=minimo&&dia>=desde).map(([dia])=>dia);
 }
-// Cada meta é paga uma vez por data. A nova meta começa no dia da atualização,
-// evitando créditos por dias antigos; o marco é preservado no backup da loja.
+// Os novos valores e as moedas começam no dia da atualização. Dias anteriores
+// preservam os bônus antigos; ambos os marcos de ativação acompanham o backup.
+function recompensaDaMeta(meta,dia) {
+  const reforcado=dia>=chaveDia(loja.inicioBonusReforcado);
+  return {valor:reforcado?meta.valor:meta.valorAnterior,moedas:reforcado?meta.moedas:0};
+}
+function textoDoBonus(bonus) {
+  return formatarDinheiro(bonus.valor)+(bonus.moedas?' + '+bonus.moedas+(bonus.moedas===1?' moeda':' moedas'):'');
+}
 function bonusDiarioDinheiro() {
   return METAS_BONUS_DINHEIRO.reduce((total,meta)=>total+
-    diasComBonusDinheiro(meta.minutos,inicioDaMetaBonusDinheiro(meta)).length*meta.valor,0);
+    diasComBonusDinheiro(meta.minutos,inicioDaMetaBonusDinheiro(meta)).reduce((soma,dia)=>soma+recompensaDaMeta(meta,dia).valor,0),0);
+}
+function bonusDiarioMoedas() {
+  return METAS_BONUS_DINHEIRO.reduce((total,meta)=>total+
+    diasComBonusDinheiro(meta.minutos,inicioDaMetaBonusDinheiro(meta)).reduce((soma,dia)=>soma+recompensaDaMeta(meta,dia).moedas,0),0);
 }
 function dinheiroGanho() { return dinheiroBaseGanho()+bonusDiarioDinheiro(); }
 function saldoDinheiro() { return Math.max(0,dinheiroGanho()-loja.gastas-loja.reaisZerados); }
 const formatoReais=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:0,maximumFractionDigits:0});
 function formatarDinheiro(valor) { return formatoReais.format(valor); }
-function saldoMoedas()  { return Math.max(0, moedasGanhas() + bonusDeMoedas() + meuTime.moedasVendas - totalMoedasGastas()); }
+function saldoMoedas()  { return Math.max(0, moedasGanhas() + bonusDiarioMoedas() + bonusDeMoedas() + meuTime.moedasVendas - totalMoedasGastas()); }
 
 function salvarBlocos()   { Armazem.gravar(CHAVES.blocos, blocos); }
 function salvarLoja()     { Armazem.gravar(CHAVES.loja, loja); }
@@ -3319,9 +3331,11 @@ function registrarBloco(inicioTs, fimTs, assunto, minutos) {
   const novasMetas=METAS_BONUS_DINHEIRO.filter(meta=>dia>=inicioDaMetaBonusDinheiro(meta)&&antes<meta.minutos&&depois>=meta.minutos);
   if(novasMetas.length){
     const quando=dia===chaveDia(new Date())?'hoje':'em '+formatarDataCurta(dia);
-    const valor=novasMetas.reduce((total,meta)=>total+meta.valor,0);
+    const premio=novasMetas.reduce((total,meta)=>{
+      const b=recompensaDaMeta(meta,dia);return {valor:total.valor+b.valor,moedas:total.moedas+b.moedas};
+    },{valor:0,moedas:0});
     const conquista=novasMetas.length>1?'Metas de 1 hora e 2h30 concluídas':'Meta de '+novasMetas[0].rotulo+' concluída';
-    mostrarAviso(conquista+' '+quando+'! +'+formatarDinheiro(valor)+' em bônus diários.','recorde');
+    mostrarAviso(conquista+' '+quando+'! +'+textoDoBonus(premio)+' em bônus diários.','recorde');
   }
 }
 
@@ -6137,32 +6151,37 @@ function renderBonusDinheiro(){
   const hoje=chaveDia(new Date()),min=Math.max(0,minutosNovosDinheiroPorDia()[hoje]||0);
   const objetivo=METAS_BONUS_DINHEIRO[METAS_BONUS_DINHEIRO.length-1].minutos;
   const concluidas=METAS_BONUS_DINHEIRO.filter(meta=>hoje>=inicioDaMetaBonusDinheiro(meta)&&min>=meta.minutos);
-  const ganho=concluidas.reduce((total,meta)=>total+meta.valor,0);
+  const ganho=concluidas.reduce((total,meta)=>{
+    const b=recompensaDaMeta(meta,hoje);return {valor:total.valor+b.valor,moedas:total.moedas+b.moedas};
+  },{valor:0,moedas:0});
   const proxima=METAS_BONUS_DINHEIRO.find(meta=>hoje>=inicioDaMetaBonusDinheiro(meta)&&min<meta.minutos);
   $('#bonusDiarioDinheiro').classList.toggle('feito',concluidas.length===METAS_BONUS_DINHEIRO.length);
   $('#estadoBonusDinheiro').textContent=proxima
-    ?(ganho?formatarDinheiro(ganho)+' garantidos. ':'')+'Próximo marco: '+proxima.rotulo+' (+'+formatarDinheiro(proxima.valor)+').'
-    :'Metas de hoje concluídas: '+formatarDinheiro(ganho)+' em bônus.';
+    ?(ganho.valor?textoDoBonus(ganho)+' garantidos. ':'')+'Próximo marco: '+proxima.rotulo+' (+'+textoDoBonus(recompensaDaMeta(proxima,hoje))+').'
+    :'Metas de hoje concluídas: '+textoDoBonus(ganho)+' em bônus.';
   const barra=$('#progressoBonusDinheiro'),progresso=Math.min(min,objetivo);
   barra.style.setProperty('--progresso',progresso/objetivo*100+'%');
   barra.setAttribute('aria-valuemax',String(objetivo));
   barra.setAttribute('aria-valuenow',String(progresso));
-  barra.setAttribute('aria-valuetext',humanoMin(min)+' de '+humanoMin(objetivo)+' hoje; '+formatarDinheiro(ganho)+' em bônus garantidos.');
+  barra.setAttribute('aria-valuetext',humanoMin(min)+' de '+humanoMin(objetivo)+' hoje; '+textoDoBonus(ganho)+' em bônus garantidos.');
   $$('.bonus-marco[data-bonus-minutos]').forEach(marco=>{
     const meta=METAS_BONUS_DINHEIRO.find(m=>m.minutos===Number(marco.dataset.bonusMinutos));
-    const feito=concluidas.includes(meta);
+    const feito=concluidas.includes(meta),premio=recompensaDaMeta(meta,hoje);
     marco.style.setProperty('--marco',meta.minutos/objetivo*100+'%');
     marco.classList.toggle('feito',feito);
-    marco.setAttribute('aria-label',meta.rotulo+': '+formatarDinheiro(meta.valor)+'. '+(feito?'Conquistado.':'A conquistar.'));
+    marco.querySelector('.bonus-reais').textContent='+ '+formatarDinheiro(premio.valor);
+    marco.querySelector('.bonus-moedas').textContent=premio.moedas?'+ '+premio.moedas+(premio.moedas===1?' moeda':' moedas'):'';
+    marco.setAttribute('aria-label',meta.rotulo+': '+textoDoBonus(premio)+'. '+(feito?'Conquistado.':'A conquistar.'));
   });
   const faltam=proxima?Math.ceil(proxima.minutos-min):0;
   $('#resumoBonusDinheiro').textContent=proxima
     ?humanoMin(min)+' de '+humanoMin(objetivo)+' hoje · '+(faltam===1?'falta 1 minuto':'faltam '+faltam+' minutos')+' para o próximo bônus.'
-    :'✓ '+formatarDinheiro(ganho)+' já incluídos no total ganho · bônus cumulativos, uma vez por dia.';
+    :'✓ '+textoDoBonus(ganho)+' já incluídos nas carteiras · bônus cumulativos, uma vez por dia.';
 }
 function renderLoja() {
   $('#saldoMoedas').textContent=saldoMoedas();$('#saldoDinheiro').textContent=formatarDinheiro(saldoDinheiro());
   $('#explicaMoeda').innerHTML='Ganhe <b>1 moeda a cada 5 minutos</b> de estudo para comprar pacotes.'+
+    (bonusDiarioMoedas()?' Seus bônus diários renderam <b>'+bonusDiarioMoedas()+' moedas</b>.':'')+
     (meuTime.moedasVendas?' Suas vendas de repetidos renderam <b>'+meuTime.moedasVendas+' moedas</b>.':'')+
     (bonusDeMoedas()?' Você também recebeu <b>5 moedas de presente</b>.':'');
   $('#explicaDinheiro').innerHTML='Ganhe <b>R$ 1 a cada 45 segundos</b> de estudo para o estádio, o museu e os sons. Seus novos estudos renderam <b>'+formatarDinheiro(dinheiroBaseGanho())+'</b>, mais <b>'+formatarDinheiro(bonusDiarioDinheiro())+'</b> em bônus diários. Estudos anteriores à ativação não geram reais.';
@@ -6176,7 +6195,7 @@ function renderLoja() {
 function zerarSaldo(){
   if(saldoMoedas()===0){mostrarAviso('O saldo de moedas já está em zero.');return;}
   if(!confirm('Zerar suas moedas?\n\nVocê fica com 0 moedas e mantém os reais, os jogadores e as compras. Seu histórico de estudo não muda.\n\nNão tem volta.'))return;
-  const proximo={...loja,moedasZeradas:Math.max(0,moedasGanhas()+bonusDeMoedas()+meuTime.moedasVendas-meuTime.gastoPacotes-loja.moedasAnteriores)};
+  const proximo={...loja,moedasZeradas:Math.max(0,moedasGanhas()+bonusDiarioMoedas()+bonusDeMoedas()+meuTime.moedasVendas-meuTime.gastoPacotes-loja.moedasAnteriores)};
   if(!Armazem.gravar(CHAVES.loja,proximo))return;loja=proximo;renderLoja();renderMeuTime();mostrarAviso('Saldo de moedas zerado.');
 }
 function zerarDinheiro(){

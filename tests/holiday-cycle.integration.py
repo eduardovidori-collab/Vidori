@@ -84,7 +84,7 @@ try:
   assert 'no seu ritmo' in p.locator('#fraseFim').inner_text()
   assert 'dias seguidos' not in p.locator('#resumoFim').inner_text()
   p.evaluate('fecharModalFim();registrarBloco(Date.now()-149*60000,Date.now(),"Projeto de férias",149);renderTudo()')
-  assert p.evaluate('({moedas:saldoMoedas(),dinheiro:saldoDinheiro(),bonus:bonusDiarioDinheiro()})')=={'moedas':30,'dinheiro':235,'bonus':35}
+  assert p.evaluate('({moedas:saldoMoedas(),dinheiro:saldoDinheiro(),bonus:bonusDiarioDinheiro()})')=={'moedas':33,'dinheiro':250,'bonus':50}
   assert '2h 30' in p.locator('#cicloAtualBox').inner_text() or '2h30' in p.locator('#cicloAtualBox').inner_text()
   assert p.locator('#listaCompleta .ferias-historico').count()==2
   p.locator('#painel-foco').screenshot(path=str(artifacts/'ciclo-ferias-foco.png'))
@@ -109,7 +109,7 @@ try:
   p.evaluate('ciclos=[];salvarCiclos();renderTudo()')
   p.locator('#arquivoImport').set_input_files({'name':'ferias.json','mimeType':'application/json','buffer':json.dumps(backup).encode()})
   p.wait_for_function('cicloAtivo()?.tipo==="ferias"')
-  assert p.evaluate('saldoDinheiro()')==235
+  assert p.evaluate('saldoDinheiro()')==250
   # Failed close and cancel preserve the live holiday; successful close creates no trophy.
   p.remove_listener('dialog',accept_dialog)
   def dismiss_dialog(d):d.dismiss()
@@ -128,7 +128,7 @@ try:
   assert p.locator('[data-ferias-arquivo] [data-ver-tutoria]').count()==0
   assert 'Sequência' not in p.locator('[data-ferias-arquivo]').inner_text()
   p.locator('#prateleira').screenshot(path=str(artifacts/'ferias-no-historico.png'))
-  assert p.evaluate('saldoMoedas()')==30 and p.evaluate('saldoDinheiro()')==235
+  assert p.evaluate('saldoMoedas()')==33 and p.evaluate('saldoDinheiro()')==250
   # Next academic cycle has its required end date, compares to the academic predecessor.
   p.evaluate('irParaPainel("ciclo")')
   assert p.locator('input[value=estudo]').is_checked()
