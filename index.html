@@ -873,6 +873,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <link rel="stylesheet" href="./estadio-museu.css?v=135">
 <link rel="stylesheet" href="./cafe.css?v=139">
 <link rel="stylesheet" href="./album-time.css?v=129">
+<link rel="stylesheet" href="./ciclo-ferias.css?v=143">
 <link rel="stylesheet" href="./jogadores-fotos.css?v=142">
 <link rel="stylesheet" href="./cartas-time.css?v=142">
 </head>
@@ -1338,8 +1339,14 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
     <div class="cartao">
       <div class="faixas faixas-fina"></div>
       <div class="cartao-corpo">
-        <h2>Ciclo em andamento</h2>
+        <h2 id="tituloFormCiclo">Abrir um ciclo</h2>
         <div id="formCicloBox">
+          <fieldset class="ciclo-tipos" id="tiposCiclo" aria-describedby="ajudaTipoCiclo">
+            <legend>Qual ciclo você quer abrir?</legend>
+            <label class="ciclo-tipo"><input type="radio" name="tipoCiclo" value="estudo" checked><span><b>Ciclo de estudos</b><small>Uma campanha para suas provas.</small></span></label>
+            <label class="ciclo-tipo ciclo-tipo-ferias"><input type="radio" name="tipoCiclo" value="ferias"><span><b>Ciclo de férias</b><small>Verde e branco. No seu ritmo.</small></span></label>
+          </fieldset>
+          <p class="dica ciclo-tipo-ajuda" id="ajudaTipoCiclo"></p>
           <div class="campo">
             <label for="cicloNome">Nome do ciclo</label>
             <input type="text" id="cicloNome" placeholder="Ex.: Ciclo 4 — Cardio e Respiratório" maxlength="60">
@@ -1349,7 +1356,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
               <label for="cicloInicio">Início</label>
               <input type="date" id="cicloInicio">
             </div>
-            <div class="campo">
+            <div class="campo" id="campoCicloFim">
               <label for="cicloFim">Fim previsto</label>
               <input type="date" id="cicloFim">
             </div>
@@ -1358,7 +1365,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
             <button class="btn btn-principal" id="btnSalvarCiclo">Salvar ciclo</button>
             <button class="btn btn-preto" id="btnEncerrarCiclo">Levantar a taça</button>
           </div>
-          <p class="dica">Encerrar congela as estatísticas e manda o ciclo para a Estante. A faculdade não volta atrás — o app também não.</p>
+          <p class="dica" id="dicaEncerrarCiclo">Encerrar congela as estatísticas e manda o ciclo para a Estante. A faculdade não volta atrás — o app também não.</p>
         </div>
       </div>
     </div>
@@ -1606,7 +1613,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <div id="avisos" aria-live="polite"></div>
 
 <script src="./futebol.js"></script>
-<script src="./estadio-museu.js?v=135"></script>
+<script src="./estadio-museu.js?v=143"></script>
 <script src="./camarotes.js?v=115"></script>
 <script src="./cidade.js?v=139"></script>
 <script src="./cafe.js?v=139"></script>
@@ -3058,51 +3065,47 @@ function mostrarAviso(texto, tipo) {
 /* --------------------------------------------------------------------------
    8. CICLOS
    -------------------------------------------------------------------------- */
+function cicloDeFerias(c) { return c?.tipo === "ferias"; }
 function cicloAtivo() { return ciclos.find((c) => !c.encerradoEm) || null; }
-function ciclosEncerrados() {
-  return ciclos.filter((c) => c.encerradoEm).sort((a, b) => a.inicio < b.inicio ? 1 : -1);
+function ciclosEncerrados(incluirFerias=false) {
+  return ciclos.filter((c) => c.encerradoEm && (incluirFerias || !cicloDeFerias(c))).sort((a, b) => a.inicio < b.inicio ? 1 : -1);
 }
 function cicloPorId(id) { return ciclos.find((c) => c.id === id) || null; }
 
 /** Último ciclo encerrado antes do ciclo informado (para a comparação). */
 function cicloAnteriorDe(ciclo) {
+  if (cicloDeFerias(ciclo)) return null;
   const anteriores = ciclos
-    .filter((c) => c.encerradoEm && c.inicio < ciclo.inicio)
+    .filter((c) => c.encerradoEm && !cicloDeFerias(c) && c.inicio < ciclo.inicio)
     .sort((a, b) => a.inicio < b.inicio ? 1 : -1);
   return anteriores[0] || null;
 }
 
 function salvarCicloDoFormulario() {
-  const nome  = $("#cicloNome").value.trim();
-  const ini   = $("#cicloInicio").value;
-  const fim   = $("#cicloFim").value;
-  if (!nome)      { mostrarAviso("Dá um nome pro ciclo, Eduardo."); return; }
-  if (!ini || !fim) { mostrarAviso("Preenche início e fim previsto."); return; }
-  if (fim < ini)  { mostrarAviso("O fim não pode vir antes do início."); return; }
-
   const atual = cicloAtivo();
-  if (atual) {
-    atual.nome = nome; atual.inicio = ini; atual.fimPrevisto = fim;
-    mostrarAviso("Ciclo atualizado, soberano.");
-  } else {
-    ciclos.push({
-      id: "c" + Date.now(),
-      nome, inicio: ini, fimPrevisto: fim,
-      encerradoEm: null, congelado: null
-    });
-    mostrarAviso("Ciclo aberto. Fase de grupos começando, " + NOME + ".");
-  }
-  salvarCiclos();
+  const tipo = atual ? (cicloDeFerias(atual) ? 'ferias' : 'estudo') : tipoCicloDoFormulario();
+  const ferias = tipo === 'ferias';
+  const nome = $('#cicloNome').value.trim();
+  const ini = $('#cicloInicio').value;
+  const fim = ferias ? null : $('#cicloFim').value;
+  if (!nome) { mostrarAviso('Dê um nome para o ciclo.'); $('#cicloNome').focus(); return false; }
+  if (!ini || (!ferias && !fim)) { mostrarAviso(ferias ? 'Escolha a data de início.' : 'Preenche início e fim previsto.'); return false; }
+  if (fim && fim < ini) { mostrarAviso('O fim não pode vir antes do início.'); return false; }
+  const proximo = atual
+    ? ciclos.map(c => c.id === atual.id ? {...c,nome,inicio:ini,fimPrevisto:fim} : c)
+    : [...ciclos,{id:'c'+Date.now(),tipo,nome,inicio:ini,fimPrevisto:fim,encerradoEm:null,congelado:null}];
+  if (!Armazem.gravar(CHAVES.ciclos,proximo)) { mostrarAviso('Não consegui salvar o ciclo. Tente novamente.'); return false; }
+  ciclos = proximo;
+  mostrarAviso(ferias ? (atual ? 'Férias atualizadas. No seu ritmo.' : 'Ciclo de férias aberto. Aproveite no seu ritmo!') : (atual ? 'Ciclo atualizado, soberano.' : 'Ciclo aberto. Fase de grupos começando, '+NOME+'.'));
   renderTudo();
-  oferecerAdocaoDeOrfaos(cicloAtivo());
+  if (!ferias) oferecerAdocaoDeOrfaos(cicloAtivo());
+  return true;
 }
 
-/**
- * Blocos sem ciclo que caem dentro do período do ciclo informado.
- * É o caso do primeiro dia: estudou antes de cadastrar a campanha.
- */
+/** Blocos anteriores não são incorporados automaticamente às férias. */
+
 function orfaosDoPeriodo(ciclo) {
-  if (!ciclo) return [];
+  if (!ciclo || cicloDeFerias(ciclo)) return [];
   return blocos.filter((b) => !b.cicloId &&
                               b.dia >= ciclo.inicio &&
                               b.dia <= ciclo.fimPrevisto);
@@ -3154,34 +3157,30 @@ function fecharModalOrfaos() { $("#modalOrfaos").classList.remove("aberto"); }
 
 function encerrarCiclo() {
   const c = cicloAtivo();
-  if (!c) { mostrarAviso("Não tem ciclo em andamento."); return; }
-  if (!confirm('Encerrar "' + c.nome + '"?\n\nAs estatísticas ficam congeladas e o ciclo vai para a Estante. Não dá pra reabrir.')) return;
-
-  const meus = blocos.filter((b) => b.cicloId === c.id);
-  const min  = meus.reduce((s, b) => s + b.minutos, 0);
-  const dias = new Set(meus.map((b) => b.dia));
-
-  c.encerradoEm = chaveDia(new Date());
-  c.congelado = {
-    minutos: min,
-    blocos: meus.length,
-    diasAtivos: dias.size,
-    maiorSequencia: maiorSequenciaEm(Array.from(dias)),
-    dataFim: c.encerradoEm
-  };
-  salvarCiclos();
-
-  const msg = falar("encerrarCiclo");
-  mostrarAviso(msg, "recorde");
-  notificar("Vidori — ciclo encerrado", msg);
-  renderTudo();
-  irParaPainel("estante");
+  if (!c) { mostrarAviso('Não tem ciclo em andamento.'); return false; }
+  const ferias = cicloDeFerias(c);
+  if (!confirm('Encerrar "'+c.nome+'"?\n\n'+(ferias ? 'Seu tempo ficará guardado no arquivo de férias, sem gerar troféus. Você poderá abrir outro ciclo depois.' : 'As estatísticas ficam congeladas e o ciclo vai para a Estante. Não dá pra reabrir.'))) return false;
+  const meus = blocos.filter(b=>b.cicloId===c.id),dias = new Set(meus.map(b=>b.dia));
+  const fim = chaveDia(new Date());
+  const congelado = {minutos:meus.reduce((total,b)=>total+b.minutos,0),blocos:meus.length,diasAtivos:dias.size,maiorSequencia:maiorSequenciaEm(Array.from(dias)),dataFim:fim};
+  const proximo = ciclos.map(item=>item.id===c.id ? {...item,encerradoEm:fim,congelado} : item);
+  if (!Armazem.gravar(CHAVES.ciclos,proximo)) { mostrarAviso('Não consegui encerrar o ciclo. Seus registros foram mantidos.'); return false; }
+  ciclos = proximo;
+  // A próxima abertura começa com um formulário novo, sem nome e datas antigos.
+  $('#cicloNome').value=''; $('#cicloInicio').value=''; $('#cicloFim').value='';
+  document.querySelector('input[name="tipoCiclo"][value="estudo"]').checked=true;
+  const msg=ferias ? 'Férias guardadas com carinho. Cada momento tem seu valor.' : falar('encerrarCiclo');
+  mostrarAviso(msg,ferias ? undefined : 'recorde');
+  if (!ferias) notificar('Copeiro — ciclo encerrado',msg);
+  renderTudo(); irParaPainel('estante');
+  return true;
 }
 
 /* --------------------------------------------------------------------------
    9. ESTATÍSTICAS
    -------------------------------------------------------------------------- */
 /** Mapa { "AAAA-MM-DD": minutos } de todo o histórico. */
+
 function minutosPorDia(lista) {
   const mapa = Object.create(null);
   (lista || blocos).forEach((b) => {
@@ -3292,7 +3291,7 @@ function acumuladoDoCiclo(ciclo, limiteDias) {
     const i = difDias(ciclo.inicio, b.dia);
     if (i >= 0) porIndice[i] = (porIndice[i] || 0) + b.minutos;
   });
-  const fimRef = ciclo.encerradoEm || ciclo.fimPrevisto;
+  const fimRef = ciclo.encerradoEm || ciclo.fimPrevisto || chaveDia(new Date());
   const totalDias = Math.max(1, difDias(ciclo.inicio, fimRef) + 1);
   const n = limiteDias || totalDias;
   const saida = [];
@@ -3632,7 +3631,7 @@ function concluirTempo() {
     T.blocosNaSerie = (T.blocosNaSerie || 0) + 1;
 
     tocarGol();
-    const msg = falar("concluir", { min: humanoMin(minutos), assunto: assunto });
+    const msg = cicloDeFerias(cicloAtivo()) ? "Bloco concluído. Um tempo para você — agora, uma pausa no seu ritmo." : falar("concluir", { min: humanoMin(minutos), assunto: assunto });
     notificar("Vidori — bloco concluído", msg);
     depoisDeRegistrar();
     // a pausa é definida ANTES de ser anunciada: o modal só lê o que já está
@@ -3862,8 +3861,18 @@ function renderCabecalho() {
     : falar("aindaNao");
 
   const c = cicloAtivo();
+  const ferias = cicloDeFerias(c);
+  document.body.classList.toggle('em-ferias',ferias);
+  $('#assunto').placeholder=ferias ? 'Ex.: leitura, curso ou projeto pessoal' : 'Ex.: Farmacologia — antibióticos';
+  if (ferias) {
+    $('#saudacao').textContent='Um tempo para você, Eduardo.';
+    $('#subtexto').textContent=min ? humanoMin(min)+' hoje, no seu ritmo.' : 'Aprender, criar ou descansar. Sem pressa.';
+  }
   const chip = $("#chipCiclo");
-  if (c) {
+  if (ferias) {
+    chip.className='chip-ciclo ferias';
+    chip.innerHTML='<span class="ponto"></span>Férias · '+escapar(c.nome)+' · No seu ritmo';
+  } else if (c) {
     const dia = difDias(c.inicio, chaveDia(new Date())) + 1;
     const total = difDias(c.inicio, c.fimPrevisto) + 1;
     const faltam = difDias(chaveDia(new Date()), c.inicio);
@@ -3886,6 +3895,7 @@ function renderHoje() {
   $("#hojeMin").textContent = humanoMin(min);
   $("#hojeBlocos").textContent = meus.length;
   $("#hojeSeq").textContent = sequenciaAtual();
+  $("#hojeSeq").parentElement.hidden = cicloDeFerias(cicloAtivo());
 
   const alvo = $("#listaHoje");
   if (!meus.length) {
@@ -3925,18 +3935,26 @@ function renderSemana() {
 function renderCicloAtual() {
   const alvo = $("#cicloAtualBox");
   const c = cicloAtivo();
+  alvo.classList.toggle('ciclo-ferias-atual',cicloDeFerias(c));
   if (!c) {
-    alvo.innerHTML = '<p class="vazio">Nenhum ciclo aberto. Cadastra o ciclo da faculdade em ' +
-                     '<b>Ciclo &amp; Ajustes</b> pra campanha começar a contar.</p>';
+    alvo.innerHTML = '<p class="vazio">Abra um ciclo de estudos ou de férias em <b>Ciclo &amp; Ajustes</b>.</p>';
     return;
   }
   const hoje = chaveDia(new Date());
   const dia   = Math.max(1, difDias(c.inicio, hoje) + 1);
-  const total = Math.max(1, difDias(c.inicio, c.fimPrevisto) + 1);
+  const total = cicloDeFerias(c) ? 1 : Math.max(1, difDias(c.inicio, c.fimPrevisto) + 1);
   const meus  = blocos.filter((b) => b.cicloId === c.id);
   const min   = meus.reduce((s, b) => s + b.minutos, 0);
   const dias  = new Set(meus.map((b) => b.dia)).size;
 
+  if (cicloDeFerias(c)) {
+    alvo.innerHTML='<span class="ferias-etiqueta">Ciclo de férias</span><h3>'+escapar(c.nome)+'</h3>'+
+      '<p class="ferias-ritmo">No seu ritmo.</p><p class="subtexto">Desde '+formatarDataLonga(c.inicio)+'. Encerre quando quiser.</p>'+
+      '<div class="numeros"><div class="numero destaque"><div class="valor">'+humanoMin(min)+'</div><div class="rotulo">Tempo para você</div></div>'+
+      '<div class="numero"><div class="valor">'+meus.length+'</div><div class="rotulo">Blocos registrados</div></div></div>'+
+      '<p class="ferias-leve">Leitura, cursos e projetos também têm seu espaço. Descansar faz parte.</p>';
+    return;
+  }
   // fase da campanha: começo = fase de grupos, reta final = decisão
   const comecou = difDias(hoje, c.inicio) <= 0;
   const prog = dia / total;
@@ -3962,6 +3980,7 @@ function renderCicloAtual() {
 
 /** Frase "Nh à frente/atrás do ciclo anterior nesta altura". */
 function textoComparativo(c) {
+  if (cicloDeFerias(c)) return "";
   const ant = cicloAnteriorDe(c);
   if (!ant) return "Primeiro ciclo da estante — sem comparação ainda. Fé, soberano.";
   const dia = Math.max(1, difDias(c.inicio, chaveDia(new Date())) + 1);
@@ -4060,13 +4079,17 @@ function renderRecordes() {
 function renderComparativo() {
   const alvo = $("#comparativoBox");
   const c = cicloAtivo();
+  if (cicloDeFerias(c)) {
+    alvo.innerHTML='<div class="ferias-pausa"><span class="ferias-etiqueta">Ciclo de férias</span><h3>Cada momento tem seu valor.</h3><p>Seu tempo fica registrado, sem comparação com os ciclos de provas. Aproveite no seu ritmo.</p></div>';
+    return;
+  }
   if (!c) {
     alvo.innerHTML = '<p class="vazio">Abre um ciclo pra comparar campanhas.</p>';
     return;
   }
   const ant = cicloAnteriorDe(c);
   const dia = Math.max(1, difDias(c.inicio, chaveDia(new Date())) + 1);
-  const total = Math.max(1, difDias(c.inicio, c.fimPrevisto) + 1);
+  const total = cicloDeFerias(c) ? 1 : Math.max(1, difDias(c.inicio, c.fimPrevisto) + 1);
 
   alvo.innerHTML =
     '<p class="comparativo-texto"><b>Dia ' + dia + " de " + total + "</b> — " +
@@ -4148,7 +4171,8 @@ function desenharComparativo(c, ant, totalDias, diaAtual) {
 
 function renderEstante() {
   renderMuseuEstante();
-  const lista = ciclosEncerrados();
+  const lista = ciclosEncerrados(true);
+  const academicos = ciclosEncerrados();
   const alvo = $("#prateleira");
 
   if (!lista.length) {
@@ -4158,10 +4182,11 @@ function renderEstante() {
     return;
   }
 
-  alvo.innerHTML = lista.map((c, i) => {
+  alvo.innerHTML = lista.map((c) => {
     const g = c.congelado || { minutos: 0, diasAtivos: 0, maiorSequencia: 0, blocos: 0 };
+    if (cicloDeFerias(c)) return '<article class="trofeu ferias-arquivo" data-ferias-arquivo="'+escapar(c.id)+'"><span class="selo">Férias · No seu ritmo</span><div class="trofeu-topo"><h3>'+escapar(c.nome)+'</h3><div class="trofeu-periodo">'+formatarDataLonga(c.inicio)+' → '+formatarDataLonga(c.encerradoEm)+'</div></div><div class="trofeu-nums"><div><div class="v">'+humanoMin(g.minutos)+'</div><div class="r">Tempo para você</div></div><div><div class="v">'+(g.blocos||0)+'</div><div class="r">Blocos registrados</div></div></div><p class="ferias-arquivo-nota">Um registro das suas férias, guardado com carinho.</p></article>';
     return '<article class="trofeu">' +
-      '<span class="selo">Tutoria · ' + (lista.length - i) + "</span>" +
+      '<span class="selo">Tutoria · ' + (academicos.length - academicos.findIndex(a=>a.id===c.id)) + "</span>" +
       '<div class="trofeu-topo">' +
         "<h3>" + escapar(c.nome) + "</h3>" +
         '<div class="trofeu-periodo">' + formatarDataLonga(c.inicio) + " → " + formatarDataLonga(c.encerradoEm) + "</div>" +
@@ -4191,7 +4216,7 @@ function renderHistorico() {
       '<span class="hora">' + formatarDataCurta(b.dia) + " " + formatarHora(b.fim) + "</span>" +
       '<span class="assunto editavel" data-id="' + b.id + '" tabindex="0" role="button" ' +
         'title="Clique para corrigir o assunto">' + escapar(b.assunto) + "</span>" +
-      '<span class="ciclo-nome">' + (c ? escapar(c.nome) : "sem ciclo") + "</span>" +
+      '<span class="ciclo-nome'+(cicloDeFerias(c)?' ferias-historico':'')+'">' + (c ? (cicloDeFerias(c)?'Férias · ':'')+escapar(c.nome) : "sem ciclo") + "</span>" +
       '<span class="min">' + b.minutos + " min</span>" +
       '<button class="apagar" data-id="' + b.id + '" title="Apagar este registro" aria-label="Apagar">&times;</button>' +
     "</div>";
@@ -4208,23 +4233,33 @@ function renderAssuntos() {
     : "";
 }
 
+function tipoCicloDoFormulario() {
+  return document.querySelector('input[name="tipoCiclo"]:checked')?.value === 'ferias' ? 'ferias' : 'estudo';
+}
+function atualizarTipoCicloFormulario() {
+  const atual=cicloAtivo(),ferias=atual ? cicloDeFerias(atual) : tipoCicloDoFormulario()==='ferias';
+  $('#formCicloBox').classList.toggle('form-ferias',ferias);
+  $('#tituloFormCiclo').textContent=atual ? (ferias ? 'Férias em andamento' : 'Ciclo em andamento') : 'Abrir um ciclo';
+  $('#campoCicloFim').hidden=ferias; $('#cicloFim').disabled=ferias;
+  $('#cicloNome').placeholder=ferias ? 'Ex.: Minhas férias — leituras e projetos' : 'Ex.: Ciclo 4 — Cardio e Respiratório';
+  $('#ajudaTipoCiclo').textContent=(atual ? 'Para escolher outro tipo, encerre o ciclo atual. ' : '')+(ferias ? 'Sem prazo, sem comparação com provas. Moedas e dinheiro continuam no mesmo ritmo: 1 moeda a cada 5 min e R$ 1 a cada 45 s, com os bônus habituais.' : 'Defina o período das provas e acompanhe sua campanha.');
+  $('#btnSalvarCiclo').textContent=atual ? (ferias ? 'Atualizar férias' : 'Atualizar ciclo') : (ferias ? 'Abrir ciclo de férias' : 'Abrir ciclo');
+  $('#btnEncerrarCiclo').textContent=ferias ? 'Encerrar férias' : 'Levantar a taça';
+  $('#dicaEncerrarCiclo').textContent=ferias ? 'Ao encerrar, as férias ficam no histórico com seu tempo registrado, sem contar como ciclo acadêmico ou gerar troféus.' : 'Encerrar congela as estatísticas e manda o ciclo para a Estante. A faculdade não volta atrás — o app também não.';
+}
 function renderFormCiclo() {
-  const c = cicloAtivo();
+  const c=cicloAtivo();
+  document.querySelectorAll('input[name="tipoCiclo"]').forEach(input=>{
+    input.disabled=!!c;
+    if (c) input.checked=input.value===(cicloDeFerias(c)?'ferias':'estudo');
+  });
   if (c) {
-    $("#cicloNome").value = c.nome;
-    $("#cicloInicio").value = c.inicio;
-    $("#cicloFim").value = c.fimPrevisto;
-    $("#btnSalvarCiclo").textContent = "Atualizar ciclo";
-    $("#btnEncerrarCiclo").disabled = false;
-  } else {
-    if (!$("#cicloInicio").value) {
-      const hoje = new Date();
-      $("#cicloInicio").value = chaveDia(hoje);
-      $("#cicloFim").value = chaveDia(somaDias(hoje, 35));   // ~1 mês e 5 dias
-    }
-    $("#btnSalvarCiclo").textContent = "Abrir ciclo";
-    $("#btnEncerrarCiclo").disabled = true;
+    $('#cicloNome').value=c.nome; $('#cicloInicio').value=c.inicio; $('#cicloFim').value=c.fimPrevisto||'';
+  } else if (!$('#cicloInicio').value) {
+    const hoje=new Date(); $('#cicloInicio').value=chaveDia(hoje); $('#cicloFim').value=chaveDia(somaDias(hoje,35));
   }
+  $('#btnEncerrarCiclo').disabled=!c;
+  atualizarTipoCicloFormulario();
 }
 
 function renderAjustes() {
@@ -4274,7 +4309,7 @@ function abrirModalFim(frase, minutos, assunto) {
   $("#resumoFim").innerHTML =
     '<div><div class="v">' + Math.round(minutos) + '</div><div class="r">min no bloco</div></div>' +
     '<div><div class="v">' + humanoMin(hojeMin) + '</div><div class="r">hoje</div></div>' +
-    '<div><div class="v">' + sequenciaAtual() + '</div><div class="r">dias seguidos</div></div>';
+    (cicloDeFerias(cicloAtivo()) ? '' : '<div><div class="v">' + sequenciaAtual() + '</div><div class="r">dias seguidos</div></div>');
 
   // lê a pausa que já foi definida, em vez de recalcular: chamar
   // entrarEmPausa() de novo daqui zerava a série duas vezes e a pausa longa
@@ -8080,6 +8115,12 @@ $("#btnPrincipal").addEventListener("click", () => (T.rodando ? pausarTimer() : 
 $("#btnZerar").addEventListener("click", zerarTimer);
 $("#btnPular").addEventListener("click", pularBloco);
 
+document.querySelectorAll('input[name="tipoCiclo"]').forEach(input=>input.addEventListener('change',()=>{
+  if(cicloAtivo())return;
+  if(tipoCicloDoFormulario()==='ferias'&&!$('#cicloNome').value.trim())$('#cicloNome').value='Minhas férias';
+  else if(tipoCicloDoFormulario()==='estudo'&&$('#cicloNome').value==='Minhas férias')$('#cicloNome').value='';
+  atualizarTipoCicloFormulario();
+}));
 $("#btnSalvarCiclo").addEventListener("click", salvarCicloDoFormulario);
 $("#btnEncerrarCiclo").addEventListener("click", encerrarCiclo);
 
@@ -8228,7 +8269,7 @@ window.addEventListener("appinstalled", () => {
    18. INÍCIO
    -------------------------------------------------------------------------- */
 function mensagemDeRetomada() {
-  if (!blocos.length) return;
+  if (!blocos.length || cicloDeFerias(cicloAtivo())) return;
   const ultimo = blocos.reduce((a, b) => (a.dia > b.dia ? a : b));
   const dias = difDias(ultimo.dia, chaveDia(new Date()));
   if (dias >= 3) {

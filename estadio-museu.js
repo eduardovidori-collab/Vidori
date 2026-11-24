@@ -64,19 +64,19 @@ function ceuSvgEstadio(x,y,w,h){return desenharCeuAmbiente(x,y,w,h,'morumbi-ceu'
 /** Registra as Clínicas nos dois ciclos existentes, uma única vez por perfil. */
 function prepararTrofeusSecundariosMuseu(){
   if(Object.hasOwn(config,'trofeusSecundariosMuseu'))return true;
-  const fontes=ciclos.filter(c=>c&&typeof c.id==='string').slice().sort((a,b)=>String(b.inicio).localeCompare(String(a.inicio))).slice(0,2);
+  const fontes=ciclos.filter(c=>c&&!cicloDeFerias(c)&&typeof c.id==='string').slice().sort((a,b)=>String(b.inicio).localeCompare(String(a.inicio))).slice(0,2);
   const registro={versao:1,conquistas:fontes.map(c=>({id:'clinicas',nome:'Clínicas',cicloId:c.id}))};
   const proximo={...config,trofeusSecundariosMuseu:registro};
   if(!Armazem.gravar(CHAVES.config,proximo))return false;
   config=proximo;return true;
 }
 function trofeusSecundariosDoCiclo(c){
-  if(!c)return [];
+  if(!c||cicloDeFerias(c))return [];
   const fontes=config.trofeusSecundariosMuseu?.conquistas;
   return Array.isArray(fontes)&&fontes.some(t=>t&&t.id==='clinicas'&&t.cicloId===c.id)?[{id:'clinicas',nome:'Clínicas'}]:[];
 }
 function ciclosDoMuseu(){
-  return ciclos.filter(c=>c&&(c.encerradoEm||trofeusSecundariosDoCiclo(c).length)).slice().sort((a,b)=>String(b.inicio).localeCompare(String(a.inicio)));
+  return ciclos.filter(c=>c&&!cicloDeFerias(c)&&(c.encerradoEm||trofeusSecundariosDoCiclo(c).length)).slice().sort((a,b)=>String(b.inicio).localeCompare(String(a.inicio)));
 }
 function resumoTitulosMuseu(){
   const principais=ciclosEncerrados().length,secundarios=ciclosDoMuseu().reduce((s,c)=>s+trofeusSecundariosDoCiclo(c).length,0);
@@ -184,7 +184,7 @@ function desenharSalaMuseu(prefix='sala',interativo=true,cicloExibido){
     <rect x="${bx+22}" y="108" width="${bw-44}" height="52" rx="2" fill="${C.escura}"/><path d="M${bx+25} 111H${bx+bw-25}M${bx+25} 157H${bx+bw-25}" stroke="${C.borda}" stroke-width=".8" opacity=".65"/>
     <text x="600" y="142" text-anchor="middle" font-family="Georgia,serif" font-size="${mobile?24:28}" letter-spacing="7" fill="${C.texto}">CONQUISTAS</text>`;
   (visiveis.length?visiveis:[null]).forEach((c,i)=>{
-    const x=bx+margem+i*(largura+espaco),cx=x+largura/2,clinicas=c&&trofeusSecundariosDoCiclo(c).length,numero=c?ciclos.slice().sort((a,b)=>String(a.inicio).localeCompare(String(b.inicio))).findIndex(t=>t.id===c.id)+1:1;
+    const x=bx+margem+i*(largura+espaco),cx=x+largura/2,clinicas=c&&trofeusSecundariosDoCiclo(c).length,numero=c?ciclos.filter(t=>!cicloDeFerias(t)).slice().sort((a,b)=>String(a.inicio).localeCompare(String(b.inicio))).findIndex(t=>t.id===c.id)+1:1;
     s+=`<g data-ciclo-armario="${c?escapar(c.id):'vazio'}"><rect x="${x}" y="176" width="${largura}" height="62" rx="2" fill="${C.escura}" stroke="${C.borda}" stroke-opacity=".4"/>
       <text x="${cx}" y="191" text-anchor="middle" font-size="${mobile?12:9}" letter-spacing="2.5" fill="${C.borda}">${c?'CICLO '+String(numero).padStart(2,'0'):'SUA PRIMEIRA CONQUISTA'}</text>`;
     linhasPlacaMuseu(c?c.nome:'Cada ciclo terá seu espaço.',mobile?37:32).forEach((l,j)=>{s+=`<text x="${cx}" y="${mobile?209+j*21:211+j*16}" text-anchor="middle" font-family="Georgia,serif" font-size="${mobile?20:15}" fill="${C.texto}">${escapar(l)}</text>`;});

@@ -1,0 +1,48 @@
+/* Férias: um registro tranquilo, separado das campanhas de provas. */
+.ciclo-tipos{border:0;padding:0;margin:0 0 12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:0}
+.ciclo-tipos legend{font-size:12px;font-weight:700;color:var(--fraco);padding:0 0 10px}
+.ciclo-tipo{display:flex;align-items:flex-start;gap:9px;padding:13px 11px;border:1.5px solid #e1e5e7;border-radius:12px;background:#fff;cursor:pointer;min-width:0}
+.ciclo-tipo input{margin:4px 0 0;flex-shrink:0;accent-color:#343a40}
+.ciclo-tipo b{font-size:13px;display:block}
+.ciclo-tipo small{display:block;font-size:11px;line-height:1.5;margin-top:3px;color:#616a66}
+.ciclo-tipo:has(input:checked){border-color:#444b52;background:#f5f6f7}
+.ciclo-tipo-ferias:has(input:checked){border-color:#397d62;background:#edf7ef;box-shadow:0 0 0 2px #397d620a}
+.ciclo-tipo-ferias input{accent-color:#397d62}
+.ciclo-tipo:has(input:focus-visible){outline:3px solid #7caf96;outline-offset:2px}
+.ciclo-tipo:has(input:disabled){cursor:default}
+.ciclo-tipo-ajuda{font-size:12px;margin-bottom:18px;line-height:1.6}
+#campoCicloFim[hidden]{display:none}
+.form-ferias{--vermelho:#367b5c;--vermelho-esc:#275b43}
+.form-ferias #ajudaTipoCiclo{padding:12px 14px;border-radius:10px;background:#f1f8f2;color:#385e49}
+.form-ferias .btn-principal{background:#367b5c;border-color:#367b5c}
+.form-ferias .btn-principal:hover{background:#275b43}
+.form-ferias input:focus{border-color:#367b5c;box-shadow:0 0 0 3px #367b5c22}
+.chip-ciclo.ferias{background:#edf7ef;color:#28563e;border:1px solid #c9dfce}
+.chip-ciclo.ferias .ponto{background:#478967}
+.ciclo-ferias-atual{padding:18px;border-radius:14px;border:1px solid #d7e8d8;background:linear-gradient(145deg,#f0f7ed,#fff 75%);color:#294e3d}
+.ferias-etiqueta{display:inline-block;font-size:10px;line-height:1.6;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:#3f7355;background:#e5f1e6;border:1px solid #cfe0cd;border-radius:30px;padding:4px 10px;margin-bottom:13px}
+.ciclo-ferias-atual h3{font:600 23px/1.25 Georgia,serif;margin-bottom:8px;overflow-wrap:anywhere}
+.ferias-ritmo{font-size:15px;color:#39704f;margin-bottom:5px}
+.ciclo-ferias-atual .numeros{margin:22px 0 17px;gap:20px}
+.ciclo-ferias-atual .numero.destaque .valor{color:#367b5c}
+.ferias-leve{padding-top:14px;border-top:1px solid #e0eadf;color:#5b7160;font-size:12px;line-height:1.7}
+.ferias-pausa{padding:22px;background:#f3f8ef;border:1px solid #dbe7d4;border-radius:14px;color:#355c45}
+.ferias-pausa h3{font:600 22px/1.3 Georgia,serif;margin-bottom:10px}
+.ferias-pausa p{font-size:13px;line-height:1.7;max-width:560px}
+.ferias-arquivo{background:linear-gradient(130deg,#f2f8ed,#fff);border-color:#c9dfca}
+.ferias-arquivo:before{background:linear-gradient(90deg,#376e52,#b6d2b7,#f4f8ec)}
+.ferias-arquivo .selo{background:#e7f2e4;color:#376647;border-color:#cadfc7}
+.ferias-arquivo .trofeu-nums div:first-child .v{color:#367b5c}
+.ferias-arquivo-nota{font-size:12px;color:#5c735f;padding:0 18px 18px}
+.item .ciclo-nome.ferias-historico{color:#367b5c}
+body.em-ferias{background:#f3f7f1}
+.em-ferias #painel-foco{--vermelho:#367b5c;--vermelho-esc:#275b43}
+.em-ferias #painel-foco .btn-principal{background:#367b5c;border-color:#367b5c}
+.em-ferias #painel-foco input:focus{box-shadow:0 0 0 3px #367b5c22}
+.em-ferias #painel-foco>.grade-foco>.coluna>.cartao>.faixas{background:linear-gradient(90deg,#367b5c 0 40%,#fff 40% 65%,#aecdad 65%)}
+.em-ferias #painel-foco .subtexto{color:#526958}
+.em-ferias #subtexto{color:#526958}
+.em-ferias #painel-foco .numero[hidden]{display:none}
+@media(max-width:430px){.ciclo-tipos{grid-template-columns:1fr}.ciclo-tipo{padding:12px}.ciclo-ferias-atual{padding:15px}.chip-ciclo.ferias{max-width:90vw}}
+#painel-ciclo .cartao:has(.form-ferias)>.faixas{background:linear-gradient(90deg,#367b5c 0 40%,#fff 40% 65%,#aecdad 65%)}
+.em-ferias #modalFim .btn-principal{background:#367b5c;border-color:#367b5c}
