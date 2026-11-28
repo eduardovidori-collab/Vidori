@@ -133,8 +133,18 @@ try:
    assert p.evaluate('cafeAudio.fontes.every(f=>f.loop)')
    assert p.evaluate('cafeAudio.fontes[0].buffer.duration')>90
    if ambiente in ['melodia','guitarra','guitarraVariada']:
-    duracao=150 if ambiente=='melodia' else 320/.95
+    duracao=150 if ambiente=='melodia' else 209*240/91.2 if ambiente=='guitarraVariada' else 320/.95
     assert abs(p.evaluate('cafeAudio.fontes[0].buffer.duration')-duracao)<.1
+   if ambiente=='guitarraVariada':
+    assert '9min10' in p.locator('#cafeTipoSom option:checked').inner_text()
+    assert p.evaluate("""()=>{
+     const b=cafeAudio.fontes[0].buffer,a=b.getChannelData(0);
+     if(a[0]!==0||a[a.length-1]!==0)return false;
+     return [60,180,300,480,540].every(t=>{
+      let e=0;const start=Math.round(t*b.sampleRate),n=4*b.sampleRate;
+      for(let i=start;i<start+n;i++)e+=a[i]*a[i];return Math.sqrt(e/n)>.005;
+     });
+    }""")
    assert p.evaluate('''async()=>{
     const a=cafeAudio,analyser=a.ctx.createAnalyser();a.master.connect(analyser);
     const data=new Float32Array(analyser.fftSize);let tocando=false;
