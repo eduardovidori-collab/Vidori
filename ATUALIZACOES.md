@@ -22,6 +22,14 @@ Atualização de 28 de novembro de 2026.
 
 As personalizações usam dinheiro do clube. Os três níveis da cafeteria continuam cuidando da estrutura. O caderno e o Pomodoro são os mesmos, inclusive durante a personalização. As peças e suas escolhas acompanham o backup e ficam disponíveis offline.
 
+## Guitarra com mais variedade
+
+- A opção **Guitarra · temas variados** passa de **5min37 para 9min10**.
+- São **21 execuções gravadas de guitarra**, com **13 gravações adicionais** em relação à versão anterior. Cada execução aparece uma vez no arranjo.
+- Novas melodias e harmonias ao longo da faixa, mantendo o andamento calmo e o estilo suave para estudar.
+- Agudos suavizados nas gravações novas e transições sobrepostas para evitar pausas entre as passagens.
+- Disponível no seletor de som da cafeteria como **Guitarra · temas variados · 9min10**, inclusive offline.
+
 ## Uma nova vista de dentro da torcida
 
 - Cenário maior, com controles abaixo da paisagem.
