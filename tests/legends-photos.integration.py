@@ -28,7 +28,7 @@ try:
   assert all(abs(a-b)<.000001 for a,b in zip(chances,[88,9,2.4,.5,.1]))
   legends=p.evaluate('JOGADORES_SPFC.filter(j=>raridadeDoJogador(j).id==="lenda").map(j=>j.id).sort()')
   assert len(legends)==5
-  assert p.evaluate("JOGADORES_SPFC.every(j=>FOTOS_JOGADORES[j.id])&&Object.keys(FOTOS_JOGADORES).length===86")
+  assert p.evaluate("JOGADORES_SPFC.every(j=>FOTOS_JOGADORES[j.id])&&Object.keys(FOTOS_JOGADORES).length===90")
   assert p.evaluate('distribuicaoDoPacote().filter(c=>["denilson-show","aloisio-chulapa","serginho-chulapa"].includes(c.jogador.id)).every(c=>c.chance>0)')
   p.evaluate('irParaPainel("time");selecionarVisaoDoTime("album")')
   assert p.locator('#timeAlbum [data-foto-jogador]').count()==0
@@ -90,20 +90,20 @@ try:
   }''')
   p.locator('#previaAtualizacao').screenshot(path=str(artifacts/'atualizacao-tres-cartas.png'))
   p.evaluate('document.querySelector("#previaAtualizacao").remove();irParaPainel("loja")')
-  assert p.locator('#catalogoPacote [data-foto-jogador]').count()==86
+  assert p.locator('#catalogoPacote [data-foto-jogador]').count()==90
   p.evaluate('async()=>await navigator.serviceWorker.ready');p.reload(wait_until='networkidle')
   # Reading a separate page online must not replace the cached app entry.
   credit_online=c.new_page();credit_online.goto(url+'imagens/jogadores/CREDITOS.html',wait_until='networkidle')
-  assert credit_online.locator('article').count()==86
+  assert credit_online.locator('article').count()==90
   credit_online.close()
   c.set_offline(True);p.reload(wait_until='domcontentloaded')
   p.evaluate('irParaPainel("time");selecionarVisaoDoTime("album")')
   p.locator('[data-album-raridade=lenda]').click()
   p.wait_for_function('document.querySelectorAll("#timeAlbum img").length===5&&Array.from(document.querySelectorAll("#timeAlbum img")).every(img=>img.complete&&img.naturalWidth>0)')
   credit=c.new_page();credit.goto(url+'imagens/jogadores/CREDITOS.html',wait_until='domcontentloaded')
-  assert credit.locator('article').count()==86
+  assert credit.locator('article').count()==90
   assert not errors,errors
-  print('PASS',url,'three new cards; unchanged rarity odds; 86 catalog portraits; five legend portraits; missing/owned states; roster/lineup/pack/catalog; responsive; fallback; offline photos and credits')
+  print('PASS',url,'three new cards; unchanged rarity odds; 90 catalog portraits; five legend portraits; missing/owned states; roster/lineup/pack/catalog; responsive; fallback; offline photos and credits')
   b.close()
 finally:
  if server:server.shutdown();server.server_close()

@@ -28,9 +28,11 @@ function renderAcessoCafe(){
   }
   if(sala){
     sala.dataset.nivel=String(n);
+    if(typeof renderObjetosCafe==='function')renderObjetosCafe();
     document.querySelector('#cafeNivel').textContent='Cafeteria · nível '+n;
   }
   if(!aberto){
+    if(document.querySelector('#personalizarCafe')?.open)document.querySelector('#personalizarCafe').close();
     pararSomCafe();
     if(document.querySelector('#painel-cafe.ativo'))irParaPainel('foco');
   }
@@ -80,6 +82,7 @@ function recarregarCafe() {
   document.querySelector("#cafeVolume").value = Math.round(cafeRascunho.volume * 100);
   document.querySelector("#cafeSalvo").textContent = "Caderno salvo neste navegador";
   renderTarefasCafe(); renderTimerCafe(); atualizarSomCafe();
+  if(typeof renderObjetosCafe==='function')renderObjetosCafe();
 }
 
 function ruaDoCafe() {

@@ -16,7 +16,7 @@ function fotoDoJogador(j,classe=''){
   const credito=j.nome+' · Foto: '+foto.autor+' · '+foto.licenca+(tratamento?' · recorte e remoção de fundo assistidos por IA':'');
   const estilo=foto.individual?'--foto-largura:100%;--foto-altura:100%;--foto-x:0%;--foto-y:0%':'--foto-x:'+(-foto.coluna*100)+'%;--foto-y:'+(-foto.linha*100)+'%';
   return '<span class="jogador-retrato '+classe+'" aria-hidden="true" title="'+escapar(credito)+'" style="'+estilo+'">'+
-    '<span class="jogador-foto-reserva">'+escapar(iniciais)+'</span><img src="./imagens/jogadores/'+arquivo+'?v='+(foto.arquivo?'142':'140')+'" data-foto-jogador="'+j.id+'" loading="lazy" decoding="async" alt=""></span>';
+    '<span class="jogador-foto-reserva">'+escapar(iniciais)+'</span><img src="./imagens/jogadores/'+arquivo+'?v='+(foto.versao||(foto.arquivo?'142':'140'))+'" data-foto-jogador="'+j.id+'" loading="lazy" decoding="async" alt=""></span>';
 }
 // Retratos individuais e atlas compartilham o mesmo enquadramento nas cartas.
 document.addEventListener('load',e=>{

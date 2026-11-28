@@ -7,7 +7,7 @@
    https://usuario.github.io/Vidori/ e em qualquer outra subpasta.
    ========================================================================== */
 
-const VERSAO = "vidori-v145";
+const VERSAO = "vidori-v146";
 
 /* Tudo que forma o app. Se algum arquivo mudar, é só subir o número da VERSAO. */
 const ARQUIVOS = [
@@ -18,13 +18,18 @@ const ARQUIVOS = [
   "./futebol.css",
   "./album-time.js?v=141",
   "./album-time.css?v=129",
-  "./atributos-jogadores.js?v=141",
-  "./cartas-time.js?v=142",
+  "./atributos-jogadores.js?v=146",
+  "./cartas-time.js?v=146",
   "./cartas-time.css?v=142",
-  "./fotos-elenco.js?v=142",
-  "./jogadores-fotos.js?v=142",
+  "./fotos-elenco.js?v=146",
+  "./jogadores-fotos.js?v=146",
   "./jogadores-fotos.css?v=142",
   "./imagens/jogadores/CREDITOS.html",
+  "./imagens/jogadores/elenco/patryck-lanza.png?v=146",
+  "./imagens/jogadores/elenco/juan.png?v=146",
+  "./imagens/jogadores/elenco/ferraresi.png?v=146",
+  "./imagens/jogadores/elenco/danielzinho.png?v=146",
+
   "./imagens/jogadores/elenco/alan-franco.png?v=142",
   "./imagens/jogadores/elenco/alexandre-pato.png?v=142",
   "./imagens/jogadores/elenco/alisson.png?v=142",
@@ -108,8 +113,12 @@ const ARQUIVOS = [
 
   "./camarotes.js?v=115",
   "./cidade.js?v=139",
-  "./cafe.js?v=139",
+  "./cafe.js?v=146",
   "./cafe.css?v=139",
+  "./cafe-personalizacao.js?v=146",
+  "./cafe-personalizacao.css?v=146",
+  "./torcida-vista.js?v=146",
+  "./torcida-vista.css?v=146",
   "./audio/cafe/cafeteria.mp3?v=119",
   "./audio/cafe/chuva.mp3?v=136",
   "./audio/cafe/natureza.mp3?v=123",

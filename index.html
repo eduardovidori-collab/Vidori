@@ -872,6 +872,8 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <link rel="stylesheet" href="./futebol.css">
 <link rel="stylesheet" href="./estadio-museu.css?v=135">
 <link rel="stylesheet" href="./cafe.css?v=139">
+<link rel="stylesheet" href="./cafe-personalizacao.css?v=146">
+<link rel="stylesheet" href="./torcida-vista.css?v=146">
 <link rel="stylesheet" href="./album-time.css?v=129">
 <link rel="stylesheet" href="./ciclo-ferias.css?v=143">
 <link rel="stylesheet" href="./jogadores-fotos.css?v=142">
@@ -1243,7 +1245,7 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
       <h2 class="carteira-cabecalho">Sua carteira</h2>
       <div class="carteiras">
         <div class="carteira" role="status" aria-live="polite"><svg class="carteira-icone carteira-icone-moeda" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="25" r="20" fill="#C49438"/><circle cx="24" cy="22" r="20" fill="#E4C064" stroke="#CDA548" stroke-width="1.5"/><circle cx="24" cy="22" r="15" fill="#F1D58A" stroke="#CFAB50"/><path d="m24 11 3.6 7.3 8 1.2-5.8 5.6 1.4 8-7.2-3.8-7.2 3.8 1.4-8-5.8-5.6 8-1.2Z" fill="#B9892D"/></svg><div><div class="carteira-rotulo">Moedas</div><div class="carteira-valor" id="saldoMoedas">0</div><small>Para seus pacotes de jogadores</small></div></div>
-        <div class="carteira carteira-dinheiro" role="status" aria-live="polite"><svg class="carteira-icone" viewBox="0 0 72 46" aria-hidden="true"><rect x="4" y="7" width="66" height="37" rx="5" fill="#619458" opacity=".3"/><rect x="1" y="2" width="66" height="37" rx="5" fill="#5A8C54" stroke="#47743D"/><path d="M12 6h44a8 8 0 0 0 7 7v15a8 8 0 0 0-7 7H12a8 8 0 0 0-7-7V13a8 8 0 0 0 7-7Z" fill="none" stroke="#BAD4A0"/><ellipse cx="34" cy="20.5" rx="12" ry="13" fill="#A7C58D"/><text x="34" y="25" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="800" fill="#3B6B35">R$</text><path d="M12 17h7m-7 5h7m30-5h7m-7 5h7" stroke="#C0D8AB" stroke-width="1.5"/></svg><div><div class="carteira-rotulo">Dinheiro do clube</div><div class="carteira-valor" id="saldoDinheiro">R$ 0</div><small>Para o estádio e os sons</small></div></div>
+        <div class="carteira carteira-dinheiro" role="status" aria-live="polite"><svg class="carteira-icone" viewBox="0 0 72 46" aria-hidden="true"><rect x="4" y="7" width="66" height="37" rx="5" fill="#619458" opacity=".3"/><rect x="1" y="2" width="66" height="37" rx="5" fill="#5A8C54" stroke="#47743D"/><path d="M12 6h44a8 8 0 0 0 7 7v15a8 8 0 0 0-7 7H12a8 8 0 0 0-7-7V13a8 8 0 0 0 7-7Z" fill="none" stroke="#BAD4A0"/><ellipse cx="34" cy="20.5" rx="12" ry="13" fill="#A7C58D"/><text x="34" y="25" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="800" fill="#3B6B35">R$</text><path d="M12 17h7m-7 5h7m30-5h7m-7 5h7" stroke="#C0D8AB" stroke-width="1.5"/></svg><div><div class="carteira-rotulo">Dinheiro do clube</div><div class="carteira-valor" id="saldoDinheiro">R$ 0</div><small>Para o estádio, o café e os sons</small></div></div>
       </div>
       <div class="carteira-detalhes"><p id="explicaMoeda"></p><p id="explicaDinheiro"></p></div>
       <div class="bonus-dinheiro" id="bonusDiarioDinheiro">
@@ -1616,11 +1618,13 @@ input[type=checkbox]{accent-color:var(--vermelho); width:17px; height:17px}
 <script src="./estadio-museu.js?v=143"></script>
 <script src="./camarotes.js?v=115"></script>
 <script src="./cidade.js?v=139"></script>
-<script src="./cafe.js?v=139"></script>
-<script src="./fotos-elenco.js?v=142"></script>
-<script src="./jogadores-fotos.js?v=142"></script>
-<script src="./atributos-jogadores.js?v=141"></script>
-<script src="./cartas-time.js?v=142"></script>
+<script src="./cafe.js?v=146"></script>
+<script src="./cafe-personalizacao.js?v=146"></script>
+<script src="./torcida-vista.js?v=146"></script>
+<script src="./fotos-elenco.js?v=146"></script>
+<script src="./jogadores-fotos.js?v=146"></script>
+<script src="./atributos-jogadores.js?v=146"></script>
+<script src="./cartas-time.js?v=146"></script>
 <script src="./album-time.js?v=141"></script>
 <script>
 "use strict";
@@ -1860,6 +1864,7 @@ function normalizarLoja(dados){
     inicioBonusReforcado:iniciado&&Number.isSafeInteger(d.inicioBonusReforcado)&&d.inicioBonusReforcado>0?d.inicioBonusReforcado:Date.now(),
     moedasAnteriores:v2?inteiro(d.moedasAnteriores):inteiro(d.gastas),
     moedasZeradas:v2?inteiro(d.moedasZeradas):0,reaisZerados:iniciado?inteiro(d.reaisZerados):0,
+    decoracaoCafe:normalizarDecoracaoCafe(d.decoracaoCafe),
     comprados,niveis,golAtivo:d.golAtivo==='fogos'?'virada':typeof d.golAtivo==='string'?d.golAtivo:'padrao',
     apitoAtivo:typeof d.apitoAtivo==='string'?d.apitoAtivo:'padrao'};
 }
@@ -1977,7 +1982,11 @@ const JOGADORES_SPFC = [
   {id:"muller",nome:"Müller",posicao:"PD",ovr:92},
   {id:"denilson-show",nome:"Denílson",posicao:"PE",ovr:91},
   {id:"aloisio-chulapa",nome:"Aloísio Chulapa",posicao:"ATA",ovr:83},
-  {id:"serginho-chulapa",nome:"Serginho Chulapa",posicao:"ATA",ovr:95}
+  {id:"serginho-chulapa",nome:"Serginho Chulapa",posicao:"ATA",ovr:95},
+  {id:"patryck-lanza",nome:"Patryck Lanza",posicao:"LE",ovr:58},
+  {id:"juan",nome:"Juan",posicao:"ATA",ovr:60},
+  {id:"ferraresi",nome:"Ferraresi",posicao:"ZAG",ovr:70},
+  {id:"danielzinho",nome:"Danielzinho",posicao:"MC",posicoes:["MC","VOL"],ovr:71}
 ];
 
 // A posição principal mantém a compatibilidade com os elencos já salvos.
@@ -2183,7 +2192,8 @@ function bonusDiarioMoedas() {
     diasComBonusDinheiro(meta.minutos,inicioDaMetaBonusDinheiro(meta)).reduce((soma,dia)=>soma+recompensaDaMeta(meta,dia).moedas,0),0);
 }
 function dinheiroGanho() { return dinheiroBaseGanho()+bonusDiarioDinheiro(); }
-function saldoDinheiro() { return Math.max(0,dinheiroGanho()-loja.gastas-loja.reaisZerados); }
+function totalReaisGastos() { return loja.gastas+loja.decoracaoCafe.gastas; }
+function saldoDinheiro() { return Math.max(0,dinheiroGanho()-totalReaisGastos()-loja.reaisZerados); }
 const formatoReais=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:0,maximumFractionDigits:0});
 function formatarDinheiro(valor) { return formatoReais.format(valor); }
 function saldoMoedas()  { return Math.max(0, moedasGanhas() + bonusDiarioMoedas() + bonusDeMoedas() + meuTime.moedasVendas - totalMoedasGastas()); }
@@ -3628,6 +3638,7 @@ function tique() {
 /** Chamado quando o tempo chega a zero (em foco ou em pausa). */
 function concluirTempo() {
   pararSomCafe();
+  if($("#personalizarCafe")?.open)$("#personalizarCafe").close();
   if($("#museuTutorias").open)$("#museuTutorias").close();
   if($("#vestiarioEstadio").open) $("#vestiarioEstadio").close();
   // O fim do foco ou da pausa deve continuar visível durante as atividades do estádio.
@@ -5409,28 +5420,6 @@ function golDaCena(x,y,w,h, prefix) {
   for(let i=1;i<8;i++)rede+=`<path d="M${x} ${y+i*h/8}h${w}"/>`;
   return `<g id="${prefix}-rede"><path d="M${x} ${y+h}V${y}h${w}v${h}" fill="#D4E4DB20" stroke="#F8FAEE" stroke-width="7" stroke-linejoin="round"/><g fill="none" stroke="#E9F1E7" opacity=".45" stroke-width="1">${rede}</g></g>`;
 }
-function desenharVistaDaTorcida() {
-  const setor=estadoArquibancada.setor,modelo=estadoArquibancada.bandeiroes[setor];
-  const oposto={norte:'SUL',sul:'NORTE',leste:'OESTE',oeste:'LESTE'}[setor];
-  let partes=[`<svg viewBox="0 0 900 540" role="img" aria-label="Vista do campo a partir da arquibancada ${SETORES_ARQUIBANCADA[setor].nome}, com torcedores à sua frente">${desenharFundoDeJogo('torcida')}<text x="450" y="132" text-anchor="middle" fill="#5B7466" font-size="11" letter-spacing="3">SETOR ${oposto}</text>`];
-  if(setor==='leste'||setor==='oeste') partes.push(golDaCena(371,294,158,54,'visita-gol'));
-  else {
-    const golLateral='<path d="M93 356 64 401 41 395 71 350Z" fill="#F4F7E530"/><path d="M93 356V309L64 354v47M93 309l-22-6-30 45v47M41 348l23 6m7-51v47m-22-14 22 6m-28 5 23 7m7-26v49m-10-34v49" fill="none" stroke="#EDF2DE" stroke-width="2"/>';
-    partes.push(golLateral,'<g transform="translate(900 0) scale(-1 1)">'+golLateral+'</g>');
-  }
-  if(temPlacar())partes.push(`<rect x="682" y="178" width="112" height="56" rx="4" fill="#22382F"/><text x="738" y="196" text-anchor="middle" fill="#AFC2A4" font-size="9">GOLS DO CICLO</text><text x="738" y="221" text-anchor="middle" fill="#F8F3CF" font-size="23" font-weight="700">${golsDoPlacar()}</text>`);
-  if(modelo!=='nenhum') {
-    const nome=modelo==='meu-time'?meuTime.nome:modelo==='soberano'?'SOBERANO':'TRICOLOR';
-    partes.push(`<path d="M125 213Q275 192 425 210L414 262Q265 249 134 267Z" fill="#EFEFE5" stroke="#B53C48" stroke-width="3"/><path d="M134 248 416 242" stroke="#B83C48" stroke-width="9"/><path d="M134 259 416 253" stroke="#2B3C33" stroke-width="7"/><text x="276" y="234" text-anchor="middle" font-size="${nome.length>20?11:16}" font-weight="800" fill="#A93340">${escapar(nome.toUpperCase())}</text>`);
-  }
-  partes.push('<path d="M0 499Q450 460 900 499" fill="none" stroke="#7B8B7F" stroke-width="7"/><path d="M30 540V497m170 43v-53m250 53v-63m250 63v-53m170 53v-43" stroke="#8B9C8D" stroke-width="5"/>');
-  const pessoas=temPublico()?22:12;
-  for(let i=0;i<pessoas;i++) {
-    const x=12+i*875/(pessoas-1),y=480+(i%3)*9,cor=['#ECEEE6','#B53543','#2E4036'][Math.floor(i/4)%3];
-    partes.push(`<g transform="translate(${x} ${y})" style="--atraso:${i*.055}s"><g class="torcedor-visita"><path d="M-12 0-25 23l5 8 13-16v44h26V15l13 16 5-8L13 0Z" fill="${cor}" stroke="#263F3220"/><path d="M-9 15H9v5H-9Z" fill="#B63643"/><path d="M-9 24H9v4H-9Z" fill="#263C33"/><rect x="-5" y="-9" width="10" height="14" rx="3" fill="#B58D6F"/><ellipse cx="0" cy="-17" rx="11" ry="13" fill="${['#C9A17E','#946B50','#DDB793'][i%3]}"/><path d="M-11-19q0-16 13-12 10 3 9 16l-5-8-15 2Z" fill="#354138"/><rect class="cartolina-visita" x="-21" y="-51" width="42" height="29" rx="2" fill="${cor}" stroke="#24382E30"/></g></g>`);
-  }
-  partes.push('</svg>');return partes.join('');
-}
 function atualizarClimaVisita() {
   const rotulo=energiaVisita>=80?'Arquibancada em festa':energiaVisita>=40?'Setor no ritmo':'Vamos animar o setor';
   $('#climaSetorVisita').textContent=rotulo;
@@ -5465,8 +5454,8 @@ function renderVisitaArquibancada() {
   $("#setoresVisitaArquibancada").innerHTML=Object.entries(SETORES_ARQUIBANCADA).map(([id,s])=>
     '<button class="btn btn-pequeno" type="button" data-visita-setor="'+id+'" aria-pressed="'+(id===estadoArquibancada.setor)+'">'+s.nome+'</button>').join("");
   $("#cenaVisitaArquibancada").innerHTML=desenharVistaDaTorcida();
-  const svg=$("#cenaVisitaArquibancada svg"),largura=900/zoomArquibancada,altura=540/zoomArquibancada;
-  svg.setAttribute("viewBox",[(900-largura)/2,(540-altura)/2,largura,altura].join(" "));
+  const svg=$("#cenaVisitaArquibancada svg"),largura=1200/zoomArquibancada,altura=720/zoomArquibancada;
+  svg.setAttribute("viewBox",[(1200-largura)/2,(720-altura)/2,largura,altura].join(" "));
   atualizarClimaVisita();
   $("#nomeSetorVisita").textContent="Setor "+setor.nome;
   $("#detalheSetorVisita").textContent=setor.descricao+" "+(temTerceiroAnel()?"Três anéis conectados.":temAnel()?"Dois anéis conectados.":"Primeiro anel.")+" "+
@@ -6184,7 +6173,7 @@ function renderLoja() {
     (bonusDiarioMoedas()?' Seus bônus diários renderam <b>'+bonusDiarioMoedas()+' moedas</b>.':'')+
     (meuTime.moedasVendas?' Suas vendas de repetidos renderam <b>'+meuTime.moedasVendas+' moedas</b>.':'')+
     (bonusDeMoedas()?' Você também recebeu <b>5 moedas de presente</b>.':'');
-  $('#explicaDinheiro').innerHTML='Ganhe <b>R$ 1 a cada 45 segundos</b> de estudo para o estádio, o museu e os sons. Seus novos estudos renderam <b>'+formatarDinheiro(dinheiroBaseGanho())+'</b>, mais <b>'+formatarDinheiro(bonusDiarioDinheiro())+'</b> em bônus diários. Estudos anteriores à ativação não geram reais.';
+  $('#explicaDinheiro').innerHTML='Ganhe <b>R$ 1 a cada 45 segundos</b> de estudo para o estádio, o museu, a decoração do café e os sons. Seus novos estudos renderam <b>'+formatarDinheiro(dinheiroBaseGanho())+'</b>, mais <b>'+formatarDinheiro(bonusDiarioDinheiro())+'</b> em bônus diários. Estudos anteriores à ativação não geram reais.';
   renderBonusDinheiro();
   $('#itensGol').innerHTML=Object.keys(SONS.gol).map(id=>cartaoDeItem('gol',id)).join('');
   $('#itensApito').innerHTML=Object.keys(SONS.apito).map(id=>cartaoDeItem('apito',id)).join('');
@@ -6201,7 +6190,7 @@ function zerarSaldo(){
 function zerarDinheiro(){
   if(saldoDinheiro()===0){mostrarAviso('O saldo em reais já está em zero.');return;}
   if(!confirm('Zerar seu dinheiro?\n\nVocê fica com R$ 0 e mantém as moedas, o estádio, o museu e os sons comprados. Seu histórico de estudo não muda.\n\nNão tem volta.'))return;
-  const proximo={...loja,reaisZerados:Math.max(0,dinheiroGanho()-loja.gastas)};
+  const proximo={...loja,reaisZerados:Math.max(0,dinheiroGanho()-totalReaisGastos())};
   if(!Armazem.gravar(CHAVES.loja,proximo))return;loja=proximo;renderEstadio();renderLoja();mostrarAviso('Saldo em reais zerado.');
 }
 function resetarLoja(){
@@ -8203,7 +8192,7 @@ $("#notifFechar").addEventListener("click", fecharModalNotif);
 document.addEventListener("keydown", (e) => {
   const alvo = e.target;
   const digitando = alvo && (alvo.tagName === "INPUT" || alvo.tagName === "TEXTAREA" || alvo.isContentEditable);
-  if($("#modalObraEstadio").open||$("#visitaArquibancada").open||$("#desafioPenaltis").open||$("#vestiarioEstadio").open||$("#partidaAmistosa").open||$("#museuTutorias").open) return;
+  if($("#personalizarCafe")?.open||$("#modalObraEstadio").open||$("#visitaArquibancada").open||$("#desafioPenaltis").open||$("#vestiarioEstadio").open||$("#partidaAmistosa").open||$("#museuTutorias").open) return;
 
   if (e.key === "Escape") {
     fecharModalFim(); fecharModalNotif(); fecharModalOrfaos();
@@ -8299,6 +8288,7 @@ function mensagemDeRetomada() {
 function iniciarApp() {
   iniciarExperiencias();
   iniciarCafe();
+  iniciarPersonalizacaoCafe();
   iniciarAlbumDoTime();
   // sincroniza recordes e marcos sem comemorar histórico antigo
   conferirRecordes(true);

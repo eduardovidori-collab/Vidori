@@ -32,6 +32,7 @@ function bandeiraDaCarta(j){
     s='<path fill="#E8C650" d="M0 0h32v22H0z"/><path fill="#244C93" d="M0 11h32v5.5H0z"/><path fill="#B8323B" d="M0 16.5h32V22H0z"/>';
     if(n.codigo==='EC')s+='<path d="M11 7q5-4 10 0l-5 2Z" fill="#5C4936"/><ellipse cx="16" cy="11.2" rx="2.8" ry="4" fill="#D3AE4C"/><ellipse cx="16" cy="11" rx="1.8" ry="2.6" fill="#7FABB8"/>';
   }else if(n.codigo==='PE')s='<path fill="#B92F40" d="M0 0h32v22H0z"/><path fill="#FFFBEF" d="M10.7 0h10.6v22H10.7z"/>';
+  else if(n.codigo==='VE')s='<path fill="#E8C650" d="M0 0h32v22H0z"/><path fill="#244C93" d="M0 7.3h32v7.4H0z"/><path fill="#B8323B" d="M0 14.7h32V22H0z"/><path d="M10 12l1-1m2-1 1-.4m2-.1 1 .1m2 .4 1 .6m1 1 1 1" stroke="#FFFBEF" stroke-width="1"/>';
   else if(n.codigo==='PY')s='<path fill="#B63443" d="M0 0h32v22H0z"/><path fill="#FFFBEF" d="M0 7.3h32v7.4H0z"/><path fill="#294D92" d="M0 14.7h32V22H0z"/><circle cx="16" cy="11" r="2.6" fill="none" stroke="#4E7954" stroke-width=".7"/><circle cx="16" cy="11" r="1" fill="#D4AD43"/>';
   return '<svg class="carta-futebol-bandeira" viewBox="0 0 32 22" role="img" aria-label="'+n.nome+'"><title>'+n.nome+'</title>'+s+'</svg>';
 }

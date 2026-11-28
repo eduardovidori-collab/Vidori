@@ -1,0 +1,29 @@
+.cafe-personalizar{background:#315b46;color:#fff;border-color:#315b46}
+.cafe-objeto-acao{display:block;width:100%;height:100%;background:none;border:0;padding:0;cursor:pointer;border-radius:10px}
+.cafe-objeto-acao svg{display:block;width:100%;height:100%;overflow:visible}
+.cafe-caneca{height:130px;pointer-events:auto;z-index:3}
+.cafe-planta .cafe-objeto-acao{height:125px;transform:translateY(-7px)}
+.cafe-luminaria{height:210px;width:90px;right:1.4%}.cafe-luminaria:before{display:none}
+.cafe-luminaria .cafe-objeto-acao svg{height:auto;transform:none}
+.cafe-objeto-acao:hover{filter:brightness(1.07)}
+.cafe-sala[data-luz-cafe=luz-cobre]{--luz-personalizada:#edbd6c40}
+.cafe-sala[data-luz-cafe=luz-linho]{--luz-personalizada:#fff0c53b}
+.cafe-mesa:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 94% 0%,var(--luz-personalizada,#f1d18d18),transparent 72%);z-index:2}
+.cafe-personalizacao{width:min(820px,calc(100% - 28px));max-height:90dvh;overflow:auto;border:1px solid #d6dccc;border-radius:20px;padding:25px;background:#faf8ef;color:#304638;box-shadow:0 25px 90px #17261c55}
+.cafe-personalizacao::backdrop{background:#182f2838;backdrop-filter:blur(1px)}
+.cafe-personalizacao header{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.cafe-personalizacao h2{font:500 29px/1.2 Georgia,serif;margin:8px 0}.cafe-personalizacao header p{font-size:12px;color:#67725e}
+#saldoObjetosCafe{font-size:13px;font-weight:700;margin:20px 0;color:#456d48}
+.cafe-pecas-abas{display:flex;gap:8px;margin-bottom:18px}.cafe-pecas-abas [aria-pressed=true]{background:#34563f;color:#fff;border-color:#34563f}
+#catalogoObjetosCafe{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.cafe-peca{padding:15px;border-radius:14px;border:1px solid #dce1d3;background:#fffdf7;min-width:0}.cafe-peca.previa{border-color:#759479;box-shadow:0 0 0 2px #75947920}
+.cafe-peca-arte{display:block;width:100%;height:150px;background:radial-gradient(ellipse at 50% 75%,#e8dfc8,transparent 65%);border:0;border-radius:9px;padding:0;cursor:pointer}.cafe-peca-arte svg{display:block;width:100%;height:100%}
+.cafe-peca-selo{display:inline-block;padding:4px 7px;background:#edf3e6;color:#52724a;font-size:10px;border-radius:5px;margin:12px 0 8px}.cafe-peca h3{font-size:14px;margin-bottom:6px}.cafe-peca p{font-size:11px;line-height:1.6;color:#737764;min-height:36px}.cafe-peca>.btn{width:100%;font-size:11px;margin-top:14px;background:#345a44;color:#fff;border-color:#345a44}.cafe-peca>.btn:disabled{opacity:.55}
+#avisoObjetosCafe{font-size:12px;line-height:1.6;margin-top:18px;min-height:20px;color:#5a7057}.cafe-ver-previa{font-size:11px;margin-top:12px}
+.cafe-dialogo-compacto{width:min(420px,calc(100% - 28px));margin:auto auto 18px 16px}.cafe-dialogo-compacto #catalogoObjetosCafe,.cafe-dialogo-compacto .cafe-pecas-abas,.cafe-dialogo-compacto #saldoObjetosCafe{display:none}.cafe-dialogo-compacto::backdrop{background:transparent;backdrop-filter:none}.cafe-dialogo-compacto h2{font-size:21px}
+.cafe-personalizacao :focus-visible{outline:3px solid #a56948;outline-offset:3px}
+@media(max-width:650px){.cafe-personalizacao{padding:18px}#catalogoObjetosCafe{grid-template-columns:1fr}.cafe-peca{display:grid;grid-template-columns:95px 1fr;gap:3px 13px}.cafe-peca-arte{height:115px;grid-row:1/5}.cafe-peca-selo{justify-self:start;margin:2px 0 4px}.cafe-peca p{min-height:0}.cafe-peca>.btn{margin-top:6px;grid-column:2}.cafe-personalizacao h2{font-size:24px}.cafe-personalizacao header{gap:10px}.cafe-pecas-abas .btn{flex:1;font-size:12px;padding:9px}.cafe-caneca{height:120px}.cafe-dialogo-compacto{margin:auto auto 12px}.cafe-luminaria{width:90px}}
+/* Os objetos pessoais ficam visíveis desde a primeira construção do café. */
+.cafe-sala[data-nivel="1"] .cafe-planta{display:block}
+.cafe-sala[data-nivel="1"] .cafe-luminaria{width:90px;height:210px;right:1.4%}
+.cafe-personalizacao header>div{min-width:0}.cafe-personalizacao header>.btn{flex-shrink:0}
+@media(max-width:650px){.cafe-peca{grid-template-columns:85px minmax(0,1fr)}.cafe-peca>.btn{white-space:normal;padding:9px 7px}.cafe-peca h3,.cafe-peca p{overflow-wrap:anywhere}.cafe-personalizacao header{gap:8px}.cafe-personalizacao header>.btn{padding:9px;font-size:12px}}

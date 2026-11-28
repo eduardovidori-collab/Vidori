@@ -586,5 +586,37 @@ const FOTOS_ELENCO = {
     "licenca": "CC BY-SA 2.0",
     "fonte": "https://commons.wikimedia.org/wiki/File:Muller_futbrasil.jpg",
     "tratamento": true
+  },
+  "patryck-lanza": {
+    "arquivo": "elenco/patryck-lanza.png",
+    "versao": 146,
+    "autor": "FotMob",
+    "fonte": "https://www.fotmob.com/players/1111496",
+    "licenca": "Crédito fotográfico: FotMob",
+    "individual": true
+  },
+  "juan": {
+    "arquivo": "elenco/juan.png",
+    "versao": 146,
+    "autor": "FotMob",
+    "fonte": "https://www.fotmob.com/players/1118178",
+    "licenca": "Crédito fotográfico: FotMob",
+    "individual": true
+  },
+  "ferraresi": {
+    "arquivo": "elenco/ferraresi.png",
+    "versao": 146,
+    "autor": "FotMob",
+    "fonte": "https://www.fotmob.com/players/847910",
+    "licenca": "Crédito fotográfico: FotMob",
+    "individual": true
+  },
+  "danielzinho": {
+    "arquivo": "elenco/danielzinho.png",
+    "versao": 146,
+    "autor": "FotMob",
+    "fonte": "https://www.fotmob.com/players/493553",
+    "licenca": "Crédito fotográfico: FotMob",
+    "individual": true
   }
 };

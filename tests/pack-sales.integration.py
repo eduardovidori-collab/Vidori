@@ -19,11 +19,11 @@ try:
   p.on('pageerror',lambda e:errors.append(str(e)))
   p.goto(url,wait_until='networkidle');p.evaluate('config.mudo=true;config.notificar=false;salvarConfig();irParaPainel("loja")')
   # Every real catalog record has a distinct valid source slot, decodable offline.
-  assert p.evaluate('Object.keys(FOTOS_JOGADORES).length===86&&JOGADORES_SPFC.every(j=>FOTOS_JOGADORES[j.id])')
+  assert p.evaluate('Object.keys(FOTOS_JOGADORES).length===90&&JOGADORES_SPFC.every(j=>FOTOS_JOGADORES[j.id])')
   assert p.evaluate('''async()=>{
    const entries=JOGADORES_SPFC.map(j=>FOTOS_JOGADORES[j.id]);
    const slots=entries.map(f=>(f.arquivo||'lendas-retratos.png')+':'+(f.coluna||0)+':'+(f.linha||0));
-   if(new Set(slots).size!==86)return false;
+   if(new Set(slots).size!==90)return false;
    return (await Promise.all([...new Set(entries.map(f=>f.arquivo||'lendas-retratos.png'))].map(async file=>{
     const r=await fetch('./imagens/jogadores/'+file+'?v='+(file==='lendas-retratos.png'?'140':'142'));
     const im=await createImageBitmap(await r.blob());const ok=im.width>=180&&im.height>=180;im.close();return ok;
@@ -89,7 +89,7 @@ try:
    const r=await fetch('./imagens/jogadores/'+file+'?v='+(file==='lendas-retratos.png'?'140':'142'));const im=await createImageBitmap(await r.blob());im.close();return r.ok;
   }))).every(Boolean)''')
   assert not errors,errors
-  print('PASS',url,'86 unique portraits decode online/offline; all sale tiers; animation guard; atomic failure; one sale per drawn copy; final copy; lineup; reload; next purchase; mobile; offline sale')
+  print('PASS',url,'90 unique portraits decode online/offline; all sale tiers; animation guard; atomic failure; one sale per drawn copy; final copy; lineup; reload; next purchase; mobile; offline sale')
   b.close()
 finally:
  if server:server.shutdown();server.server_close()

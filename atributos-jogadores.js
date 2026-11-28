@@ -46,7 +46,9 @@ const ATRIBUTOS_JOGADORES = {
   nene:[62,85,91,87,28,56], 'waldir-peres':[91,88,65,93,57,90],
   'fabio-aurelio':[79,70,87,78,76,68], miranda:[75,38,67,54,93,88],
   muller:[93,91,85,94,30,77], 'denilson-show':[95,75,83,99,25,68],
-  'aloisio-chulapa':[63,79,67,62,35,94], 'serginho-chulapa':[83,98,70,82,39,97]
+  'aloisio-chulapa':[63,79,67,62,35,94], 'serginho-chulapa':[83,98,70,82,39,97],
+  'patryck-lanza':[71,28,49,53,53,56], juan:[73,54,43,62,23,57],
+  ferraresi:[65,29,58,45,75,75], danielzinho:[65,51,77,73,64,57]
 };
 const NOMES_ATRIBUTOS = {
   linha:[['RIT','Ritmo'],['FIN','Finalização'],['PAS','Passe'],['DRI','Drible'],['DEF','Defesa'],['FIS','Físico']],
@@ -55,11 +57,11 @@ const NOMES_ATRIBUTOS = {
 const NACIONALIDADES_JOGADORES = {
   orejuela:'CO','joao-rojas':'EC','alan-franco':'AR',calleri:'AR',lugano:'UY',
   cueva:'PE','enzo-diaz':'AR','gabriel-neves':'UY',trellez:'CO',benitez:'AR',
-  bobadilla:'PY',rigoni:'AR'
+  bobadilla:'PY',rigoni:'AR',ferraresi:'VE'
 };
 function nacionalidadeDoJogador(j){
   const codigo=NACIONALIDADES_JOGADORES[j.id]||'BR';
-  return {codigo,nome:{BR:'Brasil',CO:'Colômbia',EC:'Equador',AR:'Argentina',UY:'Uruguai',PE:'Peru',PY:'Paraguai'}[codigo]};
+  return {codigo,nome:{BR:'Brasil',CO:'Colômbia',EC:'Equador',AR:'Argentina',UY:'Uruguai',PE:'Peru',PY:'Paraguai',VE:'Venezuela'}[codigo]};
 }
 function atributosDoJogador(j){
   const valores=ATRIBUTOS_JOGADORES[j.id];
